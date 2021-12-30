@@ -1,22 +1,25 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  getDatabase,
-  ref,
-  update,
-  onValue,
-  get,
-  onDisconnect,
-  remove,
   child,
+  get,
+  getDatabase,
+  onDisconnect,
+  onValue,
+  ref,
+  remove,
   set,
+  update,
 } from "@firebase/database";
-import { getAuth, onAuthStateChanged } from "@firebase/auth";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faCog } from "@fortawesome/free-solid-svg-icons";
-import { faTrophy } from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/dist/client/router";
+import { getAuth, onAuthStateChanged } from "@firebase/auth";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Swal from "sweetalert2";
+import celebrationAnim from "../../lotties/celebrationAnim.json";
+import { faTrophy } from "@fortawesome/free-solid-svg-icons";
+import lottie from "lottie-web";
 import { requestPassword } from "../../components/Alerts";
+import { useRouter } from "next/dist/client/router";
 
 interface User {
   username: string;
@@ -45,6 +48,7 @@ function RoomGame() {
   const [timer, setTimer] = useState(10);
   const [timeToStart, setTimeToStart] = useState(3);
   const flagEnter = useRef(false);
+  const celebrationContainer = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const db = getDatabase();
   const auth = getAuth();
@@ -192,9 +196,16 @@ function RoomGame() {
             update(refUser, { maxScore: localUser.clicks });
           }
         }
+        if (celebrationContainer?.current?.innerHTML === "") {
+          lottie.loadAnimation({
+            container: celebrationContainer.current!,
+            animationData: celebrationAnim,
+          });
+        }
         return;
       }
 
+      lottie.destroy();
       const intervalId = setInterval(() => {
         let refGame = ref(db, `games/${idGame}`);
         update(refGame, { timer: timer - 1 });
@@ -273,6 +284,17 @@ function RoomGame() {
           {timeToStart === 0 ? "Go" : timeToStart}
         </div>
       )}
+      <div
+        ref={celebrationContainer}
+        className={`position-absolute ${
+          timer > 0
+            ? "d-none"
+            : listUsers[0].username === localUser.username
+            ? "d-block"
+            : "d-none"
+        } `}
+        id="celebration"
+      />
       <div className="container-fluid">
         <main className="main">
           <div className="room-name position-absolute d-none d-md-block">
@@ -281,7 +303,7 @@ function RoomGame() {
           {/* <div className="float-right">
             <FontAwesomeIcon icon={faCog} className="mx-1 mb-1" size={"xs"} />
           </div> */}
-          <div className="header py-4 flex-lg-row">
+          <div className="header pt-2 pb-5 flex-lg-row">
             <button
               className="btn-click p-2 btn-back me-auto mb-4"
               onClick={() => router.push("/")}
@@ -294,9 +316,9 @@ function RoomGame() {
               Go back
             </button>
             <span className="d-block d-md-none m-auto">{roomName}</span>
-            <h1 className="me-auto d-none d-md-block position-absolute">
+            {/* <h1 className="me-auto d-none d-md-block position-absolute">
               Click battle
-            </h1>
+            </h1> */}
           </div>
           {timer > 0 ? (
             <>
