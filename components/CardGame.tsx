@@ -1,7 +1,7 @@
-import React from "react";
-import Link from "next/Link";
+import { faLock, faUser } from "@fortawesome/free-solid-svg-icons";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faLock } from "@fortawesome/free-solid-svg-icons";
+import React from "react";
 
 interface GameRoom {
   listUsers: [];
