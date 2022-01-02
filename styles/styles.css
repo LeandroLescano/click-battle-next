@@ -14,12 +14,6 @@
   }
 }
 
-#celebration {
-  transform: scale(3.2);
-  height: 100%;
-  width: 100%;
-}
-
 button {
   position: relative;
   display: inline-block;
@@ -89,6 +83,10 @@ button.btn-click svg {
 }
 .form-name:focus {
   outline: none !important;
+}
+.form-name:disabled {
+  background-color: lightgray;
+  border: 2px solid gray;
 }
 .row-user {
   font-weight: 600;
@@ -196,9 +194,6 @@ button.btn-click svg {
 }
 
 @media screen and (min-width: 640px) {
-  #celebration {
-    transform: scale(1);
-  }
   .opponents-container::-webkit-scrollbar-track {
     background: transparent;
   }

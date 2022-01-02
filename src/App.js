@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from "react";
-import firebase from "firebase/app";
-import Swal from "sweetalert2";
-import { Link } from "react-router-dom";
 import "firebase/database";
-// import "../src/styles/styles.scss";
 import "../src/styles/styles.css";
+import "../src/styles/roomGame.css";
+
+import React, { useEffect, useState } from "react";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
-import ModalLogin from "./modalLogin";
+import { Link } from "react-router-dom";
 import ModalCreateUsername from "./modalCreateUsername";
+import ModalLogin from "./modalLogin";
+import Swal from "sweetalert2";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
+import firebase from "firebase/app";
+
+// import "../src/styles/styles.scss";
 
 function App() {
   const [listGames, setListGames] = useState([]);

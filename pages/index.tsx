@@ -1,24 +1,25 @@
-import React, { useState, useEffect, createRef } from "react";
-import { getAuth, signInAnonymously } from "firebase/auth";
+import React, { createRef, useEffect, useState } from "react";
 import {
+  child,
+  get,
   getDatabase,
-  ref,
   onValue,
   push,
-  get,
-  child,
+  ref,
   set,
   update,
 } from "@firebase/database";
-import { useRouter } from "next/dist/client/router";
-import Swal from "sweetalert2";
-import ModalLogin from "../components/modalLogin";
-import ModalCreateUsername from "../components/modalCreateUsername";
-import type { NextPage } from "next";
-import { sha256 } from "../services/encode";
+import { getAuth, signInAnonymously } from "firebase/auth";
+
 import CardGame from "../components/CardGame";
-import { requestPassword } from "../components/Alerts";
 import Footer from "../components/Footer";
+import ModalCreateUsername from "../components/modalCreateUsername";
+import ModalLogin from "../components/modalLogin";
+import type { NextPage } from "next";
+import Swal from "sweetalert2";
+import { requestPassword } from "../components/Alerts";
+import { sha256 } from "../services/encode";
+import { useRouter } from "next/dist/client/router";
 
 type User = {
   username: string;
@@ -100,6 +101,16 @@ const Home: NextPage = () => {
                 localStorage.setItem("user", objUser.username);
               }
               setUser(objUser);
+              let refUser = ref(db, `users/${key}`);
+              get(refUser).then((snapshot) => {
+                if (snapshot.val() !== objUser) {
+                  setUser(snapshot.val());
+                  sessionStorage.setItem(
+                    "objUser",
+                    JSON.stringify(snapshot.val())
+                  );
+                }
+              });
             } else if (key) {
               updateUserName("");
             } else {

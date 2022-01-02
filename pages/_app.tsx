@@ -1,8 +1,11 @@
 import "../styles/globals.css";
 import "../styles/styles.css";
+import "../styles/roomGame.css";
 import "../styles/index.css";
+
+import { getApp, getApps, initializeApp } from "firebase/app";
+
 import type { AppProps } from "next/app";
-import { initializeApp, getApps, getApp } from "firebase/app";
 import Layout from "../components/Layout";
 
 const firebaseConfig = {

@@ -10,10 +10,11 @@ import {
   set,
   update,
 } from "@firebase/database";
-import { faArrowLeft, faCog } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faCog, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { getAuth, onAuthStateChanged } from "@firebase/auth";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import SettingsSideBar from "../../components/SettingsSideBar";
 import Swal from "sweetalert2";
 import celebrationAnim from "../../lotties/celebrationAnim.json";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
@@ -33,11 +34,12 @@ interface User {
 function RoomGame() {
   const [isLocal, setIsLocal] = useState(false);
   const [idGame, setIdGame] = useState<String>();
-  const [roomName, setRoomName] = useState<String>();
+  const [roomName, setRoomName] = useState<string>();
   const [maxUsers, setMaxUsers] = useState(2);
   const [start, setStart] = useState(false);
   const [startCountdown, setStartCountdown] = useState(false);
-  const [roomPassword, setRoomPassword] = useState(false);
+  const [roomPassword, setRoomPassword] = useState<string>();
+  const [localPosition, setLocalPosition] = useState<String>();
   const [localUser, setLocalUser] = useState<User>({
     username: "",
     clicks: 0,
@@ -190,6 +192,7 @@ function RoomGame() {
         let refGame = ref(db, `games/${idGame}`);
         update(refGame, { timer: null });
         let userKey = sessionStorage.getItem("userKey");
+        console.log({ userKey }, { localUser });
         if (userKey && localUser.maxScore) {
           if (localUser.clicks > localUser.maxScore) {
             let refUser = ref(db, `users/${userKey}`);
@@ -230,6 +233,31 @@ function RoomGame() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timer, start, timeToStart, startCountdown]);
+
+  useEffect(() => {
+    if (timer === undefined) {
+      for (const i in listUsers) {
+        if (listUsers[i].username === localUser.username) {
+          setLocalPosition(getSuffixPosition(Number(i) + 1));
+        }
+      }
+    }
+  }, [listUsers]);
+
+  const getSuffixPosition = (i: number) => {
+    var j = i % 10,
+      k = i % 100;
+    if (j == 1 && k != 11) {
+      return i + "st";
+    }
+    if (j == 2 && k != 12) {
+      return i + "nd";
+    }
+    if (j == 3 && k != 13) {
+      return i + "rd";
+    }
+    return i + "th";
+  };
 
   //function for update clicks
   const handleClick = () => {
@@ -296,13 +324,17 @@ function RoomGame() {
         id="celebration"
       />
       <div className="container-fluid">
+        {isLocal && (
+          <SettingsSideBar
+            idGame={idGame}
+            options={{ maxUsers, roomName, password: roomPassword }}
+          />
+        )}
         <main className="main">
           <div className="room-name position-absolute d-none d-md-block">
             {roomName}
           </div>
-          {/* <div className="float-right">
-            <FontAwesomeIcon icon={faCog} className="mx-1 mb-1" size={"xs"} />
-          </div> */}
+
           <div className="header pt-2 pb-5 flex-lg-row">
             <button
               className="btn-click p-2 btn-back me-auto mb-4"
@@ -310,15 +342,12 @@ function RoomGame() {
             >
               <FontAwesomeIcon
                 icon={faArrowLeft}
-                className="mx-1 mb-1"
                 size={"xs"}
+                className="me-2"
               />
               Go back
             </button>
             <span className="d-block d-md-none m-auto">{roomName}</span>
-            {/* <h1 className="me-auto d-none d-md-block position-absolute">
-              Click battle
-            </h1> */}
           </div>
           {timer > 0 ? (
             <>
@@ -365,7 +394,15 @@ function RoomGame() {
                     })}
                 </div>
                 <div className="col-md-6 text-center">
-                  <h4>You have {localUser.clicks} clicks!</h4>
+                  {!start && !startCountdown ? (
+                    isLocal ? (
+                      <h4>press start to play</h4>
+                    ) : (
+                      <h4>Waiting for host...</h4>
+                    )
+                  ) : (
+                    <h4>You have {localUser.clicks} clicks!</h4>
+                  )}
                   <div className="d-flex justify-content-around">
                     <button
                       className="btn-click my-2"
@@ -387,9 +424,6 @@ function RoomGame() {
                   <p className="mt-3 mb-0">{localUser.username}</p>
                 </div>
               </div>
-              {!isLocal && !startCountdown && !start && (
-                <h4>Waiting for host...</h4>
-              )}
             </>
           ) : (
             <div
@@ -397,7 +431,7 @@ function RoomGame() {
               className="result-container text-center mb-2"
             >
               <h1 id="result" className="no-select">
-                Result
+                Result - {localPosition} place
               </h1>
               {listUsers
                 .sort((a, b) => (a.clicks < b.clicks ? 1 : -1))
@@ -427,7 +461,7 @@ function RoomGame() {
             </div>
           )}
           <div className="room-info">
-            {timer !== undefined && (
+            {timer !== undefined && start && (
               <h2 className="text-center">{timer} seconds remaining!</h2>
             )}
           </div>

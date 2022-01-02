@@ -1,0 +1,83 @@
+@import url("./styles.css");
+
+.container-input input:checked ~ .checkmark {
+  background-color: red;
+}
+#celebration {
+  transform: scale(3.2);
+  height: 100%;
+  width: 100%;
+}
+
+/* ==== SETTINGS ==== */
+.sidebar {
+  z-index: 999;
+  padding: 1em;
+  position: absolute;
+  right: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: #424242;
+  transition: 0.6s all cubic-bezier(0.51, 0.22, 0.55, 0.32);
+  transform: translateX(101%);
+}
+.sidebar.active {
+  transform: translateX(0%);
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1em;
+}
+
+section.settings-users {
+  flex-direction: row;
+  align-items: center;
+}
+
+.btn-settings {
+  padding: 1em !important;
+}
+
+.settings-icon {
+  position: absolute;
+  right: 0.5em;
+  top: 0.5em;
+  width: 1.5em;
+  transition: 0.8s all ease;
+}
+.settings-icon > svg {
+  margin: 0;
+}
+.settings-icon:hover {
+  cursor: pointer;
+  transform: rotate(360deg);
+  color: var(--dark-pink);
+}
+
+.close-icon {
+  width: 1.5em;
+  transition: 0.3s all ease;
+}
+.close-icon:hover {
+  cursor: pointer;
+  transform: rotate(180deg);
+  color: var(--dark-pink);
+}
+
+/* ==== SETTINGS ==== */
+
+@media screen and (min-width: 640px) {
+  #celebration {
+    transform: scale(1);
+  }
+
+  .sidebar {
+    width: 30vw;
+  }
+
+  .settings-icon {
+    width: 2.5em;
+  }
+}
