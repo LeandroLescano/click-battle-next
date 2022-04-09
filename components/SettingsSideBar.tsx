@@ -13,12 +13,18 @@ type AppProps = {
     password?: string | null;
   };
   idGame: String | undefined;
+  showSideBar: boolean;
+  handleSideBar: Function;
 };
 
-function SettingsSideBar({ options, idGame }: AppProps) {
+function SettingsSideBar({
+  options,
+  idGame,
+  showSideBar,
+  handleSideBar,
+}: AppProps) {
   const [settings, setSettings] = useState(options);
   const [deletePassword, setDeletePassword] = useState(false);
-  const [showSideBar, setShowSideBar] = useState(false);
   const inputPassword = useRef<HTMLInputElement>(null);
   const db = getDatabase();
 
@@ -77,7 +83,7 @@ function SettingsSideBar({ options, idGame }: AppProps) {
 
   return (
     <>
-      <div className="settings-icon" onClick={() => setShowSideBar(true)}>
+      <div className="settings-icon" onClick={() => handleSideBar(true)}>
         <FontAwesomeIcon icon={faCog} />
       </div>
       <aside className={`sidebar ${showSideBar && "active"}`}>
@@ -86,7 +92,7 @@ function SettingsSideBar({ options, idGame }: AppProps) {
           <FontAwesomeIcon
             icon={faTimes}
             className="close-icon"
-            onClick={() => setShowSideBar(false)}
+            onClick={() => handleSideBar(false)}
           />
         </div>
         <hr />
@@ -159,7 +165,7 @@ function SettingsSideBar({ options, idGame }: AppProps) {
           className="btn-click btn-settings"
           onClick={() => handleUpdateSettings()}
         >
-          Guardar
+          Save settings
         </button>
       </aside>
     </>

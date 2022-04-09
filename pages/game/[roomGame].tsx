@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 import {
   child,
   get,
@@ -10,19 +10,20 @@ import {
   set,
   update,
 } from "@firebase/database";
-import { faArrowLeft, faCog, faTimes } from "@fortawesome/free-solid-svg-icons";
-import { getAuth, onAuthStateChanged } from "@firebase/auth";
 
+import FlipMove from "react-flip-move";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ResultSection from "../../components/roomGame/ResultSection";
 import SettingsSideBar from "../../components/SettingsSideBar";
 import Swal from "sweetalert2";
 import celebrationAnim from "../../lotties/celebrationAnim.json";
-import { faTrophy } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { getAuth } from "@firebase/auth";
 import lottie from "lottie-web";
 import { requestPassword } from "../../components/Alerts";
 import { useRouter } from "next/dist/client/router";
 
-interface User {
+export interface User {
   username: string;
   clicks: number;
   rol?: string;
@@ -40,6 +41,7 @@ function RoomGame() {
   const [startCountdown, setStartCountdown] = useState(false);
   const [roomPassword, setRoomPassword] = useState<string>();
   const [localPosition, setLocalPosition] = useState<String>();
+  const [showSideBar, setShowSideBar] = useState(false);
   const [localUser, setLocalUser] = useState<User>({
     username: "",
     clicks: 0,
@@ -59,6 +61,7 @@ function RoomGame() {
     let pathIdGame = window.location.pathname.slice(1).substring(5);
     let user = localStorage.getItem("user");
     let userOwner = sessionStorage.getItem("actualOwner");
+    //! Uncomment this to test the game
     onDisconnect(
       ref(db, `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`)
     )
@@ -80,7 +83,7 @@ function RoomGame() {
     }
   }, [auth]);
 
-  //useEffect for update all data in state
+  //* useEffect for update all data in state
   useEffect(() => {
     let idGame = sessionStorage.getItem("actualIDGame");
     let pathIdGame = window.location.pathname.slice(1).substring(5);
@@ -185,7 +188,7 @@ function RoomGame() {
     });
   };
 
-  //useEffect for update timer in state and show result
+  //* useEffect for update timer in state and show result
   useEffect(() => {
     if (start) {
       if (!timer) {
@@ -259,19 +262,19 @@ function RoomGame() {
     return i + "th";
   };
 
-  //function for update clicks
+  //* function for update clicks
   const handleClick = () => {
     let refGame = ref(db, `games/${idGame}/listUsers/${auth.currentUser?.uid}`);
     update(refGame, { clicks: localUser.clicks + 1 });
   };
 
-  //function for start game
+  //* function for start game
   const handleStart = () => {
     let refGame = ref(db, `games/${idGame}`);
     update(refGame, { gameStart: true });
   };
 
-  //function for reset all data
+  //* function for reset all data
   const handleReset = () => {
     let refGame = ref(db, `games/${idGame}`);
     update(refGame, {
@@ -288,7 +291,13 @@ function RoomGame() {
     });
   };
 
-  //function for kick users
+  const checkSideBarToClose = () => {
+    if (showSideBar) {
+      setShowSideBar(false);
+    }
+  };
+
+  //* function for kick users
   const kickUser = (userKey: string | null) => {
     if (userKey) {
       let userRef = ref(db, `games/${idGame}/listUsers/${userKey}`);
@@ -304,6 +313,24 @@ function RoomGame() {
       });
     }
   };
+
+  const FlipItem = forwardRef((user: User, ref: any) => (
+    <div className="visitor-container" ref={ref}>
+      <div
+        className={`row row-user ${
+          localUser.username === user.username && "local-row"
+        }`}
+      >
+        <div className="col-8 text-start">{user.username}</div>
+        <div className={isLocal ? "col-2" : "col-4"}>{user.clicks}</div>
+        {isLocal && localUser.username !== user.username && (
+          <div className="col-2" onClick={() => kickUser(user.key || null)}>
+            X
+          </div>
+        )}
+      </div>
+    </div>
+  ));
 
   return (
     <>
@@ -326,11 +353,13 @@ function RoomGame() {
       <div className="container-fluid">
         {isLocal && (
           <SettingsSideBar
+            showSideBar={showSideBar}
+            handleSideBar={(val: boolean) => setShowSideBar(val)}
             idGame={idGame}
             options={{ maxUsers, roomName, password: roomPassword }}
           />
         )}
-        <main className="main">
+        <main className="main" onClick={() => checkSideBarToClose()}>
           <div className="room-name position-absolute d-none d-md-block">
             {roomName}
           </div>
@@ -367,8 +396,8 @@ function RoomGame() {
                   ) : (
                     isLocal && <h4>Waiting for opponents...</h4>
                   )}
-                  {listUsers
-                    .filter((user) => user.key !== localUser.key)
+                  {/* {listUsers
+                    // .filter((user) => user.key !== localUser.key)
                     .sort((a, b) => b.clicks - a.clicks)
                     .map((user, i) => {
                       return (
@@ -391,7 +420,21 @@ function RoomGame() {
                           </div>
                         </div>
                       );
-                    })}
+                    })} */}
+                  <FlipMove
+                    duration={700}
+                    delay={0}
+                    easing="ease"
+                    staggerDurationBy={15}
+                    staggerDelayBy={20}
+                  >
+                    {listUsers
+                      // .filter((user) => user.key !== localUser.key)
+                      .sort((a, b) => b.clicks - a.clicks)
+                      .map((user, i) => {
+                        return <FlipItem key={user.key} {...user} />;
+                      })}
+                  </FlipMove>
                 </div>
                 <div className="col-md-6 text-center">
                   {!start && !startCountdown ? (
@@ -426,39 +469,13 @@ function RoomGame() {
               </div>
             </>
           ) : (
-            <div
-              id="result-container"
-              className="result-container text-center mb-2"
-            >
-              <h1 id="result" className="no-select">
-                Result - {localPosition} place
-              </h1>
-              {listUsers
-                .sort((a, b) => (a.clicks < b.clicks ? 1 : -1))
-                .map((user, i) => {
-                  return (
-                    <p
-                      key={i}
-                      className={`row-user ${
-                        user.username === localUser.username ? "local-row" : ""
-                      }`}
-                    >
-                      {i === 0 && (
-                        <FontAwesomeIcon icon={faTrophy} className="mx-1" />
-                      )}
-                      <b>{user.username}</b> with {user.clicks} clicks!{" "}
-                      {i === 0 && (
-                        <FontAwesomeIcon icon={faTrophy} className="mx-1" />
-                      )}
-                    </p>
-                  );
-                })}
-              {isLocal && (
-                <button className="btn-click mt-5" onClick={handleReset}>
-                  Reset
-                </button>
-              )}
-            </div>
+            <ResultSection
+              listUsers={listUsers}
+              localUser={localUser}
+              isLocal={isLocal}
+              handleReset={handleReset}
+              localPosition={localPosition}
+            />
           )}
           <div className="room-info">
             {timer !== undefined && start && (
