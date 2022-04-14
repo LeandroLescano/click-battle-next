@@ -1,9 +1,10 @@
-import React from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
+
 import App from "./App";
+import React from "react";
 import RoomGame from "./roomGame";
 
-export default function Routes() {
+const Routes = () => {
   return (
     <Router>
       <Switch>
@@ -12,4 +13,8 @@ export default function Routes() {
       </Switch>
     </Router>
   );
-}
+};
+
+Route.displayName = "Routes";
+
+export default Routes;
