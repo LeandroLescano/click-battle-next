@@ -6,11 +6,13 @@
   --pink-border: #b18597;
   --pink-shadow: #ffe3e2;
   --darker-pink: #f75580;
+  --background-sidebar: #fff0f0;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --pink-shadow: #ffe3e217;
+    --background-sidebar: #424242;
   }
 }
 
