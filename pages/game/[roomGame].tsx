@@ -11,8 +11,10 @@ import {
   update,
 } from "@firebase/database";
 
-import FlipMove from "react-flip-move";
+import CelebrationResult from "../../components/roomGame/CelebrationResult";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import LocalSection from "../../components/roomGame/LocalSection";
+import OpponentSection from "../../components/roomGame/OpponentSection";
 import ResultSection from "../../components/roomGame/ResultSection";
 import SettingsSideBar from "../../components/SettingsSideBar";
 import Swal from "sweetalert2";
@@ -71,6 +73,8 @@ function RoomGame() {
       return () => {
         let refGame = ref(db, `games/${pathIdGame}`);
         remove(refGame);
+        let refGameList = ref(db, `gamesList/${pathIdGame}`);
+        remove(refGameList);
       };
     } else {
       return () => {
@@ -112,6 +116,9 @@ function RoomGame() {
         }
         let listUsers: User[] = [];
         let listUsersDB: User[] = snapshot.val().listUsers;
+        if (!listUsersDB) {
+          listUsersDB = [];
+        }
         Object.entries(listUsersDB).forEach((val) => {
           if (!val[1].kickOut) {
             let objUser: User = {
@@ -168,6 +175,7 @@ function RoomGame() {
     });
   }, []);
 
+  //* function for add user to database and update state
   const addNewUserToDB = (pathIdGame: string, user: string | null) => {
     let refUser = ref(
       db,
@@ -237,6 +245,7 @@ function RoomGame() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timer, start, timeToStart, startCountdown]);
 
+  //* useEffect for put the position of the localUser
   useEffect(() => {
     if (timer === undefined) {
       for (const i in listUsers) {
@@ -247,6 +256,7 @@ function RoomGame() {
     }
   }, [listUsers]);
 
+  //* function for get suffix position
   const getSuffixPosition = (i: number) => {
     var j = i % 10,
       k = i % 100;
@@ -314,24 +324,6 @@ function RoomGame() {
     }
   };
 
-  const FlipItem = forwardRef((user: User, ref: any) => (
-    <div className="visitor-container" ref={ref}>
-      <div
-        className={`row row-user ${
-          localUser.username === user.username && "local-row"
-        }`}
-      >
-        <div className="col-8 text-start">{user.username}</div>
-        <div className={isLocal ? "col-2" : "col-4"}>{user.clicks}</div>
-        {isLocal && localUser.username !== user.username && (
-          <div className="col-2" onClick={() => kickUser(user.key || null)}>
-            X
-          </div>
-        )}
-      </div>
-    </div>
-  ));
-
   return (
     <>
       {startCountdown && timeToStart >= 0 && (
@@ -339,16 +331,11 @@ function RoomGame() {
           {timeToStart === 0 ? "Go" : timeToStart}
         </div>
       )}
-      <div
-        ref={celebrationContainer}
-        className={`position-absolute ${
-          timer > 0
-            ? "d-none"
-            : listUsers[0].username === localUser.username
-            ? "d-block"
-            : "d-none"
-        } `}
-        id="celebration"
+      <CelebrationResult
+        celebrationContainer={celebrationContainer}
+        timer={timer}
+        listUsers={listUsers}
+        localUser={localUser}
       />
       <div className="container-fluid">
         {isLocal && (
@@ -363,7 +350,6 @@ function RoomGame() {
           <div className="room-name position-absolute d-none d-md-block">
             {roomName}
           </div>
-
           <div className="header pt-2 pb-5 flex-lg-row">
             <button
               className="btn-click p-2 btn-back me-auto mb-4"
@@ -382,89 +368,24 @@ function RoomGame() {
             <>
               <div className="row mb-3 w-100 g-4">
                 <div className="col-md-6 text-center opponents-container">
-                  {listUsers.length > 1 ? (
-                    <div className="row row-users-title">
-                      <div className="col-8 text-start">
-                        <p className="mb-2">
-                          Opponents ({listUsers.length - 1}/{maxUsers - 1})
-                        </p>
-                      </div>
-                      <div className={`${isLocal ? "col-2" : "col-4"} pe-4`}>
-                        Clicks
-                      </div>
-                    </div>
-                  ) : (
-                    isLocal && <h4>Waiting for opponents...</h4>
-                  )}
-                  {/* {listUsers
-                    // .filter((user) => user.key !== localUser.key)
-                    .sort((a, b) => b.clicks - a.clicks)
-                    .map((user, i) => {
-                      return (
-                        <div className="visitor-container" key={i}>
-                          <div className="row row-user">
-                            <div className="col-8 text-start">
-                              {user.username}
-                            </div>
-                            <div className={isLocal ? "col-2" : "col-4"}>
-                              {user.clicks}
-                            </div>
-                            {isLocal && (
-                              <div
-                                className="col-2"
-                                onClick={() => kickUser(user.key || null)}
-                              >
-                                X
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })} */}
-                  <FlipMove
-                    duration={700}
-                    delay={0}
-                    easing="ease"
-                    staggerDurationBy={15}
-                    staggerDelayBy={20}
-                  >
-                    {listUsers
-                      // .filter((user) => user.key !== localUser.key)
-                      .sort((a, b) => b.clicks - a.clicks)
-                      .map((user, i) => {
-                        return <FlipItem key={user.key} {...user} />;
-                      })}
-                  </FlipMove>
+                  <OpponentSection
+                    isLocal={isLocal}
+                    opponents={listUsers}
+                    localUser={localUser}
+                    kickOpponent={(key: string) => kickUser(key)}
+                    maxUsers={maxUsers}
+                  />
                 </div>
                 <div className="col-md-6 text-center">
-                  {!start && !startCountdown ? (
-                    isLocal ? (
-                      <h4>press start to play</h4>
-                    ) : (
-                      <h4>Waiting for host...</h4>
-                    )
-                  ) : (
-                    <h4>You have {localUser.clicks} clicks!</h4>
-                  )}
-                  <div className="d-flex justify-content-around">
-                    <button
-                      className="btn-click my-2"
-                      disabled={!start}
-                      onClick={handleClick}
-                    >
-                      Click
-                    </button>
-                    {isLocal && !start && !startCountdown && (
-                      <button
-                        className="btn-click my-2"
-                        disabled={!start && listUsers.length < 2}
-                        onClick={() => handleStart()}
-                      >
-                        Start!
-                      </button>
-                    )}
-                  </div>
-                  <p className="mt-3 mb-0">{localUser.username}</p>
+                  <LocalSection
+                    isLocal={isLocal}
+                    handleClick={handleClick}
+                    handleStart={handleStart}
+                    listUsers={listUsers}
+                    localUser={localUser}
+                    start={start}
+                    startCountdown={startCountdown}
+                  />
                 </div>
               </div>
             </>

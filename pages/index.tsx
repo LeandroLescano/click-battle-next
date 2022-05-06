@@ -82,7 +82,6 @@ const Home: NextPage = () => {
         });
       }
     }
-
     //If user name exist, update it on state
     if (mounted) {
       auth.onAuthStateChanged((user: any) => {
@@ -161,7 +160,8 @@ const Home: NextPage = () => {
     //Get rooms of games from DB
     if (user.username !== "") {
       const refGames = ref(db, `games`);
-      onValue(refGames, (snapshot) => {
+      const refGamesList = ref(db, `gamesList`);
+      onValue(refGames, (snapshot: any) => {
         if (snapshot.val() !== null) {
           if (mounted) {
             setListGames(snapshot.val());
@@ -169,6 +169,17 @@ const Home: NextPage = () => {
         } else {
           setListGames([]);
         }
+      });
+      onValue(refGamesList, () => {
+        get(refGames).then((snapshot) => {
+          if (snapshot.val() !== null) {
+            if (mounted) {
+              setListGames(snapshot.val());
+            }
+          } else {
+            setListGames([]);
+          }
+        });
       });
     }
     return () => {
@@ -198,8 +209,6 @@ const Home: NextPage = () => {
       roomName: newRoomName,
       currentGame: false,
       gameStart: false,
-      // listUsers: [userToPush],
-      // password: encryptPass,
       listUsers: [],
       ownerUser: user,
       visitorUser: null,
@@ -208,6 +217,8 @@ const Home: NextPage = () => {
       maxUsers: +maxUsers,
     };
     let newKey = push(newGameRef, objRoom).key;
+    const refGamesList = ref(db, `gamesList/${newKey}`);
+    update(refGamesList, { current: true });
     let childNewGame = child(
       newGameRef,
       `${newKey}/listUsers/${auth.currentUser?.uid}`
@@ -306,6 +317,14 @@ const Home: NextPage = () => {
     signInAnonymously(auth)
       .then(() => {
         console.log(auth.currentUser);
+        const refGames = ref(db, `games`);
+        get(refGames).then((snapshot) => {
+          if (snapshot.val() !== null) {
+            setListGames(snapshot.val());
+          } else {
+            setListGames([]);
+          }
+        });
       })
       .catch((e) => console.error(e));
     setUser({ username: user });
