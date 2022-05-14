@@ -160,8 +160,8 @@ const Home: NextPage = () => {
     //Get rooms of games from DB
     if (user.username !== "") {
       const refGames = ref(db, `games`);
-      const refGamesList = ref(db, `gamesList`);
       onValue(refGames, (snapshot: any) => {
+        console.log("refGames", snapshot.val());
         if (snapshot.val() !== null) {
           if (mounted) {
             setListGames(snapshot.val());
@@ -169,17 +169,6 @@ const Home: NextPage = () => {
         } else {
           setListGames([]);
         }
-      });
-      onValue(refGamesList, () => {
-        get(refGames).then((snapshot) => {
-          if (snapshot.val() !== null) {
-            if (mounted) {
-              setListGames(snapshot.val());
-            }
-          } else {
-            setListGames([]);
-          }
-        });
       });
     }
     return () => {
@@ -217,8 +206,6 @@ const Home: NextPage = () => {
       maxUsers: +maxUsers,
     };
     let newKey = push(newGameRef, objRoom).key;
-    const refGamesList = ref(db, `gamesList/${newKey}`);
-    update(refGamesList, { current: true });
     let childNewGame = child(
       newGameRef,
       `${newKey}/listUsers/${auth.currentUser?.uid}`
@@ -316,19 +303,9 @@ const Home: NextPage = () => {
     localStorage.setItem("user", user);
     signInAnonymously(auth)
       .then(() => {
-        console.log(auth.currentUser);
-        const refGames = ref(db, `games`);
-        get(refGames).then((snapshot) => {
-          if (snapshot.val() !== null) {
-            setListGames(snapshot.val());
-          } else {
-            setListGames([]);
-          }
-        });
+        setUser({ username: user });
       })
       .catch((e) => console.error(e));
-    setUser({ username: user });
-    // document.getElementById("btnModal").click();
     btnModal.current?.click();
   };
 
