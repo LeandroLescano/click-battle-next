@@ -2,6 +2,7 @@ import "../styles/globals.css";
 import "../styles/styles.css";
 import "../styles/roomGame.css";
 import "../styles/index.css";
+import "../styles/404.scss";
 
 import { getApp, getApps, initializeApp } from "firebase/app";
 

@@ -301,7 +301,7 @@ function RoomGame() {
     });
   };
 
-  const checkSideBarToClose = () => {
+  const toggleSideBar = () => {
     if (showSideBar) {
       setShowSideBar(false);
     }
@@ -346,7 +346,7 @@ function RoomGame() {
             options={{ maxUsers, roomName, password: roomPassword }}
           />
         )}
-        <main className="main" onClick={() => checkSideBarToClose()}>
+        <main className="main" onClick={() => toggleSideBar()}>
           <div className="room-name position-absolute d-none d-md-block">
             {roomName}
           </div>

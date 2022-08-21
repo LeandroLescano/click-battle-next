@@ -239,24 +239,33 @@ const Home: NextPage = () => {
     maxUsers: number,
     password: string
   ) => {
-    if (Object.keys(actualUsers).length === maxUsers) {
-      Swal.fire({
-        icon: "warning",
-        title: "Room is full",
-        toast: true,
-        showConfirmButton: false,
-        position: "bottom-end",
-        timer: 3000,
-      });
-    } else {
-      if (password) {
-        requestPassword(password).then((val) => {
-          console.log(val);
-          if (val) configRoomToEnter(idGame, owner);
+    try {
+      if (Object.keys(actualUsers).length === maxUsers) {
+        Swal.fire({
+          icon: "warning",
+          title: "Room is full",
+          toast: true,
+          showConfirmButton: false,
+          position: "bottom-end",
+          timer: 3000,
         });
       } else {
-        configRoomToEnter(idGame, owner);
+        if (password) {
+          requestPassword(password).then((val) => {
+            console.log(val);
+            if (val) configRoomToEnter(idGame, owner);
+          });
+        } else {
+          configRoomToEnter(idGame, owner);
+        }
       }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Ups! We couldn't enter the room, please try again.",
+        timer: 3000,
+        timerProgressBar: true,
+      });
     }
   };
 

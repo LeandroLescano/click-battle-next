@@ -1,0 +1,39 @@
+.container-404 {
+  height: 100vh;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  z-index: -1;
+}
+
+.pointer {
+  user-select: none;
+  opacity: 1;
+  transition: ease-out all 0.15s;
+  &.clicked {
+    scale: 0.8;
+  }
+}
+
+.c-404 {
+  & h1,
+  h4 {
+    background-color: #212121;
+    opacity: 0.8;
+  }
+}
+
+.not-found-icon {
+  opacity: 0;
+  transition: ease-out all 0.15s;
+  &.clicked {
+    opacity: 0.5;
+  }
+}
+
+.icon-container {
+  position: relative;
+  right: 15px;
+  top: -180px;
+  z-index: -2;
+}
