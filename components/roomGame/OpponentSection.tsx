@@ -1,49 +1,52 @@
-import React, { forwardRef } from "react";
+import React, { useEffect, useState } from "react";
 
-import FlipMove from "react-flip-move";
 import { User } from "../../pages/game/[roomGame]";
+import OpponentList from "./OpponentList";
 
 interface OpponentSectionProps {
   opponents: User[];
   isLocal: boolean;
-  localUser: User;
-  kickOpponent: Function;
+  localUsername: string;
   maxUsers: number;
 }
 
 function OpponentSection({
   opponents,
   isLocal,
-  localUser,
-  kickOpponent,
+  localUsername,
   maxUsers,
 }: OpponentSectionProps) {
-  const FlipItem = forwardRef(
-    ({ username, clicks, userKey }: any, ref: any) => {
-      return (
-        <div className="visitor-container" ref={ref} key={userKey}>
-          <div
-            className={`row row-user ${
-              localUser.username === username && "local-row"
-            }`}
-          >
-            <div className="col-8 text-start">{username}</div>
-            <div className={isLocal ? "col-2" : "col-4"}>{clicks}</div>
-            {isLocal && localUser.username !== username && (
-              <div
-                className="col-2"
-                onClick={() => {
-                  kickOpponent(userKey || null);
-                }}
-              >
-                X
-              </div>
-            )}
-          </div>
-        </div>
-      );
+  const [countPositions, setCountPositions] = useState({
+    list: opponents,
+    count: 0,
+  });
+
+  useEffect(() => {
+    if (
+      !checkOrderArray(
+        countPositions.list,
+        opponents.sort((a, b) => b.clicks - a.clicks)
+      )
+    ) {
+      setCountPositions((prev) => ({
+        list: opponents.sort((a, b) => b.clicks - a.clicks),
+        count: prev.count + 1,
+      }));
     }
-  );
+  }, [opponents]);
+
+  useEffect(() => {
+    console.log("countPositions change");
+  }, [countPositions.list]);
+
+  const checkOrderArray = (arr1: User[], arr2: User[]) => {
+    for (let x = 0; x < arr1.length; x++) {
+      if (arr1[x].key !== arr2[x].key) {
+        return false;
+      }
+    }
+    return true;
+  };
 
   return (
     <>
@@ -54,33 +57,42 @@ function OpponentSection({
               Opponents ({opponents.length - 1}/{maxUsers - 1})
             </p>
           </div>
-          <div className={`${isLocal ? "col-2" : "col-4"} pe-4`}>Clicks</div>
+          {/* <div className={`${isLocal ? "col-2" : "col-4"} pe-4`}>Clicks</div> */}
         </div>
       ) : (
         isLocal && <h4>Waiting for opponents...</h4>
       )}
-      <FlipMove
-        duration={500}
-        delay={0}
-        easing="ease"
-        staggerDurationBy={15}
-        staggerDelayBy={20}
-      >
-        {opponents
-          .sort((a, b) => b.clicks - a.clicks)
-          .map((user, i) => {
-            return (
-              <FlipItem
-                clicks={user.clicks}
-                username={user.username}
-                key={user.key}
-                userKey={user.key}
-              />
-            );
-          })}
-      </FlipMove>
+      <div className="d-flex">
+        <div
+          style={{ minWidth: 100, display: "flex", flexDirection: "column" }}
+        >
+          {opponents
+            .sort((a, b) => b.clicks - a.clicks)
+            .map((user, i) => {
+              return (
+                <span
+                  style={{
+                    height: 36,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {user.clicks}
+                </span>
+              );
+            })}
+        </div>
+        <div style={{ flex: 1 }}>
+          <OpponentList
+            isLocal={isLocal}
+            countPositions={countPositions}
+            localUsername={localUsername}
+          />
+        </div>
+      </div>
     </>
   );
 }
 
-export default OpponentSection;
+export default React.memo(OpponentSection);

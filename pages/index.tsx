@@ -20,6 +20,7 @@ import Swal from "sweetalert2";
 import { requestPassword } from "../components/Alerts";
 import { sha256 } from "../services/encode";
 import { useRouter } from "next/dist/client/router";
+import * as ga from "../lib/ga";
 
 type User = {
   username: string;
@@ -161,7 +162,6 @@ const Home: NextPage = () => {
     if (user.username !== "") {
       const refGames = ref(db, `games`);
       onValue(refGames, (snapshot: any) => {
-        console.log("refGames", snapshot.val());
         if (snapshot.val() !== null) {
           if (mounted) {
             setListGames(snapshot.val());
@@ -260,6 +260,7 @@ const Home: NextPage = () => {
         }
       }
     } catch (error) {
+      console.log(error);
       Swal.fire({
         icon: "error",
         title: "Ups! We couldn't enter the room, please try again.",
@@ -286,6 +287,15 @@ const Home: NextPage = () => {
         let refGame = ref(db, `games/${idGame}/listUsers`);
         let childRef = child(refGame, auth.currentUser.uid);
         set(childRef, userToPush);
+        ga.event({
+          action: "enter_room",
+          params: {
+            withCustomName: !!roomName,
+            withPassword: !!roomPassword,
+            maxUsers: maxUsers,
+            isRegistered: !auth.currentUser.isAnonymous,
+          },
+        });
         router.push(`game/${idGame}`);
       } else {
         console.error("Error loading useer to game");

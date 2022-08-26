@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   child,
   get,
@@ -58,121 +58,156 @@ function RoomGame() {
   const router = useRouter();
   const db = getDatabase();
   const auth = getAuth();
+  const listUsersRef = useRef<User[]>([
+    { username: "", clicks: 0, rol: "visitor" },
+  ]);
+  const localUserRef = useRef<User>();
 
   useEffect(() => {
     let pathIdGame = window.location.pathname.slice(1).substring(5);
     let user = localStorage.getItem("user");
     let userOwner = sessionStorage.getItem("actualOwner");
     //! Uncomment this to test the game
-    onDisconnect(
-      ref(db, `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`)
-    )
-      .remove()
-      .catch((e) => console.error(e));
-    if (user === userOwner) {
-      return () => {
-        let refGame = ref(db, `games/${pathIdGame}`);
-        remove(refGame);
-        let refGameList = ref(db, `gamesList/${pathIdGame}`);
-        remove(refGameList);
-      };
-    } else {
-      return () => {
-        let refGame = ref(
-          db,
-          `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`
-        );
-        remove(refGame);
-      };
-    }
+    // onDisconnect(
+    //   ref(db, `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`)
+    // )
+    //   .remove()
+    //   .catch((e) => console.error(e));
+    // if (user === userOwner) {
+    //   return () => {
+    //     let refGame = ref(db, `games/${pathIdGame}`);
+    //     remove(refGame);
+    //     let refGameList = ref(db, `gamesList/${pathIdGame}`);
+    //     remove(refGameList);
+    //   };
+    // } else {
+    //   return () => {
+    //     let refGame = ref(
+    //       db,
+    //       `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`
+    //     );
+    //     remove(refGame);
+    //   };
+    // }
   }, [auth]);
 
   //* useEffect for update all data in state
   useEffect(() => {
-    let idGame = sessionStorage.getItem("actualIDGame");
-    let pathIdGame = window.location.pathname.slice(1).substring(5);
-    let user = localStorage.getItem("user");
-    // if (idGame !== pathIdGame) {
-    //   router.push("/");
-    //   return;
-    // }
-    let actualUser = localStorage.getItem("user");
-    let id = window.location.pathname.slice(1).substring(5);
-    setIdGame(id);
-    // sessionStorage.setItem("actualIDGame", id);
-    let refGame = ref(db, `games/${id}/`);
-    onValue(refGame, (snapshot) => {
-      if (snapshot.val() !== null) {
-        setRoomName(snapshot.val().roomName);
-        setTimer(snapshot.val().timer);
-        setTimeToStart(snapshot.val().timeStart);
-        setStart(snapshot.val().currentGame);
-        setMaxUsers(snapshot.val().maxUsers);
-        setRoomPassword(snapshot.val().password);
-        if (snapshot.val().gameStart) {
-          setStartCountdown(true);
-        } else {
-          setStartCountdown(false);
-        }
-        let listUsers: User[] = [];
-        let listUsersDB: User[] = snapshot.val().listUsers;
-        if (!listUsersDB) {
-          listUsersDB = [];
-        }
-        Object.entries(listUsersDB).forEach((val) => {
-          if (!val[1].kickOut) {
-            let objUser: User = {
-              username: val[1].username,
-              clicks: val[1].clicks,
-              rol: val[1].rol,
-              maxScore: val[1].maxScore,
-              key: val[0],
-            };
-            if (val[0] === auth.currentUser?.uid) {
-              setLocalUser(objUser);
-            }
-            listUsers.push(objUser);
-          } else if (val[0] === auth.currentUser?.uid) {
-            router.push({ pathname: "/", query: { kickedOut: true } });
+    try {
+      let idGame = sessionStorage.getItem("actualIDGame");
+      let pathIdGame = window.location.pathname.slice(1).substring(5);
+      let user = localStorage.getItem("user");
+      // if (idGame !== pathIdGame) {
+      //   router.push("/");
+      //   return;
+      // }
+      let actualUser = localStorage.getItem("user");
+      setIdGame(pathIdGame);
+      // sessionStorage.setItem("actualIDGame", id);
+      let refGame = ref(db, `games/${pathIdGame}/`);
+      onValue(refGame, (snapshot) => {
+        if (snapshot.val() !== null) {
+          setRoomName(snapshot.val().roomName);
+          setTimer(snapshot.val().timer);
+          setTimeToStart(snapshot.val().timeStart);
+          setStart(snapshot.val().currentGame);
+          setMaxUsers(snapshot.val().maxUsers);
+          setRoomPassword(snapshot.val().password);
+          if (snapshot.val().gameStart) {
+            setStartCountdown(true);
+          } else {
+            setStartCountdown(false);
           }
-        });
-        setListUsers(listUsers);
-        if (snapshot.val().ownerUser.username === actualUser) {
-          setIsLocal(true);
-        } else {
-          if (
-            listUsers.filter((u) => u.username !== user).length ===
-            snapshot.val().maxUsers
-          ) {
-            router.push({ pathname: "/", query: { fullRoom: true } });
-            return;
+          let listUsersToPush: User[] = [];
+          let listUsersDB: User[] = snapshot.val().listUsers;
+          if (!listUsersDB) {
+            listUsersDB = [];
           }
-          if (
-            snapshot.val().password &&
-            idGame !== pathIdGame &&
-            !flagEnter.current
-          ) {
-            flagEnter.current = true;
-            requestPassword(snapshot.val().password).then((val) => {
-              if (val.isConfirmed === false) {
-                router.push("/");
-                return;
-              } else {
-                sessionStorage.setItem("actualIDGame", pathIdGame);
-                addNewUserToDB(pathIdGame, user);
+          const checkOrderArray = (arr1: User[], arr2: User[]) => {
+            for (let x = 0; x < arr1.length; x++) {
+              if (arr1[x].key !== arr2[x]?.key) {
+                return false;
               }
-            });
+            }
+            return true;
+          };
+          Object.entries(listUsersDB).forEach((val) => {
+            if (!val[1].kickOut) {
+              let objUser: User = {
+                username: val[1].username,
+                clicks: val[1].clicks,
+                rol: val[1].rol,
+                maxScore: val[1].maxScore,
+                key: val[0],
+              };
+              if (val[0] === auth.currentUser?.uid) {
+                if (objUser.clicks !== localUserRef.current?.clicks) {
+                  localUserRef.current = objUser;
+                  setLocalUser(objUser);
+                }
+              }
+              listUsersToPush.push(objUser);
+            } else if (val[0] === auth.currentUser?.uid) {
+              router.push({ pathname: "/", query: { kickedOut: true } });
+            }
+          });
+          // if (
+          //   !checkOrderArray(
+          //     listUsersToPush.sort((a, b) => b.clicks - a.clicks),
+          //     listUsersRef.current.sort((a, b) => b.clicks - a.clicks)
+          //   )
+          // ) {
+          //   listUsersRef.current = listUsersToPush;
+          setListUsers(listUsersToPush);
+          // }
+          // if (!listUsersRef.current[0].key) {
+          //   listUsersRef.current = listUsersToPush;
+          // }
+          if (snapshot.val().ownerUser.username === actualUser) {
+            setIsLocal(true);
+          } else {
+            if (
+              listUsersToPush.filter((u) => u.username !== user).length ===
+              snapshot.val().maxUsers
+            ) {
+              router.push({ pathname: "/", query: { fullRoom: true } });
+              return;
+            }
+            if (
+              snapshot.val().password &&
+              idGame !== pathIdGame &&
+              !flagEnter.current
+            ) {
+              flagEnter.current = true;
+              requestPassword(snapshot.val().password).then((val) => {
+                if (val.isConfirmed === false) {
+                  router.push("/");
+                  return;
+                } else {
+                  sessionStorage.setItem("actualIDGame", pathIdGame);
+                  addNewUserToDB(pathIdGame, user);
+                }
+              });
+            }
+            //Add user to DB
+            if (!flagEnter.current) {
+              flagEnter.current = true;
+              addNewUserToDB(pathIdGame, user);
+            }
           }
-          //Add user to DB
-          if (!flagEnter.current) {
-            flagEnter.current = true;
-            addNewUserToDB(pathIdGame, user);
-          }
+        } else {
+          router.replace("/");
         }
-      } else {
-        router.replace("/");
-      }
-    });
+      });
+    } catch {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Sorry, something went wrong. Please try again..",
+      }).then(() => {
+        router.push("/");
+      });
+    }
   }, []);
 
   //* function for add user to database and update state
@@ -307,23 +342,6 @@ function RoomGame() {
     }
   };
 
-  //* function for kick users
-  const kickUser = (userKey: string | null) => {
-    if (userKey) {
-      let userRef = ref(db, `games/${idGame}/listUsers/${userKey}`);
-      update(userRef, { kickOut: true }).then(() => {
-        Swal.fire({
-          title: "The user has been kicked.",
-          icon: "success",
-          toast: true,
-          showConfirmButton: false,
-          position: "bottom-end",
-          timer: 2500,
-        });
-      });
-    }
-  };
-
   return (
     <>
       {startCountdown && timeToStart >= 0 && (
@@ -371,8 +389,7 @@ function RoomGame() {
                   <OpponentSection
                     isLocal={isLocal}
                     opponents={listUsers}
-                    localUser={localUser}
-                    kickOpponent={(key: string) => kickUser(key)}
+                    localUsername={localUser.username}
                     maxUsers={maxUsers}
                   />
                 </div>
