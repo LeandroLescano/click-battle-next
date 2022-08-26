@@ -71,6 +71,7 @@ function OpponentSection({
             .map((user, i) => {
               return (
                 <span
+                  key={i}
                   style={{
                     height: 36,
                     display: "flex",
