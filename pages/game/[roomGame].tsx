@@ -68,27 +68,27 @@ function RoomGame() {
     let user = localStorage.getItem("user");
     let userOwner = sessionStorage.getItem("actualOwner");
     //! Uncomment this to test the game
-    // onDisconnect(
-    //   ref(db, `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`)
-    // )
-    //   .remove()
-    //   .catch((e) => console.error(e));
-    // if (user === userOwner) {
-    //   return () => {
-    //     let refGame = ref(db, `games/${pathIdGame}`);
-    //     remove(refGame);
-    //     let refGameList = ref(db, `gamesList/${pathIdGame}`);
-    //     remove(refGameList);
-    //   };
-    // } else {
-    //   return () => {
-    //     let refGame = ref(
-    //       db,
-    //       `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`
-    //     );
-    //     remove(refGame);
-    //   };
-    // }
+    onDisconnect(
+      ref(db, `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`)
+    )
+      .remove()
+      .catch((e) => console.error(e));
+    if (user === userOwner) {
+      return () => {
+        let refGame = ref(db, `games/${pathIdGame}`);
+        remove(refGame);
+        let refGameList = ref(db, `gamesList/${pathIdGame}`);
+        remove(refGameList);
+      };
+    } else {
+      return () => {
+        let refGame = ref(
+          db,
+          `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`
+        );
+        remove(refGame);
+      };
+    }
   }, [auth]);
 
   //* useEffect for update all data in state
