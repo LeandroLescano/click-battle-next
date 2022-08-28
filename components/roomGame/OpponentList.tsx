@@ -35,7 +35,7 @@ const OpponentList = ({ countPositions, localUsername, isLocal }: Props) => {
     }
   };
 
-  const FlipItem = ({ username, clicks, userKey }: any) => {
+  const FlipItem = ({ username, userKey }: any) => {
     return (
       <Flipped key={userKey} flipId={userKey}>
         <div className="visitor-container">
@@ -44,16 +44,15 @@ const OpponentList = ({ countPositions, localUsername, isLocal }: Props) => {
               localUsername === username && "local-row"
             }`}
           >
-            <div className="col-8 text-start">{username}</div>
-            {/* <div className={isLocal ? "col-2" : "col-4"}>{clicks}</div> */}
+            <div className="col-10 text-start">{username}</div>
             {isLocal && localUsername !== username && (
               <div
-                className="col-2"
+                className="col-2 btn-kick"
                 onClick={() => {
                   kickUser(userKey || null);
                 }}
               >
-                X
+                kick
               </div>
             )}
           </div>
@@ -65,14 +64,7 @@ const OpponentList = ({ countPositions, localUsername, isLocal }: Props) => {
   return (
     <Flipper flipKey={countPositions.count}>
       {countPositions.list.map((user, i) => {
-        return (
-          <FlipItem
-            clicks={user.clicks}
-            username={user.username}
-            key={i}
-            userKey={user.key}
-          />
-        );
+        return <FlipItem username={user.username} key={i} userKey={user.key} />;
       })}
     </Flipper>
   );

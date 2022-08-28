@@ -9,6 +9,19 @@
   width: 100%;
 }
 
+.btn-kick {
+  cursor: pointer;
+}
+
+.btn-kick:hover {
+  background-color: var(--dark-pink);
+  color: var(--background-sidebar);
+  box-shadow: 0px 0px 10px black;
+  border-radius: 5px;
+  border: none;
+  transition: all 0.2s ease;
+}
+
 /* ==== SETTINGS ==== */
 .sidebar {
   z-index: 999;

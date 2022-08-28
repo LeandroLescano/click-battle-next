@@ -1,0 +1,11 @@
+.stars-container {
+  min-height: 35px;
+}
+
+.star-rate {
+  min-width: 30px;
+  &:hover {
+    transform: scale(1.2);
+    transition: all 0.25s ease;
+  }
+}

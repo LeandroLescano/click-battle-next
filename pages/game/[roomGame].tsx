@@ -58,16 +58,13 @@ function RoomGame() {
   const router = useRouter();
   const db = getDatabase();
   const auth = getAuth();
-  const listUsersRef = useRef<User[]>([
-    { username: "", clicks: 0, rol: "visitor" },
-  ]);
   const localUserRef = useRef<User>();
 
   useEffect(() => {
     let pathIdGame = window.location.pathname.slice(1).substring(5);
     let user = localStorage.getItem("user");
     let userOwner = sessionStorage.getItem("actualOwner");
-    //! Uncomment this to test the game
+    // //! Uncomment this to test the game
     onDisconnect(
       ref(db, `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`)
     )
@@ -123,14 +120,6 @@ function RoomGame() {
           if (!listUsersDB) {
             listUsersDB = [];
           }
-          const checkOrderArray = (arr1: User[], arr2: User[]) => {
-            for (let x = 0; x < arr1.length; x++) {
-              if (arr1[x].key !== arr2[x]?.key) {
-                return false;
-              }
-            }
-            return true;
-          };
           Object.entries(listUsersDB).forEach((val) => {
             if (!val[1].kickOut) {
               let objUser: User = {
@@ -151,18 +140,7 @@ function RoomGame() {
               router.push({ pathname: "/", query: { kickedOut: true } });
             }
           });
-          // if (
-          //   !checkOrderArray(
-          //     listUsersToPush.sort((a, b) => b.clicks - a.clicks),
-          //     listUsersRef.current.sort((a, b) => b.clicks - a.clicks)
-          //   )
-          // ) {
-          //   listUsersRef.current = listUsersToPush;
           setListUsers(listUsersToPush);
-          // }
-          // if (!listUsersRef.current[0].key) {
-          //   listUsersRef.current = listUsersToPush;
-          // }
           if (snapshot.val().ownerUser.username === actualUser) {
             setIsLocal(true);
           } else {

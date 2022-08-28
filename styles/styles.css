@@ -90,6 +90,12 @@ button.btn-click svg {
   background-color: lightgray;
   border: 2px solid gray;
 }
+.row-click {
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .row-user {
   font-weight: 600;
   color: var(--text);
