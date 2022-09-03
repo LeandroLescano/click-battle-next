@@ -54,7 +54,10 @@ const Star = ({
       (Math.ceil(positionToUse) === position || rating.value === position) &&
       useHalves
     ) {
-      if ((hoverPosition > 0 && overHalf) || rating.value === position) {
+      if (
+        (hoverPosition > 0 && overHalf) ||
+        Math.floor(rating.value) === position
+      ) {
         setIcon(faStar);
       } else {
         setIcon(faStarHalfAlt);

@@ -36,6 +36,7 @@ const RatingStars = ({
   useEffect(() => {
     if (onSelect && rating.isSelected) {
       onSelect(rating.value);
+      setHoverPosition(0);
     }
   }, [rating]);
 

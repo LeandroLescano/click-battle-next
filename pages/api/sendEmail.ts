@@ -9,34 +9,49 @@ type IResponse = {
   data?: string;
 };
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<IResponse>
 ) {
-  const { author, message } = JSON.parse(req.body);
-  let transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.REACT_APP_EMAIL,
-      pass: process.env.REACT_APP_PASSWORD,
-    },
-  });
-  let mailOptions = {
-    from: process.env.REACT_APP_EMAIL,
-    to: "leandrolescano11@gmail.com",
-    subject: `Click Battle - New message from ${author}`,
-    html: `Author: <b>${author}</b> 
-          Message: ${message}`,
-  };
+  return new Promise<void>((resolve, reject) => {
+    const { author, message } = JSON.parse(req.body);
 
-  return transporter.sendMail(
-    mailOptions,
-    (err: Error | null, info: SendmailTransport.SentMessageInfo) => {
-      if (err) {
-        res.status(500).json({ status: "failure", data: err.message });
-      } else {
-        res.status(200).json({ status: "success" });
-      }
+    if (author.length === 0 || message.length === 0) {
+      res.status(401).end({
+        status: "failure",
+        data: "No author or message provided",
+      });
+      resolve();
     }
-  );
+
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.REACT_APP_EMAIL,
+        pass: process.env.REACT_APP_PASSWORD,
+      },
+    });
+    let mailOptions = {
+      from: process.env.REACT_APP_EMAIL,
+      to: "leandrolescano11@gmail.com",
+      subject: `Click Battle - New message from ${author}`,
+      html: `Author: <b>${author}</b> 
+          Message: ${message}`,
+    };
+
+    transporter.sendMail(
+      mailOptions,
+      (err: Error | null, info: SendmailTransport.SentMessageInfo) => {
+        if (err) {
+          res.status(500).send({ status: "failure", data: err.message });
+          res.end();
+          resolve();
+        } else {
+          res.status(200).send({ status: "success" });
+          res.end();
+          resolve();
+        }
+      }
+    );
+  });
 }

@@ -23,11 +23,18 @@ type AppProps = {
 
 interface contactProps {
   title?: string;
-  message?: string;
+  text?: string;
 }
 
 const Footer = ({ user, handleLogOut }: AppProps) => {
-  const ReactSwal = withReactContent(Swal);
+  const ReactSwal = withReactContent(
+    Swal.mixin({
+      buttonsStyling: false,
+      customClass: {
+        confirmButton: "btn-click",
+      },
+    })
+  );
   const [rating, setRating] = useState(0);
   const [send, setSend] = useState(false);
   const auth = getAuth();
@@ -35,7 +42,7 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
 
   const handleContact = async ({
     title = "Contact us",
-    message,
+    text = "You can send a criticism, a complaint or whatever you want...",
   }: contactProps = {}) => {
     if (auth.currentUser?.isAnonymous) {
       loginWithGoogleAlert();
@@ -43,12 +50,20 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
     }
     ReactSwal.fire({
       title: title,
-      text: message,
-      html: `<textarea type="text" id="message" class="form-name" placeholder="Your message">`,
+      html: `<textarea type="text" id="message" class="form-name w-100" placeholder="${text}">`,
       confirmButtonText: "Send message",
       showCloseButton: true,
-      preConfirm: () => {
-        return (document.getElementById("message") as HTMLInputElement)?.value;
+      preConfirm: async () => {
+        const value = (document.getElementById("message") as HTMLInputElement)
+          ?.value;
+        if (value.length > 0) {
+          return value;
+        } else {
+          ReactSwal.showValidationMessage("Please enter a valid message");
+          await timeout(2500);
+          ReactSwal.resetValidationMessage();
+          return false;
+        }
       },
     }).then(async (result) => {
       if (result.isConfirmed) {
@@ -59,13 +74,14 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
 
   const sendEmail = async (message: string) => {
     loadingAlert("Sending email...");
-    await fetch("/api/sendEmail", {
+    const response = await fetch("/api/sendEmail", {
       method: "POST",
       body: JSON.stringify({
         message: message,
         author: auth.currentUser?.email,
       }),
     });
+    console.log({ response });
     ReactSwal.fire({
       icon: "success",
       title: "Thanks for your time!",
@@ -85,8 +101,8 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
     await update(refRating, { rating: rating });
     if (rating > 0 && rating < 3) {
       handleContact({
-        title: "We're sad about your rating",
-        message: "Please tell us what can do to improve your experience",
+        title: "We're sad about your rating 🥺",
+        text: "Please tell us what can do to improve your experience 🤗...",
       });
     } else {
       ReactSwal.fire({
