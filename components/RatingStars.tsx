@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { RATING } from "../resources/constants";
 import Star from "./Star";
 
 interface Props {
@@ -6,8 +7,9 @@ interface Props {
   cant?: number;
   useHalves?: boolean;
   onChange?: (value: number) => void;
-  onSelect?: (value: boolean) => void;
+  onSelect?: (value: number) => void;
   numberStyle?: object;
+  initialValue?: number;
 }
 
 const RatingStars = ({
@@ -15,12 +17,14 @@ const RatingStars = ({
   cant = 5,
   useHalves = true,
   onChange,
+  onSelect,
   numberStyle = {},
+  initialValue = 0,
 }: Props) => {
   const [hoverPosition, setHoverPosition] = useState(0);
   const [rating, setRating] = useState({
-    value: 0,
-    isSelected: false,
+    value: initialValue,
+    isSelected: initialValue ? true : false,
   });
 
   useEffect(() => {
@@ -29,12 +33,20 @@ const RatingStars = ({
     }
   }, [hoverPosition]);
 
+  useEffect(() => {
+    if (onSelect && rating.isSelected) {
+      onSelect(rating.value);
+    }
+  }, [rating]);
+
   return (
     <div className="d-flex justify-content-center flex-column">
       <div>
-        <h2 style={{ ...numberStyle }}>
-          {rating.isSelected ? rating.value : hoverPosition}
-        </h2>
+        {showNumberRating ? (
+          <h3 style={{ ...numberStyle }}>
+            {rating.isSelected ? RATING[rating.value] : RATING[hoverPosition]}
+          </h3>
+        ) : null}
       </div>
       <div className="stars-container">
         {[...Array(cant)].map((val, i) => {

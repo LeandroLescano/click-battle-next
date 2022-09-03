@@ -37,53 +37,53 @@ const Star = ({
   };
 
   useEffect(() => {
-    if (Math.ceil(hoverPosition) < position) {
-      setIcon(faStarEmpty as IconProp);
-    } else if (Math.ceil(hoverPosition) === position && useHalves) {
-      if (overHalf) {
+    if (Math.ceil(hoverPosition) === position && hoverPosition > 0) {
+      onHover(overHalf ? position : position - 0.5);
+    }
+    let positionToUse = hoverPosition;
+    if (
+      rating.isSelected &&
+      (Math.ceil(rating.value) >= position || rating.value === position - 0.5)
+    ) {
+      positionToUse = rating.value;
+    }
+
+    if (Math.ceil(positionToUse) > position) {
+      setIcon(faStar);
+    } else if (
+      (Math.ceil(positionToUse) === position || rating.value === position) &&
+      useHalves
+    ) {
+      if ((hoverPosition > 0 && overHalf) || rating.value === position) {
         setIcon(faStar);
       } else {
         setIcon(faStarHalfAlt);
       }
-      onHover(overHalf ? position : position - 0.5);
     } else {
-      setIcon(faStar);
+      setIcon(faStarEmpty as IconProp);
     }
-  }, [overHalf, hoverPosition]);
+  }, [overHalf, hoverPosition, rating.value]);
 
   return (
     <>
-      {rating.isSelected && rating.value >= position - 0.5 ? (
-        <FontAwesomeIcon
-          className="star-rate"
-          icon={rating.value === position - 0.5 ? faStarHalfAlt : faStar}
-          size="lg"
-          color="goldenrod"
-          onMouseEnter={() => (!rating.isSelected ? onHover(position) : null)}
-          onMouseMove={(e) =>
-            Math.ceil(hoverPosition) === position && useHalves
-              ? handleCoords(e)
-              : null
-          }
-          onMouseLeave={() => onHover(0)}
-          onClick={() => onSelected(overHalf ? position : position - 0.5)}
-        />
-      ) : null}
-      {(!rating.isSelected || rating.value <= position - 1) && (
-        <FontAwesomeIcon
-          className="star-rate"
-          icon={icon}
-          size="lg"
-          onMouseEnter={() => onHover(position)}
-          onMouseMove={(e) =>
-            Math.ceil(hoverPosition) === position && useHalves
-              ? handleCoords(e)
-              : null
-          }
-          onMouseLeave={() => onHover(0)}
-          onClick={() => onSelected(overHalf ? position : position - 0.5)}
-        />
-      )}
+      <FontAwesomeIcon
+        className="star-rate"
+        icon={icon}
+        size="2x"
+        color={rating.isSelected ? "goldenrod" : "default"}
+        onMouseEnter={() => onHover(position)}
+        onMouseMove={(e) =>
+          Math.ceil(
+            rating.isSelected && hoverPosition === 0
+              ? rating.value
+              : hoverPosition
+          ) === position && useHalves
+            ? handleCoords(e)
+            : null
+        }
+        onMouseLeave={() => onHover(0)}
+        onClick={() => onSelected(overHalf ? position : position - 0.5)}
+      />
     </>
   );
 };

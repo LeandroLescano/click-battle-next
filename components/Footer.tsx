@@ -1,6 +1,10 @@
-import React from "react";
+import { getAuth } from "firebase/auth";
+import { getDatabase, ref, update } from "firebase/database";
+import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { loadingAlert, loginWithGoogleAlert } from "../utils/alerts";
+import { timeout } from "../utils/timeout";
 import RatingStars from "./RatingStars";
 
 type User = {
@@ -17,8 +21,132 @@ type AppProps = {
   handleLogOut: Function;
 };
 
-function Footer({ user, handleLogOut }: AppProps) {
+interface contactProps {
+  title?: string;
+  message?: string;
+}
+
+const Footer = ({ user, handleLogOut }: AppProps) => {
   const ReactSwal = withReactContent(Swal);
+  const [rating, setRating] = useState(0);
+  const [send, setSend] = useState(false);
+  const auth = getAuth();
+  const db = getDatabase();
+
+  const handleContact = async ({
+    title = "Contact us",
+    message,
+  }: contactProps = {}) => {
+    if (auth.currentUser?.isAnonymous) {
+      loginWithGoogleAlert();
+      return;
+    }
+    ReactSwal.fire({
+      title: title,
+      text: message,
+      html: `<textarea type="text" id="message" class="form-name" placeholder="Your message">`,
+      confirmButtonText: "Send message",
+      showCloseButton: true,
+      preConfirm: () => {
+        return (document.getElementById("message") as HTMLInputElement)?.value;
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        sendEmail(result.value as string);
+      }
+    });
+  };
+
+  const sendEmail = async (message: string) => {
+    loadingAlert("Sending email...");
+    await fetch("/api/sendEmail", {
+      method: "POST",
+      body: JSON.stringify({
+        message: message,
+        author: auth.currentUser?.email,
+      }),
+    });
+    ReactSwal.fire({
+      icon: "success",
+      title: "Thanks for your time!",
+      toast: true,
+      position: "bottom",
+      timerProgressBar: true,
+      timer: 2500,
+      showConfirmButton: false,
+      showCloseButton: true,
+    });
+  };
+
+  const sendRating = async () => {
+    loadingAlert("Sending feedback...");
+    let key = sessionStorage.getItem("userKey");
+    const refRating = ref(db, `users/${key}`);
+    await update(refRating, { rating: rating });
+    if (rating > 0 && rating < 3) {
+      handleContact({
+        title: "We're sad about your rating",
+        message: "Please tell us what can do to improve your experience",
+      });
+    } else {
+      ReactSwal.fire({
+        icon: "success",
+        title: "Thanks for your time!",
+        toast: true,
+        position: "bottom",
+        timerProgressBar: true,
+        timer: 2500,
+        showConfirmButton: false,
+        showCloseButton: true,
+      });
+    }
+    setSend(false);
+    setRating(0);
+  };
+
+  const handleFeedback = () => {
+    if (auth.currentUser?.isAnonymous) {
+      loginWithGoogleAlert();
+      return;
+    }
+    ReactSwal.fire({
+      title: "Feedback",
+      html: (
+        <RatingStars
+          onSelect={setRating}
+          initialValue={rating > 0 ? rating : undefined}
+        />
+      ),
+      confirmButtonText: "Send feedback",
+      didOpen: () => {
+        ReactSwal.disableButtons();
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        ReactSwal.showLoading();
+        setSend(true);
+        return false;
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (rating > 0 && ReactSwal.isVisible()) {
+      ReactSwal.resetValidationMessage();
+      ReactSwal.enableButtons();
+    }
+  }, [rating]);
+
+  useEffect(() => {
+    let mounted = true;
+    if (send && mounted) {
+      sendRating();
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [send]);
+
   return (
     <footer className="mt-auto d-flex flex-column-reverse flex-md-row justify-content-centers justify-content-md-between w-100 align-items-baseline">
       <div className="footer mx-auto mx-md-0">
@@ -34,19 +162,10 @@ function Footer({ user, handleLogOut }: AppProps) {
           />
         </a>
       </div>
-      <div className="d-flex gap-2">
-        <a
-          onClick={() =>
-            ReactSwal.fire({
-              title: "Feedback",
-              html: <RatingStars />,
-            })
-          }
-        >
-          Feedback
-        </a>
+      <div className="d-flex gap-2 mx-auto mx-md-0 mb-2 mb-md-0">
+        <a onClick={() => handleFeedback()}>Feedback</a>
         <span>|</span>
-        <a>Contact</a>
+        <a onClick={() => handleContact()}>Contact</a>
       </div>
       {user.username !== "" && (
         <div className="txt-user text-center mx-auto mx-md-0">
@@ -61,6 +180,6 @@ function Footer({ user, handleLogOut }: AppProps) {
       )}
     </footer>
   );
-}
+};
 
 export default Footer;

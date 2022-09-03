@@ -10,5 +10,7 @@ module.exports = {
     messagingSenderId: "55439914661",
     appId: "1:55439914661:web:5877e7ba22e1dcc0b1ff4c",
     measurementId: "G-ETTEKV9L5B",
+    REACT_APP_EMAIL: "tatilescano11@gmail.com",
+    REACT_APP_PASSWORD: "nrzesscilivmlzbq",
   },
 };
