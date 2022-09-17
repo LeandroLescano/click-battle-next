@@ -14,6 +14,10 @@ body {
   overflow: hidden;
 }
 
+#__next {
+  height: 100%;
+}
+
 .btn-logout {
   padding: 0.2em 0.5em !important;
   margin-bottom: 0.5em;
@@ -117,7 +121,7 @@ a {
   justify-content: flex-start;
   align-items: center;
   min-width: 50vw;
-  min-height: 100vh;
+  min-height: 100%;
 }
 
 #root {
