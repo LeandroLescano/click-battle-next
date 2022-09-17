@@ -5,6 +5,7 @@ import { getDatabase, ref, update } from "@firebase/database";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Swal from "sweetalert2";
 import { sha256 } from "../services/encode";
+import { range } from "../utils/numbers";
 
 type AppProps = {
   options: {
@@ -25,11 +26,18 @@ function SettingsSideBar({
 }: AppProps) {
   const [settings, setSettings] = useState(options);
   const [deletePassword, setDeletePassword] = useState(false);
+  const [config, setConfig] = useState({
+    maxUsers: 10,
+  });
   const inputPassword = useRef<HTMLInputElement>(null);
   const db = getDatabase();
 
   useEffect(() => {
     setSettings({ maxUsers: options.maxUsers, roomName: options.roomName });
+    const config = sessionStorage.getItem("config");
+    if (config) {
+      setConfig(JSON.parse(config));
+    }
   }, [options]);
 
   const handleUpdateSettings = () => {
@@ -149,15 +157,11 @@ function SettingsSideBar({
                 setSettings({ ...settings, maxUsers: Number(ref.target.value) })
               }
             >
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
+              {[...Array.from(range(2, config.maxUsers + 1))].map((val, i) => (
+                <option key={i} value={val}>
+                  {val}
+                </option>
+              ))}
             </select>
           </section>
         </div>

@@ -21,15 +21,16 @@ import { requestPassword } from "../components/Alerts";
 import { sha256 } from "../services/encode";
 import { useRouter } from "next/dist/client/router";
 import * as ga from "../lib/ga";
+import { range } from "../utils/numbers";
 
-type User = {
+interface User {
   username: string;
   clicks?: number;
   rol?: string;
   maxScore?: number;
   key?: string;
   email?: string;
-};
+}
 
 const Home: NextPage = () => {
   const [listGames, setListGames] = useState([]);
@@ -37,6 +38,9 @@ const Home: NextPage = () => {
   const [roomName, setRoomName] = useState("");
   const [roomPassword, setRoomPassword] = useState("");
   const [maxUsers, setMaxUsers] = useState(2);
+  const [config, setConfig] = useState({
+    maxUsers: 10,
+  });
   const router = useRouter();
   const db = getDatabase();
   const auth = getAuth();
@@ -168,6 +172,12 @@ const Home: NextPage = () => {
           }
         } else {
           setListGames([]);
+        }
+      });
+      get(ref(db, "/config")).then((snapshot) => {
+        if (snapshot.val()) {
+          setConfig(snapshot.val());
+          sessionStorage.setItem("config", JSON.stringify(snapshot.val()));
         }
       });
     }
@@ -434,15 +444,11 @@ const Home: NextPage = () => {
               value={maxUsers}
               onChange={(ref) => handleNumberUsers(ref)}
             >
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
+              {[...Array.from(range(2, config.maxUsers + 1))].map((val, i) => (
+                <option key={i} value={val}>
+                  {val}
+                </option>
+              ))}
             </select>
           </div>
           <div className="col-lg-8 order-md-1 rooms-section">
