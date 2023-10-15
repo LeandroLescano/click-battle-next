@@ -1,26 +1,26 @@
-import React, {
-  ChangeEventHandler,
-  MouseEventHandler,
-  useEffect,
-  useState,
-} from "react";
+import React, {useEffect, useState} from "react";
 import GoogleButton from "react-google-button";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  UserCredential
+} from "firebase/auth";
 
 type AppProps = {
-  loginGoogle: Function;
-  loginGuest: Function;
-  close: Function;
+  loginGoogle: (user: UserCredential) => void;
+  loginGuest: (username: string) => void;
+  close: VoidFunction;
 };
 
-function ModalLogin({ loginGoogle, loginGuest, close }: AppProps) {
-  const [isMobile, setIsMobile] = useState<Boolean>(false);
-  const [guestUser, setGuestUser] = useState<String>("");
+function ModalLogin({loginGoogle, loginGuest, close}: AppProps) {
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [guestUser, setGuestUser] = useState<string>("");
   const auth = getAuth();
 
   useEffect(() => {
     let mounted = true;
-    if (process.browser && mounted) {
+    if (window && mounted) {
       window.addEventListener("resize", () => {
         if (window.innerWidth > 992) {
           setIsMobile(false);
@@ -58,7 +58,9 @@ function ModalLogin({ loginGoogle, loginGuest, close }: AppProps) {
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    loginGuest(guestUser);
+    if (guestUser.trim().length > 3) {
+      loginGuest(guestUser);
+    }
   };
 
   const handleChange = (name: string) => {
