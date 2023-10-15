@@ -1,10 +1,10 @@
-import { getAuth } from "firebase/auth";
-import { getDatabase, ref, update } from "firebase/database";
-import React, { useEffect, useState } from "react";
+import {getAuth} from "firebase/auth";
+import {getDatabase, ref, update} from "firebase/database";
+import React, {useEffect, useState} from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { loadingAlert, loginWithGoogleAlert } from "../utils/alerts";
-import { timeout } from "../utils/timeout";
+import {loadingAlert, loginWithGoogleAlert} from "../utils/alerts";
+import {timeout} from "../utils/timeout";
 import RatingStars from "./RatingStars";
 
 type User = {
@@ -18,7 +18,7 @@ type User = {
 
 type AppProps = {
   user: User;
-  handleLogOut: Function;
+  handleLogOut: VoidFunction;
 };
 
 interface contactProps {
@@ -26,13 +26,13 @@ interface contactProps {
   text?: string;
 }
 
-const Footer = ({ user, handleLogOut }: AppProps) => {
+export const Footer = ({user, handleLogOut}: AppProps) => {
   const ReactSwal = withReactContent(
     Swal.mixin({
       buttonsStyling: false,
       customClass: {
-        confirmButton: "btn-click",
-      },
+        confirmButton: "btn-click small"
+      }
     })
   );
   const [rating, setRating] = useState(0);
@@ -42,7 +42,7 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
 
   const handleContact = async ({
     title = "Contact us",
-    text = "You can send a criticism, a complaint or whatever you want...",
+    text = "You can send a criticism, a complaint or whatever you want..."
   }: contactProps = {}) => {
     if (auth.currentUser?.isAnonymous) {
       loginWithGoogleAlert();
@@ -64,7 +64,7 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
           ReactSwal.resetValidationMessage();
           return false;
         }
-      },
+      }
     }).then(async (result) => {
       if (result.isConfirmed) {
         sendEmail(result.value as string);
@@ -78,10 +78,10 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
       method: "POST",
       body: JSON.stringify({
         message: message,
-        author: auth.currentUser?.email,
-      }),
+        author: auth.currentUser?.email
+      })
     });
-    console.log({ response });
+    console.log({response});
     ReactSwal.fire({
       icon: "success",
       title: "Thanks for your time!",
@@ -90,19 +90,19 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
       timerProgressBar: true,
       timer: 2500,
       showConfirmButton: false,
-      showCloseButton: true,
+      showCloseButton: true
     });
   };
 
   const sendRating = async () => {
     loadingAlert("Sending feedback...");
-    let key = sessionStorage.getItem("userKey");
+    const key = sessionStorage.getItem("userKey");
     const refRating = ref(db, `users/${key}`);
-    await update(refRating, { rating: rating });
+    await update(refRating, {rating: rating});
     if (rating > 0 && rating < 3) {
       handleContact({
         title: "We're sad about your rating 🥺",
-        text: "Please tell us what can do to improve your experience 🤗...",
+        text: "Please tell us what can do to improve your experience 🤗..."
       });
     } else {
       ReactSwal.fire({
@@ -113,7 +113,7 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
         timerProgressBar: true,
         timer: 2500,
         showConfirmButton: false,
-        showCloseButton: true,
+        showCloseButton: true
       });
     }
     setSend(false);
@@ -136,7 +136,7 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
       confirmButtonText: "Send feedback",
       didOpen: () => {
         ReactSwal.disableButtons();
-      },
+      }
     }).then((result) => {
       if (result.isConfirmed) {
         ReactSwal.showLoading();
@@ -178,18 +178,17 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
           />
         </a>
       </div>
-      <div className="d-flex gap-2 mx-auto mx-md-0 mb-2 mb-md-0">
-        <a onClick={() => handleFeedback()}>Feedback</a>
-        <span>|</span>
-        <a onClick={() => handleContact()}>Contact</a>
-      </div>
+      {!auth.currentUser?.isAnonymous ? (
+        <div className="d-flex gap-2 mx-auto mx-md-0 mb-2 mb-md-0">
+          <a onClick={handleFeedback}>Feedback</a>
+          <span>|</span>
+          <a onClick={() => handleContact()}>Contact</a>
+        </div>
+      ) : null}
       {user.username !== "" && (
-        <div className="txt-user text-center mx-auto mx-md-0">
-          logged as {user.username} -{" "}
-          <button
-            className="btn-logout btn-click"
-            onClick={() => handleLogOut()}
-          >
+        <div className="txt-user text-center mx-auto mx-md-0 mt-1">
+          {`logged as ${user.username} - `}
+          <button className="btn-logout btn-click" onClick={handleLogOut}>
             Log out
           </button>
         </div>
@@ -197,5 +196,3 @@ const Footer = ({ user, handleLogOut }: AppProps) => {
     </footer>
   );
 };
-
-export default Footer;

@@ -39,6 +39,10 @@ button.btn-click {
   transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
     background 150ms cubic-bezier(0, 0, 0.58, 1);
 }
+button.btn-click.small {
+  padding: 0.5em 1em;
+}
+
 button.btn-click::before {
   position: absolute;
   content: "";

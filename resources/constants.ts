@@ -1,4 +1,4 @@
-export const RATING: { [key: number]: string } = {
+export const RATING: {[key: number]: string} = {
   0: "Choose a rating",
   0.5: "Lousy",
   1: "Very Bad",
@@ -9,5 +9,5 @@ export const RATING: { [key: number]: string } = {
   3.5: "Good",
   4: "Great",
   4.5: "Almost Excellent",
-  5: "Excellent",
+  5: "Excellent"
 };

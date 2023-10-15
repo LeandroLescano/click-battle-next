@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import "firebase/database";
-import { getDatabase, ref, update } from "@firebase/database";
+import {getDatabase, ref, update} from "@firebase/database";
 
 type AppProps = {
-  close: Function;
+  onClose: VoidFunction;
 };
 
-function ModalCreateUsername({ close }: AppProps) {
+export const ModalCreateUsername = ({onClose}: AppProps) => {
   const [name, setName] = useState("");
   const db = getDatabase();
 
@@ -18,11 +18,11 @@ function ModalCreateUsername({ close }: AppProps) {
 
   const handleCreateUser = () => {
     if (name.length >= 3) {
-      let key = sessionStorage.getItem("userKey");
-      let refUser = ref(db, `users/${key}`);
-      update(refUser, { username: name });
+      const key = sessionStorage.getItem("userKey");
+      const refUser = ref(db, `users/${key}`);
+      update(refUser, {username: name});
       sessionStorage.setItem("user", name);
-      close();
+      onClose();
     }
   };
 
@@ -59,6 +59,4 @@ function ModalCreateUsername({ close }: AppProps) {
       </div>
     </div>
   );
-}
-
-export default ModalCreateUsername;
+};

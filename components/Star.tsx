@@ -1,8 +1,8 @@
-import { faStar, faStarHalfAlt } from "@fortawesome/free-solid-svg-icons";
-import { faStar as faStarEmpty } from "@fortawesome/free-regular-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { MouseEvent, useEffect, useState } from "react";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import {faStar, faStarHalfAlt} from "@fortawesome/free-solid-svg-icons";
+import {faStar as faStarEmpty} from "@fortawesome/free-regular-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import React, {MouseEvent, useEffect, useState} from "react";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
 
 interface Props {
   position: number;
@@ -22,7 +22,7 @@ const Star = ({
   rating,
   onHover,
   onSelected,
-  useHalves,
+  useHalves
 }: Props) => {
   const [overHalf, setOverHalf] = useState(false);
   const [icon, setIcon] = useState<IconProp>(faStarEmpty as IconProp);
@@ -49,7 +49,7 @@ const Star = ({
     }
 
     if (Math.ceil(positionToUse) > position) {
-      setIcon(faStar);
+      setIcon(faStar as IconProp);
     } else if (
       (Math.ceil(positionToUse) === position || rating.value === position) &&
       useHalves
@@ -58,9 +58,9 @@ const Star = ({
         (hoverPosition > 0 && overHalf) ||
         Math.floor(rating.value) === position
       ) {
-        setIcon(faStar);
+        setIcon(faStar as IconProp);
       } else {
-        setIcon(faStarHalfAlt);
+        setIcon(faStarHalfAlt as IconProp);
       }
     } else {
       setIcon(faStarEmpty as IconProp);

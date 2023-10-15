@@ -1,16 +1,17 @@
 import React from "react";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { timeout } from "../utils/timeout";
+import {useEffect, useState} from "react";
+import {motion} from "framer-motion";
+import {timeout} from "../utils/timeout";
 import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBan } from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faBan} from "@fortawesome/free-solid-svg-icons";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
 
 const PointerAnimation = () => {
   const [clicked, setClicked] = useState(false);
   const [position, setPosition] = useState({
     x: 30,
-    y: 30,
+    y: 30
   });
 
   const MINUTE_MS = 1500;
@@ -35,12 +36,12 @@ const PointerAnimation = () => {
     if (typeof window !== "undefined") {
       return {
         x: Math.floor(Math.random() * (window.innerWidth - 100)),
-        y: Math.floor(Math.random() * (window.innerHeight - 140)),
+        y: Math.floor(Math.random() * (window.innerHeight - 140))
       };
     } else {
       return {
         x: 30,
-        y: 30,
+        y: 30
       };
     }
   };
@@ -49,8 +50,8 @@ const PointerAnimation = () => {
     <div className="container-404">
       <motion.div
         className="container-pointer"
-        animate={{ x: position.x, y: position.y }}
-        transition={{ duration: 0.4 }}
+        animate={{x: position.x, y: position.y}}
+        transition={{duration: 0.4}}
       >
         <Image
           src={"/img-pointer.png"}
@@ -60,7 +61,7 @@ const PointerAnimation = () => {
         />
         <div className={"icon-container"}>
           <FontAwesomeIcon
-            icon={faBan}
+            icon={faBan as IconProp}
             height={100}
             className={`not-found-icon ${clicked ? "clicked" : ""}`}
           />

@@ -1,10 +1,11 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React from "react";
-import { User } from "../../pages/game/[roomGame]";
-import { faTrophy } from "@fortawesome/free-solid-svg-icons";
+import {User} from "interfaces";
+import {faTrophy} from "@fortawesome/free-solid-svg-icons";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
 
 interface ResultSectionProps {
-  localPosition: String | undefined;
+  localPosition: string | undefined;
   listUsers: Array<User>;
   localUser: User;
   handleReset: () => void;
@@ -16,7 +17,7 @@ function ResultSection({
   localPosition,
   localUser,
   handleReset,
-  isLocal,
+  isLocal
 }: ResultSectionProps) {
   return (
     <div id="result-container" className="result-container text-center mb-2">
@@ -24,7 +25,7 @@ function ResultSection({
         Result - {localPosition} place
       </h1>
       {listUsers
-        .sort((a, b) => (a.clicks < b.clicks ? 1 : -1))
+        .sort((a, b) => ((a.clicks || 0) < (b.clicks || 0) ? 1 : -1))
         .map((user, i) => {
           return (
             <p
@@ -33,9 +34,13 @@ function ResultSection({
                 user.username === localUser.username ? "local-row" : ""
               }`}
             >
-              {i === 0 && <FontAwesomeIcon icon={faTrophy} className="mx-1" />}
+              {i === 0 && (
+                <FontAwesomeIcon icon={faTrophy as IconProp} className="mx-1" />
+              )}
               <b>{user.username}</b> with {user.clicks} clicks!
-              {i === 0 && <FontAwesomeIcon icon={faTrophy} className="mx-1" />}
+              {i === 0 && (
+                <FontAwesomeIcon icon={faTrophy as IconProp} className="mx-1" />
+              )}
             </p>
           );
         })}

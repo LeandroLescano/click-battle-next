@@ -1,7 +1,9 @@
-import Swal, { SweetAlertResult } from "sweetalert2";
-import { sha256 } from "../services/encode";
+import Swal, {SweetAlertResult} from "sweetalert2";
+import {sha256} from "../services/encode";
 
-const requestPassword = async (password: string): Promise<any> => {
+export const requestPassword = async (
+  password: string
+): Promise<SweetAlertResult> => {
   return await Swal.fire({
     title: "Enter the password",
     input: "password",
@@ -23,8 +25,6 @@ const requestPassword = async (password: string): Promise<any> => {
         }
         return true;
       });
-    },
+    }
   }).then((val) => val);
 };
-
-export { requestPassword };

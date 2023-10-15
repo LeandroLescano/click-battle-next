@@ -1,5 +1,5 @@
 import React from "react";
-import { User } from "../../pages/game/[roomGame]";
+import {User} from "interfaces";
 
 interface LocalSectionProps {
   isLocal: boolean;
@@ -7,8 +7,8 @@ interface LocalSectionProps {
   start: boolean;
   startCountdown: boolean;
   listUsers: User[];
-  handleClick: Function;
-  handleStart: Function;
+  handleClick: VoidFunction;
+  handleStart: VoidFunction;
 }
 
 function LocalSection({
@@ -18,7 +18,7 @@ function LocalSection({
   startCountdown,
   listUsers,
   handleClick,
-  handleStart,
+  handleStart
 }: LocalSectionProps) {
   return (
     <>
@@ -35,7 +35,7 @@ function LocalSection({
         <button
           className="btn-click my-2"
           disabled={!start}
-          onClick={() => handleClick()}
+          onClick={handleClick}
         >
           Click
         </button>
@@ -43,7 +43,7 @@ function LocalSection({
           <button
             className="btn-click my-2"
             disabled={!start && listUsers.length < 2}
-            onClick={() => handleStart()}
+            onClick={handleStart}
           >
             Start!
           </button>

@@ -1,3 +1,4 @@
+import React from "react";
 import "../styles/globals.css";
 import "../styles/styles.css";
 import "../styles/roomGame.css";
@@ -5,11 +6,13 @@ import "../styles/index.css";
 import "../styles/404.scss";
 import "../styles/footer.scss";
 
-import { getApp, getApps, initializeApp } from "firebase/app";
+import {getApp, getApps, initializeApp} from "firebase/app";
 
-import type { AppProps } from "next/app";
+import type {AppProps} from "next/app";
 import Script from "next/script";
 import Layout from "../components/Layout";
+import {connectAuthEmulator, getAuth} from "firebase/auth";
+import {connectDatabaseEmulator, getDatabase} from "firebase/database";
 
 const firebaseConfig = {
   apiKey: process.env.apiKey,
@@ -19,7 +22,7 @@ const firebaseConfig = {
   storageBucket: process.env.storageBucket,
   messagingSenderId: process.env.messagingSenderId,
   appId: process.env.appId,
-  measurementId: process.env.measurementId,
+  measurementId: process.env.measurementId
 };
 
 if (!getApps.length) {
@@ -28,7 +31,15 @@ if (!getApps.length) {
   getApp(); // if already initialized, use that one
 }
 
-function MyApp({ Component, pageProps }: AppProps) {
+try {
+  connectAuthEmulator(getAuth(), "http://localhost:9099", {
+    disableWarnings: true
+  });
+  connectDatabaseEmulator(getDatabase(), "localhost", 9000);
+} catch (error) {
+  console.log({error});
+}
+function MyApp({Component, pageProps}: AppProps) {
   return (
     <Layout>
       <>

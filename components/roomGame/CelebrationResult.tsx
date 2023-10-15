@@ -1,8 +1,8 @@
 import React from "react";
-import { User } from "../../pages/game/[roomGame]";
+import {User} from "interfaces";
 
 interface Props {
-  celebrationContainer: any;
+  celebrationContainer: React.LegacyRef<HTMLDivElement> | undefined;
   timer: number;
   listUsers: User[];
   localUser: User;
@@ -12,7 +12,7 @@ function CelebrationResult({
   celebrationContainer,
   timer,
   listUsers,
-  localUser,
+  localUser
 }: Props) {
   return (
     <div
@@ -20,8 +20,8 @@ function CelebrationResult({
       className={`position-absolute ${
         timer > 0
           ? "d-none"
-          : listUsers.sort((a, b) => b.clicks - a.clicks)[0].username ===
-            localUser.username
+          : listUsers.sort((a, b) => (b.clicks || 0) - (a.clicks || 0))[0]
+              .username === localUser.username
           ? "d-block"
           : "d-none"
       } `}

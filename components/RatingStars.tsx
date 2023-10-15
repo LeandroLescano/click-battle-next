@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { RATING } from "../resources/constants";
+import React, {useEffect, useState} from "react";
+import {RATING} from "../resources/constants";
 import Star from "./Star";
 
 interface Props {
@@ -19,12 +19,12 @@ const RatingStars = ({
   onChange,
   onSelect,
   numberStyle = {},
-  initialValue = 0,
+  initialValue = 0
 }: Props) => {
   const [hoverPosition, setHoverPosition] = useState(0);
   const [rating, setRating] = useState({
     value: initialValue,
-    isSelected: initialValue ? true : false,
+    isSelected: initialValue ? true : false
   });
 
   useEffect(() => {
@@ -44,7 +44,7 @@ const RatingStars = ({
     <div className="d-flex justify-content-center flex-column">
       <div>
         {showNumberRating ? (
-          <h3 style={{ ...numberStyle }}>
+          <h3 style={{...numberStyle}}>
             {rating.isSelected ? RATING[rating.value] : RATING[hoverPosition]}
           </h3>
         ) : null}
@@ -61,7 +61,7 @@ const RatingStars = ({
               onSelected={(value) =>
                 setRating({
                   isSelected: true,
-                  value: value,
+                  value: value
                 })
               }
               useHalves={useHalves}

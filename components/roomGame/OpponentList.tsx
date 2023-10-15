@@ -1,9 +1,9 @@
-import { getDatabase, ref, update } from "firebase/database";
-import { useRouter } from "next/dist/client/router";
+import {getDatabase, ref, update} from "firebase/database";
+import {useRouter} from "next/dist/client/router";
 import React from "react";
-import { Flipped, Flipper } from "react-flip-toolkit";
+import {Flipped, Flipper} from "react-flip-toolkit";
 import Swal from "sweetalert2";
-import { User } from "../../pages/game/[roomGame]";
+import {User} from "interfaces";
 
 interface Props {
   countPositions: {
@@ -14,28 +14,34 @@ interface Props {
   isLocal: boolean;
 }
 
-const OpponentList = ({ countPositions, localUsername, isLocal }: Props) => {
+const OpponentList = ({countPositions, localUsername, isLocal}: Props) => {
   const router = useRouter();
   const pathIdGame = router.query.roomGame;
   const db = getDatabase();
 
   const kickUser = (userKey: string | null) => {
     if (userKey) {
-      let userRef = ref(db, `games/${pathIdGame}/listUsers/${userKey}`);
-      update(userRef, { kickOut: true }).then(() => {
+      const userRef = ref(db, `games/${pathIdGame}/listUsers/${userKey}`);
+      update(userRef, {kickOut: true}).then(() => {
         Swal.fire({
           title: "The user has been kicked.",
           icon: "success",
           toast: true,
           showConfirmButton: false,
           position: "bottom-end",
-          timer: 2500,
+          timer: 2500
         });
       });
     }
   };
 
-  const FlipItem = ({ username, userKey }: any) => {
+  const FlipItem = ({
+    username,
+    userKey
+  }: {
+    username: string;
+    userKey: string;
+  }) => {
     return (
       <Flipped key={userKey} flipId={userKey}>
         <div className="visitor-container">
@@ -64,7 +70,9 @@ const OpponentList = ({ countPositions, localUsername, isLocal }: Props) => {
   return (
     <Flipper flipKey={countPositions.count}>
       {countPositions.list.map((user, i) => {
-        return <FlipItem username={user.username} key={i} userKey={user.key} />;
+        return (
+          <FlipItem username={user.username} key={i} userKey={user.key || ""} />
+        );
       })}
     </Flipper>
   );

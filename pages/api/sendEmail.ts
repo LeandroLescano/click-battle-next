@@ -1,5 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
+
+import type {NextApiRequest, NextApiResponse} from "next";
+
 import SendmailTransport from "nodemailer/lib/sendmail-transport";
 
 const nodemailer = require("nodemailer");
@@ -14,40 +16,40 @@ export default async function handler(
   res: NextApiResponse<IResponse>
 ) {
   return new Promise<void>((resolve, reject) => {
-    const { author, message } = JSON.parse(req.body);
+    const {author, message} = JSON.parse(req.body);
 
-    if (author.length === 0 || message.length === 0) {
+    if (author?.length === 0 || message?.length === 0) {
       res.status(401).end({
         status: "failure",
-        data: "No author or message provided",
+        data: "No author or message provided"
       });
-      resolve();
+      reject();
     }
 
-    let transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: process.env.REACT_APP_EMAIL,
-        pass: process.env.REACT_APP_PASSWORD,
-      },
+        pass: process.env.REACT_APP_PASSWORD
+      }
     });
-    let mailOptions = {
+    const mailOptions = {
       from: process.env.REACT_APP_EMAIL,
       to: "leandrolescano11@gmail.com",
       subject: `Click Battle - New message from ${author}`,
-      html: `Author: <b>${author}</b> 
-          Message: ${message}`,
+      html: `Author: <b>${author}</b>
+          Message: ${message}`
     };
 
     transporter.sendMail(
       mailOptions,
       (err: Error | null, info: SendmailTransport.SentMessageInfo) => {
         if (err) {
-          res.status(500).send({ status: "failure", data: err.message });
+          res.status(500).send({status: "failure", data: err.message});
           res.end();
-          resolve();
+          reject();
         } else {
-          res.status(200).send({ status: "success" });
+          res.status(200).send({status: "success"});
           res.end();
           resolve();
         }

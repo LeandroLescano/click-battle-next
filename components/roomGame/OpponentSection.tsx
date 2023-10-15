@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 
-import { User } from "../../pages/game/[roomGame]";
 import OpponentList from "./OpponentList";
+import {User} from "interfaces";
 
 interface OpponentSectionProps {
   opponents: User[];
@@ -14,23 +14,23 @@ function OpponentSection({
   opponents,
   isLocal,
   localUsername,
-  maxUsers,
+  maxUsers
 }: OpponentSectionProps) {
   const [countPositions, setCountPositions] = useState({
     list: opponents,
-    count: 0,
+    count: 0
   });
 
   useEffect(() => {
     if (
       !checkOrderArray(
         countPositions.list,
-        opponents.sort((a, b) => b.clicks - a.clicks)
+        opponents.sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
       )
     ) {
       setCountPositions((prev) => ({
-        list: opponents.sort((a, b) => b.clicks - a.clicks),
-        count: prev.count + 1,
+        list: opponents.sort((a, b) => (b.clicks || 0) - (a.clicks || 0)),
+        count: prev.count + 1
       }));
     }
   }, [opponents]);
@@ -69,7 +69,7 @@ function OpponentSection({
         </div>
         <div className="col-2">
           {opponents
-            .sort((a, b) => b.clicks - a.clicks)
+            .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
             .map((user, i) => {
               return (
                 <div key={i} className={`row row-click`}>
