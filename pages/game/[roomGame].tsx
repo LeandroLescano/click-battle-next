@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, {forwardRef, useEffect, useRef, useState} from "react";
 import {
   child,
   get,
@@ -12,18 +12,18 @@ import {
 } from "@firebase/database";
 
 import CelebrationResult from "../../components/roomGame/CelebrationResult";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import LocalSection from "../../components/roomGame/LocalSection";
 import OpponentSection from "../../components/roomGame/OpponentSection";
 import ResultSection from "../../components/roomGame/ResultSection";
 import SettingsSideBar from "../../components/SettingsSideBar";
 import Swal from "sweetalert2";
 import celebrationAnim from "../../lotties/celebrationAnim.json";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { getAuth } from "@firebase/auth";
+import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
+import {getAuth} from "@firebase/auth";
 import lottie from "lottie-web";
-import { requestPassword } from "../../components/Alerts";
-import { useRouter } from "next/dist/client/router";
+import {requestPassword} from "../../components/Alerts";
+import {useRouter} from "next/dist/client/router";
 
 export interface User {
   username: string;
@@ -49,7 +49,7 @@ function RoomGame() {
     clicks: 0,
   });
   const [listUsers, setListUsers] = useState<User[]>([
-    { username: "", clicks: 0, rol: "visitor" },
+    {username: "", clicks: 0, rol: "visitor"},
   ]);
   const [timer, setTimer] = useState(10);
   const [timeToStart, setTimeToStart] = useState(3);
@@ -60,25 +60,28 @@ function RoomGame() {
   const auth = getAuth();
 
   useEffect(() => {
-    let pathIdGame = window.location.pathname.slice(1).substring(5);
-    let user = localStorage.getItem("user");
-    let userOwner = sessionStorage.getItem("actualOwner");
-    //! Uncomment this to test the game
-    onDisconnect(
-      ref(db, `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`)
-    )
-      .remove()
-      .catch((e) => console.error(e));
+    const pathIdGame = window.location.pathname.slice(1).substring(5);
+    const user = localStorage.getItem("user");
+    const userOwner = sessionStorage.getItem("actualOwner");
+
+    const gamePath = `games/${pathIdGame}`;
+
     if (user === userOwner) {
+      onDisconnect(ref(db, gamePath))
+        .remove()
+        .catch((e) => console.error(e));
       return () => {
-        let refGame = ref(db, `games/${pathIdGame}`);
+        const refGame = ref(db, gamePath);
         remove(refGame);
-        let refGameList = ref(db, `gamesList/${pathIdGame}`);
-        remove(refGameList);
       };
     } else {
+      onDisconnect(
+        ref(db, `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`)
+      )
+        .remove()
+        .catch((e) => console.error(e));
       return () => {
-        let refGame = ref(
+        const refGame = ref(
           db,
           `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`
         );
@@ -133,7 +136,7 @@ function RoomGame() {
             }
             listUsers.push(objUser);
           } else if (val[0] === auth.currentUser?.uid) {
-            router.push({ pathname: "/", query: { kickedOut: true } });
+            router.push({pathname: "/", query: {kickedOut: true}});
           }
         });
         setListUsers(listUsers);
@@ -144,7 +147,7 @@ function RoomGame() {
             listUsers.filter((u) => u.username !== user).length ===
             snapshot.val().maxUsers
           ) {
-            router.push({ pathname: "/", query: { fullRoom: true } });
+            router.push({pathname: "/", query: {fullRoom: true}});
             return;
           }
           if (
@@ -201,13 +204,13 @@ function RoomGame() {
     if (start) {
       if (!timer) {
         let refGame = ref(db, `games/${idGame}`);
-        update(refGame, { timer: null });
+        update(refGame, {timer: null});
         let userKey = sessionStorage.getItem("userKey");
-        console.log({ userKey }, { localUser });
+        console.log({userKey}, {localUser});
         if (userKey && localUser.maxScore) {
           if (localUser.clicks > localUser.maxScore) {
             let refUser = ref(db, `users/${userKey}`);
-            update(refUser, { maxScore: localUser.clicks });
+            update(refUser, {maxScore: localUser.clicks});
           }
         }
         if (celebrationContainer?.current?.innerHTML === "") {
@@ -222,7 +225,7 @@ function RoomGame() {
       lottie.destroy();
       const intervalId = setInterval(() => {
         let refGame = ref(db, `games/${idGame}`);
-        update(refGame, { timer: timer - 1 });
+        update(refGame, {timer: timer - 1});
       }, 1000);
       return () => clearInterval(intervalId);
     } else if (startCountdown) {
@@ -238,7 +241,7 @@ function RoomGame() {
 
       const intervalIdStart = setInterval(() => {
         let refGame = ref(db, `games/${idGame}`);
-        update(refGame, { timeStart: timeToStart - 1 });
+        update(refGame, {timeStart: timeToStart - 1});
       }, 1000);
       return () => clearInterval(intervalIdStart);
     }
@@ -275,13 +278,13 @@ function RoomGame() {
   //* function for update clicks
   const handleClick = () => {
     let refGame = ref(db, `games/${idGame}/listUsers/${auth.currentUser?.uid}`);
-    update(refGame, { clicks: localUser.clicks + 1 });
+    update(refGame, {clicks: localUser.clicks + 1});
   };
 
   //* function for start game
   const handleStart = () => {
     let refGame = ref(db, `games/${idGame}`);
-    update(refGame, { gameStart: true });
+    update(refGame, {gameStart: true});
   };
 
   //* function for reset all data
@@ -296,7 +299,7 @@ function RoomGame() {
     let refGameUsers = ref(db, `games/${idGame}/listUsers`);
     get(refGameUsers).then((snapshot) => {
       snapshot.forEach((child) => {
-        update(child.ref, { clicks: 0 });
+        update(child.ref, {clicks: 0});
       });
     });
   };
@@ -311,7 +314,7 @@ function RoomGame() {
   const kickUser = (userKey: string | null) => {
     if (userKey) {
       let userRef = ref(db, `games/${idGame}/listUsers/${userKey}`);
-      update(userRef, { kickOut: true }).then(() => {
+      update(userRef, {kickOut: true}).then(() => {
         Swal.fire({
           title: "The user has been kicked.",
           icon: "success",
@@ -343,7 +346,7 @@ function RoomGame() {
             showSideBar={showSideBar}
             handleSideBar={(val: boolean) => setShowSideBar(val)}
             idGame={idGame}
-            options={{ maxUsers, roomName, password: roomPassword }}
+            options={{maxUsers, roomName, password: roomPassword}}
           />
         )}
         <main className="main" onClick={() => toggleSideBar()}>
