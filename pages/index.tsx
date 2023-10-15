@@ -27,8 +27,12 @@ import {getAnalytics, logEvent} from "firebase/analytics";
 import {getUser} from "services/user";
 
 // Components
-import {CardGame, Footer, requestPassword} from "components";
-import {ModalCreateUsername} from "components/ModalCreateUsername";
+import {
+  CardGame,
+  Footer,
+  requestPassword,
+  ModalCreateUsername
+} from "components";
 import ModalLogin from "../components/modalLogin";
 
 // Utils
