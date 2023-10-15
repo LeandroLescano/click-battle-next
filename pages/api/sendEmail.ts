@@ -4,7 +4,7 @@ import type {NextApiRequest, NextApiResponse} from "next";
 
 import SendmailTransport from "nodemailer/lib/sendmail-transport";
 
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
 
 type IResponse = {
   status: "success" | "failure";
@@ -49,6 +49,7 @@ export default async function handler(
           res.end();
           reject();
         } else {
+          console.log({info});
           res.status(200).send({status: "success"});
           res.end();
           resolve();
