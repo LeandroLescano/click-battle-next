@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from "react";
 
 import OpponentList from "./OpponentList";
-import {User} from "interfaces";
+import {GameUser} from "interfaces";
 
 interface OpponentSectionProps {
-  opponents: User[];
+  opponents: GameUser[];
   isLocal: boolean;
   localUsername: string;
   maxUsers: number;
@@ -35,7 +35,7 @@ function OpponentSection({
     }
   }, [opponents]);
 
-  const checkOrderArray = (arr1: User[], arr2: User[]) => {
+  const checkOrderArray = (arr1: GameUser[], arr2: GameUser[]) => {
     if (arr1.length !== arr2.length) return false;
     for (let x = 0; x < arr1.length; x++) {
       if (arr1[x].key !== arr2[x].key) {

@@ -1,24 +1,44 @@
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React from "react";
-import {User} from "interfaces";
+import {GameUser} from "interfaces";
 import {faTrophy} from "@fortawesome/free-solid-svg-icons";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {get, getDatabase, ref, update} from "firebase/database";
 
 interface ResultSectionProps {
+  idGame: string;
   localPosition: string | undefined;
-  listUsers: Array<User>;
-  localUser: User;
-  handleReset: () => void;
+  listUsers: Array<GameUser>;
+  localUser: GameUser;
   isLocal: boolean;
 }
 
 function ResultSection({
+  idGame,
   listUsers,
   localPosition,
   localUser,
-  handleReset,
   isLocal
 }: ResultSectionProps) {
+  const db = getDatabase();
+
+  // function for reset all data
+  const handleReset = () => {
+    const refGame = ref(db, `games/${idGame}`);
+    update(refGame, {
+      timer: 10,
+      gameStart: false,
+      timeStart: 3,
+      currentGame: false
+    });
+    const refGameUsers = ref(db, `games/${idGame}/listUsers`);
+    get(refGameUsers).then((snapshot) => {
+      snapshot.forEach((child) => {
+        update(child.ref, {clicks: 0});
+      });
+    });
+  };
+
   return (
     <div id="result-container" className="result-container text-center mb-2">
       <h1 id="result" className="no-select">

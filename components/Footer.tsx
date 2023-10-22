@@ -1,4 +1,4 @@
-import {getAuth} from "firebase/auth";
+import {useAuth} from "contexts/AuthContext";
 import {getDatabase, ref, update} from "firebase/database";
 import React, {useEffect, useState} from "react";
 import Swal from "sweetalert2";
@@ -7,26 +7,12 @@ import {loadingAlert, loginWithGoogleAlert} from "../utils/alerts";
 import {timeout} from "../utils/timeout";
 import RatingStars from "./RatingStars";
 
-type User = {
-  username: string;
-  clicks?: number;
-  rol?: string;
-  maxScore?: number;
-  key?: string;
-  email?: string;
-};
-
-type AppProps = {
-  user: User;
-  handleLogOut: VoidFunction;
-};
-
 interface contactProps {
   title?: string;
   text?: string;
 }
 
-export const Footer = ({user, handleLogOut}: AppProps) => {
+export const Footer = () => {
   const ReactSwal = withReactContent(
     Swal.mixin({
       buttonsStyling: false,
@@ -37,14 +23,23 @@ export const Footer = ({user, handleLogOut}: AppProps) => {
   );
   const [rating, setRating] = useState(0);
   const [send, setSend] = useState(false);
-  const auth = getAuth();
   const db = getDatabase();
+  const {user, gameUser, signOut} = useAuth();
+
+  //Function for logout user.
+  const handleLogOut = () => {
+    if (user) {
+      signOut();
+    }
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("userKey");
+  };
 
   const handleContact = async ({
     title = "Contact us",
     text = "You can send a criticism, a complaint or whatever you want..."
   }: contactProps = {}) => {
-    if (auth.currentUser?.isAnonymous) {
+    if (user?.isAnonymous) {
       loginWithGoogleAlert();
       return;
     }
@@ -74,23 +69,23 @@ export const Footer = ({user, handleLogOut}: AppProps) => {
 
   const sendEmail = async (message: string) => {
     loadingAlert("Sending email...");
-    const response = await fetch("/api/sendEmail", {
+    fetch("/api/sendEmail", {
       method: "POST",
       body: JSON.stringify({
         message: message,
-        author: auth.currentUser?.email
+        author: user?.email
       })
-    });
-    console.log({response});
-    ReactSwal.fire({
-      icon: "success",
-      title: "Thanks for your time!",
-      toast: true,
-      position: "bottom",
-      timerProgressBar: true,
-      timer: 2500,
-      showConfirmButton: false,
-      showCloseButton: true
+    }).then(() => {
+      ReactSwal.fire({
+        icon: "success",
+        title: "Thanks for your time!",
+        toast: true,
+        position: "bottom",
+        timerProgressBar: true,
+        timer: 2500,
+        showConfirmButton: false,
+        showCloseButton: true
+      });
     });
   };
 
@@ -121,7 +116,7 @@ export const Footer = ({user, handleLogOut}: AppProps) => {
   };
 
   const handleFeedback = () => {
-    if (auth.currentUser?.isAnonymous) {
+    if (user?.isAnonymous) {
       loginWithGoogleAlert();
       return;
     }
@@ -164,35 +159,42 @@ export const Footer = ({user, handleLogOut}: AppProps) => {
   }, [send]);
 
   return (
-    <footer className="mt-auto d-flex flex-column-reverse flex-md-row justify-content-centers justify-content-md-between w-100 align-items-baseline">
-      <div className="footer mx-auto mx-md-0">
-        <a
-          href="https://cafecito.app/leanlescano"
-          rel="noreferrer"
-          target="_blank"
-        >
-          <img
-            srcSet="https://cdn.cafecito.app/imgs/buttons/button_2.png 1x, https://cdn.cafecito.app/imgs/buttons/button_2_2x.png 2x, https://cdn.cafecito.app/imgs/buttons/button_2_3.75x.png 3.75x"
-            src="https://cdn.cafecito.app/imgs/buttons/button_2.png"
-            alt="Invitame un café en cafecito.app"
-          />
-        </a>
-      </div>
-      {!auth.currentUser?.isAnonymous ? (
-        <div className="d-flex gap-2 mx-auto mx-md-0 mb-2 mb-md-0">
-          <a onClick={handleFeedback}>Feedback</a>
-          <span>|</span>
-          <a onClick={() => handleContact()}>Contact</a>
+    <>
+      <footer className="mt-auto d-flex flex-column-reverse flex-md-row justify-content-centers justify-content-md-between w-100 align-items-baseline">
+        <div className="footer mx-auto mx-md-0">
+          <a
+            href="https://cafecito.app/leanlescano"
+            rel="noreferrer"
+            target="_blank"
+          >
+            <img
+              srcSet="https://cdn.cafecito.app/imgs/buttons/button_2.png 1x, https://cdn.cafecito.app/imgs/buttons/button_2_2x.png 2x, https://cdn.cafecito.app/imgs/buttons/button_2_3.75x.png 3.75x"
+              src="https://cdn.cafecito.app/imgs/buttons/button_2.png"
+              alt="Invitame un café en cafecito.app"
+            />
+          </a>
         </div>
-      ) : null}
-      {user.username !== "" && (
-        <div className="txt-user text-center mx-auto mx-md-0 mt-1">
-          {`logged as ${user.username} - `}
-          <button className="btn-logout btn-click" onClick={handleLogOut}>
-            Log out
-          </button>
+        {!user?.isAnonymous ? (
+          <div className="d-flex gap-2 mx-auto mx-md-0 mb-2 mb-md-0">
+            <a onClick={handleFeedback}>Feedback</a>
+            <span>|</span>
+            <a onClick={() => handleContact}>Contact</a>
+          </div>
+        ) : null}
+        {gameUser?.username && (
+          <div className="txt-user text-center mx-auto mx-md-0 mt-1">
+            {`logged as ${gameUser.username} - `}
+            <button className="btn-logout btn-click" onClick={handleLogOut}>
+              Log out
+            </button>
+          </div>
+        )}
+      </footer>
+      {gameUser?.email && (
+        <div className="score-container float-right">
+          Max score: {gameUser.maxScore}
         </div>
       )}
-    </footer>
+    </>
   );
 };

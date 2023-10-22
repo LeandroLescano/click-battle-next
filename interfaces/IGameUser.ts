@@ -1,7 +1,7 @@
-export interface User {
+export interface GameUser {
   username: string;
   clicks?: number;
-  rol?: string;
+  rol?: "visitor" | "owner";
   maxScore?: number;
   key?: string;
   kickOut?: boolean;

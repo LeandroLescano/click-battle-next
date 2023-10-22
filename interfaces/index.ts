@@ -1,2 +1,3 @@
 export * from "./IGame";
-export * from "./IUser";
+export * from "./IGameUser";
+export * from "./IRoom";

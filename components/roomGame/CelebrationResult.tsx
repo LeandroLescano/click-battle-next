@@ -1,11 +1,11 @@
 import React from "react";
-import {User} from "interfaces";
+import {GameUser} from "interfaces";
 
 interface Props {
   celebrationContainer: React.LegacyRef<HTMLDivElement> | undefined;
-  timer: number;
-  listUsers: User[];
-  localUser: User;
+  timer: number | undefined;
+  listUsers: GameUser[];
+  localUser: GameUser;
 }
 
 function CelebrationResult({
@@ -18,7 +18,7 @@ function CelebrationResult({
     <div
       ref={celebrationContainer}
       className={`position-absolute ${
-        timer > 0
+        timer && timer > 0
           ? "d-none"
           : listUsers.sort((a, b) => (b.clicks || 0) - (a.clicks || 0))[0]
               .username === localUser.username

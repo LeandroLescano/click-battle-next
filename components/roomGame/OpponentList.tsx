@@ -3,12 +3,12 @@ import {useRouter} from "next/dist/client/router";
 import React from "react";
 import {Flipped, Flipper} from "react-flip-toolkit";
 import Swal from "sweetalert2";
-import {User} from "interfaces";
+import {GameUser} from "interfaces";
 
 interface Props {
   countPositions: {
     count: number;
-    list: User[];
+    list: GameUser[];
   };
   localUsername: string;
   isLocal: boolean;

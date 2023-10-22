@@ -167,7 +167,7 @@ function SettingsSideBar({
           </section>
         </div>
         <button
-          className="btn-click btn-settings"
+          className="btn-click small btn-settings"
           onClick={() => handleUpdateSettings()}
         >
           Save settings

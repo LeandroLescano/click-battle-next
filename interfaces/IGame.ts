@@ -1,11 +1,12 @@
-import {User} from "./IUser";
+import {GameUser} from "./IGameUser";
 
 export interface Game {
-  listUsers: Pick<User, "clicks" | "rol" | "username">[];
+  key?: string | null;
+  listUsers: Pick<GameUser, "clicks" | "rol" | "username" | "key">[];
   currentGame: boolean;
   gameStart: boolean;
   maxUsers: number;
-  ownerUser: Pick<User, "username">;
+  ownerUser: Pick<GameUser, "username">;
   roomName: string;
   timeStart: number;
   timer: number;

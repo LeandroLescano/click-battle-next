@@ -1,14 +1,11 @@
 import React, {useState} from "react";
 import "firebase/database";
-import {getDatabase, ref, update} from "@firebase/database";
+import {Modal} from "react-bootstrap";
+import {useAuth} from "contexts/AuthContext";
 
-type AppProps = {
-  onClose: VoidFunction;
-};
-
-export const ModalCreateUsername = ({onClose}: AppProps) => {
+export const ModalCreateUsername = () => {
   const [name, setName] = useState("");
-  const db = getDatabase();
+  const {user, gameUser, createUser} = useAuth();
 
   const handleChange = (name: string) => {
     if (name.length <= 25) {
@@ -16,47 +13,45 @@ export const ModalCreateUsername = ({onClose}: AppProps) => {
     }
   };
 
-  const handleCreateUser = () => {
+  const handleCreateUser = (
+    e?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e?.preventDefault();
     if (name.length >= 3) {
-      const key = sessionStorage.getItem("userKey");
-      const refUser = ref(db, `users/${key}`);
-      update(refUser, {username: name});
-      sessionStorage.setItem("user", name);
-      onClose();
+      createUser(name);
+      setName("");
     }
   };
 
   return (
-    <div
-      className="modal fade"
-      id="modalCreateUsername"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      data-tabindex="-1"
-      aria-labelledby="modalCreateUsernameLabel"
-      aria-hidden="true"
+    <Modal
+      show={!!(user && !gameUser?.username)}
+      animation
+      centered
+      backdrop="static"
+      keyboard={false}
     >
-      <div className="modal-dialog modal-md modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-body text-center">
-            <h4>Enter your username</h4>
-            <input
-              type="text"
-              className="form-name mb-2 me-5"
-              data-label="username"
-              value={name}
-              placeholder="Username"
-              onChange={(ref) => handleChange(ref.target.value)}
-            />
-            <button
-              className="btn-click py-2 px-3 mb-3"
-              onClick={() => handleCreateUser()}
-            >
-              Choose
-            </button>
-          </div>
+      <Modal.Body>
+        <div className="d-flex flex-column align-items-center gap-3">
+          <h4>Enter your username</h4>
+          <input
+            type="text"
+            className="form-name mb-2"
+            data-label="username"
+            value={name}
+            placeholder="Username"
+            onKeyPress={(e) => e.key === "Enter" && handleCreateUser()}
+            onChange={(e) => handleChange(e.target.value)}
+          />
+          <button
+            className="btn-click py-2 px-3 mb-3"
+            onClick={handleCreateUser}
+            type="submit"
+          >
+            Choose
+          </button>
         </div>
-      </div>
-    </div>
+      </Modal.Body>
+    </Modal>
   );
 };

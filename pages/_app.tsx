@@ -9,10 +9,10 @@ import "../styles/footer.scss";
 import {getApp, getApps, initializeApp} from "firebase/app";
 
 import type {AppProps} from "next/app";
-import Script from "next/script";
 import Layout from "../components/Layout";
 import {connectAuthEmulator, getAuth} from "firebase/auth";
 import {connectDatabaseEmulator, getDatabase} from "firebase/database";
+import {AuthProvider} from "contexts/AuthContext";
 
 const firebaseConfig = {
   apiKey: process.env.apiKey,
@@ -41,24 +41,11 @@ try {
 }
 function MyApp({Component, pageProps}: AppProps) {
   return (
-    <Layout>
-      <>
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.measurementId}`}
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){window.dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${process.env.measurementId}', {
-              page_path: window.location.pathname,
-            });`}
-        </Script>
+    <AuthProvider>
+      <Layout>
         <Component {...pageProps} />
-      </>
-    </Layout>
+      </Layout>
+    </AuthProvider>
   );
 }
 export default MyApp;

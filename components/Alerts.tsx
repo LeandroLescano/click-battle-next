@@ -10,6 +10,7 @@ export const requestPassword = async (
     showCancelButton: true,
     cancelButtonText: "Cancel",
     confirmButtonText: "Enter",
+    reverseButtons: true,
     inputValidator: (val) => {
       if (!val) {
         return "Plese enter the password";
