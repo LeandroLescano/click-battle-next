@@ -335,106 +335,108 @@ See you there! 📱🖱️`
     }
   };
 
-  if (loading || !currentGame) {
-    //TODO: Create loading component
-    return <h1>Loading...</h1>;
-  }
-
   return (
     <>
-      {startCountdown &&
-        currentGame?.timeStart &&
-        currentGame.timeStart >= 0 && (
-          <div className="start-countdown">
-            {currentGame.timeStart === 0 ? "Go" : currentGame.timeStart}
-          </div>
-        )}
-      <CelebrationResult
-        celebrationContainer={celebrationContainer}
-        timer={currentGame?.timer}
-        listUsers={listUsers}
-        localUser={localUser}
-      />
-      <div className="container-fluid">
-        {isLocal && (
-          <SettingsSideBar
-            showSideBar={showSideBar}
-            handleSideBar={(val: boolean) => setShowSideBar(val)}
-            idGame={idGame}
-            options={{
-              maxUsers: currentGame?.maxUsers || 2,
-              roomName: currentGame?.roomName,
-              password: currentGame?.password
-            }}
-          />
-        )}
-        <main className="main" onClick={() => toggleSideBar()}>
-          <div className="room-name position-absolute d-none d-md-block">
-            {currentGame?.roomName || ""}
-          </div>
-          <div className="header pt-2 pb-5 flex-lg-row">
-            <button
-              className="btn-click p-2 btn-back me-auto mb-4"
-              onClick={() => router.push("/")}
-            >
-              <FontAwesomeIcon
-                icon={faArrowLeft as IconProp}
-                size="xs"
-                className="me-2"
-              />
-              Go back
-            </button>
-            <span className="d-block d-md-none m-auto">
-              {currentGame?.roomName || ""}
-            </span>
-          </div>
-          {currentGame?.timer && currentGame?.timer > 0 ? (
-            <>
-              <div className="row mb-3 w-100 g-4">
-                <div className="col-md-6 text-center opponents-container">
-                  <OpponentSection
-                    isLocal={isLocal}
-                    opponents={listUsers}
-                    localUsername={gameUser?.username || ""}
-                    maxUsers={currentGame.maxUsers}
-                  />
-                </div>
-                <div className="col-md-6 text-center">
-                  <LocalSection
-                    idGame={idGame || ""}
-                    isLocal={isLocal}
-                    listUsers={listUsers}
-                    localUser={localUser}
-                    start={currentGame.currentGame}
-                    startCountdown={startCountdown}
-                  />
-                </div>
+      {loading || !currentGame ? (
+        <h1>Loading...</h1>
+      ) : (
+        <>
+          {startCountdown &&
+            currentGame?.timeStart &&
+            currentGame.timeStart >= 0 && (
+              <div className="start-countdown">
+                {currentGame.timeStart === 0 ? "Go" : currentGame.timeStart}
               </div>
-            </>
-          ) : (
-            <ResultSection
-              idGame={idGame || ""}
-              listUsers={listUsers}
-              localUser={localUser}
-              isLocal={isLocal}
-              localPosition={localPosition}
-            />
-          )}
-          <div className="room-info">
-            {currentGame?.timer !== undefined && currentGame.currentGame && (
-              <h2 className="text-center">
-                {currentGame?.timer} seconds remaining!
-              </h2>
             )}
+          <CelebrationResult
+            celebrationContainer={celebrationContainer}
+            timer={currentGame?.timer}
+            listUsers={listUsers}
+            localUser={localUser}
+          />
+          <div className="container-fluid">
+            {isLocal && (
+              <SettingsSideBar
+                showSideBar={showSideBar}
+                handleSideBar={(val: boolean) => setShowSideBar(val)}
+                idGame={idGame}
+                options={{
+                  maxUsers: currentGame?.maxUsers || 2,
+                  roomName: currentGame?.roomName,
+                  password: currentGame?.password
+                }}
+              />
+            )}
+            <main className="main" onClick={() => toggleSideBar()}>
+              <div className="room-name position-absolute d-none d-md-block">
+                {currentGame?.roomName || ""}
+              </div>
+              <div className="header pt-2 pb-5 flex-lg-row">
+                <button
+                  className="btn-click p-2 btn-back me-auto mb-4"
+                  onClick={() => router.push("/")}
+                >
+                  <FontAwesomeIcon
+                    icon={faArrowLeft as IconProp}
+                    size="xs"
+                    className="me-2"
+                  />
+                  Go back
+                </button>
+                <span className="d-block d-md-none m-auto">
+                  {currentGame?.roomName || ""}
+                </span>
+              </div>
+              {currentGame?.timer && currentGame?.timer > 0 ? (
+                <>
+                  <div className="row mb-3 w-100 g-4">
+                    <div className="col-md-6 text-center opponents-container">
+                      <OpponentSection
+                        isLocal={isLocal}
+                        opponents={listUsers}
+                        localUsername={gameUser?.username || ""}
+                        maxUsers={currentGame.maxUsers}
+                      />
+                    </div>
+                    <div className="col-md-6 text-center">
+                      <LocalSection
+                        idGame={idGame || ""}
+                        isLocal={isLocal}
+                        listUsers={listUsers}
+                        localUser={localUser}
+                        start={currentGame.currentGame}
+                        startCountdown={startCountdown}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <ResultSection
+                  idGame={idGame || ""}
+                  listUsers={listUsers}
+                  localUser={localUser}
+                  isLocal={isLocal}
+                  localPosition={localPosition}
+                />
+              )}
+              <div className="room-info">
+                {currentGame?.timer !== undefined &&
+                  currentGame.currentGame && (
+                    <h2 className="text-center">
+                      {currentGame?.timer} seconds remaining!
+                    </h2>
+                  )}
+              </div>
+              <button
+                className="btn-click small position-absolute bottom-0 end-0 me-4 mb-4"
+                onClick={handleInvite}
+              >
+                Invite friends
+              </button>
+            </main>
           </div>
-          <button
-            className="btn-click small position-absolute bottom-0 end-0 me-4 mb-4"
-            onClick={handleInvite}
-          >
-            Invite friends
-          </button>
-        </main>
-      </div>
+        </>
+      )}
       <ModalLogin />
       <ModalCreateUsername />
     </>
