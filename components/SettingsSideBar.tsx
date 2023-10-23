@@ -7,12 +7,14 @@ import Swal from "sweetalert2";
 import {sha256} from "../services/encode";
 import {range} from "../utils/numbers";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {AVAILABLE_TIMES} from "resources/constants";
 
 type AppProps = {
   options: {
     maxUsers: number;
     roomName: string | undefined;
     password?: string | null;
+    timer: number;
   };
   idGame: string | undefined;
   showSideBar: boolean;
@@ -34,7 +36,11 @@ function SettingsSideBar({
   const db = getDatabase();
 
   useEffect(() => {
-    setSettings({maxUsers: options.maxUsers, roomName: options.roomName});
+    setSettings({
+      maxUsers: options.maxUsers,
+      roomName: options.roomName,
+      timer: options.timer
+    });
     const config = sessionStorage.getItem("config");
     if (config) {
       setConfig(JSON.parse(config));
@@ -159,6 +165,23 @@ function SettingsSideBar({
               }
             >
               {[...Array.from(range(2, config.maxUsers + 1))].map((val, i) => (
+                <option key={i} value={val}>
+                  {val}
+                </option>
+              ))}
+            </select>
+          </section>
+          <section className="settings-users">
+            <span>Timer</span>
+            <select
+              className="form-name ms-4"
+              data-label="Room name"
+              value={settings.timer}
+              onChange={(ref) =>
+                setSettings({...settings, timer: Number(ref.target.value)})
+              }
+            >
+              {AVAILABLE_TIMES.map((val, i) => (
                 <option key={i} value={val}>
                   {val}
                 </option>

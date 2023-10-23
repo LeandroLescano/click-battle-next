@@ -11,3 +11,5 @@ export const RATING: {[key: number]: string} = {
   4.5: "Almost Excellent",
   5: "Excellent"
 };
+
+export const AVAILABLE_TIMES = [5, 10, 15, 20, 30];

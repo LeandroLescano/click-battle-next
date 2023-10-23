@@ -10,8 +10,8 @@ import {getApp, getApps, initializeApp} from "firebase/app";
 
 import type {AppProps} from "next/app";
 import Layout from "../components/Layout";
-// import {connectAuthEmulator, getAuth} from "firebase/auth";
-// import {connectDatabaseEmulator, getDatabase} from "firebase/database";
+import {connectAuthEmulator, getAuth} from "firebase/auth";
+import {connectDatabaseEmulator, getDatabase} from "firebase/database";
 import {AuthProvider} from "contexts/AuthContext";
 
 const firebaseConfig = {
@@ -31,14 +31,17 @@ if (!getApps.length) {
   getApp(); // if already initialized, use that one
 }
 
-// try {
-//   connectAuthEmulator(getAuth(), "http://localhost:9099", {
-//     disableWarnings: true
-//   });
-//   connectDatabaseEmulator(getDatabase(), "localhost", 9000);
-// } catch (error) {
-//   console.log({error});
-// }
+if (process.env.NODE_ENV === "development") {
+  try {
+    connectAuthEmulator(getAuth(), "http://localhost:9099", {
+      disableWarnings: true
+    });
+    connectDatabaseEmulator(getDatabase(), "localhost", 9000);
+  } catch (error) {
+    console.log({error});
+  }
+}
+
 function MyApp({Component, pageProps}: AppProps) {
   return (
     <AuthProvider>

@@ -60,7 +60,7 @@ function LocalSection({
       ) : (
         <h4>You have {localUser.clicks} clicks!</h4>
       )}
-      <div className="d-flex justify-content-around">
+      <div className="d-flex justify-content-around gap-2">
         <button
           className="btn-click my-2"
           disabled={!start}

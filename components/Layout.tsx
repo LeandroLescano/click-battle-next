@@ -15,7 +15,7 @@ function Layout({children}: Props) {
         crossOrigin="anonymous"
       ></Script>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, minimum-scale=1" />
         <title>Click Battle</title>
 
         <link

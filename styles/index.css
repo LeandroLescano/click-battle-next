@@ -15,7 +15,8 @@ body {
 }
 
 #__next {
-  height: 100%;
+  height: 100vh;
+  width: 100vw;
   overflow-y: auto;
 }
 
@@ -175,6 +176,7 @@ a {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  max-height: 100vh;
 }
 
 .content-login-modal {

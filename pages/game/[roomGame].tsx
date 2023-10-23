@@ -35,7 +35,6 @@ import {requestPassword} from "../../components/Alerts";
 import SettingsSideBar from "../../components/SettingsSideBar";
 import {getSuffixPosition} from "utils/string";
 import {useAuth} from "contexts/AuthContext";
-import ModalLogin from "components/ModalLogin";
 import {ModalCreateUsername} from "components";
 import useIsMobileDevice from "hooks/useIsMobileDevice";
 
@@ -51,6 +50,9 @@ const CelebrationResult = dynamic(
 const ResultSection = dynamic(
   () => import("../../components/roomGame/ResultSection")
 );
+const ModalLogin = dynamic(() => import("../../components/ModalLogin"), {
+  ssr: false
+});
 
 function RoomGame() {
   const [isLocal, setIsLocal] = useState(false);
@@ -336,7 +338,7 @@ See you there! 📱🖱️`
   };
 
   return (
-    <>
+    <div className="vw-100 overflow-x-hidden">
       {loading || !currentGame ? (
         <h1>Loading...</h1>
       ) : (
@@ -363,7 +365,8 @@ See you there! 📱🖱️`
                 options={{
                   maxUsers: currentGame?.maxUsers || 2,
                   roomName: currentGame?.roomName,
-                  password: currentGame?.password
+                  password: currentGame?.password,
+                  timer: currentGame?.timer || 10
                 }}
               />
             )}
@@ -437,9 +440,13 @@ See you there! 📱🖱️`
           </div>
         </>
       )}
-      <ModalLogin />
-      <ModalCreateUsername />
-    </>
+      {!loading && (
+        <>
+          <ModalLogin />
+          <ModalCreateUsername />
+        </>
+      )}
+    </div>
   );
 }
 
