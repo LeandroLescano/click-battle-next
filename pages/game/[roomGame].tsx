@@ -67,7 +67,6 @@ function RoomGame() {
   });
   const [listUsers, setListUsers] = useState<GameUser[]>([
     {username: "", clicks: 0, rol: "visitor"}
-
   ]);
   const flagEnter = useRef(false);
   const celebrationContainer = useRef<HTMLDivElement>(null);
