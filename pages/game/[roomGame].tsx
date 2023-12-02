@@ -29,13 +29,16 @@ import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import lottie from "lottie-web";
 import Swal from "sweetalert2";
 import celebrationAnim from "../../lotties/celebrationAnim.json";
+import {getSuffixPosition} from "utils/string";
 
 // Components
 import {requestPassword} from "../../components/Alerts";
 import SettingsSideBar from "../../components/SettingsSideBar";
-import {getSuffixPosition} from "utils/string";
-import {useAuth} from "contexts/AuthContext";
 import {ModalCreateUsername} from "components";
+import Loading from "components/Loading";
+
+// Hooks
+import {useAuth} from "contexts/AuthContext";
 import useIsMobileDevice from "hooks/useIsMobileDevice";
 
 const OpponentSection = dynamic(
@@ -340,7 +343,7 @@ See you there! 📱🖱️`
   return (
     <div className="vw-100 overflow-x-hidden">
       {loading || !currentGame ? (
-        <h1>Loading...</h1>
+        <Loading />
       ) : (
         <>
           {startCountdown &&
