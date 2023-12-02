@@ -356,7 +356,7 @@ See you there! 📱🖱️`
             listUsers={listUsers}
             localUser={localUser}
           />
-          <div className="container-fluid">
+          <div className="container-fluid vh-100">
             {isLocal && (
               <SettingsSideBar
                 showSideBar={showSideBar}
@@ -415,11 +415,11 @@ See you there! 📱🖱️`
                 </>
               ) : (
                 <ResultSection
-                  idGame={idGame || ""}
                   listUsers={listUsers}
                   localUser={localUser}
                   isLocal={isLocal}
                   localPosition={localPosition}
+                  currentGame={currentGame}
                 />
               )}
               <div className="room-info">

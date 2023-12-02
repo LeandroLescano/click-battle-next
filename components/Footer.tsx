@@ -68,25 +68,32 @@ export const Footer = () => {
   };
 
   const sendEmail = async (message: string) => {
-    loadingAlert("Sending email...");
-    fetch("/api/sendEmail", {
-      method: "POST",
-      body: JSON.stringify({
-        message: message,
-        author: user?.email
-      })
-    }).then(() => {
-      ReactSwal.fire({
-        icon: "success",
-        title: "Thanks for your time!",
-        toast: true,
-        position: "bottom",
-        timerProgressBar: true,
-        timer: 2500,
-        showConfirmButton: false,
-        showCloseButton: true
+    if (user?.email) {
+      loadingAlert("Sending email...");
+      fetch("/api/sendEmail", {
+        method: "POST",
+        body: JSON.stringify({
+          message: message,
+          author: user?.email
+        })
+      }).then(() => {
+        ReactSwal.fire({
+          icon: "success",
+          title: "Thanks for your time!",
+          toast: true,
+          position: "bottom",
+          timerProgressBar: true,
+          timer: 2500,
+          showConfirmButton: false,
+          showCloseButton: true
+        });
       });
-    });
+    } else {
+      Swal.fire({
+        title: "Error",
+        text: "We can't send the email, please try again"
+      });
+    }
   };
 
   const sendRating = async () => {
@@ -178,7 +185,7 @@ export const Footer = () => {
           <div className="d-flex gap-2 mx-auto mx-md-0 mb-2 mb-md-0">
             <a onClick={handleFeedback}>Feedback</a>
             <span>|</span>
-            <a onClick={() => handleContact}>Contact</a>
+            <a onClick={() => handleContact()}>Contact</a>
           </div>
         ) : null}
         {gameUser?.username && (

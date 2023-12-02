@@ -7,21 +7,22 @@ const useIsMobile = (): boolean => {
   useEffect(() => {
     if (isSSR) return;
     let mounted = true;
+    const checkMobile = (window: Window) => {
+      if (window.innerWidth > 992) {
+        setIsMobile(false);
+      } else {
+        setIsMobile(true);
+      }
+    };
+
     if (window && mounted) {
+      checkMobile(window);
       window.addEventListener("resize", () => {
-        if (window.innerWidth > 992) {
-          setIsMobile(false);
-        } else {
-          setIsMobile(true);
-        }
+        checkMobile(window);
       });
 
       window.addEventListener("load", () => {
-        if (window.innerWidth > 992) {
-          setIsMobile(false);
-        } else {
-          setIsMobile(true);
-        }
+        checkMobile(window);
       });
     }
     return () => {

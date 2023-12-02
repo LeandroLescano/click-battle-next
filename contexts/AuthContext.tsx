@@ -13,6 +13,8 @@ import {useState, useEffect, useContext, createContext} from "react";
 import {GameUser} from "interfaces";
 import {getUser} from "services/user";
 import {get, getDatabase, push, ref, update} from "firebase/database";
+import {getAnalytics, logEvent} from "firebase/analytics";
+import useUserInfo from "hooks/useUserInfo";
 
 interface AuthContextState {
   user: User | null;
@@ -52,6 +54,7 @@ function useProvideAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [gameUser, setGameUser] = useState<GameUser>();
   const [loading, setLoading] = useState(true);
+  const userInfo = useUserInfo();
   const auth = getAuth();
   const db = getDatabase();
 
@@ -167,6 +170,14 @@ function useProvideAuth() {
     localStorage.setItem("user", username);
     authSignInAnonymously(auth)
       .then(() => {
+        logEvent(getAnalytics(), "login", {
+          action: "login",
+          params: {
+            isAnonymously: true,
+            username,
+            ...userInfo
+          }
+        });
         setGameUser({username});
       })
       .catch((e) => console.error(e));
@@ -182,6 +193,14 @@ function useProvideAuth() {
     const refUser = ref(db, `users/${key}`);
 
     update(refUser, {username});
+    logEvent(getAnalytics(), "login", {
+      action: "login",
+      params: {
+        isAnonymously: false,
+        username,
+        ...userInfo
+      }
+    });
     setGameUser((prev) => prev && {...prev, username});
     localStorage.setItem("user", username);
   };
@@ -203,6 +222,14 @@ function useProvideAuth() {
             username: value[1].username,
             maxScore: value[1].maxScore,
             email: value[1].email
+          });
+          logEvent(getAnalytics(), "login", {
+            action: "login",
+            params: {
+              isAnonymously: false,
+              username: value[1].username,
+              ...userInfo
+            }
           });
           return;
         }

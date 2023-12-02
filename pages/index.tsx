@@ -31,6 +31,7 @@ import Swal from "sweetalert2";
 // Hooks
 import {useAuth} from "contexts/AuthContext";
 import CreateSection from "components/CreateSection/CreateSection";
+import Loading from "components/Loading";
 
 const ModalLogin = dynamic(() => import("../components/ModalLogin"), {
   ssr: false
@@ -175,7 +176,7 @@ const Home: NextPage = () => {
     }
   };
 
-  if (loading) return <h1>Loading....</h1>;
+  if (loading) return <Loading />;
 
   return (
     <>
