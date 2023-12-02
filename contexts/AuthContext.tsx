@@ -172,11 +172,9 @@ function useProvideAuth() {
       .then(() => {
         logEvent(getAnalytics(), "login", {
           action: "login",
-          params: {
-            isAnonymously: true,
-            username,
-            ...userInfo
-          }
+          isAnonymously: true,
+          username,
+          ...userInfo
         });
         setGameUser({username});
       })
@@ -195,11 +193,9 @@ function useProvideAuth() {
     update(refUser, {username});
     logEvent(getAnalytics(), "login", {
       action: "login",
-      params: {
-        isAnonymously: false,
-        username,
-        ...userInfo
-      }
+      isAnonymously: false,
+      username,
+      ...userInfo
     });
     setGameUser((prev) => prev && {...prev, username});
     localStorage.setItem("user", username);
@@ -225,11 +221,9 @@ function useProvideAuth() {
           });
           logEvent(getAnalytics(), "login", {
             action: "login",
-            params: {
-              isAnonymously: false,
-              username: value[1].username,
-              ...userInfo
-            }
+            isAnonymously: false,
+            username: value[1].username,
+            ...userInfo
           });
           return;
         }

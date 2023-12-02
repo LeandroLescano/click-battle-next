@@ -99,12 +99,10 @@ const CreateSection = () => {
         if (objRoom.key) {
           logEvent(getAnalytics(), "create_room", {
             action: "create_room",
-            params: {
-              withCustomName: !!room.name,
-              withPassword: !!room.password,
-              maxUsers: room.maxUsers,
-              isRegistered: !user?.isAnonymous
-            }
+            withCustomName: !!room.name,
+            withPassword: !!room.password,
+            maxUsers: room.maxUsers,
+            isRegistered: !user?.isAnonymous
           });
 
           sessionStorage.setItem("actualIDGame", objRoom.key);

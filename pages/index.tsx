@@ -161,12 +161,10 @@ const Home: NextPage = () => {
           set(childRef, userToPush);
           logEvent(getAnalytics(), "enter_room", {
             action: "enter_room",
-            params: {
-              withCustomName: !!game.roomName,
-              withPassword: !!game.password,
-              maxUsers: game.maxUsers,
-              isRegistered: !user.isAnonymous
-            }
+            withCustomName: !!game.roomName,
+            withPassword: !!game.password,
+            maxUsers: game.maxUsers,
+            isRegistered: !user.isAnonymous
           });
           router.push(`game/${game.key}`);
         } else {
