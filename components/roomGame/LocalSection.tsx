@@ -1,25 +1,54 @@
-import React from "react";
-import { User } from "../../pages/game/[roomGame]";
+import React, {useState} from "react";
+import {GameUser} from "interfaces";
+import {getDatabase, ref, update} from "firebase/database";
+import {useRouter} from "next/router";
+import {useAuth} from "contexts/AuthContext";
 
 interface LocalSectionProps {
+  idGame: string;
   isLocal: boolean;
-  localUser: User;
+  localUser: GameUser;
   start: boolean;
   startCountdown: boolean;
-  listUsers: User[];
-  handleClick: Function;
-  handleStart: Function;
+  listUsers: GameUser[];
 }
 
 function LocalSection({
+  idGame,
   isLocal,
   localUser,
   start,
   startCountdown,
-  listUsers,
-  handleClick,
-  handleStart,
+  listUsers
 }: LocalSectionProps) {
+  const [lastClickTime, setLastClickTime] = useState<number>();
+  const router = useRouter();
+  const db = getDatabase();
+  const {user: gUser} = useAuth();
+
+  // function for start game
+  const handleStart = () => {
+    const refGame = ref(db, `games/${idGame}`);
+    update(refGame, {gameStart: true});
+  };
+
+  // function for update clicks
+  const handleClick = () => {
+    const now = Date.now();
+
+    // 1000ms / 25 clicks = 40ms
+    if (lastClickTime && now - lastClickTime < 40) {
+      router.push({pathname: "/", query: {suspicionOfHack: true}});
+      return;
+    }
+
+    if (localUser.clicks !== undefined && gUser) {
+      setLastClickTime(now);
+      const refGame = ref(db, `games/${idGame}/listUsers/${gUser.uid}`);
+      update(refGame, {clicks: localUser.clicks + 1});
+    }
+  };
+
   return (
     <>
       {!start && !startCountdown ? (
@@ -31,11 +60,11 @@ function LocalSection({
       ) : (
         <h4>You have {localUser.clicks} clicks!</h4>
       )}
-      <div className="d-flex justify-content-around">
+      <div className="d-flex justify-content-around gap-2">
         <button
           className="btn-click my-2"
           disabled={!start}
-          onClick={() => handleClick()}
+          onClick={handleClick}
         >
           Click
         </button>
@@ -43,7 +72,7 @@ function LocalSection({
           <button
             className="btn-click my-2"
             disabled={!start && listUsers.length < 2}
-            onClick={() => handleStart()}
+            onClick={handleStart}
           >
             Start!
           </button>

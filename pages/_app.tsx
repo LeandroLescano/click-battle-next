@@ -1,23 +1,28 @@
+import React from "react";
 import "../styles/globals.css";
 import "../styles/styles.css";
 import "../styles/roomGame.css";
 import "../styles/index.css";
 import "../styles/404.scss";
+import "../styles/footer.scss";
 
-import { getApp, getApps, initializeApp } from "firebase/app";
+import {getApp, getApps, initializeApp} from "firebase/app";
 
-import type { AppProps } from "next/app";
+import type {AppProps} from "next/app";
 import Layout from "../components/Layout";
+import {connectAuthEmulator, getAuth} from "firebase/auth";
+import {connectDatabaseEmulator, getDatabase} from "firebase/database";
+import {AuthProvider} from "contexts/AuthContext";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBcEJHGsplG6KemwQ3XbPlxaQZbAEVce0c",
-  authDomain: "click-battle-mp.firebaseapp.com",
-  databaseURL: "https://click-battle-mp-default-rtdb.firebaseio.com",
-  projectId: "click-battle-mp",
-  storageBucket: "click-battle-mp.appspot.com",
-  messagingSenderId: "55439914661",
-  appId: "1:55439914661:web:5877e7ba22e1dcc0b1ff4c",
-  measurementId: "G-ETTEKV9L5B",
+  apiKey: process.env.apiKey,
+  authDomain: process.env.authDomain,
+  databaseURL: process.env.databaseURL,
+  projectId: process.env.projectId,
+  storageBucket: process.env.storageBucket,
+  messagingSenderId: process.env.messagingSenderId,
+  appId: process.env.appId,
+  measurementId: process.env.measurementId
 };
 
 if (!getApps.length) {
@@ -26,11 +31,24 @@ if (!getApps.length) {
   getApp(); // if already initialized, use that one
 }
 
-function MyApp({ Component, pageProps }: AppProps) {
+if (process.env.NODE_ENV === "development") {
+  try {
+    connectAuthEmulator(getAuth(), "http://localhost:9099", {
+      disableWarnings: true
+    });
+    connectDatabaseEmulator(getDatabase(), "localhost", 9000);
+  } catch (error) {
+    console.log({error});
+  }
+}
+
+function MyApp({Component, pageProps}: AppProps) {
   return (
-    <Layout>
-      <Component {...pageProps} />
-    </Layout>
+    <AuthProvider>
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
+    </AuthProvider>
   );
 }
 export default MyApp;

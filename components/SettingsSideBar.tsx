@@ -1,39 +1,54 @@
-import React, { useEffect, useRef, useState } from "react";
-import { faCog, faTimes } from "@fortawesome/free-solid-svg-icons";
-import { getDatabase, ref, update } from "@firebase/database";
+import React, {useEffect, useRef, useState} from "react";
+import {faCog, faTimes} from "@fortawesome/free-solid-svg-icons";
+import {getDatabase, ref, update} from "@firebase/database";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Swal from "sweetalert2";
-import { sha256 } from "../services/encode";
+import {sha256} from "../services/encode";
+import {range} from "../utils/numbers";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {AVAILABLE_TIMES} from "resources/constants";
 
 type AppProps = {
   options: {
     maxUsers: number;
     roomName: string | undefined;
     password?: string | null;
+    timer: number;
   };
-  idGame: String | undefined;
+  idGame: string | undefined;
   showSideBar: boolean;
-  handleSideBar: Function;
+  handleSideBar: (value: boolean) => void;
 };
 
 function SettingsSideBar({
   options,
   idGame,
   showSideBar,
-  handleSideBar,
+  handleSideBar
 }: AppProps) {
   const [settings, setSettings] = useState(options);
   const [deletePassword, setDeletePassword] = useState(false);
+  const [config, setConfig] = useState({
+    maxUsers: 10
+  });
   const inputPassword = useRef<HTMLInputElement>(null);
   const db = getDatabase();
 
   useEffect(() => {
-    setSettings({ maxUsers: options.maxUsers, roomName: options.roomName });
+    setSettings({
+      maxUsers: options.maxUsers,
+      roomName: options.roomName,
+      timer: options.timer
+    });
+    const config = sessionStorage.getItem("config");
+    if (config) {
+      setConfig(JSON.parse(config));
+    }
   }, [options]);
 
   const handleUpdateSettings = () => {
-    let updateSettings = settings;
+    const updateSettings = settings;
     if (deletePassword) {
       updateSettings.password = null;
       updateDatabase(updateSettings);
@@ -53,8 +68,8 @@ function SettingsSideBar({
   };
 
   const updateDatabase = (settings: object) => {
-    let refGame = ref(db, `games/${idGame}`);
-    update(refGame, { ...settings })
+    const refGame = ref(db, `games/${idGame}`);
+    update(refGame, {...settings})
       .then(() => {
         Swal.fire({
           title: "Settings updated",
@@ -64,7 +79,7 @@ function SettingsSideBar({
           showConfirmButton: false,
           timer: 2500,
           icon: "success",
-          timerProgressBar: true,
+          timerProgressBar: true
         });
       })
       .catch(() => {
@@ -76,7 +91,7 @@ function SettingsSideBar({
           showConfirmButton: false,
           timer: 2500,
           icon: "error",
-          timerProgressBar: true,
+          timerProgressBar: true
         });
       });
   };
@@ -84,13 +99,13 @@ function SettingsSideBar({
   return (
     <>
       <div className="settings-icon" onClick={() => handleSideBar(true)}>
-        <FontAwesomeIcon icon={faCog} />
+        <FontAwesomeIcon icon={faCog as IconProp} />
       </div>
       <aside className={`sidebar ${showSideBar && "active"}`}>
         <div className="d-flex justify-content-between align-items-center">
           <h2 className="m-0">Settings</h2>
           <FontAwesomeIcon
-            icon={faTimes}
+            icon={faTimes as IconProp}
             className="close-icon"
             onClick={() => handleSideBar(false)}
           />
@@ -105,7 +120,7 @@ function SettingsSideBar({
               data-label="Room name"
               value={settings.roomName ?? ""}
               onChange={(ref) =>
-                setSettings({ ...settings, roomName: ref.target.value })
+                setSettings({...settings, roomName: ref.target.value})
               }
             />
           </section>
@@ -119,7 +134,7 @@ function SettingsSideBar({
                 data-label="Password"
                 disabled={deletePassword}
                 onChange={(ref) =>
-                  setSettings({ ...settings, password: ref.target.value })
+                  setSettings({...settings, password: ref.target.value})
                 }
                 placeholder={`Password`}
               />
@@ -146,23 +161,36 @@ function SettingsSideBar({
               data-label="Room name"
               value={settings.maxUsers}
               onChange={(ref) =>
-                setSettings({ ...settings, maxUsers: Number(ref.target.value) })
+                setSettings({...settings, maxUsers: Number(ref.target.value)})
               }
             >
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
+              {[...Array.from(range(2, config.maxUsers + 1))].map((val, i) => (
+                <option key={i} value={val}>
+                  {val}
+                </option>
+              ))}
+            </select>
+          </section>
+          <section className="settings-users">
+            <span>Timer</span>
+            <select
+              className="form-name ms-4"
+              data-label="Room name"
+              value={settings.timer}
+              onChange={(ref) =>
+                setSettings({...settings, timer: Number(ref.target.value)})
+              }
+            >
+              {AVAILABLE_TIMES.map((val, i) => (
+                <option key={i} value={val}>
+                  {val}
+                </option>
+              ))}
             </select>
           </section>
         </div>
         <button
-          className="btn-click btn-settings"
+          className="btn-click small btn-settings"
           onClick={() => handleUpdateSettings()}
         >
           Save settings

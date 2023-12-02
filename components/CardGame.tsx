@@ -1,72 +1,46 @@
-import { faLock, faUser } from "@fortawesome/free-solid-svg-icons";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {faLock, faUser} from "@fortawesome/free-solid-svg-icons";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {Game} from "interfaces";
 import React from "react";
 
-interface GameRoom {
-  listUsers: [];
-  maxUsers: number;
-  ownerUser: { username: string };
-  visitorUser: string;
-  roomName: string;
-  password: string;
-}
-
 type AppProps = {
-  game: [number, GameRoom];
-  handleEnterGame: Function;
+  game: Game;
+  handleEnterGame: VoidFunction;
   roomNumber: number;
 };
 
-function CardGame({ game, handleEnterGame, roomNumber }: AppProps) {
+export const CardGame = ({game, handleEnterGame, roomNumber}: AppProps) => {
   return (
-    <div className="col col-card mb-3">
-      {/* <Link
-        href={
-          game[1].listUsers &&
-          Object.keys(game[1].listUsers).length === game[1].maxUsers
-            ? "/"
-            : `/game/${game[0]}`
-        }
-      > */}
-      <div
-        className="card card-room shadow-sm"
-        onClick={() =>
-          handleEnterGame(
-            game[0],
-            game[1].ownerUser.username,
-            game[1].listUsers,
-            game[1].maxUsers,
-            game[1].password
-          )
-        }
-      >
-        <div className={`card-body ${game[1].visitorUser ? "card-full" : ""}`}>
-          <p>
-            <b>
-              {game[1].roomName !== ""
-                ? game[1].roomName
-                : `Sala N°${roomNumber}`}
-              {game[1].password ? (
-                <FontAwesomeIcon icon={faLock} className="mx-1" />
-              ) : null}
-            </b>
-          </p>
-          <span>
-            Owner: <br />
-            {game[1].ownerUser.username}
-          </span>
-        </div>
-        <div className="txt-cant-users">
-          <FontAwesomeIcon icon={faUser} className="mx-1" />
-          {game[1].listUsers
-            ? `${Object.keys(game[1].listUsers).length}/${game[1].maxUsers}`
-            : `1/${game[1].maxUsers}`}
+    game.ownerUser && (
+      <div className="col col-card mb-3">
+        <div
+          className="card card-room shadow-sm"
+          onClick={() => handleEnterGame()}
+        >
+          <div className={`card-body ${game?.visitorUser ? "card-full" : ""}`}>
+            <p>
+              <b>
+                {game.roomName !== "" ? game.roomName : `Room N°${roomNumber}`}
+                {game.password ? (
+                  <FontAwesomeIcon icon={faLock as IconProp} className="mx-1" />
+                ) : null}
+              </b>
+            </p>
+            <span>
+              Owner: <br />
+              {game.ownerUser?.username}
+            </span>
+          </div>
+          <div className="txt-cant-users">
+            <FontAwesomeIcon icon={faUser as IconProp} className="mx-1" />
+            {game.listUsers
+              ? `${Object.keys(game.listUsers).length}/${game.maxUsers}`
+              : `1/${game.maxUsers}`}
+          </div>
         </div>
       </div>
-      {/* </Link> */}
-    </div>
+    )
   );
-}
-
-export default CardGame;
+};

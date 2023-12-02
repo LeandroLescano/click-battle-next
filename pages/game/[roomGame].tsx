@@ -1,7 +1,15 @@
-import React, {forwardRef, useEffect, useRef, useState} from "react";
+// React
+import React, {useEffect, useRef, useState} from "react";
+import dynamic from "next/dynamic";
+
+// Interfaces
+import {Game, GameUser} from "interfaces";
+
+//Router
+import {useRouter} from "next/dist/client/router";
+
+// Firebase
 import {
-  child,
-  get,
   getDatabase,
   onDisconnect,
   onValue,
@@ -9,248 +17,218 @@ import {
   remove,
   set,
   update,
+  Unsubscribe
 } from "@firebase/database";
 
-import CelebrationResult from "../../components/roomGame/CelebrationResult";
+// Icons
+import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import LocalSection from "../../components/roomGame/LocalSection";
-import OpponentSection from "../../components/roomGame/OpponentSection";
-import ResultSection from "../../components/roomGame/ResultSection";
-import SettingsSideBar from "../../components/SettingsSideBar";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
+
+// Utils
+import lottie from "lottie-web";
 import Swal from "sweetalert2";
 import celebrationAnim from "../../lotties/celebrationAnim.json";
-import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
-import {getAuth} from "@firebase/auth";
-import lottie from "lottie-web";
-import {requestPassword} from "../../components/Alerts";
-import {useRouter} from "next/dist/client/router";
 
-export interface User {
-  username: string;
-  clicks: number;
-  rol?: string;
-  maxScore?: number;
-  key?: string;
-  kickOut?: boolean;
-}
+// Components
+import {requestPassword} from "../../components/Alerts";
+import SettingsSideBar from "../../components/SettingsSideBar";
+import {getSuffixPosition} from "utils/string";
+import {useAuth} from "contexts/AuthContext";
+import {ModalCreateUsername} from "components";
+import useIsMobileDevice from "hooks/useIsMobileDevice";
+
+const OpponentSection = dynamic(
+  () => import("../../components/roomGame/OpponentSection")
+);
+const LocalSection = dynamic(
+  () => import("../../components/roomGame/LocalSection")
+);
+const CelebrationResult = dynamic(
+  () => import("../../components/roomGame/CelebrationResult")
+);
+const ResultSection = dynamic(
+  () => import("../../components/roomGame/ResultSection")
+);
+const ModalLogin = dynamic(() => import("../../components/ModalLogin"), {
+  ssr: false
+});
 
 function RoomGame() {
   const [isLocal, setIsLocal] = useState(false);
-  const [idGame, setIdGame] = useState<String>();
-  const [roomName, setRoomName] = useState<string>();
-  const [maxUsers, setMaxUsers] = useState(2);
-  const [start, setStart] = useState(false);
+  const [currentGame, setCurrentGame] = useState<Game>();
+  const [idGame, setIdGame] = useState<string>();
   const [startCountdown, setStartCountdown] = useState(false);
-  const [roomPassword, setRoomPassword] = useState<string>();
-  const [localPosition, setLocalPosition] = useState<String>();
+  const [localPosition, setLocalPosition] = useState<string>();
   const [showSideBar, setShowSideBar] = useState(false);
-  const [localUser, setLocalUser] = useState<User>({
+  const [localUser, setLocalUser] = useState<GameUser>({
     username: "",
-    clicks: 0,
+    clicks: 0
   });
-  const [listUsers, setListUsers] = useState<User[]>([
-    {username: "", clicks: 0, rol: "visitor"},
+  const [listUsers, setListUsers] = useState<GameUser[]>([
+    {username: "", clicks: 0, rol: "visitor"}
+
   ]);
-  const [timer, setTimer] = useState(10);
-  const [timeToStart, setTimeToStart] = useState(3);
   const flagEnter = useRef(false);
   const celebrationContainer = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const db = getDatabase();
-  const auth = getAuth();
+  const {gameUser, user: gUser, updateGameUser, loading} = useAuth();
+  const localUserRef = useRef<GameUser>();
+  const mobileDevice = useIsMobileDevice();
 
-  useEffect(() => {
-    const pathIdGame = window.location.pathname.slice(1).substring(5);
-    const user = localStorage.getItem("user");
-    const userOwner = sessionStorage.getItem("actualOwner");
+  let unsubscribe: Unsubscribe;
 
-    const gamePath = `games/${pathIdGame}`;
-
-    if (user === userOwner) {
-      onDisconnect(ref(db, gamePath))
-        .remove()
-        .catch((e) => console.error(e));
-      return () => {
-        const refGame = ref(db, gamePath);
-        remove(refGame);
-      };
-    } else {
-      onDisconnect(
-        ref(db, `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`)
-      )
-        .remove()
-        .catch((e) => console.error(e));
-      return () => {
-        const refGame = ref(
-          db,
-          `games/${pathIdGame}/listUsers/${auth.currentUser?.uid}`
-        );
-        remove(refGame);
-      };
-    }
-  }, [auth]);
-
-  //* useEffect for update all data in state
-  useEffect(() => {
-    let idGame = sessionStorage.getItem("actualIDGame");
-    let pathIdGame = window.location.pathname.slice(1).substring(5);
-    let user = localStorage.getItem("user");
-    // if (idGame !== pathIdGame) {
-    //   router.push("/");
-    //   return;
-    // }
-    let actualUser = localStorage.getItem("user");
-    let id = window.location.pathname.slice(1).substring(5);
-    setIdGame(id);
-    // sessionStorage.setItem("actualIDGame", id);
-    let refGame = ref(db, `games/${id}/`);
-    onValue(refGame, (snapshot) => {
-      if (snapshot.val() !== null) {
-        setRoomName(snapshot.val().roomName);
-        setTimer(snapshot.val().timer);
-        setTimeToStart(snapshot.val().timeStart);
-        setStart(snapshot.val().currentGame);
-        setMaxUsers(snapshot.val().maxUsers);
-        setRoomPassword(snapshot.val().password);
-        if (snapshot.val().gameStart) {
-          setStartCountdown(true);
-        } else {
-          setStartCountdown(false);
-        }
-        let listUsers: User[] = [];
-        let listUsersDB: User[] = snapshot.val().listUsers;
-        if (!listUsersDB) {
-          listUsersDB = [];
-        }
-        Object.entries(listUsersDB).forEach((val) => {
-          if (!val[1].kickOut) {
-            let objUser: User = {
-              username: val[1].username,
-              clicks: val[1].clicks,
-              rol: val[1].rol,
-              maxScore: val[1].maxScore,
-              key: val[0],
-            };
-            if (val[0] === auth.currentUser?.uid) {
-              setLocalUser(objUser);
-            }
-            listUsers.push(objUser);
-          } else if (val[0] === auth.currentUser?.uid) {
-            router.push({pathname: "/", query: {kickedOut: true}});
-          }
-        });
-        setListUsers(listUsers);
-        if (snapshot.val().ownerUser.username === actualUser) {
-          setIsLocal(true);
-        } else {
-          if (
-            listUsers.filter((u) => u.username !== user).length ===
-            snapshot.val().maxUsers
-          ) {
-            router.push({pathname: "/", query: {fullRoom: true}});
-            return;
-          }
-          if (
-            snapshot.val().password &&
-            idGame !== pathIdGame &&
-            !flagEnter.current
-          ) {
-            flagEnter.current = true;
-            requestPassword(snapshot.val().password).then((val) => {
-              if (val.isConfirmed === false) {
-                router.push("/");
-                return;
-              } else {
-                sessionStorage.setItem("actualIDGame", pathIdGame);
-                addNewUserToDB(pathIdGame, user);
-              }
-            });
-          }
-          //Add user to DB
-          if (!flagEnter.current) {
-            flagEnter.current = true;
-            addNewUserToDB(pathIdGame, user);
-          }
-        }
-      } else {
-        router.replace("/");
-      }
-    });
-  }, []);
-
-  //* function for add user to database and update state
-  const addNewUserToDB = (pathIdGame: string, user: string | null) => {
-    let refUser = ref(
-      db,
-      `games/${idGame}/listUsers/${auth.currentUser?.uid}`
-    ).ref;
-    get(refUser).then((data) => {
-      if (data.val() === null) {
-        let objUser = {
-          username: user!,
-          clicks: 0,
-          key: auth.currentUser?.uid,
-        };
-        setLocalUser(objUser);
-        let userRef = ref(db, `games/${pathIdGame}/listUsers`);
-        let localUserRef = child(userRef, `${auth.currentUser?.uid}`);
-        set(localUserRef, objUser);
-      }
+  const clearPath = (id: string) => {
+    router.replace(`/game/${id}`, `/game/${id}`, {
+      shallow: true
     });
   };
 
-  //* useEffect for update timer in state and show result
   useEffect(() => {
-    if (start) {
-      if (!timer) {
-        let refGame = ref(db, `games/${idGame}`);
-        update(refGame, {timer: null});
-        let userKey = sessionStorage.getItem("userKey");
-        console.log({userKey}, {localUser});
-        if (userKey && localUser.maxScore) {
-          if (localUser.clicks > localUser.maxScore) {
-            let refUser = ref(db, `users/${userKey}`);
-            update(refUser, {maxScore: localUser.clicks});
-          }
-        }
-        if (celebrationContainer?.current?.innerHTML === "") {
-          lottie.loadAnimation({
-            container: celebrationContainer.current!,
-            animationData: celebrationAnim,
-          });
-        }
-        return;
-      }
+    if (!loading && gUser?.uid) {
+      const pathIdGame = window.location.pathname.slice(1).substring(5);
+      const user = localStorage.getItem("user");
+      const userOwner = sessionStorage.getItem("actualOwner");
 
-      lottie.destroy();
-      const intervalId = setInterval(() => {
-        let refGame = ref(db, `games/${idGame}`);
-        update(refGame, {timer: timer - 1});
-      }, 1000);
-      return () => clearInterval(intervalId);
-    } else if (startCountdown) {
-      if (!timeToStart) {
-        let refGame = ref(db, `games/${idGame}`);
-        update(refGame, {
-          gameStart: false,
-          timeStart: null,
-          currentGame: true,
-        });
-        return;
-      }
+      const gamePath = `games/${pathIdGame}`;
 
-      const intervalIdStart = setInterval(() => {
-        let refGame = ref(db, `games/${idGame}`);
-        update(refGame, {timeStart: timeToStart - 1});
-      }, 1000);
-      return () => clearInterval(intervalIdStart);
+      if (user === userOwner) {
+        onDisconnect(ref(db, gamePath))
+          .remove()
+          .catch((e) => console.error(e));
+        return () => {
+          const refGame = ref(db, gamePath);
+          remove(refGame);
+        };
+      } else {
+        onDisconnect(ref(db, `games/${pathIdGame}/listUsers/${gUser.uid}`))
+          .remove()
+          .catch((e) => console.error(e));
+        return () => {
+          const refGame = ref(db, `games/${pathIdGame}/listUsers/${gUser.uid}`);
+          remove(refGame);
+        };
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timer, start, timeToStart, startCountdown]);
+  }, [loading, gUser?.uid]);
 
-  //* useEffect for put the position of the localUser
+  // useEffect for update all data in local state
   useEffect(() => {
-    if (timer === undefined) {
+    if (!loading) {
+      try {
+        const idGame = sessionStorage.getItem("actualIDGame");
+        const pathIdGame = window.location.pathname.slice(1).substring(5);
+        const user = localStorage.getItem("user");
+        const actualUser = localStorage.getItem("user");
+        const refGame = ref(db, `games/${pathIdGame}/`);
+
+        setIdGame(pathIdGame);
+        unsubscribe = onValue(refGame, (snapshot) => {
+          const game: Game | null = snapshot.val();
+          if (game) {
+            game.key = snapshot.key;
+            if (game.listUsers) {
+              game.listUsers = Object.entries(game.listUsers).map((u) => ({
+                key: u[0],
+                ...u[1]
+              }));
+            }
+            setCurrentGame(game);
+            if (game.gameStart) {
+              setStartCountdown(true);
+            } else {
+              setStartCountdown(false);
+            }
+            const listUsersToPush: GameUser[] = [];
+            let listUsersDB: GameUser[] = game.listUsers;
+            if (!listUsersDB) {
+              listUsersDB = [];
+            }
+            listUsersDB.forEach((val) => {
+              if (!val.kickOut) {
+                const objUser: GameUser = {
+                  username: val.username,
+                  clicks: val.clicks,
+                  rol: val.rol,
+                  maxScore: val.maxScore,
+                  key: val.key
+                };
+
+                if (val.key === gUser?.uid) {
+                  if (objUser.clicks !== localUserRef.current?.clicks) {
+                    localUserRef.current = objUser;
+                    setLocalUser(objUser);
+                  }
+                }
+                listUsersToPush.push(objUser);
+              } else if (val.key === gUser?.uid) {
+                router.push({pathname: "/", query: {kickedOut: true}});
+              }
+            });
+            setListUsers(listUsersToPush);
+            if (game.ownerUser.username === actualUser) {
+              setIsLocal(true);
+            } else if (gUser?.uid) {
+              if (
+                listUsersToPush.filter((u) => u.username !== user).length ===
+                game.maxUsers
+              ) {
+                router.push({pathname: "/", query: {fullRoom: true}});
+                return;
+              }
+              if (
+                game.password &&
+                idGame !== pathIdGame &&
+                !flagEnter.current
+              ) {
+                flagEnter.current = true;
+                if (!router.query.pwd || router.query.pwd !== game.password) {
+                  requestPassword(game.password).then((val) => {
+                    if (val.isConfirmed) {
+                      clearPath(pathIdGame);
+                      sessionStorage.setItem("actualIDGame", pathIdGame);
+                      addNewUserToDB(game);
+                    } else {
+                      router.push("/");
+                      return;
+                    }
+                  });
+                } else {
+                  clearPath(pathIdGame);
+                  sessionStorage.setItem("actualIDGame", pathIdGame);
+                  addNewUserToDB(game);
+                }
+              }
+              //Add user to DB
+              if (!flagEnter.current) {
+                flagEnter.current = true;
+                addNewUserToDB(game);
+              }
+            }
+          } else {
+            router.replace("/");
+          }
+        });
+      } catch {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Sorry, something went wrong. Please try again.."
+        }).then(() => {
+          router.push("/");
+        });
+      }
+    }
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, [loading, gUser?.uid]);
+
+  // useEffect for put the position of the localUser
+  useEffect(() => {
+    if (currentGame?.timer === undefined) {
       for (const i in listUsers) {
         if (listUsers[i].username === localUser.username) {
           setLocalPosition(getSuffixPosition(Number(i) + 1));
@@ -259,49 +237,71 @@ function RoomGame() {
     }
   }, [listUsers]);
 
-  //* function for get suffix position
-  const getSuffixPosition = (i: number) => {
-    var j = i % 10,
-      k = i % 100;
-    if (j == 1 && k != 11) {
-      return i + "st";
-    }
-    if (j == 2 && k != 12) {
-      return i + "nd";
-    }
-    if (j == 3 && k != 13) {
-      return i + "rd";
-    }
-    return i + "th";
-  };
+  // useEffect for update timer in state and show result
+  useEffect(() => {
+    if (currentGame?.currentGame) {
+      if (!currentGame.timer) {
+        const refGame = ref(db, `games/${idGame}`);
+        update(refGame, {timer: null});
+        const userKey = sessionStorage.getItem("userKey");
+        if (userKey && localUser.clicks) {
+          if (!gameUser?.maxScore || localUser.clicks > gameUser.maxScore) {
+            const refUser = ref(db, `users/${userKey}`);
+            update(refUser, {maxScore: localUser.clicks});
+            updateGameUser({maxScore: localUser.clicks});
+          }
+        }
+        if (celebrationContainer?.current?.innerHTML === "") {
+          lottie.loadAnimation({
+            container: celebrationContainer.current!,
+            animationData: celebrationAnim
+          });
+        }
+        return;
+      }
 
-  //* function for update clicks
-  const handleClick = () => {
-    let refGame = ref(db, `games/${idGame}/listUsers/${auth.currentUser?.uid}`);
-    update(refGame, {clicks: localUser.clicks + 1});
-  };
+      lottie.destroy();
+      const intervalId = setInterval(() => {
+        const refGame = ref(db, `games/${idGame}`);
+        update(refGame, {timer: currentGame?.timer - 1});
+      }, 1000);
+      return () => clearInterval(intervalId);
+    } else if (startCountdown) {
+      if (!currentGame?.timeStart) {
+        const refGame = ref(db, `games/${idGame}`);
+        update(refGame, {
+          gameStart: false,
+          timeStart: null,
+          currentGame: true
+        });
+        return;
+      }
 
-  //* function for start game
-  const handleStart = () => {
-    let refGame = ref(db, `games/${idGame}`);
-    update(refGame, {gameStart: true});
-  };
+      const intervalIdStart = setInterval(() => {
+        const refGame = ref(db, `games/${idGame}`);
+        update(refGame, {timeStart: currentGame.timeStart - 1});
+      }, 1000);
+      return () => clearInterval(intervalIdStart);
+    }
+  }, [
+    currentGame?.currentGame,
+    currentGame?.timeStart,
+    currentGame?.timer,
+    startCountdown
+  ]);
 
-  //* function for reset all data
-  const handleReset = () => {
-    let refGame = ref(db, `games/${idGame}`);
-    update(refGame, {
-      timer: 10,
-      gameStart: false,
-      timeStart: 3,
-      currentGame: false,
-    });
-    let refGameUsers = ref(db, `games/${idGame}/listUsers`);
-    get(refGameUsers).then((snapshot) => {
-      snapshot.forEach((child) => {
-        update(child.ref, {clicks: 0});
-      });
-    });
+  // function for add user to database and update state
+  const addNewUserToDB = (game: Game) => {
+    if (gUser?.uid) {
+      const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
+      set(refUser, {clicks: 0, rol: "visitor", username: gameUser?.username});
+    } else if (router.query.invite) {
+      if (Date.now() > Number(router.query.invite)) {
+        router.push("/");
+      }
+    } else {
+      router.push("/");
+    }
   };
 
   const toggleSideBar = () => {
@@ -310,105 +310,144 @@ function RoomGame() {
     }
   };
 
-  //* function for kick users
-  const kickUser = (userKey: string | null) => {
-    if (userKey) {
-      let userRef = ref(db, `games/${idGame}/listUsers/${userKey}`);
-      update(userRef, {kickOut: true}).then(() => {
-        Swal.fire({
-          title: "The user has been kicked.",
-          icon: "success",
-          toast: true,
-          showConfirmButton: false,
-          position: "bottom-end",
-          timer: 2500,
-        });
+  const handleInvite = () => {
+    let link = window.location.href + `?invite=${Date.now() + 5 * 60 * 1000}`;
+    if (currentGame?.password) {
+      link += `&pwd=${currentGame.password}`;
+    }
+    const data: ShareData = {
+      title: "Click Battle",
+      text: `Hey!
+
+Join me in a click battle! Let's see who can click the fastest. Click here to join: ${link}.
+
+See you there! 📱🖱️`
+    };
+    if (mobileDevice && navigator.canShare(data)) {
+      navigator.share(data);
+    } else {
+      navigator.clipboard.writeText(link);
+      Swal.fire({
+        toast: true,
+        title: "Link copied to clipoard!",
+        position: "bottom-left",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true
       });
     }
   };
 
   return (
-    <>
-      {startCountdown && timeToStart >= 0 && (
-        <div className="start-countdown">
-          {timeToStart === 0 ? "Go" : timeToStart}
-        </div>
-      )}
-      <CelebrationResult
-        celebrationContainer={celebrationContainer}
-        timer={timer}
-        listUsers={listUsers}
-        localUser={localUser}
-      />
-      <div className="container-fluid">
-        {isLocal && (
-          <SettingsSideBar
-            showSideBar={showSideBar}
-            handleSideBar={(val: boolean) => setShowSideBar(val)}
-            idGame={idGame}
-            options={{maxUsers, roomName, password: roomPassword}}
-          />
-        )}
-        <main className="main" onClick={() => toggleSideBar()}>
-          <div className="room-name position-absolute d-none d-md-block">
-            {roomName}
-          </div>
-          <div className="header pt-2 pb-5 flex-lg-row">
-            <button
-              className="btn-click p-2 btn-back me-auto mb-4"
-              onClick={() => router.push("/")}
-            >
-              <FontAwesomeIcon
-                icon={faArrowLeft}
-                size={"xs"}
-                className="me-2"
-              />
-              Go back
-            </button>
-            <span className="d-block d-md-none m-auto">{roomName}</span>
-          </div>
-          {timer > 0 ? (
-            <>
-              <div className="row mb-3 w-100 g-4">
-                <div className="col-md-6 text-center opponents-container">
-                  <OpponentSection
-                    isLocal={isLocal}
-                    opponents={listUsers}
-                    localUser={localUser}
-                    kickOpponent={(key: string) => kickUser(key)}
-                    maxUsers={maxUsers}
-                  />
-                </div>
-                <div className="col-md-6 text-center">
-                  <LocalSection
-                    isLocal={isLocal}
-                    handleClick={handleClick}
-                    handleStart={handleStart}
-                    listUsers={listUsers}
-                    localUser={localUser}
-                    start={start}
-                    startCountdown={startCountdown}
-                  />
-                </div>
+    <div className="vw-100 overflow-x-hidden">
+      {loading || !currentGame ? (
+        <h1>Loading...</h1>
+      ) : (
+        <>
+          {startCountdown &&
+            currentGame?.timeStart &&
+            currentGame.timeStart >= 0 && (
+              <div className="start-countdown">
+                {currentGame.timeStart === 0 ? "Go" : currentGame.timeStart}
               </div>
-            </>
-          ) : (
-            <ResultSection
-              listUsers={listUsers}
-              localUser={localUser}
-              isLocal={isLocal}
-              handleReset={handleReset}
-              localPosition={localPosition}
-            />
-          )}
-          <div className="room-info">
-            {timer !== undefined && start && (
-              <h2 className="text-center">{timer} seconds remaining!</h2>
             )}
+          <CelebrationResult
+            celebrationContainer={celebrationContainer}
+            timer={currentGame?.timer}
+            listUsers={listUsers}
+            localUser={localUser}
+          />
+          <div className="container-fluid vh-100">
+            {isLocal && (
+              <SettingsSideBar
+                showSideBar={showSideBar}
+                handleSideBar={(val: boolean) => setShowSideBar(val)}
+                idGame={idGame}
+                options={{
+                  maxUsers: currentGame?.maxUsers || 2,
+                  roomName: currentGame?.roomName,
+                  password: currentGame?.password,
+                  timer: currentGame?.timer || 10
+                }}
+              />
+            )}
+            <main className="main" onClick={() => toggleSideBar()}>
+              <div className="room-name position-absolute d-none d-md-block">
+                {currentGame?.roomName || ""}
+              </div>
+              <div className="header pt-2 pb-5 flex-lg-row">
+                <button
+                  className="btn-click p-2 btn-back me-auto mb-4"
+                  onClick={() => router.push("/")}
+                >
+                  <FontAwesomeIcon
+                    icon={faArrowLeft as IconProp}
+                    size="xs"
+                    className="me-2"
+                  />
+                  Go back
+                </button>
+                <span className="d-block d-md-none m-auto">
+                  {currentGame?.roomName || ""}
+                </span>
+              </div>
+              {currentGame?.timer && currentGame?.timer > 0 ? (
+                <>
+                  <div className="row mb-3 w-100 g-4">
+                    <div className="col-md-6 text-center opponents-container">
+                      <OpponentSection
+                        isLocal={isLocal}
+                        opponents={listUsers}
+                        localUsername={gameUser?.username || ""}
+                        maxUsers={currentGame.maxUsers}
+                      />
+                    </div>
+                    <div className="col-md-6 text-center">
+                      <LocalSection
+                        idGame={idGame || ""}
+                        isLocal={isLocal}
+                        listUsers={listUsers}
+                        localUser={localUser}
+                        start={currentGame.currentGame}
+                        startCountdown={startCountdown}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <ResultSection
+                  listUsers={listUsers}
+                  localUser={localUser}
+                  isLocal={isLocal}
+                  localPosition={localPosition}
+                  currentGame={currentGame}
+                />
+              )}
+              <div className="room-info">
+                {currentGame?.timer !== undefined &&
+                  currentGame.currentGame && (
+                    <h2 className="text-center">
+                      {currentGame?.timer} seconds remaining!
+                    </h2>
+                  )}
+              </div>
+              <button
+                className="btn-click small position-absolute bottom-0 end-0 me-4 mb-4"
+                onClick={handleInvite}
+              >
+                Invite friends
+              </button>
+            </main>
           </div>
-        </main>
-      </div>
-    </>
+        </>
+      )}
+      {!loading && (
+        <>
+          <ModalLogin />
+          <ModalCreateUsername />
+        </>
+      )}
+    </div>
   );
 }
 

@@ -1,7 +1,11 @@
 import React from "react";
-import PointerAnimation from "../components/pointerAnimation";
-import { useRouter } from "next/dist/client/router";
+import {useRouter} from "next/dist/client/router";
+import dynamic from "next/dynamic";
 import Layout from "../components/Layout";
+
+const PointerAnimation = dynamic(
+  () => import("../components/pointerAnimation")
+);
 
 const NotFound = () => {
   const router = useRouter();
@@ -9,8 +13,8 @@ const NotFound = () => {
     <Layout>
       <>
         <main className="container c-404">
-          <h1>{"Ouch, we can't find what"}</h1>
-          <h1>{"you're looking for"}</h1>
+          <h1 className="fs-1">404</h1>
+          <h1>{"Ouch, we can't find what you're looking for"}</h1>
           <h4 className="mt-2">We can offer you to go back to home :)</h4>
           <button
             className="btn-click p-2 btn-back mt-4"

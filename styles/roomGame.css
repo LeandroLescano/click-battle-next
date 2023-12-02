@@ -9,6 +9,20 @@
   width: 100%;
 }
 
+.btn-kick {
+  cursor: pointer;
+  transition: all ease 0.5s;
+}
+
+.btn-kick:hover {
+  background-color: var(--dark-pink);
+  color: var(--background-sidebar);
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  border: none;
+  transition: all 0.2s ease;
+}
+
 /* ==== SETTINGS ==== */
 .sidebar {
   z-index: 999;
@@ -42,6 +56,7 @@ section.settings-users {
 
 .settings-icon {
   position: absolute;
+  text-align: center;
   right: 0.5em;
   top: 0.5em;
   width: 1.5em;
