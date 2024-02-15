@@ -15,12 +15,11 @@ function Layout({children}: Props) {
         crossOrigin="anonymous"
       ></Script>
       <Head>
-        <Script
+        <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4229101464965146"
-          strategy="lazyOnload"
           crossOrigin="anonymous"
-        />
+        ></script>
         <meta name="viewport" content="width=device-width, minimum-scale=1" />
         <title>Click Battle</title>
 
