@@ -14,6 +14,12 @@ function Layout({children}: Props) {
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossOrigin="anonymous"
       ></Script>
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4229101464965146"
+        strategy="lazyOnload"
+        crossOrigin="anonymous"
+      />
       <Head>
         <meta name="viewport" content="width=device-width, minimum-scale=1" />
         <title>Click Battle</title>
