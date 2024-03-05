@@ -15,6 +15,9 @@ module.exports = {
     appId: process.env.APP_ID,
     measurementId: process.env.MEASUREMENT_ID,
     REACT_APP_EMAIL: process.env.REACT_APP_EMAIL,
-    REACT_APP_PASSWORD: process.env.REACT_APP_PASSWORD
+    REACT_APP_PASSWORD: process.env.REACT_APP_PASSWORD,
+    NEXT_PUBLIC_ROLLBAR_CLIENT_TOKEN:
+      process.env.NEXT_PUBLIC_ROLLBAR_CLIENT_TOKEN,
+    ROLLBAR_SERVER_TOKEN: process.env.ROLLBAR_SERVER_TOKEN
   }
 };
