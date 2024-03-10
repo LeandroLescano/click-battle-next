@@ -1,5 +1,5 @@
 import {getDatabase, ref, update} from "firebase/database";
-import {useRouter} from "next/dist/client/router";
+import {useParams} from "next/navigation";
 import React from "react";
 import {Flipped, Flipper} from "react-flip-toolkit";
 import Swal from "sweetalert2";
@@ -15,8 +15,7 @@ interface Props {
 }
 
 const OpponentList = ({countPositions, localUsername, isLocal}: Props) => {
-  const router = useRouter();
-  const pathIdGame = router.query.roomGame;
+  const pathIdGame = useParams()?.roomGame;
   const db = getDatabase();
 
   const kickUser = (userKey: string | null) => {

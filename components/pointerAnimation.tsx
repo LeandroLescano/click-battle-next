@@ -1,11 +1,13 @@
-import React from "react";
-import {useEffect, useState} from "react";
+"use client";
+import React, {useEffect, useState} from "react";
 import {motion} from "framer-motion";
-import {timeout} from "../utils/timeout";
 import Image from "next/image";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBan} from "@fortawesome/free-solid-svg-icons";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
+
+// Utils
+import {timeout} from "../utils/timeout";
 
 const PointerAnimation = () => {
   const [clicked, setClicked] = useState(false);
@@ -54,15 +56,17 @@ const PointerAnimation = () => {
         transition={{duration: 0.4}}
       >
         <Image
+          alt="pointer"
           src={"/img-pointer.png"}
           width={100}
           height={140}
           className={`pointer ${clicked ? "clicked" : ""}`}
         />
-        <div className={"icon-container"}>
+        <div className="icon-container">
           <FontAwesomeIcon
             icon={faBan as IconProp}
-            height={100}
+            height={600}
+            size="5x"
             className={`not-found-icon ${clicked ? "clicked" : ""}`}
           />
         </div>

@@ -1,13 +1,13 @@
+"use client";
+
 // React
 import React, {useEffect, useState} from "react";
-
-// Utils
 
 // Interfaces
 import {Game, GameUser} from "interfaces";
 
 // Router
-import {useRouter} from "next/dist/client/router";
+import {useParams, useRouter} from "next/navigation";
 
 // Next
 import type {NextPage} from "next";
@@ -40,26 +40,27 @@ const ModalLogin = dynamic(() => import("../components/ModalLogin"), {
 const Home: NextPage = () => {
   const [listGames, setListGames] = useState<Game[]>([]);
   const router = useRouter();
+  const query = useParams();
   const db = getDatabase();
   const {gameUser, user, loading} = useAuth();
 
   useEffect(() => {
     //If exist userKey get user from DB
-    if (router.query.kickedOut === "true") {
+    if (query?.kickedOut === "true") {
       router.replace("/");
       Swal.fire({
         title: "You were kicked out by the owner.",
         icon: "error",
         confirmButtonText: "Ok"
       });
-    } else if (router.query.fullRoom === "true") {
+    } else if (query?.fullRoom === "true") {
       router.replace("/");
       Swal.fire({
         title: "The room is full.",
         icon: "error",
         confirmButtonText: "Ok"
       });
-    } else if (router.query.suspicionOfHack === "true") {
+    } else if (query?.suspicionOfHack === "true") {
       router.replace("/");
       Swal.fire({
         title: "Fair play is important to us",

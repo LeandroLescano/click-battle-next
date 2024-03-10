@@ -15,6 +15,7 @@ interface contactProps {
 export const Footer = () => {
   const ReactSwal = withReactContent(
     Swal.mixin({
+      heightAuto: false,
       buttonsStyling: false,
       customClass: {
         confirmButton: "btn-click small"
@@ -76,18 +77,26 @@ export const Footer = () => {
           message: message,
           author: user?.email
         })
-      }).then(() => {
-        ReactSwal.fire({
-          icon: "success",
-          title: "Thanks for your time!",
-          toast: true,
-          position: "bottom",
-          timerProgressBar: true,
-          timer: 2500,
-          showConfirmButton: false,
-          showCloseButton: true
-        });
-      });
+      }).then(
+        ({status}) => {
+          const isSuccess = status === 200;
+          ReactSwal.fire({
+            icon: isSuccess ? "success" : "error",
+            title: isSuccess
+              ? "Thanks for your time!"
+              : "Oops, we have a problem sending your feedback",
+            toast: true,
+            position: "bottom",
+            timerProgressBar: true,
+            timer: 2500,
+            showConfirmButton: false,
+            showCloseButton: true
+          });
+        },
+        (e) => {
+          console.error(e);
+        }
+      );
     } else {
       Swal.fire({
         title: "Error",
@@ -181,7 +190,7 @@ export const Footer = () => {
             />
           </a>
         </div>
-        {!user?.isAnonymous ? (
+        {user && !user.isAnonymous ? (
           <div className="d-flex gap-2 mx-auto mx-md-0 mb-2 mb-md-0">
             <a onClick={handleFeedback}>Feedback</a>
             <span>|</span>

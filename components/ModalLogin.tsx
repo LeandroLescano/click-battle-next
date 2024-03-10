@@ -6,7 +6,7 @@ import {Modal} from "react-bootstrap";
 
 function ModalLogin() {
   const isMobile = useIsMobile();
-  const [guestUser, setGuestUser] = useState<string>("");
+  const [guestUsername, setGuestUsername] = useState("");
   const {signInWithGoogle, signInAnonymously, user} = useAuth();
 
   const handleLogin = () => {
@@ -17,15 +17,15 @@ function ModalLogin() {
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    if (guestUser.trim().length >= 3) {
-      signInAnonymously(guestUser);
-      setGuestUser("");
+    if (guestUsername.trim().length >= 3) {
+      signInAnonymously(guestUsername);
+      setGuestUsername("");
     }
   };
 
   const handleChange = (name: string) => {
     if (name.length <= 25) {
-      setGuestUser(name);
+      setGuestUsername(name);
     }
   };
 
@@ -48,7 +48,7 @@ function ModalLogin() {
                   type="text"
                   className="form-name mb-2"
                   data-label="username"
-                  data-value={guestUser}
+                  data-value={guestUsername}
                   placeholder="Username"
                   onChange={(ref) => handleChange(ref.target.value)}
                 />

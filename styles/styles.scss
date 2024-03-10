@@ -1,11 +1,12 @@
+$--text: #382b22;
+$--light-pink: #fff0f0;
+$--pink: #ffe9e9;
+$--dark-pink: #f9c4d2;
+$--pink-border: #b18597;
+$--darker-pink: #f75580;
+
 :root {
-  --text: #382b22;
-  --light-pink: #fff0f0;
-  --pink: #ffe9e9;
-  --dark-pink: #f9c4d2;
-  --pink-border: #b18597;
   --pink-shadow: #ffe3e2;
-  --darker-pink: #f75580;
   --background-sidebar: #fff0f0;
 }
 
@@ -27,18 +28,21 @@ button {
   font-size: inherit;
   font-family: inherit;
 }
+
 button.btn-click {
   font-weight: 600;
-  color: var(--text);
+  color: $--text;
   text-transform: uppercase;
   padding: 1.25em 2em;
-  background: var(--light-pink);
-  border: 2px solid var(--pink-border);
+  background: $--light-pink;
+  border: 2px solid $--pink-border;
   border-radius: 0.75em;
   transform-style: preserve-3d;
-  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
+  transition:
+    transform 150ms cubic-bezier(0, 0, 0.58, 1),
     background 150ms cubic-bezier(0, 0, 0.58, 1);
 }
+
 button.btn-click.small {
   padding: 0.5em 1em;
 }
@@ -52,38 +56,47 @@ button.btn-click::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--dark-pink);
+  background: $--dark-pink;
   border-radius: inherit;
-  box-shadow: 0 0 0 2px var(--pink-border), 0 0.625em 0 0 var(--pink-shadow);
+  box-shadow:
+    0 0 0 2px $--pink-border,
+    0 0.625em 0 0 var(--pink-shadow);
   transform: translate3d(0, 0.75em, -1em);
-  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
+  transition:
+    transform 150ms cubic-bezier(0, 0, 0.58, 1),
     box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 /* Button Hover */
 button.btn-click:hover {
-  background: var(--pink);
+  background: $--pink;
   transform: translate(0, 0.25em);
 }
 button.btn-click:hover::before {
-  box-shadow: 0 0 0 2px var(--pink-border), 0 0.5em 0 0 var(--pink-shadow);
+  box-shadow:
+    0 0 0 2px $--pink-border,
+    0 0.5em 0 0 var(--pink-shadow);
   transform: translate3d(0, 0.5em, -1em);
 }
 /* Button Active */
 button.btn-click:active {
-  background: var(--pink);
+  background: $--pink;
   transform: translate(0em, 0.75em);
 }
 button.btn-click:active::before {
-  box-shadow: 0 0 0 2px var(--pink-border), 0 0 var(--pink-shadow);
+  box-shadow:
+    0 0 0 2px $--pink-border,
+    0 0 var(--pink-shadow);
   transform: translate3d(0, 0, -1em);
 }
 /* Button Active (DISABLED) */
 button.btn-click:disabled:active {
-  background: var(--pink);
+  background: $--pink;
   transform: translate(0, 0.55em);
 }
 button.btn-click:disabled:active::before {
-  box-shadow: 0 0 0 2px var(--pink-border), 0 0.5em 0 0 var(--pink-shadow);
+  box-shadow:
+    0 0 0 2px $--pink-border,
+    0 0.5em 0 0 var(--pink-shadow);
   transform: translate3d(0, 0.25em, -1em);
 }
 
@@ -92,11 +105,11 @@ button.btn-click svg {
 }
 .form-name {
   font-weight: 600;
-  color: var(--text);
+  color: $--text;
   text-transform: uppercase;
   padding: 0.25em 1em;
-  background: var(--light-pink);
-  border: 2px solid var(--pink-border);
+  background: $--light-pink;
+  border: 2px solid $--pink-border;
   border-radius: 0.75em;
 }
 .form-name:focus {
@@ -114,11 +127,11 @@ button.btn-click svg {
 }
 .row-user {
   font-weight: 600;
-  color: var(--text);
+  color: $--text;
   text-transform: uppercase;
   padding: 0.25em 1em;
-  background: var(--light-pink);
-  border: 2px solid var(--pink-border);
+  background: $--light-pink;
+  border: 2px solid $--pink-border;
   border-radius: 0.75em;
   -webkit-touch-callout: none;
   /* iOS Safari */
@@ -142,8 +155,8 @@ button.btn-click svg {
 }
 
 .local-row {
-  background-color: var(--darker-pink);
-  border-color: var(--light-pink);
+  background-color: $--darker-pink;
+  border-color: $--light-pink;
   color: white;
 }
 .no-select {
@@ -162,15 +175,16 @@ button.btn-click svg {
 }
 .card {
   font-weight: 600;
-  color: var(--text);
+  color: $--text;
   text-transform: uppercase;
   padding: 0.1em 0.25em;
   margin-bottom: 0.5em;
-  background: var(--light-pink);
-  border: 2px solid var(--pink-border);
+  background: $--light-pink;
+  border: 2px solid $--pink-border;
   border-radius: 0.75em;
   transform-style: preserve-3d;
-  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
+  transition:
+    transform 150ms cubic-bezier(0, 0, 0.58, 1),
     background 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 .card::before {
@@ -182,27 +196,34 @@ button.btn-click svg {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--dark-pink);
+  background: $--dark-pink;
   border-radius: inherit;
-  box-shadow: 0 0 0 2px var(--pink-border), 0 0.625em 0 0 var(--pink-shadow);
+  box-shadow:
+    0 0 0 2px $--pink-border,
+    0 0.625em 0 0 var(--pink-shadow);
   transform: translate3d(0, 0.75em, -1em);
-  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
+  transition:
+    transform 150ms cubic-bezier(0, 0, 0.58, 1),
     box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 .card:hover {
-  background: var(--pink);
+  background: $--pink;
   transform: translate(0, 0.25em);
 }
 .card:hover::before {
-  box-shadow: 0 0 0 2px var(--pink-border), 0 0.5em 0 0 var(--pink-shadow);
+  box-shadow:
+    0 0 0 2px $--pink-border,
+    0 0.5em 0 0 var(--pink-shadow);
   transform: translate3d(0, 0.5em, -1em);
 }
 .card:active {
-  background: var(--pink);
+  background: $--pink;
   transform: translate(0em, 0.75em);
 }
 .card:active::before {
-  box-shadow: 0 0 0 2px var(--pink-border), 0 0 var(--pink-shadow);
+  box-shadow:
+    0 0 0 2px $--pink-border,
+    0 0 var(--pink-shadow);
   transform: translate3d(0, 0, -1em);
 }
 
@@ -230,7 +251,7 @@ button.btn-click svg {
   }
 
   .opponents-container::-webkit-scrollbar-thumb {
-    background: var(--dark-pink);
+    background: $--dark-pink;
     border-radius: 0.5em;
   }
 }

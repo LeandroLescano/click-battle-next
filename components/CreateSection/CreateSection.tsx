@@ -21,7 +21,7 @@ import {
 import {Game, GameUser, Room} from "interfaces";
 
 // Router
-import {useRouter} from "next/router";
+import {useRouter} from "next/navigation";
 
 // Utils
 import {sha256} from "services/encode";

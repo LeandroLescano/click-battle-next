@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   GoogleAuthProvider,
@@ -42,7 +44,7 @@ interface Props {
 }
 
 export function AuthProvider({children}: Props) {
-  const auth = useProvideAuth();
+  const auth = useAuthProvider();
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 }
 
@@ -50,7 +52,7 @@ export const useAuth = () => {
   return useContext(AuthContext);
 };
 
-function useProvideAuth() {
+function useAuthProvider() {
   const [user, setUser] = useState<User | null>(null);
   const [gameUser, setGameUser] = useState<GameUser>();
   const [loading, setLoading] = useState(true);
@@ -207,41 +209,45 @@ function useProvideAuth() {
     const userEmail = data.user.email;
     let userNew = true;
     const refUsers = ref(db, "users");
-    get(refUsers).then((snapshot) => {
-      const usersDB: GameUser = snapshot.val() || [];
-      Object.entries(usersDB).forEach((value) => {
-        if (value[1].email && value[1].email === userEmail) {
-          userNew = false;
-          localStorage.setItem("user", value[1].username);
-          sessionStorage.setItem("userKey", value[0]);
-          setGameUser({
-            username: value[1].username,
-            maxScore: value[1].maxScore,
-            email: value[1].email
-          });
-          logEvent(getAnalytics(), "login", {
-            action: "login",
-            isAnonymously: false,
-            username: value[1].username,
-            ...userInfo
-          });
-          return;
+    get(refUsers)
+      .then((snapshot) => {
+        const usersDB: GameUser = snapshot.val() || [];
+        Object.entries(usersDB).forEach((value) => {
+          if (value[1].email && value[1].email === userEmail) {
+            userNew = false;
+            localStorage.setItem("user", value[1].username);
+            sessionStorage.setItem("userKey", value[0]);
+            setGameUser({
+              username: value[1].username,
+              maxScore: value[1].maxScore,
+              email: value[1].email
+            });
+            logEvent(getAnalytics(), "login", {
+              action: "login",
+              isAnonymously: false,
+              username: value[1].username,
+              ...userInfo
+            });
+            return;
+          }
+        });
+        if (userNew) {
+          const refUsers = ref(db, "users");
+          const newKeyUser = push(refUsers, {
+            email: userEmail,
+            maxScore: 0,
+            username: ""
+          }).key;
+          if (newKeyUser) {
+            sessionStorage.setItem("userKey", newKeyUser);
+          } else {
+            console.error("Error generating new user");
+          }
         }
+      })
+      .finally(() => {
+        handleUser(data.user);
       });
-      if (userNew) {
-        const refUsers = ref(db, "users");
-        const newKeyUser = push(refUsers, {
-          email: userEmail,
-          maxScore: 0,
-          username: ""
-        }).key;
-        if (newKeyUser) {
-          sessionStorage.setItem("userKey", newKeyUser);
-        } else {
-          console.error("Error generating new user");
-        }
-      }
-    });
   };
 
   useEffect(() => {

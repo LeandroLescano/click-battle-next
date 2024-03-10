@@ -1,3 +1,4 @@
+"use client";
 // React
 import React, {useEffect, useRef, useState} from "react";
 import dynamic from "next/dynamic";
@@ -6,7 +7,7 @@ import dynamic from "next/dynamic";
 import {Game, GameUser} from "interfaces";
 
 //Router
-import {useRouter} from "next/dist/client/router";
+import {useParams, useRouter} from "next/navigation";
 
 // Firebase
 import {
@@ -28,12 +29,12 @@ import {IconProp} from "@fortawesome/fontawesome-svg-core";
 // Utils
 import lottie from "lottie-web";
 import Swal from "sweetalert2";
-import celebrationAnim from "../../lotties/celebrationAnim.json";
+import celebrationAnim from "../../../lotties/celebrationAnim.json";
 import {getSuffixPosition} from "utils/string";
 
 // Components
-import {requestPassword} from "../../components/Alerts";
-import SettingsSideBar from "../../components/SettingsSideBar";
+import {requestPassword} from "../../../components/Alerts";
+import SettingsSideBar from "../../../components/SettingsSideBar";
 import {ModalCreateUsername} from "components";
 import Loading from "components/Loading";
 
@@ -42,18 +43,18 @@ import {useAuth} from "contexts/AuthContext";
 import useIsMobileDevice from "hooks/useIsMobileDevice";
 
 const OpponentSection = dynamic(
-  () => import("../../components/roomGame/OpponentSection")
+  () => import("../../../components/roomGame/OpponentSection")
 );
 const LocalSection = dynamic(
-  () => import("../../components/roomGame/LocalSection")
+  () => import("../../../components/roomGame/LocalSection")
 );
 const CelebrationResult = dynamic(
-  () => import("../../components/roomGame/CelebrationResult")
+  () => import("../../../components/roomGame/CelebrationResult")
 );
 const ResultSection = dynamic(
-  () => import("../../components/roomGame/ResultSection")
+  () => import("../../../components/roomGame/ResultSection")
 );
-const ModalLogin = dynamic(() => import("../../components/ModalLogin"), {
+const ModalLogin = dynamic(() => import("../../../components/ModalLogin"), {
   ssr: false
 });
 
@@ -74,6 +75,7 @@ function RoomGame() {
   const flagEnter = useRef(false);
   const celebrationContainer = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const query = useParams();
   const db = getDatabase();
   const {gameUser, user: gUser, updateGameUser, loading} = useAuth();
   const localUserRef = useRef<GameUser>();
@@ -82,9 +84,10 @@ function RoomGame() {
   let unsubscribe: Unsubscribe;
 
   const clearPath = (id: string) => {
-    router.replace(`/game/${id}`, `/game/${id}`, {
-      shallow: true
-    });
+    router.replace(`/game/${id}`);
+    // router.replace(`/game/${id}`, `/game/${id}`, {
+    //   shallow: true
+    // });
   };
 
   useEffect(() => {
@@ -137,11 +140,9 @@ function RoomGame() {
               }));
             }
             setCurrentGame(game);
-            if (game.gameStart) {
-              setStartCountdown(true);
-            } else {
-              setStartCountdown(false);
-            }
+
+            setStartCountdown(game.gameStart);
+
             const listUsersToPush: GameUser[] = [];
             let listUsersDB: GameUser[] = game.listUsers;
             if (!listUsersDB) {
@@ -165,7 +166,7 @@ function RoomGame() {
                 }
                 listUsersToPush.push(objUser);
               } else if (val.key === gUser?.uid) {
-                router.push({pathname: "/", query: {kickedOut: true}});
+                router.push("/?kickedOut=true");
               }
             });
             setListUsers(listUsersToPush);
@@ -176,16 +177,17 @@ function RoomGame() {
                 listUsersToPush.filter((u) => u.username !== user).length ===
                 game.maxUsers
               ) {
-                router.push({pathname: "/", query: {fullRoom: true}});
+                router.push("/?fullRoom=true");
                 return;
               }
+
               if (
                 game.password &&
                 idGame !== pathIdGame &&
                 !flagEnter.current
               ) {
                 flagEnter.current = true;
-                if (!router.query.pwd || router.query.pwd !== game.password) {
+                if (!query?.pwd || query.pwd !== game.password) {
                   requestPassword(game.password).then((val) => {
                     if (val.isConfirmed) {
                       clearPath(pathIdGame);
@@ -202,6 +204,7 @@ function RoomGame() {
                   addNewUserToDB(game);
                 }
               }
+
               //Add user to DB
               if (!flagEnter.current) {
                 flagEnter.current = true;
@@ -246,6 +249,7 @@ function RoomGame() {
         const refGame = ref(db, `games/${idGame}`);
         update(refGame, {timer: null});
         const userKey = sessionStorage.getItem("userKey");
+
         if (userKey && localUser.clicks) {
           if (!gameUser?.maxScore || localUser.clicks > gameUser.maxScore) {
             const refUser = ref(db, `users/${userKey}`);
@@ -253,6 +257,7 @@ function RoomGame() {
             updateGameUser({maxScore: localUser.clicks});
           }
         }
+
         if (celebrationContainer?.current?.innerHTML === "") {
           lottie.loadAnimation({
             container: celebrationContainer.current!,
@@ -267,10 +272,12 @@ function RoomGame() {
         const refGame = ref(db, `games/${idGame}`);
         update(refGame, {timer: currentGame?.timer - 1});
       }, 1000);
+
       return () => clearInterval(intervalId);
     } else if (startCountdown) {
       if (!currentGame?.timeStart) {
         const refGame = ref(db, `games/${idGame}`);
+
         update(refGame, {
           gameStart: false,
           timeStart: null,
@@ -297,8 +304,8 @@ function RoomGame() {
     if (gUser?.uid) {
       const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
       set(refUser, {clicks: 0, rol: "visitor", username: gameUser?.username});
-    } else if (router.query.invite) {
-      if (Date.now() > Number(router.query.invite)) {
+    } else if (query?.invite) {
+      if (Date.now() > Number(query?.invite)) {
         router.push("/");
       }
     } else {
