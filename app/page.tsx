@@ -10,7 +10,6 @@ import {Game, GameUser} from "interfaces";
 import {useParams, useRouter} from "next/navigation";
 
 // Next
-import type {NextPage} from "next";
 import dynamic from "next/dynamic";
 
 // Firebase
@@ -37,7 +36,7 @@ const ModalLogin = dynamic(() => import("../components/ModalLogin"), {
   ssr: false
 });
 
-const Home: NextPage = () => {
+const Home = () => {
   const [listGames, setListGames] = useState<Game[]>([]);
   const router = useRouter();
   const query = useParams();

@@ -1,6 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
+import {NextResponse} from "next/server";
+
 export async function GET() {
-  console.info("get hello");
-  return Response.json({name: "John Doe Test"}, {status: 200});
+  return NextResponse.json({name: "John Doe Test"}, {status: 200});
 }

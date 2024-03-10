@@ -3,13 +3,14 @@ import SendmailTransport from "nodemailer/lib/sendmail-transport";
 
 import nodemailer from "nodemailer";
 import {EmailTemplate} from "components/EmailTemplate";
+import {NextRequest, NextResponse} from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const {author, message} = await req.json();
 
   return await new Promise<void>((resolve, reject) => {
     if (author?.length === 0 || message?.length === 0) {
-      return Response.json(
+      return NextResponse.json(
         {
           status: "failure",
           data: "No author or message provided"
@@ -50,9 +51,9 @@ export async function POST(req: Request) {
     );
   })
     .then(() => {
-      return Response.json({status: "sucess"}, {status: 200});
+      return NextResponse.json({status: "sucess"}, {status: 200});
     })
     .catch((e) => {
-      return Response.json({status: "failure", message: e}, {status: 500});
+      return NextResponse.json({status: "failure", message: e}, {status: 500});
     });
 }
