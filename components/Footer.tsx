@@ -1,10 +1,13 @@
-import {useAuth} from "contexts/AuthContext";
-import {getDatabase, ref, update} from "firebase/database";
 import React, {useEffect, useState} from "react";
+import {getDatabase, ref, update} from "firebase/database";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import {loadingAlert, loginWithGoogleAlert} from "../utils/alerts";
-import {timeout} from "../utils/timeout";
+import {useRouter} from "next/navigation";
+
+import {useAuth} from "contexts/AuthContext";
+import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
+import {timeout} from "utils/timeout";
+
 import RatingStars from "./RatingStars";
 
 interface contactProps {
@@ -26,6 +29,7 @@ export const Footer = () => {
   const [send, setSend] = useState(false);
   const db = getDatabase();
   const {user, gameUser, signOut} = useAuth();
+  const router = useRouter();
 
   //Function for logout user.
   const handleLogOut = () => {
@@ -195,8 +199,12 @@ export const Footer = () => {
             <a onClick={handleFeedback}>Feedback</a>
             <span>|</span>
             <a onClick={() => handleContact()}>Contact</a>
+            <span>|</span>
+            <a onClick={() => router.push("/ranking")}>Ranking</a>
           </div>
-        ) : null}
+        ) : (
+          <a onClick={() => router.push("/ranking")}>Ranking</a>
+        )}
         {gameUser?.username && (
           <div className="txt-user text-center mx-auto mx-md-0 mt-1">
             {`logged as ${gameUser.username} - `}

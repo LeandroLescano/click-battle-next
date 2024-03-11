@@ -4,6 +4,10 @@ import React from "react";
 import {customInitApp} from "lib/firebase-admin-config";
 import {getDatabase} from "firebase-admin/database";
 import {Card, CardBody, CardHeader, Container} from "react-bootstrap";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 
 // Interfaces
@@ -51,11 +55,22 @@ const Ranking = async () => {
   const {users, lastUpdate} = await getRanking();
 
   return (
-    <Container fluid="md" className="p-4 h-100">
+    <Container fluid="md" className="p-2 h-100">
       <Card className="h-100">
         <CardHeader>
-          <section className="d-flex flex-row align-items-end justify-content-between mb-0">
-            <h1 className="mb-0">Click masters</h1>
+          <section className="d-flex flex-lg-row align-items-lg-end justify-content-between mb-0 gap-lg-0 gap-2">
+            <span className="flex-fill d-flex gap-4 align-items-lg-end align-items-center">
+              <Link href="/" passHref>
+                <button className="btn-click small p-2 btn-back mb-2 float-lg-start">
+                  <FontAwesomeIcon
+                    icon={faArrowLeft as IconProp}
+                    size="xs"
+                    className="mx-2"
+                  />
+                </button>
+              </Link>
+              <h1 className="mb-0">Click masters</h1>
+            </span>
             <UpdatedTime text="last update:" date={lastUpdate} />
           </section>
         </CardHeader>

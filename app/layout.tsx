@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Head from "next/head";
 import Script from "next/script";
 import "../styles/globals.scss";
 import "../styles/styles.scss";
@@ -52,14 +51,14 @@ type Props = {
 export default function Layout({children}: Props) {
   return (
     <html lang="en">
-      <Head>
+      <head>
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4229101464965146"
           crossOrigin="anonymous"
         ></Script>
-        <meta name="viewport" content="width=device-width, minimum-scale=1" />
         <title>Click Battle</title>
+        <meta name="viewport" content="width=device-width, minimum-scale=1" />
         <link
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
           rel="stylesheet"
@@ -93,7 +92,7 @@ export default function Layout({children}: Props) {
         />
         <meta name="twitter:creator" content="@LeanLescano_" />
         <meta name="author" content="Lescano Leandro Nicolas" />
-      </Head>
+      </head>
       <body>
         <AuthProvider>{children}</AuthProvider>
       </body>
