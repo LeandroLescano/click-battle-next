@@ -4,9 +4,14 @@ import React from "react";
 import {customInitApp} from "lib/firebase-admin-config";
 import {getDatabase} from "firebase-admin/database";
 import {Card, CardBody, CardHeader, Container} from "react-bootstrap";
+import dynamic from "next/dynamic";
 
 // Interfaces
 import {GameUser} from "interfaces";
+
+const UpdatedTime = dynamic(() => import("components/UpdatedTime"), {
+  ssr: false
+});
 
 customInitApp();
 
@@ -51,7 +56,7 @@ const Ranking = async () => {
         <CardHeader>
           <section className="d-flex flex-row align-items-end justify-content-between mb-0">
             <h1 className="mb-0">Click masters</h1>
-            <span>last update: {lastUpdate.toLocaleString()}</span>
+            <UpdatedTime text="last update:" date={lastUpdate} />
           </section>
         </CardHeader>
         <CardBody className="d-flex flex-column h-100 overflow-y-auto">
