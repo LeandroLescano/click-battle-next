@@ -68,6 +68,16 @@ const CreateSection = () => {
           userToPush["maxScore"] = gameUser.maxScore;
         }
 
+        if (room.timer) {
+          if (room.timer < 5) room.timer = 5;
+          if (room.timer > 30) room.timer = 30;
+        }
+
+        if (room.maxUsers) {
+          if (room.maxUsers > config.maxUsers) room.maxUsers = config.maxUsers;
+          if (room.maxUsers < 2) room.maxUsers = 2;
+        }
+
         const objRoom: Game = {
           roomName: newRoomName,
           currentGame: false,

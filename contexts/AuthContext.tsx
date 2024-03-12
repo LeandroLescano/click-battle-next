@@ -163,8 +163,22 @@ function useAuthProvider() {
   };
 
   const signInWithGoogle = async () => {
-    const response = await signInWithPopup(auth, new GoogleAuthProvider());
-    handleLoginGoogle(response);
+    const response = await signInWithPopup(
+      auth,
+      new GoogleAuthProvider()
+    ).catch((error) => {
+      if (
+        error.code !== "auth/cancelled-popup-request" &&
+        error.code !== "auth/popup-closed-by-user"
+      ) {
+        console.error(error);
+        throw error;
+      }
+    });
+
+    if (response) {
+      handleLoginGoogle(response);
+    }
   };
 
   //Function for login a guest user
