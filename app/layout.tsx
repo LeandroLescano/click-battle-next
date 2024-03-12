@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, {Suspense} from "react";
 import Script from "next/script";
 import "../styles/globals.scss";
 import "../styles/styles.scss";
@@ -15,6 +15,7 @@ import {getApp, getApps, initializeApp} from "firebase/app";
 import {connectAuthEmulator, getAuth} from "firebase/auth";
 import {connectDatabaseEmulator, getDatabase} from "firebase/database";
 import {AuthProvider} from "contexts/AuthContext";
+import Loading from "components/Loading";
 
 const firebaseConfig = {
   apiKey: process.env.apiKey,
@@ -94,7 +95,9 @@ export default function Layout({children}: Props) {
         <meta name="author" content="Lescano Leandro Nicolas" />
       </head>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Suspense fallback={Loading}>{children}</Suspense>
+        </AuthProvider>
       </body>
     </html>
   );
