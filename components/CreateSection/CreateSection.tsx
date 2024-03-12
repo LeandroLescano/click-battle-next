@@ -120,8 +120,6 @@ const CreateSection = () => {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setCreating(false);
     }
   };
 
@@ -137,12 +135,12 @@ const CreateSection = () => {
   }, [gameUser?.username]);
 
   return (
-    <div className="col-lg-4 order-md-2 create-section">
+    <>
       <h1 className="text-center mb-4">Click battle!</h1>
       <button
         className="btn-click mb-3 mb-md-5"
         disabled={!gameUser?.username || creating}
-        onClick={() => handleCreate()}
+        onClick={handleCreate}
       >
         Create game
       </button>
@@ -194,7 +192,7 @@ const CreateSection = () => {
           </option>
         ))}
       </select>
-    </div>
+    </>
   );
 };
 

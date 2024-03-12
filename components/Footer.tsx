@@ -180,7 +180,7 @@ export const Footer = () => {
 
   return (
     <>
-      <footer className="mt-auto d-flex flex-column-reverse flex-md-row justify-content-centers justify-content-md-between w-100 align-items-baseline">
+      <footer className="mt-auto d-flex flex-column-reverse flex-md-row justify-content-centers justify-content-md-between w-100 align-items-baseline pb-2">
         <div className="footer mx-auto mx-md-0">
           <a
             href="https://cafecito.app/leanlescano"
@@ -195,7 +195,7 @@ export const Footer = () => {
           </a>
         </div>
         {user && !user.isAnonymous ? (
-          <div className="d-flex gap-2 mx-auto mx-md-0 mb-2 mb-md-0">
+          <div className="d-flex gap-2 mx-auto mx-md-0 my-2">
             <a onClick={handleFeedback}>Feedback</a>
             <span>|</span>
             <a onClick={() => handleContact()}>Contact</a>
@@ -203,7 +203,9 @@ export const Footer = () => {
             <a onClick={() => router.push("/ranking")}>Ranking</a>
           </div>
         ) : (
-          <a onClick={() => router.push("/ranking")}>Ranking</a>
+          <div className="d-flex justify-content-center w-sm-100 flex-fill align-self-center pb-sm-2 pb-0">
+            <a onClick={() => router.push("/ranking")}>Ranking</a>
+          </div>
         )}
         {gameUser?.username && (
           <div className="txt-user text-center mx-auto mx-md-0 mt-1">

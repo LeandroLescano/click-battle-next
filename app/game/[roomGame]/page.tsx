@@ -170,7 +170,7 @@ function RoomGame() {
               }
             });
             setListUsers(listUsersToPush);
-            if (game.ownerUser.username === actualUser) {
+            if (game.ownerUser?.username === actualUser) {
               setIsLocal(true);
             } else if (gUser?.uid) {
               if (
