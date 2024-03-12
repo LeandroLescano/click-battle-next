@@ -1,7 +1,6 @@
-@import url("./styles.css");
+@import "./styles.scss";
 
 body {
-  --text: #382b22;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
@@ -9,7 +8,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 600;
-  color: var(--text);
+  color: $--text;
   text-transform: uppercase;
   overflow: hidden;
 }
@@ -37,10 +36,10 @@ button.btn-logout::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--dark-pink);
+  background: $--dark-pink;
   border-radius: inherit;
   box-shadow:
-    0 0 0 2px var(--pink-border),
+    0 0 0 2px $--pink-border,
     0 0.325em 0 0 var(--pink-shadow);
   transform: translate3d(0, 0.75em, -1em);
   transition:
@@ -48,22 +47,20 @@ button.btn-logout::before {
     box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 button.btn-logout:hover {
-  background: var(--pink);
+  background: $--pink;
   transform: translate(0, 0.05em);
 }
 button.btn-logout:hover::before {
-  box-shadow:
-    0 0 0 2px var(--pink-border),
-    0 0.2em 0 0 var(--pink-shadow);
+  box-shadow: 0 0 0 2px $--pink-border 0 0.2em 0 0 var(--pink-shadow);
   transform: translate3d(0, 0.5em, -0.05em);
 }
 button.btn-logout:active {
-  background: var(--pink);
+  background: $--pink;
   transform: translate(0, 0.2em);
 }
 button.btn-logout:active::before {
   box-shadow:
-    0 0 0 2px var(--pink-border),
+    0 0 0 2px $--pink-border,
     0 0 var(--pink-shadow);
   transform: translate3d(0, 0, -1em);
 }
@@ -72,12 +69,12 @@ button.btn-logout:active::before {
 
 @media (prefers-color-scheme: dark) {
   body {
-    background-color: #212121;
-    color: white;
+    background-color: #212121 !important;
+    color: white !important;
   }
 
   .modal-content {
-    background-color: #151515;
+    background-color: #151515 !important;
   }
 }
 
@@ -134,7 +131,7 @@ a {
 }
 
 .main {
-  padding: 0.5rem;
+  padding: 0 0.5rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -151,7 +148,7 @@ a {
 
 .score-container {
   position: absolute;
-  right: 10px;
+  right: 25px;
   top: 10px;
 }
 
@@ -198,10 +195,6 @@ a {
   width: 100%;
 }
 
-.rooms-section > .row {
-  flex: 1;
-}
-
 .col-card {
   min-width: 200px;
 }
@@ -212,10 +205,6 @@ a {
   align-items: center;
   justify-content: center;
   width: 100%;
-}
-
-.main > .row-home {
-  min-height: 80vh;
 }
 
 .swal2-popup {

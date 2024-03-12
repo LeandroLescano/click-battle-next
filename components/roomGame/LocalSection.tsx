@@ -1,7 +1,11 @@
 import React, {useState} from "react";
-import {GameUser} from "interfaces";
 import {getDatabase, ref, update} from "firebase/database";
-import {useRouter} from "next/router";
+import {useRouter} from "next/navigation";
+
+// Interfaces
+import {GameUser} from "interfaces";
+
+// Contexts
 import {useAuth} from "contexts/AuthContext";
 
 interface LocalSectionProps {
@@ -38,7 +42,8 @@ function LocalSection({
 
     // 1000ms / 25 clicks = 40ms
     if (lastClickTime && now - lastClickTime < 40) {
-      router.push({pathname: "/", query: {suspicionOfHack: true}});
+      // router.push({href: "/", query: {suspicionOfHack: true}});
+      router.push("/?suspicionOfHack=true");
       return;
     }
 

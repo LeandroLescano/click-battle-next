@@ -1,28 +1,22 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-
-import type {NextApiRequest, NextApiResponse} from "next";
-
 import SendmailTransport from "nodemailer/lib/sendmail-transport";
 
 import nodemailer from "nodemailer";
+import {EmailTemplate} from "components/EmailTemplate";
+import {NextRequest, NextResponse} from "next/server";
 
-type IResponse = {
-  status: "success" | "failure";
-  data?: string;
-};
+export async function POST(req: NextRequest) {
+  const {author, message} = await req.json();
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<IResponse>
-) {
-  return new Promise<void>((resolve, reject) => {
-    const {author, message} = JSON.parse(req.body);
-
+  return await new Promise<void>((resolve, reject) => {
     if (author?.length === 0 || message?.length === 0) {
-      res.status(401).end({
-        status: "failure",
-        data: "No author or message provided"
-      });
+      return NextResponse.json(
+        {
+          status: "failure",
+          data: "No author or message provided"
+        },
+        {status: 401}
+      );
       reject();
     }
 
@@ -33,28 +27,33 @@ export default async function handler(
         pass: process.env.REACT_APP_PASSWORD
       }
     });
+
+    const htmlText = EmailTemplate({author, message});
+
     const mailOptions = {
       from: process.env.REACT_APP_EMAIL,
       to: "leandrolescano11@gmail.com",
       subject: `Click Battle - New message from ${author}`,
-      html: `Author: <b>${author}</b>
-          Message: ${message}`
+      html: htmlText
     };
 
-    transporter.sendMail(
+    return transporter.sendMail(
       mailOptions,
       (err: Error | null, info: SendmailTransport.SentMessageInfo) => {
         if (err) {
-          res.status(500).send({status: "failure", data: err.message});
-          res.end();
-          reject();
+          console.error(err.message);
+          reject(err);
         } else {
           console.log({info});
-          res.status(200).send({status: "success"});
-          res.end();
           resolve();
         }
       }
     );
-  });
+  })
+    .then(() => {
+      return NextResponse.json({status: "sucess"}, {status: 200});
+    })
+    .catch((e) => {
+      return NextResponse.json({status: "failure", message: e}, {status: 500});
+    });
 }

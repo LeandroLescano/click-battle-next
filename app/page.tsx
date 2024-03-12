@@ -1,16 +1,15 @@
+"use client";
+
 // React
 import React, {useEffect, useState} from "react";
-
-// Utils
 
 // Interfaces
 import {Game, GameUser} from "interfaces";
 
 // Router
-import {useRouter} from "next/dist/client/router";
+import {useRouter, useSearchParams} from "next/navigation";
 
 // Next
-import type {NextPage} from "next";
 import dynamic from "next/dynamic";
 
 // Firebase
@@ -24,42 +23,43 @@ import {
   requestPassword,
   ModalCreateUsername
 } from "components";
+import CreateSection from "components/CreateSection/CreateSection";
+import Loading from "components/Loading";
 
 // Utils
 import Swal from "sweetalert2";
 
 // Hooks
 import {useAuth} from "contexts/AuthContext";
-import CreateSection from "components/CreateSection/CreateSection";
-import Loading from "components/Loading";
 
 const ModalLogin = dynamic(() => import("../components/ModalLogin"), {
   ssr: false
 });
 
-const Home: NextPage = () => {
+const Home = () => {
   const [listGames, setListGames] = useState<Game[]>([]);
   const router = useRouter();
+  const params = useSearchParams();
   const db = getDatabase();
   const {gameUser, user, loading} = useAuth();
 
   useEffect(() => {
     //If exist userKey get user from DB
-    if (router.query.kickedOut === "true") {
+    if (params.get("kickedOut") === "true") {
       router.replace("/");
       Swal.fire({
         title: "You were kicked out by the owner.",
         icon: "error",
         confirmButtonText: "Ok"
       });
-    } else if (router.query.fullRoom === "true") {
+    } else if (params.get("fullRoom") === "true") {
       router.replace("/");
       Swal.fire({
         title: "The room is full.",
         icon: "error",
         confirmButtonText: "Ok"
       });
-    } else if (router.query.suspicionOfHack === "true") {
+    } else if (params.get("suspicionOfHack") === "true") {
       router.replace("/");
       Swal.fire({
         title: "Fair play is important to us",
@@ -121,7 +121,7 @@ const Home: NextPage = () => {
         } else {
           if (game.password) {
             requestPassword(game.password).then((val) => {
-              if (game.key && val) {
+              if (game.key && val.isConfirmed) {
                 configRoomToEnter(game);
               }
             });
@@ -131,7 +131,7 @@ const Home: NextPage = () => {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       Swal.fire({
         icon: "error",
         title: "Ups! We couldn't enter the room, please try again.",
@@ -143,7 +143,7 @@ const Home: NextPage = () => {
 
   //Function for add actualGameID to sessionStorage and add new user to game in database
   const configRoomToEnter = (game: Game) => {
-    if (game.key) {
+    if (game.key && game.ownerUser) {
       sessionStorage.setItem("actualIDGame", game.key);
       sessionStorage.setItem("actualOwner", game.ownerUser.username);
       if (gameUser && game.ownerUser.username !== gameUser.username) {
@@ -178,26 +178,26 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <div className="main">
-        <div className="row row-home h-100 w-100">
-          <CreateSection />
-          <div className="col-lg-8 order-md-1 rooms-section">
+      <div className="main h-100 d-flex overflow-y-auto">
+        <div className="d-flex flex-md-row flex-column w-100 flex-fill p-md-0 p-4">
+          <div className="col-lg-4 order-md-1 create-section">
+            <CreateSection />
+          </div>
+          <div className="col-lg-8 order-md-0 rooms-section">
             <h2>Available rooms</h2>
             {listGames.length > 0 ? (
               <div
                 className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mh-100 align-content-start"
                 style={{minHeight: "90%"}}
               >
-                {listGames.map((game, i) => {
-                  return (
-                    <CardGame
-                      game={game}
-                      key={i}
-                      roomNumber={i}
-                      handleEnterGame={() => handleEnterGame(game)}
-                    />
-                  );
-                })}
+                {listGames.map((game, i) => (
+                  <CardGame
+                    game={game}
+                    key={i}
+                    roomNumber={i}
+                    handleEnterGame={() => handleEnterGame(game)}
+                  />
+                ))}
               </div>
             ) : (
               <h4 className="h-100">

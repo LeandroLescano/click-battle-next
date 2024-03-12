@@ -21,7 +21,7 @@ import {
 import {Game, GameUser, Room} from "interfaces";
 
 // Router
-import {useRouter} from "next/router";
+import {useRouter} from "next/navigation";
 
 // Utils
 import {sha256} from "services/encode";
@@ -66,6 +66,16 @@ const CreateSection = () => {
 
         if (gameUser.maxScore) {
           userToPush["maxScore"] = gameUser.maxScore;
+        }
+
+        if (room.timer) {
+          if (room.timer < 5) room.timer = 5;
+          if (room.timer > 30) room.timer = 30;
+        }
+
+        if (room.maxUsers) {
+          if (room.maxUsers > config.maxUsers) room.maxUsers = config.maxUsers;
+          if (room.maxUsers < 2) room.maxUsers = 2;
         }
 
         const objRoom: Game = {
@@ -120,8 +130,6 @@ const CreateSection = () => {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setCreating(false);
     }
   };
 
@@ -137,12 +145,12 @@ const CreateSection = () => {
   }, [gameUser?.username]);
 
   return (
-    <div className="col-lg-4 order-md-2 create-section">
+    <>
       <h1 className="text-center mb-4">Click battle!</h1>
       <button
         className="btn-click mb-3 mb-md-5"
         disabled={!gameUser?.username || creating}
-        onClick={() => handleCreate()}
+        onClick={handleCreate}
       >
         Create game
       </button>
@@ -194,7 +202,7 @@ const CreateSection = () => {
           </option>
         ))}
       </select>
-    </div>
+    </>
   );
 };
 

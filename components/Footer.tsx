@@ -1,10 +1,13 @@
-import {useAuth} from "contexts/AuthContext";
-import {getDatabase, ref, update} from "firebase/database";
 import React, {useEffect, useState} from "react";
+import {getDatabase, ref, update} from "firebase/database";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import {loadingAlert, loginWithGoogleAlert} from "../utils/alerts";
-import {timeout} from "../utils/timeout";
+import {useRouter} from "next/navigation";
+
+import {useAuth} from "contexts/AuthContext";
+import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
+import {timeout} from "utils/timeout";
+
 import RatingStars from "./RatingStars";
 
 interface contactProps {
@@ -15,6 +18,7 @@ interface contactProps {
 export const Footer = () => {
   const ReactSwal = withReactContent(
     Swal.mixin({
+      heightAuto: false,
       buttonsStyling: false,
       customClass: {
         confirmButton: "btn-click small"
@@ -25,6 +29,7 @@ export const Footer = () => {
   const [send, setSend] = useState(false);
   const db = getDatabase();
   const {user, gameUser, signOut} = useAuth();
+  const router = useRouter();
 
   //Function for logout user.
   const handleLogOut = () => {
@@ -76,18 +81,26 @@ export const Footer = () => {
           message: message,
           author: user?.email
         })
-      }).then(() => {
-        ReactSwal.fire({
-          icon: "success",
-          title: "Thanks for your time!",
-          toast: true,
-          position: "bottom",
-          timerProgressBar: true,
-          timer: 2500,
-          showConfirmButton: false,
-          showCloseButton: true
-        });
-      });
+      }).then(
+        ({status}) => {
+          const isSuccess = status === 200;
+          ReactSwal.fire({
+            icon: isSuccess ? "success" : "error",
+            title: isSuccess
+              ? "Thanks for your time!"
+              : "Oops, we have a problem sending your feedback",
+            toast: true,
+            position: "bottom",
+            timerProgressBar: true,
+            timer: 2500,
+            showConfirmButton: false,
+            showCloseButton: true
+          });
+        },
+        (e) => {
+          console.error(e);
+        }
+      );
     } else {
       Swal.fire({
         title: "Error",
@@ -167,7 +180,7 @@ export const Footer = () => {
 
   return (
     <>
-      <footer className="mt-auto d-flex flex-column-reverse flex-md-row justify-content-centers justify-content-md-between w-100 align-items-baseline">
+      <footer className="mt-auto d-flex flex-column-reverse flex-md-row justify-content-centers justify-content-md-between w-100 align-items-baseline pb-2">
         <div className="footer mx-auto mx-md-0">
           <a
             href="https://cafecito.app/leanlescano"
@@ -181,13 +194,19 @@ export const Footer = () => {
             />
           </a>
         </div>
-        {!user?.isAnonymous ? (
-          <div className="d-flex gap-2 mx-auto mx-md-0 mb-2 mb-md-0">
+        {user && !user.isAnonymous ? (
+          <div className="d-flex gap-2 mx-auto mx-md-0 my-2">
             <a onClick={handleFeedback}>Feedback</a>
             <span>|</span>
             <a onClick={() => handleContact()}>Contact</a>
+            <span>|</span>
+            <a onClick={() => router.push("/ranking")}>Ranking</a>
           </div>
-        ) : null}
+        ) : (
+          <div className="d-flex justify-content-center w-sm-100 flex-fill align-self-center pb-sm-2 pb-0">
+            <a onClick={() => router.push("/ranking")}>Ranking</a>
+          </div>
+        )}
         {gameUser?.username && (
           <div className="txt-user text-center mx-auto mx-md-0 mt-1">
             {`logged as ${gameUser.username} - `}

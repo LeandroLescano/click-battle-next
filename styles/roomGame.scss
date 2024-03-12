@@ -1,8 +1,9 @@
-@import url("./styles.css");
+@import "./styles.scss";
 
 .container-input input:checked ~ .checkmark {
   background-color: red;
 }
+
 #celebration {
   transform: scale(3.2);
   height: 100%;
@@ -15,7 +16,7 @@
 }
 
 .btn-kick:hover {
-  background-color: var(--dark-pink);
+  background-color: $--dark-pink;
   color: var(--background-sidebar);
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
   border-radius: 5px;
@@ -34,20 +35,21 @@
   background-color: var(--background-sidebar);
   transition: 0.6s all cubic-bezier(0.51, 0.22, 0.55, 0.32);
   transform: translateX(101%);
-}
-.sidebar.active {
-  transform: translateX(0%);
+
+  &.active {
+    transform: translateX(0%);
+  }
 }
 
 section {
   display: flex;
   flex-direction: column;
   margin-bottom: 1em;
-}
 
-section.settings-users {
-  flex-direction: row;
-  align-items: center;
+  &.settings-users {
+    flex-direction: row;
+    align-items: center;
+  }
 }
 
 .btn-settings {
@@ -61,24 +63,27 @@ section.settings-users {
   top: 0.5em;
   width: 1.5em;
   transition: 0.8s all ease;
-}
-.settings-icon > svg {
-  margin: 0;
-}
-.settings-icon:hover {
-  cursor: pointer;
-  transform: rotate(360deg);
-  color: var(--dark-pink);
+
+  & > svg {
+    margin: 0;
+  }
+
+  &:hover {
+    cursor: pointer;
+    transform: rotate(360deg);
+    color: $--dark-pink;
+  }
 }
 
 .close-icon {
   width: 1.5em;
   transition: 0.3s all ease;
-}
-.close-icon:hover {
-  cursor: pointer;
-  transform: rotate(180deg);
-  color: var(--dark-pink);
+
+  &:hover {
+    cursor: pointer;
+    transform: rotate(180deg);
+    color: $--dark-pink;
+  }
 }
 
 /* ==== SETTINGS ==== */

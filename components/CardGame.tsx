@@ -5,13 +5,17 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Game} from "interfaces";
 import React from "react";
 
-type AppProps = {
+type CardGameProps = {
   game: Game;
   handleEnterGame: VoidFunction;
   roomNumber: number;
 };
 
-export const CardGame = ({game, handleEnterGame, roomNumber}: AppProps) => {
+export const CardGame = ({
+  game,
+  handleEnterGame,
+  roomNumber
+}: CardGameProps) => {
   return (
     game.ownerUser && (
       <div className="col col-card mb-3">

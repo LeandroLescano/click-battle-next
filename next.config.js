@@ -19,7 +19,9 @@ module.exports = {
     measurementId: process.env.MEASUREMENT_ID,
     REACT_APP_EMAIL: process.env.REACT_APP_EMAIL,
     REACT_APP_PASSWORD: process.env.REACT_APP_PASSWORD,
-    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN
+    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+    PRIVATE_KEY: process.env.PRIVATE_KEY,
+    CLIENT_EMAIL: process.env.CLIENT_EMAIL
   }
 };
 

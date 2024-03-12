@@ -1,0 +1,369 @@
+import {Game} from "interfaces";
+
+export const gamesMock: Game[] = [
+  {
+    key: "game123",
+    listUsers: [
+      {clicks: 10, rol: "owner", username: "player1", key: "user123"},
+      {clicks: 5, rol: "visitor", username: "player2", key: "user456"}
+    ],
+    currentGame: true,
+    gameStart: false,
+    maxUsers: 4,
+    ownerUser: {username: "admin"},
+    roomName: "My Awesome Game",
+    timeStart: 0,
+    timer: 60,
+    password: "secret",
+    visitorUser: "",
+    created: new Date(2024, 2, 10) // March 10, 2024
+  },
+  {
+    key: null,
+    listUsers: [],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 10,
+    ownerUser: {username: "host"},
+    roomName: "Waiting Room",
+    timeStart: 0,
+    timer: 300,
+    visitorUser: "guest",
+    created: new Date()
+  },
+  {
+    key: "fastGame",
+    listUsers: [{clicks: 0, rol: "owner", username: "alone", key: "user789"}],
+    currentGame: true,
+    gameStart: true,
+    maxUsers: 1,
+    ownerUser: {username: "alone"},
+    roomName: "Solo Challenge",
+    timeStart: Date.now(), // Current timestamp
+    timer: 10,
+    visitorUser: "",
+    created: new Date()
+  },
+  {
+    key: "passwordProtected",
+    listUsers: [],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 2,
+    ownerUser: {username: "puzzler"},
+    roomName: "Brain Teaser",
+    timeStart: 0,
+    timer: 120,
+    password: "thinkfast",
+    visitorUser: "",
+    created: new Date("2024-02-15") // February 15, 2024
+  },
+  {
+    key: "finishedGame",
+    listUsers: [
+      {clicks: 200, rol: "owner", username: "champion", key: "user001"},
+      {clicks: 150, rol: "visitor", username: "challenger", key: "user002"}
+    ],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 2,
+    ownerUser: {username: "champion"},
+    roomName: "Epic Duel",
+    timeStart: 1646918400000, // Timestamp from a previous date
+    timer: 0,
+    visitorUser: "",
+    created: new Date("2024-03-09") // March 9, 2024
+  },
+  {
+    key: "game123",
+    listUsers: [
+      {clicks: 10, rol: "owner", username: "player1", key: "user123"},
+      {clicks: 5, rol: "visitor", username: "player2", key: "user456"}
+    ],
+    currentGame: true,
+    gameStart: false,
+    maxUsers: 4,
+    ownerUser: {username: "admin"},
+    roomName: "My Awesome Game",
+    timeStart: 0,
+    timer: 60,
+    password: "secret",
+    visitorUser: "",
+    created: new Date(2024, 2, 10) // March 10, 2024
+  },
+  {
+    key: null,
+    listUsers: [],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 10,
+    ownerUser: {username: "host"},
+    roomName: "Waiting Room",
+    timeStart: 0,
+    timer: 300,
+    visitorUser: "guest",
+    created: new Date()
+  },
+  {
+    key: "fastGame",
+    listUsers: [{clicks: 0, rol: "owner", username: "alone", key: "user789"}],
+    currentGame: true,
+    gameStart: true,
+    maxUsers: 1,
+    ownerUser: {username: "alone"},
+    roomName: "Solo Challenge",
+    timeStart: Date.now(), // Current timestamp
+    timer: 10,
+    visitorUser: "",
+    created: new Date()
+  },
+  {
+    key: "passwordProtected",
+    listUsers: [],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 2,
+    ownerUser: {username: "puzzler"},
+    roomName: "Brain Teaser",
+    timeStart: 0,
+    timer: 120,
+    password: "thinkfast",
+    visitorUser: "",
+    created: new Date("2024-02-15") // February 15, 2024
+  },
+  {
+    key: "finishedGame",
+    listUsers: [
+      {clicks: 200, rol: "owner", username: "champion", key: "user001"},
+      {clicks: 150, rol: "visitor", username: "challenger", key: "user002"}
+    ],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 2,
+    ownerUser: {username: "champion"},
+    roomName: "Epic Duel",
+    timeStart: 1646918400000, // Timestamp from a previous date
+    timer: 0,
+    visitorUser: "",
+    created: new Date("2024-03-09") // March 9, 2024
+  },
+  {
+    key: "game123",
+    listUsers: [
+      {clicks: 10, rol: "owner", username: "player1", key: "user123"},
+      {clicks: 5, rol: "visitor", username: "player2", key: "user456"}
+    ],
+    currentGame: true,
+    gameStart: false,
+    maxUsers: 4,
+    ownerUser: {username: "admin"},
+    roomName: "My Awesome Game",
+    timeStart: 0,
+    timer: 60,
+    password: "secret",
+    visitorUser: "",
+    created: new Date(2024, 2, 10) // March 10, 2024
+  },
+  {
+    key: null,
+    listUsers: [],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 10,
+    ownerUser: {username: "host"},
+    roomName: "Waiting Room",
+    timeStart: 0,
+    timer: 300,
+    visitorUser: "guest",
+    created: new Date()
+  },
+  {
+    key: "fastGame",
+    listUsers: [{clicks: 0, rol: "owner", username: "alone", key: "user789"}],
+    currentGame: true,
+    gameStart: true,
+    maxUsers: 1,
+    ownerUser: {username: "alone"},
+    roomName: "Solo Challenge",
+    timeStart: Date.now(), // Current timestamp
+    timer: 10,
+    visitorUser: "",
+    created: new Date()
+  },
+  {
+    key: "passwordProtected",
+    listUsers: [],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 2,
+    ownerUser: {username: "puzzler"},
+    roomName: "Brain Teaser",
+    timeStart: 0,
+    timer: 120,
+    password: "thinkfast",
+    visitorUser: "",
+    created: new Date("2024-02-15") // February 15, 2024
+  },
+  {
+    key: "finishedGame",
+    listUsers: [
+      {clicks: 200, rol: "owner", username: "champion", key: "user001"},
+      {clicks: 150, rol: "visitor", username: "challenger", key: "user002"}
+    ],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 2,
+    ownerUser: {username: "champion"},
+    roomName: "Epic Duel",
+    timeStart: 1646918400000, // Timestamp from a previous date
+    timer: 0,
+    visitorUser: "",
+    created: new Date("2024-03-09") // March 9, 2024
+  },
+  {
+    key: "game123",
+    listUsers: [
+      {clicks: 10, rol: "owner", username: "player1", key: "user123"},
+      {clicks: 5, rol: "visitor", username: "player2", key: "user456"}
+    ],
+    currentGame: true,
+    gameStart: false,
+    maxUsers: 4,
+    ownerUser: {username: "admin"},
+    roomName: "My Awesome Game",
+    timeStart: 0,
+    timer: 60,
+    password: "secret",
+    visitorUser: "",
+    created: new Date(2024, 2, 10) // March 10, 2024
+  },
+  {
+    key: null,
+    listUsers: [],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 10,
+    ownerUser: {username: "host"},
+    roomName: "Waiting Room",
+    timeStart: 0,
+    timer: 300,
+    visitorUser: "guest",
+    created: new Date()
+  },
+  {
+    key: "fastGame",
+    listUsers: [{clicks: 0, rol: "owner", username: "alone", key: "user789"}],
+    currentGame: true,
+    gameStart: true,
+    maxUsers: 1,
+    ownerUser: {username: "alone"},
+    roomName: "Solo Challenge",
+    timeStart: Date.now(), // Current timestamp
+    timer: 10,
+    visitorUser: "",
+    created: new Date()
+  },
+  {
+    key: "passwordProtected",
+    listUsers: [],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 2,
+    ownerUser: {username: "puzzler"},
+    roomName: "Brain Teaser",
+    timeStart: 0,
+    timer: 120,
+    password: "thinkfast",
+    visitorUser: "",
+    created: new Date("2024-02-15") // February 15, 2024
+  },
+  {
+    key: "finishedGame",
+    listUsers: [
+      {clicks: 200, rol: "owner", username: "champion", key: "user001"},
+      {clicks: 150, rol: "visitor", username: "challenger", key: "user002"}
+    ],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 2,
+    ownerUser: {username: "champion"},
+    roomName: "Epic Duel",
+    timeStart: 1646918400000, // Timestamp from a previous date
+    timer: 0,
+    visitorUser: "",
+    created: new Date("2024-03-09") // March 9, 2024
+  },
+  {
+    key: "game123",
+    listUsers: [
+      {clicks: 10, rol: "owner", username: "player1", key: "user123"},
+      {clicks: 5, rol: "visitor", username: "player2", key: "user456"}
+    ],
+    currentGame: true,
+    gameStart: false,
+    maxUsers: 4,
+    ownerUser: {username: "admin"},
+    roomName: "My Awesome Game",
+    timeStart: 0,
+    timer: 60,
+    password: "secret",
+    visitorUser: "",
+    created: new Date(2024, 2, 10) // March 10, 2024
+  },
+  {
+    key: null,
+    listUsers: [],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 10,
+    ownerUser: {username: "host"},
+    roomName: "Waiting Room",
+    timeStart: 0,
+    timer: 300,
+    visitorUser: "guest",
+    created: new Date()
+  },
+  {
+    key: "fastGame",
+    listUsers: [{clicks: 0, rol: "owner", username: "alone", key: "user789"}],
+    currentGame: true,
+    gameStart: true,
+    maxUsers: 1,
+    ownerUser: {username: "alone"},
+    roomName: "Solo Challenge",
+    timeStart: Date.now(), // Current timestamp
+    timer: 10,
+    visitorUser: "",
+    created: new Date()
+  },
+  {
+    key: "passwordProtected",
+    listUsers: [],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 2,
+    ownerUser: {username: "puzzler"},
+    roomName: "Brain Teaser",
+    timeStart: 0,
+    timer: 120,
+    password: "thinkfast",
+    visitorUser: "",
+    created: new Date("2024-02-15") // February 15, 2024
+  },
+  {
+    key: "finishedGame",
+    listUsers: [
+      {clicks: 200, rol: "owner", username: "champion", key: "user001"},
+      {clicks: 150, rol: "visitor", username: "challenger", key: "user002"}
+    ],
+    currentGame: false,
+    gameStart: false,
+    maxUsers: 2,
+    ownerUser: {username: "champion"},
+    roomName: "Epic Duel",
+    timeStart: 1646918400000, // Timestamp from a previous date
+    timer: 0,
+    visitorUser: "",
+    created: new Date("2024-03-09") // March 9, 2024
+  }
+];

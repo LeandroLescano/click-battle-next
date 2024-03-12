@@ -34,6 +34,7 @@
 .not-found-icon {
   opacity: 0;
   transition: ease-out all 0.15s;
+
   &.clicked {
     opacity: 0.5;
   }
@@ -41,7 +42,7 @@
 
 .icon-container {
   position: relative;
-  right: 15px;
-  top: -180px;
+  right: 5px;
+  top: -170px;
   z-index: -2;
 }
