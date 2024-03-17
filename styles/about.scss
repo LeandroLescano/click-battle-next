@@ -1,0 +1,7 @@
+.about-container {
+  text-transform: none;
+
+  & > h4 {
+    margin-top: 0.5em;
+  }
+}

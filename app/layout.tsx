@@ -8,6 +8,7 @@ import "../styles/roomGame.scss";
 import "../styles/index.scss";
 import "../styles/404.scss";
 import "../styles/footer.scss";
+import "../styles/about.scss";
 import "bootstrap/dist/css/bootstrap.css";
 
 import {getApp, getApps, initializeApp} from "firebase/app";
@@ -96,7 +97,7 @@ export default function Layout({children}: Props) {
       </head>
       <body>
         <AuthProvider>
-          <Suspense fallback={Loading}>{children}</Suspense>
+          <Suspense fallback={<Loading />}>{children}</Suspense>
         </AuthProvider>
       </body>
     </html>
