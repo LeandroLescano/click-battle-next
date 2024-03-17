@@ -11,6 +11,7 @@
   user-select: none;
   opacity: 1;
   transition: ease-out all 0.15s;
+
   &.clicked {
     scale: 0.8;
   }

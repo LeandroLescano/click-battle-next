@@ -5,7 +5,7 @@
   -ms-user-select: none;
   -webkit-appearance: none;
   appearance: none;
-  background-color: WHITE;
+  background-color: white;
   background-image: none;
   border: 1px solid #747775;
   -webkit-border-radius: 20px;
@@ -14,7 +14,7 @@
   box-sizing: border-box;
   color: #1f1f1f;
   cursor: pointer;
-  font-family: "Roboto", arial, sans-serif;
+  font-family: Roboto, arial, sans-serif;
   font-size: 14px;
   height: 40px;
   width: 40px;
@@ -58,14 +58,14 @@
 }
 
 .login-button:disabled .login-button-icon {
-  opacity: 38%;
+  opacity: 0.38;
 }
 
 .login-button:not(:disabled):hover {
   -webkit-box-shadow:
-    0 1px 2px 0 rgba(60, 64, 67, 0.3),
-    0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    0 1px 2px 0 #3c40434d,
+    0 1px 3px 1px #3c404326;
   box-shadow:
-    0 1px 2px 0 rgba(60, 64, 67, 0.3),
-    0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    0 1px 2px 0 #3c40434d,
+    0 1px 3px 1px #3c404326;
 }
