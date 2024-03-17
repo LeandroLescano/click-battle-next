@@ -19,6 +19,14 @@
     "semi": ["error", "always"],
     "no-var": 1,
     "react/prop-types": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
     "prettier/prettier": [
       "error",
       {

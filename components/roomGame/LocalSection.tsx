@@ -7,6 +7,7 @@ import {GameUser} from "interfaces";
 
 // Contexts
 import {useAuth} from "contexts/AuthContext";
+import {getAnalytics, logEvent} from "firebase/analytics";
 
 interface LocalSectionProps {
   idGame: string;
@@ -33,6 +34,11 @@ function LocalSection({
   // function for start game
   const handleStart = () => {
     const refGame = ref(db, `games/${idGame}`);
+    logEvent(getAnalytics(), "start_game", {
+      action: "start_game",
+      users: listUsers.length,
+      date: new Date()
+    });
     update(refGame, {gameStart: true});
   };
 

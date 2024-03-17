@@ -8,14 +8,26 @@ import {sha256} from "../services/encode";
 import {range} from "../utils/numbers";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {AVAILABLE_TIMES} from "resources/constants";
+import {Game} from "interfaces";
+
+const Toast = Swal.mixin({
+  toast: true,
+  position: "bottom-end",
+  showCloseButton: true,
+  showConfirmButton: false,
+  timer: 2500,
+  timerProgressBar: true
+});
+
+interface Settings {
+  maxUsers: number;
+  roomName: string | undefined;
+  password?: string | null;
+  timer: number;
+}
 
 type AppProps = {
-  options: {
-    maxUsers: number;
-    roomName: string | undefined;
-    password?: string | null;
-    timer: number;
-  };
+  options: Settings;
   idGame: string | undefined;
   showSideBar: boolean;
   handleSideBar: (value: boolean) => void;
@@ -58,8 +70,8 @@ function SettingsSideBar({
         updateDatabase(updateSettings);
       });
     } else {
-      delete updateSettings.password;
-      updateDatabase(updateSettings);
+      const {password: _, ...updateSettingsWithoutPwd} = updateSettings;
+      updateDatabase(updateSettingsWithoutPwd);
     }
     if (inputPassword.current) {
       inputPassword.current.value = "";
@@ -67,33 +79,30 @@ function SettingsSideBar({
     setDeletePassword(false);
   };
 
-  const updateDatabase = (settings: object) => {
-    const refGame = ref(db, `games/${idGame}`);
-    update(refGame, {...settings})
-      .then(() => {
-        Swal.fire({
-          title: "Settings updated",
-          toast: true,
-          position: "bottom-end",
-          showCloseButton: true,
-          showConfirmButton: false,
-          timer: 2500,
-          icon: "success",
-          timerProgressBar: true
-        });
-      })
-      .catch(() => {
-        Swal.fire({
-          title: "There was an error",
-          toast: true,
-          position: "bottom-end",
-          showCloseButton: true,
-          showConfirmButton: false,
-          timer: 2500,
-          icon: "error",
-          timerProgressBar: true
-        });
+  const updateDatabase = async (settings: Settings) => {
+    try {
+      const refGame = ref(db, `games/${idGame}`);
+
+      await update(refGame, {
+        roomName: settings.roomName,
+        settings: {
+          maxUsers: settings.maxUsers,
+          timer: settings.timer,
+          password: settings.password || null
+        }
+      } as Partial<Game>);
+
+      Toast.fire({
+        title: "Settings updated",
+        icon: "success"
       });
+    } catch (error) {
+      console.error(error);
+      Toast.fire({
+        title: "There was an error",
+        icon: "error"
+      });
+    }
   };
 
   return (

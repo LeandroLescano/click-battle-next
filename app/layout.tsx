@@ -9,6 +9,7 @@ import "../styles/index.scss";
 import "../styles/404.scss";
 import "../styles/footer.scss";
 import "../styles/about.scss";
+import "../styles/loginButton.scss";
 import "bootstrap/dist/css/bootstrap.css";
 
 import {getApp, getApps, initializeApp} from "firebase/app";

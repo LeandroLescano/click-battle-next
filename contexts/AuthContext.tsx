@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, {useState, useEffect, useContext, createContext} from "react";
 import {
   GoogleAuthProvider,
   User,
@@ -9,30 +9,48 @@ import {
   signInWithPopup,
   signOut as authSignOut,
   UserCredential,
-  signInAnonymously as authSignInAnonymously
+  signInAnonymously as authSignInAnonymously,
+  TwitterAuthProvider,
+  GithubAuthProvider,
+  linkWithCredential,
+  OAuthProvider
 } from "firebase/auth";
-import {useState, useEffect, useContext, createContext} from "react";
-import {GameUser} from "interfaces";
-import {getUser} from "services/user";
+import Swal from "sweetalert2";
 import {get, getDatabase, push, ref, update} from "firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
+
+import {GameUser} from "interfaces";
+import {getUser} from "services/user";
 import useUserInfo from "hooks/useUserInfo";
+
+export type AuthProviders = keyof typeof AUTH_PROVIDERS;
 
 interface AuthContextState {
   user: User | null;
   gameUser?: GameUser;
   loading: boolean;
-  signInWithGoogle: VoidFunction;
+  signInWithProvider: (provider?: AuthProviders) => void;
   signInAnonymously: (username: string) => void;
   signOut: VoidFunction;
   createUser: (username: string) => void;
   updateGameUser: (props: Partial<GameUser>) => void;
 }
 
+const githubProvider = new GithubAuthProvider();
+githubProvider.setCustomParameters({
+  redirect_uri: "localhost:4000"
+});
+
+const AUTH_PROVIDERS = {
+  google: GoogleAuthProvider,
+  twitter: TwitterAuthProvider,
+  github: GithubAuthProvider
+};
+
 const AuthContext = createContext({
   user: null,
   loading: true,
-  signInWithGoogle: () => ({}),
+  signInWithProvider: () => ({}),
   signInAnonymously: () => ({}),
   signOut: () => ({}),
   createUser: () => ({}),
@@ -162,11 +180,27 @@ function useAuthProvider() {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithProvider = async (provider: AuthProviders = "google") => {
     const response = await signInWithPopup(
       auth,
-      new GoogleAuthProvider()
+      new AUTH_PROVIDERS[provider]()
     ).catch((error) => {
+      if (error.code === "auth/account-exists-with-different-credential") {
+        const pendingCred = AUTH_PROVIDERS[provider].credentialFromError(error);
+        if (pendingCred) {
+          sessionStorage.setItem(
+            "pending-credential",
+            JSON.stringify(pendingCred)
+          );
+
+          Swal.fire({
+            heightAuto: false,
+            title: "Existing email",
+            text: `Please sign in with the previous method to vinculate accounts`
+          });
+        }
+      }
+
       if (
         error.code !== "auth/cancelled-popup-request" &&
         error.code !== "auth/popup-closed-by-user"
@@ -177,7 +211,32 @@ function useAuthProvider() {
     });
 
     if (response) {
-      handleLoginGoogle(response);
+      const pendingCred = sessionStorage.getItem("pending-credential");
+
+      if (pendingCred !== null) {
+        let parsedCredential = JSON.parse(pendingCred);
+
+        if (parsedCredential.providerId === "twitter.com") {
+          parsedCredential = TwitterAuthProvider.credential(
+            parsedCredential.accessToken,
+            parsedCredential.secret
+          );
+        } else {
+          parsedCredential = OAuthProvider.credentialFromJSON(parsedCredential);
+        }
+
+        if (
+          !response.user.providerData.some(
+            (provider) => provider.providerId === parsedCredential.providerId
+          )
+        ) {
+          console.log(response.user, parsedCredential);
+          await linkWithCredential(response.user, parsedCredential);
+          sessionStorage.removeItem("pending-credential");
+        }
+      }
+
+      handleLoginWithProvider(response);
     }
   };
 
@@ -217,8 +276,8 @@ function useAuthProvider() {
     localStorage.setItem("user", username);
   };
 
-  //Function for login a Google account user
-  const handleLoginGoogle = (data: UserCredential) => {
+  //Function for login a Auth Provider account user
+  const handleLoginWithProvider = (data: UserCredential) => {
     //Check if user is new
     const userEmail = data.user.email;
     let userNew = true;
@@ -274,7 +333,7 @@ function useAuthProvider() {
     user,
     gameUser,
     loading,
-    signInWithGoogle,
+    signInWithProvider,
     signInAnonymously,
     signOut,
     createUser,

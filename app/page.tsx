@@ -47,17 +47,20 @@ const Home = () => {
     //If exist userKey get user from DB
     if (params.get("kickedOut") === "true") {
       router.replace("/");
+      //TODO: Add a global Swal mixin with heightAuto:false
       Swal.fire({
         title: "You were kicked out by the owner.",
         icon: "error",
-        confirmButtonText: "Ok"
+        confirmButtonText: "Ok",
+        heightAuto: false
       });
     } else if (params.get("fullRoom") === "true") {
       router.replace("/");
       Swal.fire({
         title: "The room is full.",
         icon: "error",
-        confirmButtonText: "Ok"
+        confirmButtonText: "Ok",
+        heightAuto: false
       });
     } else if (params.get("suspicionOfHack") === "true") {
       router.replace("/");
@@ -65,7 +68,8 @@ const Home = () => {
         title: "Fair play is important to us",
         text: "Please refrain from using unauthorized tools or hacks while playing.",
         icon: "warning",
-        confirmButtonText: "Ok"
+        confirmButtonText: "Ok",
+        heightAuto: false
       });
     }
   }, []);
@@ -109,7 +113,7 @@ const Home = () => {
   const handleEnterGame = (game: Game) => {
     try {
       if (game.key) {
-        if (Object.keys(game.listUsers).length === game.maxUsers) {
+        if (Object.keys(game.listUsers).length === game.settings.maxUsers) {
           Swal.fire({
             icon: "warning",
             title: "Room is full",
@@ -119,8 +123,8 @@ const Home = () => {
             timer: 3000
           });
         } else {
-          if (game.password) {
-            requestPassword(game.password).then((val) => {
+          if (game.settings.password) {
+            requestPassword(game.settings.password).then((val) => {
               if (game.key && val.isConfirmed) {
                 configRoomToEnter(game);
               }
@@ -136,40 +140,44 @@ const Home = () => {
         icon: "error",
         title: "Ups! We couldn't enter the room, please try again.",
         timer: 3000,
-        timerProgressBar: true
+        timerProgressBar: true,
+        heightAuto: false
       });
     }
   };
 
   //Function for add actualGameID to sessionStorage and add new user to game in database
   const configRoomToEnter = (game: Game) => {
-    if (game.key && game.ownerUser) {
+    if (
+      game.key &&
+      game.ownerUser &&
+      gameUser &&
+      game.ownerUser.username !== gameUser.username
+    ) {
       sessionStorage.setItem("actualIDGame", game.key);
       sessionStorage.setItem("actualOwner", game.ownerUser.username);
-      if (gameUser && game.ownerUser.username !== gameUser.username) {
-        if (user?.uid) {
-          const userToPush: GameUser = {
-            username: gameUser.username,
-            clicks: 0,
-            rol: "visitor"
-          };
-          if (gameUser.maxScore) {
-            userToPush["maxScore"] = gameUser.maxScore;
-          }
-          const refGame = ref(db, `games/${game.key}/listUsers`);
-          const childRef = child(refGame, user.uid);
-          set(childRef, userToPush);
-          logEvent(getAnalytics(), "enter_room", {
-            action: "enter_room",
-            withCustomName: !!game.roomName,
-            withPassword: !!game.password,
-            maxUsers: game.maxUsers,
-            isRegistered: !user.isAnonymous
-          });
-          router.push(`game/${game.key}`);
-        } else {
-          console.error("Error loading user to game");
+      if (user?.uid) {
+        const userToPush: GameUser = {
+          username: gameUser.username,
+          clicks: 0,
+          rol: "visitor"
+        };
+        if (gameUser.maxScore) {
+          userToPush["maxScore"] = gameUser.maxScore;
         }
+        const refGame = ref(db, `games/${game.key}/listUsers`);
+        const childRef = child(refGame, user.uid);
+        set(childRef, userToPush);
+        logEvent(getAnalytics(), "enter_room", {
+          action: "enter_room",
+          withCustomName: !!game.roomName,
+          withPassword: !!game.settings.password,
+          maxUsers: game.settings.maxUsers,
+          isRegistered: !user.isAnonymous
+        });
+        router.push(`game/${game.key}`);
+      } else {
+        console.error("Error loading user to game");
       }
     }
   };

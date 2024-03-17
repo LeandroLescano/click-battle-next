@@ -104,7 +104,8 @@ export const Footer = () => {
     } else {
       Swal.fire({
         title: "Error",
-        text: "We can't send the email, please try again"
+        text: "We can't send the email, please try again",
+        heightAuto: false
       });
     }
   };

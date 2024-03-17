@@ -13,12 +13,11 @@ import {
   push,
   ref,
   serverTimestamp,
-  set,
-  update
+  set
 } from "firebase/database";
 
 // Interfaces
-import {Game, GameUser, Room} from "interfaces";
+import {Game, GameSettings, GameUser, Room} from "interfaces";
 
 // Router
 import {useRouter} from "next/navigation";
@@ -51,12 +50,8 @@ const CreateSection = () => {
     try {
       if (gameUser && room) {
         setCreating(true);
-        let newRoomName = gameUser.username + "'s room";
+        const newRoomName = room.name || gameUser.username + "'s room";
         const newGameRef = ref(db, "games/");
-
-        if (room.name) {
-          newRoomName = room.name;
-        }
 
         const userToPush: GameUser = {
           username: gameUser.username,
@@ -65,7 +60,7 @@ const CreateSection = () => {
         };
 
         if (gameUser.maxScore) {
-          userToPush["maxScore"] = gameUser.maxScore;
+          userToPush.maxScore = gameUser.maxScore;
         }
 
         if (room.timer) {
@@ -78,6 +73,17 @@ const CreateSection = () => {
           if (room.maxUsers < 2) room.maxUsers = 2;
         }
 
+        const timer = room.timer || 10;
+
+        const settings: GameSettings = {
+          timer,
+          maxUsers: room.maxUsers || 2
+        };
+
+        if (room.password) {
+          settings.password = await sha256(room.password);
+        }
+
         const objRoom: Game = {
           roomName: newRoomName,
           currentGame: false,
@@ -86,9 +92,9 @@ const CreateSection = () => {
           ownerUser: gameUser,
           visitorUser: "",
           timeStart: 3,
-          timer: room.timer || 10,
-          maxUsers: room.maxUsers || 2,
-          created: serverTimestamp()
+          timer,
+          created: serverTimestamp(),
+          settings
         };
 
         objRoom.key = push(newGameRef, objRoom).key;
@@ -98,13 +104,6 @@ const CreateSection = () => {
         );
 
         await set(childNewGame, userToPush);
-
-        if (room.password) {
-          const refActualGame = ref(db, `games/${objRoom.key}`);
-          sha256(room.password).then((hash) =>
-            update(refActualGame, {password: hash})
-          );
-        }
 
         if (objRoom.key) {
           logEvent(getAnalytics(), "create_room", {
@@ -124,7 +123,8 @@ const CreateSection = () => {
           Swal.fire({
             icon: "error",
             title: "Ups! We couldn't create the room, please try again.",
-            timer: 3000
+            timer: 3000,
+            heightAuto: false
           });
         }
       }
