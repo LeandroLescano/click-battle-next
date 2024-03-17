@@ -162,8 +162,8 @@ const Home = () => {
           clicks: 0,
           rol: "visitor"
         };
-        if (gameUser.maxScore) {
-          userToPush["maxScore"] = gameUser.maxScore;
+        if (gameUser.maxScores) {
+          userToPush.maxScores = gameUser.maxScores;
         }
         const refGame = ref(db, `games/${game.key}/listUsers`);
         const childRef = child(refGame, user.uid);

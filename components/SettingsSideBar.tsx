@@ -85,6 +85,7 @@ function SettingsSideBar({
 
       await update(refGame, {
         roomName: settings.roomName,
+        timer: settings.timer,
         settings: {
           maxUsers: settings.maxUsers,
           timer: settings.timer,

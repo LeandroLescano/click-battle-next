@@ -217,11 +217,11 @@ export const Footer = () => {
           </div>
         )}
       </footer>
-      {gameUser?.email && (
+      {/* {gameUser?.email && (
         <div className="score-container float-right">
-          Max score: {gameUser.maxScore}
+          Max score: {gameUser.maxScores}
         </div>
-      )}
+      )} */}
     </>
   );
 };

@@ -94,7 +94,7 @@ function useAuthProvider() {
         if (dbUser) {
           const obj = {
             username: dbUser.username,
-            maxScore: dbUser.maxScore,
+            maxScores: dbUser.maxScores,
             email: dbUser.email
           };
           setGameUser(obj);
@@ -153,7 +153,7 @@ function useAuthProvider() {
 
                   const obj = {
                     username: value[1].username,
-                    maxScore: value[1].maxScore,
+                    maxScores: value[1].maxScores,
                     email: value[1].email
                   };
 
@@ -292,7 +292,7 @@ function useAuthProvider() {
             sessionStorage.setItem("userKey", value[0]);
             setGameUser({
               username: value[1].username,
-              maxScore: value[1].maxScore,
+              maxScores: value[1].maxScores,
               email: value[1].email
             });
             logEvent(getAnalytics(), "login", {
@@ -308,7 +308,7 @@ function useAuthProvider() {
           const refUsers = ref(db, "users");
           const newKeyUser = push(refUsers, {
             email: userEmail,
-            maxScore: 0,
+            maxScores: [],
             username: ""
           }).key;
           if (newKeyUser) {

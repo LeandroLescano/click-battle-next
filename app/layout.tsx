@@ -72,6 +72,10 @@ export default function Layout({children}: Props) {
           name="description"
           content="Online multiplayer Click battle - Challenge your friends to a 10 second click battle!"
         />
+        <meta
+          name="keywords"
+          content="click, clicks, battle, game, multiplayer, online, friends"
+        />
         <meta property="og:type" content="article" />
         <meta property="og:title" content="CLICK BATTLE" />
         <meta
@@ -80,14 +84,14 @@ export default function Layout({children}: Props) {
         />
         <meta
           property="og:description"
-          content="Online multiplayer Click battle"
+          content="Online multiplayer Click battle game"
         />
         <meta property="og:url" content="https://click-battle-mp.web.app/" />
         <meta property="og:site_name" content="Click battle" />
         <meta name="twitter:title" content="Click battle" />
         <meta
           name="twitter:description"
-          content="Online multiplayer Click battle"
+          content="Online multiplayer Click battle game"
         />
         <meta
           name="twitter:image"

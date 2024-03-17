@@ -6,12 +6,14 @@
     "-MWbLN_Nnodq8beWmFPM": {
       "email": "tatilescano11@gmail.com",
       "maxScore": 102,
+      "maxScores": [{"clicks": 20, "time": 10}],
       "rating": 5,
       "username": "LeanLescano"
     },
     "-MWeLKZgBFwGp58d4CVW": {
       "email": "leandrolescano11@gmail.com",
       "maxScore": 73,
+      "maxScores": [{"clicks": 15, "time": 10}],
       "rating": 4.5,
       "username": "lean"
     },

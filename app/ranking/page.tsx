@@ -24,16 +24,22 @@ type WithRequired<T, K extends keyof T> = T & {[P in K]-?: T[P]};
 const getRanking = async () => {
   const db = getDatabase();
   const ref = db.ref("users");
-  const usersWithScore: WithRequired<GameUser, "maxScore">[] = [];
+  const usersWithScore: (WithRequired<GameUser, "maxScores"> & {
+    cps: number;
+  })[] = [];
+
   await ref.once("value", (data) => {
     const users = data.val() as {[key: string]: GameUser};
 
     Object.entries(users).forEach(([key, user]) => {
-      if (user.maxScore) {
+      if (user.maxScores) {
         usersWithScore.push({
           ...user,
           key,
-          maxScore: user.maxScore
+          maxScores: user.maxScores,
+          cps: Math.max(
+            ...user.maxScores.map((score) => score.clicks / score.time)
+          )
         });
       }
     });
@@ -76,7 +82,7 @@ const Ranking = async () => {
         </CardHeader>
         <CardBody className="d-flex flex-column h-100 overflow-y-auto">
           {users
-            .sort((a, b) => b.maxScore - a.maxScore)
+            .sort((a, b) => b.cps - a.cps)
             .map((user, i) => {
               const Component = RankComponent[i + 1] || RankComponent.default;
 
@@ -88,7 +94,7 @@ const Ranking = async () => {
                   <span>
                     {i + 1}. {user.username || "???????"}
                   </span>
-                  {user.maxScore}
+                  <span className="text-lowercase">{user.cps} cps</span>
                 </Component>
               );
             })}

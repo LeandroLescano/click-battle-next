@@ -4,7 +4,7 @@ import React, {useEffect, useRef, useState} from "react";
 import dynamic from "next/dynamic";
 
 // Interfaces
-import {Game, GameUser} from "interfaces";
+import {Game, GameUser, MaxScore} from "interfaces";
 
 //Router
 import {useParams, useRouter} from "next/navigation";
@@ -152,7 +152,7 @@ function RoomGame() {
                   username: val.username,
                   clicks: val.clicks,
                   rol: val.rol,
-                  maxScore: val.maxScore,
+                  maxScores: val.maxScores,
                   key: val.key
                 };
 
@@ -323,11 +323,36 @@ function RoomGame() {
   };
 
   const updateLocalMaxScore = (userKey: string) => {
-    if (userKey && localUser.clicks) {
-      if (!gameUser?.maxScore || localUser.clicks > gameUser.maxScore) {
+    if (userKey && localUser.clicks && gameUser && currentGame) {
+      const currentMaxScore = gameUser.maxScores?.find(
+        (score) => score.time === currentGame.settings.timer
+      );
+
+      if (!currentMaxScore || localUser.clicks > currentMaxScore.clicks) {
         const refUser = ref(db, `users/${userKey}`);
-        update(refUser, {maxScore: localUser.clicks});
-        updateGameUser({maxScore: localUser.clicks});
+        let updatedScores: MaxScore[] | undefined = gameUser.maxScores;
+        if (!gameUser.maxScores) {
+          updatedScores = [
+            {clicks: localUser.clicks, time: currentGame.settings.timer}
+          ];
+        } else {
+          if (currentMaxScore) {
+            updatedScores = gameUser.maxScores.map((score) =>
+              score.time === currentGame.settings.timer
+                ? {...score, clicks: localUser.clicks!}
+                : score
+            );
+          } else {
+            updatedScores = [
+              ...gameUser.maxScores,
+              {time: currentGame.settings.timer, clicks: localUser.clicks}
+            ];
+          }
+        }
+        update(refUser, {
+          maxScores: updatedScores
+        });
+        updateGameUser({maxScores: updatedScores});
       }
     }
   };

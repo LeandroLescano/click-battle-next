@@ -59,8 +59,8 @@ const CreateSection = () => {
           rol: "owner"
         };
 
-        if (gameUser.maxScore) {
-          userToPush.maxScore = gameUser.maxScore;
+        if (gameUser.maxScores) {
+          userToPush.maxScores = gameUser.maxScores;
         }
 
         if (room.timer) {
