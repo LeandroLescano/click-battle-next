@@ -2,8 +2,8 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Oxygen",
-    Ubuntu, "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 600;
@@ -24,7 +24,7 @@ body {
   margin-bottom: 0.5em;
 }
 
-/*TEST*/
+/* TEST */
 
 button.btn-logout::before {
   position: absolute;
@@ -34,7 +34,7 @@ button.btn-logout::before {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: inset;
   background: $--dark-pink;
   border-radius: inherit;
   box-shadow:
@@ -68,7 +68,7 @@ button.btn-logout:active::before {
   transform: translate3d(0, 0, -1em);
 }
 
-/*END TEST*/
+/* END TEST */
 
 @media (prefers-color-scheme: dark) {
   body {
@@ -91,18 +91,8 @@ body {
   padding: 0;
   height: 100%;
   margin: 0;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    Fira Sans,
-    Droid Sans,
-    Helvetica Neue,
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 }
 
 a {
