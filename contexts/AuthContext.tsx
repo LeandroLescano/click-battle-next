@@ -186,7 +186,7 @@ function useAuthProvider() {
 
           Swal.fire({
             heightAuto: false,
-            title: "Existing email",
+            title: "EXISTING EMAIL",
             text: `Please sign in with the previous method to vinculate accounts`
           });
         }
