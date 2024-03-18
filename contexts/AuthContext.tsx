@@ -190,9 +190,7 @@ function useAuthProvider() {
             text: `Please sign in with the previous method to vinculate accounts`
           });
         }
-      }
-
-      if (
+      } else if (
         error.code !== "auth/cancelled-popup-request" &&
         error.code !== "auth/popup-closed-by-user"
       ) {
