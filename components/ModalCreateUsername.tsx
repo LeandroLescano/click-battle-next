@@ -50,7 +50,6 @@ export const ModalCreateUsername = () => {
       <Modal.Body>
         <div className="d-flex flex-column align-items-center gap-3">
           <h4>Enter your username</h4>
-          <p>{user?.uid}</p>
           <input
             type="text"
             className="form-name mb-2"
