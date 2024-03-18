@@ -18,6 +18,7 @@ import {connectAuthEmulator, getAuth} from "firebase/auth";
 import {connectDatabaseEmulator, getDatabase} from "firebase/database";
 import {AuthProvider} from "contexts/AuthContext";
 import Loading from "components/Loading";
+import {connectFirestoreEmulator, getFirestore} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.apiKey,
@@ -41,6 +42,7 @@ if (process.env.NODE_ENV === "development") {
     connectAuthEmulator(getAuth(), "http://localhost:9099", {
       disableWarnings: true
     });
+    connectFirestoreEmulator(getFirestore(), "localhost", 8080);
     connectDatabaseEmulator(getDatabase(), "localhost", 9000);
   } catch (error) {
     console.log({error});

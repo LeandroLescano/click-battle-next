@@ -42,6 +42,7 @@ import Loading from "components/Loading";
 import {useAuth} from "contexts/AuthContext";
 import useIsMobileDevice from "hooks/useIsMobileDevice";
 import {getAnalytics, logEvent} from "firebase/analytics";
+import {updateUser} from "services/user";
 
 const OpponentSection = dynamic(
   () => import("../../../components/roomGame/OpponentSection")
@@ -329,7 +330,6 @@ function RoomGame() {
       );
 
       if (!currentMaxScore || localUser.clicks > currentMaxScore.clicks) {
-        const refUser = ref(db, `users/${userKey}`);
         let updatedScores: MaxScore[] | undefined = gameUser.maxScores;
         if (!gameUser.maxScores) {
           updatedScores = [
@@ -349,7 +349,7 @@ function RoomGame() {
             ];
           }
         }
-        update(refUser, {
+        updateUser(userKey, {
           maxScores: updatedScores
         });
         updateGameUser({maxScores: updatedScores});
@@ -391,7 +391,9 @@ Join me in a click battle! Let's see who can click the fastest. Click here to jo
 See you there! 📱🖱️`
     };
     if (mobileDevice && navigator.canShare(data)) {
-      navigator.share(data);
+      navigator.share(data).catch((e: unknown) => {
+        console.error(e);
+      });
     } else {
       navigator.clipboard.writeText(link);
       Swal.fire({

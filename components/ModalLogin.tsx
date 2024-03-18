@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 import useIsMobile from "hooks/useIsMobile";
 import {AuthProviders, useAuth} from "contexts/AuthContext";
 import {Modal} from "react-bootstrap";
@@ -8,27 +8,10 @@ import TwitterButton from "./TwitterButton";
 
 function ModalLogin() {
   const isMobile = useIsMobile();
-  const [guestUsername, setGuestUsername] = useState("");
   const {signInWithProvider, signInAnonymously, user} = useAuth();
 
   const handleLogin = (provider: AuthProviders = "google") => {
     signInWithProvider(provider);
-  };
-
-  const handleLoginGuest = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.preventDefault();
-    if (guestUsername.trim().length >= 3) {
-      signInAnonymously(guestUsername);
-      setGuestUsername("");
-    }
-  };
-
-  const handleChange = (name: string) => {
-    if (name.length <= 25) {
-      setGuestUsername(name);
-    }
   };
 
   return (
@@ -59,24 +42,13 @@ function ModalLogin() {
                 isMobile ? "border-top mt-4 pt-4" : "border-start"
               }`}
             >
-              <h5>Login as guest</h5>
-              <form className="d-flex gap-2 flex-column align-items-center">
-                <input
-                  type="text"
-                  className="form-name mb-2"
-                  data-label="username"
-                  data-value={guestUsername}
-                  placeholder="Username"
-                  onChange={(ref) => handleChange(ref.target.value)}
-                />
-                <button
-                  className="btn-click small py-2 px-3 mb-3"
-                  onClick={handleLoginGuest}
-                  type="submit"
-                >
-                  Login
-                </button>
-              </form>
+              <button
+                className="btn-click small py-2 px-3 mb-3"
+                onClick={signInAnonymously}
+                type="submit"
+              >
+                Login as guest
+              </button>
             </div>
           </div>
         </div>

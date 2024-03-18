@@ -2,7 +2,7 @@ export const revalidate = 3600; // revalidate at most every hour
 
 import React from "react";
 import {customInitApp} from "lib/firebase-admin-config";
-import {getDatabase} from "firebase-admin/database";
+import {getFirestore} from "firebase-admin/firestore";
 import {Card, CardBody, CardHeader, Container} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
@@ -22,20 +22,20 @@ customInitApp();
 type WithRequired<T, K extends keyof T> = T & {[P in K]-?: T[P]};
 
 const getRanking = async () => {
-  const db = getDatabase();
-  const ref = db.ref("users");
+  const db = getFirestore();
+  const ref = db.collection("users");
   const usersWithScore: (WithRequired<GameUser, "maxScores"> & {
     cps: number;
   })[] = [];
 
-  await ref.once("value", (data) => {
-    const users = data.val() as {[key: string]: GameUser};
+  await ref.get().then((data) => {
+    data.docs.forEach((doc) => {
+      const user = doc.data() as GameUser;
 
-    Object.entries(users).forEach(([key, user]) => {
       if (user.maxScores) {
         usersWithScore.push({
           ...user,
-          key,
+          key: doc.id,
           maxScores: user.maxScores,
           cps: Math.max(
             ...user.maxScores.map((score) => score.clicks / score.time)

@@ -6,6 +6,7 @@ export interface GameUser {
   key?: string;
   kickOut?: boolean;
   email?: string;
+  rating?: number;
 }
 
 export interface MaxScore {

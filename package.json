@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "emulators": "firebase emulators:start --import=./resources --only database,auth ",
+    "emulators": "firebase emulators:start --import=./resources --only database,auth,firestore ",
     "lint:es": "eslint --ext .ts,.tsx .",
     "lint:fix": "eslint --fix --ext .ts,.tsx .",
     "lint:quiet": "next lint --quiet src",

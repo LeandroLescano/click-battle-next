@@ -135,10 +135,11 @@ const CreateSection = () => {
 
   useEffect(() => {
     if (gameUser?.username) {
-      get(ref(db, "/config")).then((snapshot) => {
-        if (snapshot.val()) {
-          setConfig(snapshot.val());
-          sessionStorage.setItem("config", JSON.stringify(snapshot.val()));
+      get(ref(db, "config")).then((snapshot) => {
+        const defaultConfig = snapshot.val();
+        if (defaultConfig) {
+          setConfig(defaultConfig);
+          sessionStorage.setItem("config", JSON.stringify(defaultConfig));
         }
       });
     }
