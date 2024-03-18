@@ -20,6 +20,7 @@ import {
   update,
   Unsubscribe
 } from "@firebase/database";
+import {getAnalytics, logEvent} from "firebase/analytics";
 
 // Icons
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
@@ -33,16 +34,23 @@ import celebrationAnim from "../../../lotties/celebrationAnim.json";
 import {getSuffixPosition} from "utils/string";
 
 // Components
-import {requestPassword} from "../../../components/Alerts";
-import SettingsSideBar from "../../../components/SettingsSideBar";
+import {requestPassword} from "components/Alerts";
+import SettingsSideBar from "components/SettingsSideBar";
 import {ModalCreateUsername} from "components";
 import Loading from "components/Loading";
 
-// Hooks
+// Context
 import {useAuth} from "contexts/AuthContext";
+
+// Hooks
 import useIsMobileDevice from "hooks/useIsMobileDevice";
-import {getAnalytics, logEvent} from "firebase/analytics";
+
+// Services
 import {updateUser} from "services/user";
+import {addRoomStats} from "services/rooms";
+
+// Interfaces
+import {RoomStats} from "interfaces/RoomStats";
 
 const OpponentSection = dynamic(
   () => import("../../../components/roomGame/OpponentSection")
@@ -74,6 +82,15 @@ function RoomGame() {
   const [listUsers, setListUsers] = useState<GameUser[]>([
     {username: "", clicks: 0, rol: "visitor"}
   ]);
+  const roomStats = useRef<RoomStats>({
+    name: "",
+    gamesPlayed: [],
+    maxUsersConnected: 1,
+    owner: "",
+    created: new Date(),
+    removed: new Date(),
+    withPassword: false
+  });
   const flagEnter = useRef(false);
   const celebrationContainer = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -102,6 +119,16 @@ function RoomGame() {
           .remove()
           .catch((e) => console.error(e));
         return () => {
+          if (
+            roomStats.current &&
+            Date.now() - roomStats.current.created.getTime() > 30 * 1000
+          ) {
+            addRoomStats({
+              ...roomStats.current,
+              removed: new Date()
+            });
+          }
+
           const refGame = ref(db, gamePath);
           remove(refGame);
         };
@@ -138,7 +165,17 @@ function RoomGame() {
                 ...u[1]
               }));
             }
+
             setCurrentGame(game);
+
+            if (!roomStats.current.name) {
+              roomStats.current.name = game.roomName;
+              roomStats.current.owner = game.ownerUser.username;
+              roomStats.current.withPassword = !!game.settings.password;
+              roomStats.current.created = new Date(
+                game.created as unknown as number
+              );
+            }
 
             setStartCountdown(game.gameStart);
 
@@ -240,6 +277,9 @@ function RoomGame() {
         }
       }
     }
+    if (roomStats.current.maxUsersConnected < listUsers.length) {
+      roomStats.current.maxUsersConnected = listUsers.length;
+    }
   }, [listUsers]);
 
   // useEffect for update timer in state and show result
@@ -257,6 +297,11 @@ function RoomGame() {
               maxClicks: Math.max(
                 ...listUsers.map((users) => users.clicks || 0)
               )
+            });
+            roomStats.current.gamesPlayed.push({
+              maxClicks: Math.max(...listUsers.map((lu) => lu.clicks || 0)),
+              numberOfUsers: listUsers.length,
+              timer: currentGame.settings.timer
             });
             const refGame = ref(db, `games/${idGame}`);
             update(refGame, {timer: null});
