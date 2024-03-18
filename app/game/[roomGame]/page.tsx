@@ -4,7 +4,7 @@ import React, {useEffect, useRef, useState} from "react";
 import dynamic from "next/dynamic";
 
 // Interfaces
-import {Game, GameUser} from "interfaces";
+import {Game, GameUser, MaxScore} from "interfaces";
 
 //Router
 import {useParams, useRouter} from "next/navigation";
@@ -20,6 +20,7 @@ import {
   update,
   Unsubscribe
 } from "@firebase/database";
+import {getAnalytics, logEvent} from "firebase/analytics";
 
 // Icons
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
@@ -33,14 +34,23 @@ import celebrationAnim from "../../../lotties/celebrationAnim.json";
 import {getSuffixPosition} from "utils/string";
 
 // Components
-import {requestPassword} from "../../../components/Alerts";
-import SettingsSideBar from "../../../components/SettingsSideBar";
+import {requestPassword} from "components/Alerts";
+import SettingsSideBar from "components/SettingsSideBar";
 import {ModalCreateUsername} from "components";
 import Loading from "components/Loading";
 
-// Hooks
+// Context
 import {useAuth} from "contexts/AuthContext";
+
+// Hooks
 import useIsMobileDevice from "hooks/useIsMobileDevice";
+
+// Services
+import {updateUser} from "services/user";
+import {addRoomStats} from "services/rooms";
+
+// Interfaces
+import {RoomStats} from "interfaces/RoomStats";
 
 const OpponentSection = dynamic(
   () => import("../../../components/roomGame/OpponentSection")
@@ -72,6 +82,15 @@ function RoomGame() {
   const [listUsers, setListUsers] = useState<GameUser[]>([
     {username: "", clicks: 0, rol: "visitor"}
   ]);
+  const roomStats = useRef<RoomStats>({
+    name: "",
+    gamesPlayed: [],
+    maxUsersConnected: 1,
+    owner: "",
+    created: new Date(),
+    removed: new Date(),
+    withPassword: false
+  });
   const flagEnter = useRef(false);
   const celebrationContainer = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -85,9 +104,6 @@ function RoomGame() {
 
   const clearPath = (id: string) => {
     router.replace(`/game/${id}`);
-    // router.replace(`/game/${id}`, `/game/${id}`, {
-    //   shallow: true
-    // });
   };
 
   useEffect(() => {
@@ -103,6 +119,16 @@ function RoomGame() {
           .remove()
           .catch((e) => console.error(e));
         return () => {
+          if (
+            roomStats.current &&
+            Date.now() - roomStats.current.created.getTime() > 30 * 1000
+          ) {
+            addRoomStats({
+              ...roomStats.current,
+              removed: new Date()
+            });
+          }
+
           const refGame = ref(db, gamePath);
           remove(refGame);
         };
@@ -139,7 +165,17 @@ function RoomGame() {
                 ...u[1]
               }));
             }
+
             setCurrentGame(game);
+
+            if (!roomStats.current.name) {
+              roomStats.current.name = game.roomName;
+              roomStats.current.owner = game.ownerUser.username;
+              roomStats.current.withPassword = !!game.settings.password;
+              roomStats.current.created = new Date(
+                game.created as unknown as number
+              );
+            }
 
             setStartCountdown(game.gameStart);
 
@@ -154,7 +190,7 @@ function RoomGame() {
                   username: val.username,
                   clicks: val.clicks,
                   rol: val.rol,
-                  maxScore: val.maxScore,
+                  maxScores: val.maxScores,
                   key: val.key
                 };
 
@@ -175,20 +211,20 @@ function RoomGame() {
             } else if (gUser?.uid) {
               if (
                 listUsersToPush.filter((u) => u.username !== user).length ===
-                game.maxUsers
+                game.settings.maxUsers
               ) {
                 router.push("/?fullRoom=true");
                 return;
               }
 
               if (
-                game.password &&
+                game.settings.password &&
                 idGame !== pathIdGame &&
                 !flagEnter.current
               ) {
                 flagEnter.current = true;
-                if (!query?.pwd || query.pwd !== game.password) {
-                  requestPassword(game.password).then((val) => {
+                if (!query?.pwd || query.pwd !== game.settings.password) {
+                  requestPassword(game.settings.password).then((val) => {
                     if (val.isConfirmed) {
                       clearPath(pathIdGame);
                       sessionStorage.setItem("actualIDGame", pathIdGame);
@@ -219,7 +255,8 @@ function RoomGame() {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: "Sorry, something went wrong. Please try again.."
+          text: "Sorry, something went wrong. Please try again..",
+          heightAuto: false
         }).then(() => {
           router.push("/");
         });
@@ -240,41 +277,62 @@ function RoomGame() {
         }
       }
     }
+    if (roomStats.current.maxUsersConnected < listUsers.length) {
+      roomStats.current.maxUsersConnected = listUsers.length;
+    }
   }, [listUsers]);
 
   // useEffect for update timer in state and show result
   useEffect(() => {
     if (currentGame?.currentGame) {
-      if (!currentGame.timer) {
-        const refGame = ref(db, `games/${idGame}`);
-        update(refGame, {timer: null});
-        const userKey = sessionStorage.getItem("userKey");
+      const userKey = sessionStorage.getItem("userKey");
 
-        if (userKey && localUser.clicks) {
-          if (!gameUser?.maxScore || localUser.clicks > gameUser.maxScore) {
-            const refUser = ref(db, `users/${userKey}`);
-            update(refUser, {maxScore: localUser.clicks});
-            updateGameUser({maxScore: localUser.clicks});
+      if (localUser.rol === "owner") {
+        // localUser is owner
+        if (!currentGame.timer) {
+          if (localUser.rol === "owner" && currentGame.timer === 0) {
+            logEvent(getAnalytics(), "game_finish", {
+              date: new Date(),
+              users: listUsers,
+              maxClicks: Math.max(
+                ...listUsers.map((users) => users.clicks || 0)
+              )
+            });
+            roomStats.current.gamesPlayed.push({
+              maxClicks: Math.max(...listUsers.map((lu) => lu.clicks || 0)),
+              numberOfUsers: listUsers.length,
+              timer: currentGame.settings.timer
+            });
+            const refGame = ref(db, `games/${idGame}`);
+            update(refGame, {timer: null});
           }
+
+          if (userKey) {
+            updateLocalMaxScore(userKey);
+          }
+
+          loadCelebrationAnimation();
+          return;
         }
 
-        if (celebrationContainer?.current?.innerHTML === "") {
-          lottie.loadAnimation({
-            container: celebrationContainer.current!,
-            animationData: celebrationAnim
-          });
+        lottie.destroy();
+        const intervalId = setInterval(() => {
+          if (localUser.rol === "owner") {
+            const refGame = ref(db, `games/${idGame}`);
+            update(refGame, {timer: currentGame?.timer - 1});
+          }
+        }, 1000);
+
+        return () => clearInterval(intervalId);
+      } else {
+        // localUser is visitor
+        if (!currentGame.timer) {
+          loadCelebrationAnimation();
+
+          userKey && updateLocalMaxScore(userKey);
         }
-        return;
       }
-
-      lottie.destroy();
-      const intervalId = setInterval(() => {
-        const refGame = ref(db, `games/${idGame}`);
-        update(refGame, {timer: currentGame?.timer - 1});
-      }, 1000);
-
-      return () => clearInterval(intervalId);
-    } else if (startCountdown) {
+    } else if (startCountdown && localUser.rol === "owner") {
       if (!currentGame?.timeStart) {
         const refGame = ref(db, `games/${idGame}`);
 
@@ -287,8 +345,10 @@ function RoomGame() {
       }
 
       const intervalIdStart = setInterval(() => {
-        const refGame = ref(db, `games/${idGame}`);
-        update(refGame, {timeStart: currentGame.timeStart - 1});
+        if (currentGame) {
+          const refGame = ref(db, `games/${idGame}`);
+          update(refGame, {timeStart: currentGame.timeStart - 1});
+        }
       }, 1000);
       return () => clearInterval(intervalIdStart);
     }
@@ -298,6 +358,49 @@ function RoomGame() {
     currentGame?.timer,
     startCountdown
   ]);
+
+  const loadCelebrationAnimation = () => {
+    if (celebrationContainer?.current?.innerHTML === "") {
+      lottie.loadAnimation({
+        container: celebrationContainer.current!,
+        animationData: celebrationAnim
+      });
+    }
+  };
+
+  const updateLocalMaxScore = (userKey: string) => {
+    if (userKey && localUser.clicks && gameUser && currentGame) {
+      const currentMaxScore = gameUser.maxScores?.find(
+        (score) => score.time === currentGame.settings.timer
+      );
+
+      if (!currentMaxScore || localUser.clicks > currentMaxScore.clicks) {
+        let updatedScores: MaxScore[] | undefined = gameUser.maxScores;
+        if (!gameUser.maxScores) {
+          updatedScores = [
+            {clicks: localUser.clicks, time: currentGame.settings.timer}
+          ];
+        } else {
+          if (currentMaxScore) {
+            updatedScores = gameUser.maxScores.map((score) =>
+              score.time === currentGame.settings.timer
+                ? {...score, clicks: localUser.clicks!}
+                : score
+            );
+          } else {
+            updatedScores = [
+              ...gameUser.maxScores,
+              {time: currentGame.settings.timer, clicks: localUser.clicks}
+            ];
+          }
+        }
+        updateUser(userKey, {
+          maxScores: updatedScores
+        });
+        updateGameUser({maxScores: updatedScores});
+      }
+    }
+  };
 
   // function for add user to database and update state
   const addNewUserToDB = (game: Game) => {
@@ -321,8 +424,8 @@ function RoomGame() {
 
   const handleInvite = () => {
     let link = window.location.href + `?invite=${Date.now() + 5 * 60 * 1000}`;
-    if (currentGame?.password) {
-      link += `&pwd=${currentGame.password}`;
+    if (currentGame?.settings.password) {
+      link += `&pwd=${currentGame.settings.password}`;
     }
     const data: ShareData = {
       title: "Click Battle",
@@ -333,7 +436,9 @@ Join me in a click battle! Let's see who can click the fastest. Click here to jo
 See you there! 📱🖱️`
     };
     if (mobileDevice && navigator.canShare(data)) {
-      navigator.share(data);
+      navigator.share(data).catch((e: unknown) => {
+        console.error(e);
+      });
     } else {
       navigator.clipboard.writeText(link);
       Swal.fire({
@@ -373,9 +478,9 @@ See you there! 📱🖱️`
                 handleSideBar={(val: boolean) => setShowSideBar(val)}
                 idGame={idGame}
                 options={{
-                  maxUsers: currentGame?.maxUsers || 2,
+                  maxUsers: currentGame?.settings.maxUsers || 2,
                   roomName: currentGame?.roomName,
-                  password: currentGame?.password,
+                  password: currentGame?.settings.password,
                   timer: currentGame?.timer || 10
                 }}
               />
@@ -408,7 +513,7 @@ See you there! 📱🖱️`
                         isLocal={isLocal}
                         opponents={listUsers}
                         localUsername={gameUser?.username || ""}
-                        maxUsers={currentGame.maxUsers}
+                        maxUsers={currentGame.settings.maxUsers}
                       />
                     </div>
                     <div className="col-md-6 text-center">

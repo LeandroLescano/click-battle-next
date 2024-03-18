@@ -5,12 +5,17 @@ export interface Game {
   listUsers: Pick<GameUser, "clicks" | "rol" | "username" | "key">[];
   currentGame: boolean;
   gameStart: boolean;
-  maxUsers: number;
   ownerUser: Pick<GameUser, "username">;
   roomName: string;
   timeStart: number;
   timer: number;
-  password?: string;
   visitorUser: string;
   created?: Date | object;
+  settings: GameSettings;
+}
+
+export interface GameSettings {
+  timer: number;
+  maxUsers: number;
+  password?: string;
 }

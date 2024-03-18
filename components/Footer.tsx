@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from "react";
-import {getDatabase, ref, update} from "firebase/database";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import {useRouter} from "next/navigation";
 
+import {timeout} from "utils/timeout";
+import {updateUser} from "services/user";
 import {useAuth} from "contexts/AuthContext";
 import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
-import {timeout} from "utils/timeout";
 
 import RatingStars from "./RatingStars";
 
@@ -27,7 +27,6 @@ export const Footer = () => {
   );
   const [rating, setRating] = useState(0);
   const [send, setSend] = useState(false);
-  const db = getDatabase();
   const {user, gameUser, signOut} = useAuth();
   const router = useRouter();
 
@@ -104,7 +103,8 @@ export const Footer = () => {
     } else {
       Swal.fire({
         title: "Error",
-        text: "We can't send the email, please try again"
+        text: "We can't send the email, please try again",
+        heightAuto: false
       });
     }
   };
@@ -112,8 +112,10 @@ export const Footer = () => {
   const sendRating = async () => {
     loadingAlert("Sending feedback...");
     const key = sessionStorage.getItem("userKey");
-    const refRating = ref(db, `users/${key}`);
-    await update(refRating, {rating: rating});
+    if (key) {
+      await updateUser(key, {rating: rating});
+    }
+
     if (rating > 0 && rating < 3) {
       handleContact({
         title: "We're sad about your rating 🥺",
@@ -216,11 +218,11 @@ export const Footer = () => {
           </div>
         )}
       </footer>
-      {gameUser?.email && (
+      {/* {gameUser?.email && (
         <div className="score-container float-right">
-          Max score: {gameUser.maxScore}
+          Max score: {gameUser.maxScores}
         </div>
-      )}
+      )} */}
     </>
   );
 };

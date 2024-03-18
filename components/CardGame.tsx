@@ -27,7 +27,7 @@ export const CardGame = ({
             <p>
               <b>
                 {game.roomName !== "" ? game.roomName : `Room N°${roomNumber}`}
-                {game.password ? (
+                {game.settings.password ? (
                   <FontAwesomeIcon icon={faLock as IconProp} className="mx-1" />
                 ) : null}
               </b>
@@ -40,8 +40,10 @@ export const CardGame = ({
           <div className="txt-cant-users">
             <FontAwesomeIcon icon={faUser as IconProp} className="mx-1" />
             {game.listUsers
-              ? `${Object.keys(game.listUsers).length}/${game.maxUsers}`
-              : `1/${game.maxUsers}`}
+              ? `${Object.keys(game.listUsers).length}/${
+                  game.settings.maxUsers
+                }`
+              : `1/${game.settings.maxUsers}`}
           </div>
         </div>
       </div>

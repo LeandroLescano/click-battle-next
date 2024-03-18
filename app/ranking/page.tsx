@@ -2,7 +2,7 @@ export const revalidate = 3600; // revalidate at most every hour
 
 import React from "react";
 import {customInitApp} from "lib/firebase-admin-config";
-import {getDatabase} from "firebase-admin/database";
+import {getFirestore} from "firebase-admin/firestore";
 import {Card, CardBody, CardHeader, Container} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
@@ -22,18 +22,24 @@ customInitApp();
 type WithRequired<T, K extends keyof T> = T & {[P in K]-?: T[P]};
 
 const getRanking = async () => {
-  const db = getDatabase();
-  const ref = db.ref("users");
-  const usersWithScore: WithRequired<GameUser, "maxScore">[] = [];
-  await ref.once("value", (data) => {
-    const users = data.val() as {[key: string]: GameUser};
+  const db = getFirestore();
+  const ref = db.collection("users");
+  const usersWithScore: (WithRequired<GameUser, "maxScores"> & {
+    cps: number;
+  })[] = [];
 
-    Object.entries(users).forEach(([key, user]) => {
-      if (user.maxScore) {
+  await ref.get().then((data) => {
+    data.docs.forEach((doc) => {
+      const user = doc.data() as GameUser;
+
+      if (user.maxScores) {
         usersWithScore.push({
           ...user,
-          key,
-          maxScore: user.maxScore
+          key: doc.id,
+          maxScores: user.maxScores,
+          cps: Math.max(
+            ...user.maxScores.map((score) => score.clicks / score.time)
+          )
         });
       }
     });
@@ -76,7 +82,7 @@ const Ranking = async () => {
         </CardHeader>
         <CardBody className="d-flex flex-column h-100 overflow-y-auto">
           {users
-            .sort((a, b) => b.maxScore - a.maxScore)
+            .sort((a, b) => b.cps - a.cps)
             .map((user, i) => {
               const Component = RankComponent[i + 1] || RankComponent.default;
 
@@ -88,7 +94,7 @@ const Ranking = async () => {
                   <span>
                     {i + 1}. {user.username || "???????"}
                   </span>
-                  {user.maxScore}
+                  <span className="text-lowercase">{user.cps} cps</span>
                 </Component>
               );
             })}

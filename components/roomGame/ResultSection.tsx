@@ -26,7 +26,7 @@ function ResultSection({
   const handleReset = () => {
     const refGame = ref(db, `games/${currentGame.key}`);
     update(refGame, {
-      timer: currentGame.timer || 10,
+      timer: currentGame.settings.timer || 10,
       gameStart: false,
       timeStart: 3,
       currentGame: false

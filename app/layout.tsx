@@ -9,6 +9,7 @@ import "../styles/index.scss";
 import "../styles/404.scss";
 import "../styles/footer.scss";
 import "../styles/about.scss";
+import "../styles/loginButton.scss";
 import "bootstrap/dist/css/bootstrap.css";
 
 import {getApp, getApps, initializeApp} from "firebase/app";
@@ -17,6 +18,7 @@ import {connectAuthEmulator, getAuth} from "firebase/auth";
 import {connectDatabaseEmulator, getDatabase} from "firebase/database";
 import {AuthProvider} from "contexts/AuthContext";
 import Loading from "components/Loading";
+import {connectFirestoreEmulator, getFirestore} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.apiKey,
@@ -40,6 +42,7 @@ if (process.env.NODE_ENV === "development") {
     connectAuthEmulator(getAuth(), "http://localhost:9099", {
       disableWarnings: true
     });
+    connectFirestoreEmulator(getFirestore(), "localhost", 8080);
     connectDatabaseEmulator(getDatabase(), "localhost", 9000);
   } catch (error) {
     console.log({error});
@@ -71,6 +74,10 @@ export default function Layout({children}: Props) {
           name="description"
           content="Online multiplayer Click battle - Challenge your friends to a 10 second click battle!"
         />
+        <meta
+          name="keywords"
+          content="click, clicks, battle, game, multiplayer, online, friends"
+        />
         <meta property="og:type" content="article" />
         <meta property="og:title" content="CLICK BATTLE" />
         <meta
@@ -79,14 +86,14 @@ export default function Layout({children}: Props) {
         />
         <meta
           property="og:description"
-          content="Online multiplayer Click battle"
+          content="Online multiplayer Click battle game"
         />
         <meta property="og:url" content="https://click-battle-mp.web.app/" />
         <meta property="og:site_name" content="Click battle" />
         <meta name="twitter:title" content="Click battle" />
         <meta
           name="twitter:description"
-          content="Online multiplayer Click battle"
+          content="Online multiplayer Click battle game"
         />
         <meta
           name="twitter:image"
