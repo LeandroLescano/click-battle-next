@@ -221,7 +221,6 @@ function useAuthProvider() {
             (provider) => provider.providerId === parsedCredential.providerId
           )
         ) {
-          console.log(response.user, parsedCredential);
           await linkWithCredential(response.user, parsedCredential);
           sessionStorage.removeItem("pending-credential");
         }

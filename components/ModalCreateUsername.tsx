@@ -21,7 +21,7 @@ export const ModalCreateUsername = () => {
     e?.preventDefault();
     const trimmedName = name.trim();
     if (trimmedName.length >= 3) {
-      console.log(user?.isAnonymous);
+      //TODO: Add loading
       if (await isUsernameAvailable(trimmedName)) {
         createUsername(trimmedName, user?.isAnonymous || true);
         setName("");

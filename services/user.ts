@@ -74,6 +74,6 @@ export const addUser = async (user: GameUser): Promise<string | null> => {
 
 export const updateUser = async (key: string, user: Partial<GameUser>) => {
   const userDoc = doc(getFirestore(), PATH, key);
-  console.log({key, user});
+
   await updateDoc(userDoc, {...user});
 };
