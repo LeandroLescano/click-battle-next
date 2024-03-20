@@ -157,98 +157,103 @@ function RoomGame() {
         setIdGame(pathIdGame);
         unsubscribe = onValue(refGame, (snapshot) => {
           const game: Game | null = snapshot.val();
-          if (game) {
-            game.key = snapshot.key;
-            if (game.listUsers) {
-              game.listUsers = Object.entries(game.listUsers).map((u) => ({
-                key: u[0],
-                ...u[1]
-              }));
-            }
+          try {
+            if (game) {
+              game.key = snapshot.key;
+              if (game.listUsers) {
+                game.listUsers = Object.entries(game.listUsers).map((u) => ({
+                  key: u[0],
+                  ...u[1]
+                }));
+              }
 
-            setCurrentGame(game);
+              setCurrentGame(game);
 
-            if (!roomStats.current.name) {
-              roomStats.current.name = game.roomName;
-              roomStats.current.owner = game.ownerUser.username;
-              roomStats.current.withPassword = !!game.settings.password;
-              roomStats.current.created = new Date(
-                game.created as unknown as number
-              );
-            }
+              if (!roomStats.current.name) {
+                roomStats.current.name = game.roomName;
+                roomStats.current.owner = game.ownerUser.username;
+                roomStats.current.withPassword = !!game.settings.password;
+                roomStats.current.created = new Date(
+                  game.created as unknown as number
+                );
+              }
 
-            setStartCountdown(game.gameStart);
+              setStartCountdown(game.gameStart);
 
-            const listUsersToPush: GameUser[] = [];
-            let listUsersDB: GameUser[] = game.listUsers;
-            if (!listUsersDB) {
-              listUsersDB = [];
-            }
-            listUsersDB.forEach((val) => {
-              if (!val.kickOut) {
-                const objUser: GameUser = {
-                  username: val.username,
-                  clicks: val.clicks,
-                  rol: val.rol,
-                  maxScores: val.maxScores,
-                  key: val.key
-                };
+              const listUsersToPush: GameUser[] = [];
+              let listUsersDB: GameUser[] = game.listUsers;
+              if (!listUsersDB) {
+                listUsersDB = [];
+              }
+              listUsersDB.forEach((val) => {
+                if (!val.kickOut) {
+                  const objUser: GameUser = {
+                    username: val.username,
+                    clicks: val.clicks,
+                    rol: val.rol,
+                    maxScores: val.maxScores,
+                    key: val.key
+                  };
 
-                if (val.key === gUser?.uid) {
-                  if (objUser.clicks !== localUserRef.current?.clicks) {
-                    localUserRef.current = objUser;
-                    setLocalUser(objUser);
+                  if (val.key === gUser?.uid) {
+                    if (objUser.clicks !== localUserRef.current?.clicks) {
+                      localUserRef.current = objUser;
+                      setLocalUser(objUser);
+                    }
+                  }
+                  listUsersToPush.push(objUser);
+                } else if (val.key === gUser?.uid) {
+                  router.push("/?kickedOut=true");
+                }
+              });
+              setListUsers(listUsersToPush);
+              if (game.ownerUser?.username === actualUser) {
+                setIsLocal(true);
+              } else if (gUser?.uid) {
+                if (
+                  listUsersToPush.filter((u) => u.username !== user).length ===
+                  game.settings.maxUsers
+                ) {
+                  router.push("/?fullRoom=true");
+                  return;
+                }
+
+                if (
+                  game.settings.password &&
+                  idGame !== pathIdGame &&
+                  !flagEnter.current
+                ) {
+                  flagEnter.current = true;
+                  if (!query?.pwd || query.pwd !== game.settings.password) {
+                    requestPassword(game.settings.password).then((val) => {
+                      if (val.isConfirmed) {
+                        clearPath(pathIdGame);
+                        sessionStorage.setItem("actualIDGame", pathIdGame);
+                        addNewUserToDB(game);
+                      } else {
+                        router.push("/");
+                        return;
+                      }
+                    });
+                  } else {
+                    clearPath(pathIdGame);
+                    sessionStorage.setItem("actualIDGame", pathIdGame);
+                    addNewUserToDB(game);
                   }
                 }
-                listUsersToPush.push(objUser);
-              } else if (val.key === gUser?.uid) {
-                router.push("/?kickedOut=true");
-              }
-            });
-            setListUsers(listUsersToPush);
-            if (game.ownerUser?.username === actualUser) {
-              setIsLocal(true);
-            } else if (gUser?.uid) {
-              if (
-                listUsersToPush.filter((u) => u.username !== user).length ===
-                game.settings.maxUsers
-              ) {
-                router.push("/?fullRoom=true");
-                return;
-              }
 
-              if (
-                game.settings.password &&
-                idGame !== pathIdGame &&
-                !flagEnter.current
-              ) {
-                flagEnter.current = true;
-                if (!query?.pwd || query.pwd !== game.settings.password) {
-                  requestPassword(game.settings.password).then((val) => {
-                    if (val.isConfirmed) {
-                      clearPath(pathIdGame);
-                      sessionStorage.setItem("actualIDGame", pathIdGame);
-                      addNewUserToDB(game);
-                    } else {
-                      router.push("/");
-                      return;
-                    }
-                  });
-                } else {
-                  clearPath(pathIdGame);
-                  sessionStorage.setItem("actualIDGame", pathIdGame);
+                //Add user to DB
+                if (!flagEnter.current) {
+                  flagEnter.current = true;
                   addNewUserToDB(game);
                 }
               }
-
-              //Add user to DB
-              if (!flagEnter.current) {
-                flagEnter.current = true;
-                addNewUserToDB(game);
-              }
+            } else {
+              router.replace("/");
             }
-          } else {
-            router.replace("/");
+          } catch (error) {
+            console.log({game, roomStats, actualUser, listUsers, isLocal});
+            throw error;
           }
         });
       } catch {
