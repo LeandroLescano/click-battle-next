@@ -158,7 +158,7 @@ function RoomGame() {
         unsubscribe = onValue(refGame, (snapshot) => {
           const game: Game | null = snapshot.val();
           try {
-            if (game) {
+            if (game && game.settings) {
               game.key = snapshot.key;
               if (game.listUsers) {
                 game.listUsers = Object.entries(game.listUsers).map((u) => ({
