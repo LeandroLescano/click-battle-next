@@ -252,7 +252,9 @@ function RoomGame() {
               router.replace("/");
             }
           } catch (error) {
-            console.log({game, roomStats, actualUser, listUsers, isLocal});
+            console.log(
+              JSON.stringify({game, roomStats, actualUser, listUsers, isLocal})
+            );
             throw error;
           }
         });
