@@ -1,12 +1,13 @@
 import React, {useState} from "react";
 import "firebase/database";
-import {Modal} from "react-bootstrap";
+import {Modal, Spinner} from "react-bootstrap";
 import {useAuth} from "contexts/AuthContext";
 import Swal from "sweetalert2";
 import {isUsernameAvailable} from "services/user";
 
 export const ModalCreateUsername = () => {
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
   const {user, gameUser, createUsername, signOut} = useAuth();
 
   const handleChange = (name: string) => {
@@ -21,7 +22,7 @@ export const ModalCreateUsername = () => {
     e?.preventDefault();
     const trimmedName = name.trim();
     if (trimmedName.length >= 3) {
-      //TODO: Add loading
+      setLoading(true);
       if (await isUsernameAvailable(trimmedName)) {
         createUsername(trimmedName, user?.isAnonymous || true);
         setName("");
@@ -36,6 +37,7 @@ export const ModalCreateUsername = () => {
           showConfirmButton: false
         });
       }
+      setLoading(false);
     }
   };
 
@@ -64,11 +66,15 @@ export const ModalCreateUsername = () => {
               Cancel
             </button>
             <button
-              className="btn-click py-2 px-3 mb-3"
+              className="btn-click py-2 px-3 mb-3 d-flex justify-content-center align-items-center"
               onClick={handleCreateUsername}
               type="submit"
             >
-              Choose
+              <span className={loading ? "opacity-0" : ""}>Choose</span>
+              <Spinner
+                size="sm"
+                className={`position-absolute ${!loading ? "opacity-0" : ""}`}
+              />
             </button>
           </div>
         </div>
