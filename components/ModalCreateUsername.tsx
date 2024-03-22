@@ -7,7 +7,7 @@ import {isUsernameAvailable} from "services/user";
 
 export const ModalCreateUsername = () => {
   const [name, setName] = useState("");
-  const {user, gameUser, createUsername} = useAuth();
+  const {user, gameUser, createUsername, signOut} = useAuth();
 
   const handleChange = (name: string) => {
     if (name.length <= 25) {
@@ -59,13 +59,18 @@ export const ModalCreateUsername = () => {
             onKeyPress={(e) => e.key === "Enter" && handleCreateUsername()}
             onChange={(e) => handleChange(e.target.value)}
           />
-          <button
-            className="btn-click py-2 px-3 mb-3"
-            onClick={handleCreateUsername}
-            type="submit"
-          >
-            Choose
-          </button>
+          <div className="d-flex gap-4 align-items-center">
+            <button className="btn-click py-2 px-3 mb-3" onClick={signOut}>
+              Cancel
+            </button>
+            <button
+              className="btn-click py-2 px-3 mb-3"
+              onClick={handleCreateUsername}
+              type="submit"
+            >
+              Choose
+            </button>
+          </div>
         </div>
       </Modal.Body>
     </Modal>

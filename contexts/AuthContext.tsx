@@ -29,6 +29,7 @@ interface AuthContextState {
   user: User | null;
   gameUser?: GameUser;
   loading: boolean;
+  isAuthenticated: boolean;
   signInWithProvider: (provider?: AuthProviders) => void;
   signInAnonymously: VoidFunction;
   signOut: VoidFunction;
@@ -50,6 +51,7 @@ const AUTH_PROVIDERS = {
 const AuthContext = createContext({
   user: null,
   loading: true,
+  isAuthenticated: false,
   signInWithProvider: () => ({}),
   signInAnonymously: () => ({}),
   signOut: () => ({}),
@@ -301,6 +303,12 @@ function useAuthProvider() {
     }
   };
 
+  const isAuthenticated: boolean = !!(
+    user?.uid &&
+    gameUser?.username &&
+    !loading
+  );
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, handleUser);
 
@@ -311,6 +319,7 @@ function useAuthProvider() {
     user,
     gameUser,
     loading,
+    isAuthenticated,
     signInWithProvider,
     signInAnonymously,
     signOut,

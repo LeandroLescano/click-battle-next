@@ -96,7 +96,13 @@ function RoomGame() {
   const router = useRouter();
   const query = useParams();
   const db = getDatabase();
-  const {gameUser, user: gUser, updateGameUser, loading} = useAuth();
+  const {
+    gameUser,
+    user: gUser,
+    updateGameUser,
+    loading,
+    isAuthenticated
+  } = useAuth();
   const localUserRef = useRef<GameUser>();
   const mobileDevice = useIsMobileDevice();
 
@@ -107,7 +113,7 @@ function RoomGame() {
   };
 
   useEffect(() => {
-    if (!loading && gUser?.uid) {
+    if (isAuthenticated && gUser?.uid) {
       const pathIdGame = window.location.pathname.slice(1).substring(5);
       const user = localStorage.getItem("user");
       const userOwner = sessionStorage.getItem("actualOwner");
@@ -142,11 +148,11 @@ function RoomGame() {
         };
       }
     }
-  }, [loading, gUser?.uid]);
+  }, [isAuthenticated, gUser?.uid]);
 
   // useEffect for update all data in local state
   useEffect(() => {
-    if (!loading) {
+    if (isAuthenticated) {
       try {
         const idGame = sessionStorage.getItem("actualIDGame");
         const pathIdGame = window.location.pathname.slice(1).substring(5);
@@ -273,7 +279,7 @@ function RoomGame() {
     return () => {
       unsubscribe?.();
     };
-  }, [loading, gUser?.uid]);
+  }, [isAuthenticated, gUser?.uid]);
 
   // useEffect for put the position of the localUser
   useEffect(() => {
@@ -562,7 +568,7 @@ See you there! 📱🖱️`
           </div>
         </>
       )}
-      {!loading && (
+      {!isAuthenticated && (
         <>
           <ModalLogin />
           <ModalCreateUsername />
