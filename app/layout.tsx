@@ -19,6 +19,11 @@ import {connectDatabaseEmulator, getDatabase} from "firebase/database";
 import {AuthProvider} from "contexts/AuthContext";
 import Loading from "components/Loading";
 import {connectFirestoreEmulator, getFirestore} from "firebase/firestore";
+import {
+  getAnalytics,
+  isSupported,
+  setAnalyticsCollectionEnabled
+} from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.apiKey,
@@ -44,6 +49,11 @@ if (process.env.NODE_ENV === "development") {
     });
     connectFirestoreEmulator(getFirestore(), "localhost", 8080);
     connectDatabaseEmulator(getDatabase(), "localhost", 9000);
+
+    isSupported().then(
+      (supported) =>
+        supported && setAnalyticsCollectionEnabled(getAnalytics(), false)
+    );
   } catch (error) {
     console.log({error});
   }

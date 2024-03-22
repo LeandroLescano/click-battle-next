@@ -1,13 +1,14 @@
 import React, {useState} from "react";
 import "firebase/database";
-import {Modal} from "react-bootstrap";
+import {Modal, Spinner} from "react-bootstrap";
 import {useAuth} from "contexts/AuthContext";
 import Swal from "sweetalert2";
 import {isUsernameAvailable} from "services/user";
 
 export const ModalCreateUsername = () => {
   const [name, setName] = useState("");
-  const {user, gameUser, createUsername} = useAuth();
+  const [loading, setLoading] = useState(false);
+  const {user, gameUser, createUsername, signOut} = useAuth();
 
   const handleChange = (name: string) => {
     if (name.length <= 25) {
@@ -21,7 +22,7 @@ export const ModalCreateUsername = () => {
     e?.preventDefault();
     const trimmedName = name.trim();
     if (trimmedName.length >= 3) {
-      //TODO: Add loading
+      setLoading(true);
       if (await isUsernameAvailable(trimmedName)) {
         createUsername(trimmedName, user?.isAnonymous || true);
         setName("");
@@ -36,6 +37,7 @@ export const ModalCreateUsername = () => {
           showConfirmButton: false
         });
       }
+      setLoading(false);
     }
   };
 
@@ -59,13 +61,22 @@ export const ModalCreateUsername = () => {
             onKeyPress={(e) => e.key === "Enter" && handleCreateUsername()}
             onChange={(e) => handleChange(e.target.value)}
           />
-          <button
-            className="btn-click py-2 px-3 mb-3"
-            onClick={handleCreateUsername}
-            type="submit"
-          >
-            Choose
-          </button>
+          <div className="d-flex gap-4 align-items-center">
+            <button className="btn-click py-2 px-3 mb-3" onClick={signOut}>
+              Cancel
+            </button>
+            <button
+              className="btn-click py-2 px-3 mb-3 d-flex justify-content-center align-items-center"
+              onClick={handleCreateUsername}
+              type="submit"
+            >
+              <span className={loading ? "opacity-0" : ""}>Choose</span>
+              <Spinner
+                size="sm"
+                className={`position-absolute ${!loading ? "opacity-0" : ""}`}
+              />
+            </button>
+          </div>
         </div>
       </Modal.Body>
     </Modal>

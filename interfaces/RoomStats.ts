@@ -1,4 +1,5 @@
 export interface RoomStats {
+  id?: string;
   name: string;
   created: Date;
   removed: Date;

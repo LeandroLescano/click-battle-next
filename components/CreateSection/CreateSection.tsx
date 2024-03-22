@@ -27,6 +27,7 @@ import {sha256} from "services/encode";
 import Swal from "sweetalert2";
 import {range} from "utils/numbers";
 import {AVAILABLE_TIMES} from "resources/constants";
+import {Spinner} from "react-bootstrap";
 
 const CreateSection = () => {
   const [creating, setCreating] = useState(false);
@@ -149,11 +150,14 @@ const CreateSection = () => {
     <>
       <h1 className="text-center mb-4">Click battle!</h1>
       <button
-        className="btn-click mb-3 mb-md-5"
+        className="btn-click mb-3 mb-md-5 d-flex justify-content-center align-items-center"
         disabled={!gameUser?.username || creating}
         onClick={handleCreate}
       >
-        Create game
+        <span className={creating ? "opacity-0" : ""}>Create game</span>
+        <Spinner
+          className={`position-absolute ${!creating ? "opacity-0" : ""}`}
+        />
       </button>
       <span>Insert room name</span>
       <input
