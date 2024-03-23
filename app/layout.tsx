@@ -111,6 +111,13 @@ export default function Layout({children}: Props) {
         />
         <meta name="twitter:creator" content="@LeanLescano_" />
         <meta name="author" content="Lescano Leandro Nicolas" />
+        {/* Script to fix 'globalThis is not defined' errors */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `!function(t){function e(){var e=this||self;e.globalThis=e,delete t.prototype._T_}"object"!=typeof globalThis&&(this?e():(t.defineProperty(t.prototype,"_T_",{configurable:!0,get:e}),_T_))}(Object);`
+          }}
+        />
+        ;
       </head>
       <body>
         <AuthProvider>
