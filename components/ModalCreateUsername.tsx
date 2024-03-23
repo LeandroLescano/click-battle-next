@@ -65,6 +65,7 @@ export const ModalCreateUsername = () => {
             <button className="btn-click py-2 px-3 mb-3" onClick={signOut}>
               Cancel
             </button>
+            {/* TODO: Make a LoadingButton component */}
             <button
               className="btn-click py-2 px-3 mb-3 d-flex justify-content-center align-items-center"
               onClick={handleCreateUsername}
