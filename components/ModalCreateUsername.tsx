@@ -54,19 +54,21 @@ export const ModalCreateUsername = () => {
           <h4>Enter your username</h4>
           <input
             type="text"
-            className="form-name mb-2"
+            className="form-name"
             data-label="username"
             value={name}
             placeholder="Username"
             onKeyPress={(e) => e.key === "Enter" && handleCreateUsername()}
             onChange={(e) => handleChange(e.target.value)}
           />
+          <sub className="mb-2 fw-light">Username must be 3-25 characters</sub>
           <div className="d-flex gap-4 align-items-center">
             <button className="btn-click py-2 px-3 mb-3" onClick={signOut}>
               Cancel
             </button>
             {/* TODO: Make a LoadingButton component */}
             <button
+              disabled={name.trim().length < 3 || name.trim().length > 25}
               className="btn-click py-2 px-3 mb-3 d-flex justify-content-center align-items-center"
               onClick={handleCreateUsername}
               type="submit"

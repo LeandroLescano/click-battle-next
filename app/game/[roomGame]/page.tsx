@@ -93,6 +93,7 @@ function RoomGame() {
   });
   const flagEnter = useRef(false);
   const celebrationContainer = useRef<HTMLDivElement>(null);
+
   const router = useRouter();
   const query = useParams();
   const db = getDatabase();
@@ -107,10 +108,6 @@ function RoomGame() {
   const mobileDevice = useIsMobileDevice();
 
   let unsubscribe: Unsubscribe;
-
-  const clearPath = (id: string) => {
-    router.replace(`/game/${id}`);
-  };
 
   useEffect(() => {
     if (isAuthenticated && gUser?.uid) {
@@ -413,6 +410,10 @@ function RoomGame() {
         updateGameUser({maxScores: updatedScores});
       }
     }
+  };
+
+  const clearPath = (id: string) => {
+    router.replace(`/game/${id}`);
   };
 
   // function for add user to database and update state
