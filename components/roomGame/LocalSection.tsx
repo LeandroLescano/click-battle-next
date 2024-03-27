@@ -31,6 +31,8 @@ function LocalSection({
   const db = getDatabase();
   const {user: gUser} = useAuth();
 
+  const cantStart = !start && listUsers.length < 2;
+
   // function for start game
   const handleStart = () => {
     const refGame = ref(db, `games/${idGame}`);
@@ -82,7 +84,7 @@ function LocalSection({
         {isLocal && !start && !startCountdown && (
           <button
             className="btn-click my-2"
-            disabled={!start && listUsers.length < 2}
+            disabled={cantStart}
             onClick={handleStart}
           >
             Start!
@@ -90,6 +92,9 @@ function LocalSection({
         )}
       </div>
       <p className="mt-3 mb-0">{localUser.username}</p>
+      {cantStart && (
+        <sub> This game requires at least 2 players. Grab a friend!</sub>
+      )}
     </>
   );
 }
