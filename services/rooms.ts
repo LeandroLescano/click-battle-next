@@ -4,7 +4,8 @@ import {
   getFirestore,
   getDocs,
   query,
-  orderBy
+  orderBy,
+  where
 } from "firebase/firestore";
 import {RoomStats} from "interfaces/RoomStats";
 
@@ -16,10 +17,20 @@ export const addRoomStats = async (roomStats: RoomStats) => {
   await addDoc(roomsCollection, roomStats);
 };
 
-export const getRoomStats = async (): Promise<RoomStats[]> => {
+export const getRoomStats = async (
+  startDate?: string | null,
+  endDate?: string | null
+): Promise<RoomStats[]> => {
   const roomsCollection = collection(getFirestore(), PATH);
-  const q = query(roomsCollection, orderBy("created", "desc"));
+  let q = query(roomsCollection, orderBy("created", "desc"));
   const rooms: RoomStats[] = [];
+
+  if (startDate) {
+    q = query(q, where("created", ">=", new Date(startDate)));
+  }
+  if (endDate) {
+    q = query(q, where("created", "<=", new Date(endDate)));
+  }
 
   await getDocs(q).then((snapshot) => {
     if (snapshot.docs.length === 0) return [];
