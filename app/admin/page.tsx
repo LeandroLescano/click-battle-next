@@ -130,9 +130,11 @@ const Admin = () => {
         setRooms(rooms)
       );
       const refGames = ref(db, `games`);
-      onValue(refGames, (snapshot) => {
+      const unsubscribe = onValue(refGames, (snapshot) => {
         setCurrentRooms(snapshot.size);
       });
+
+      return unsubscribe;
     }
   }, [loading, params]);
 
