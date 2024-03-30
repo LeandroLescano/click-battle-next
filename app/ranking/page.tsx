@@ -10,8 +10,8 @@ import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
-// Interfaces
 import {GameUser} from "interfaces";
+import {RankingList} from "components/RankingList";
 
 const UpdatedTime = dynamic(() => import("components/UpdatedTime"), {
   ssr: false
@@ -26,20 +26,25 @@ const getRanking = async () => {
   const ref = db.collection("users");
   const usersWithScore: (WithRequired<GameUser, "maxScores"> & {
     cps: number;
+    time: number;
   })[] = [];
 
   await ref.get().then((data) => {
     data.docs.forEach((doc) => {
       const user = doc.data() as GameUser;
 
-      if (user.maxScores) {
+      if (user.maxScores && user.maxScores.length > 0) {
+        const cps = Math.max(
+          ...user.maxScores.map((score) => score.clicks / score.time)
+        );
+        const time =
+          user.maxScores.find((ms) => ms.clicks / ms.time === cps)?.time || 10;
         usersWithScore.push({
           ...user,
           key: doc.id,
           maxScores: user.maxScores,
-          cps: Math.max(
-            ...user.maxScores.map((score) => score.clicks / score.time)
-          )
+          cps,
+          time
         });
       }
     });
@@ -48,13 +53,6 @@ const getRanking = async () => {
   const lastUpdate = new Date();
 
   return {users: usersWithScore, lastUpdate};
-};
-
-const RankComponent: Record<string, keyof JSX.IntrinsicElements> = {
-  1: "h2",
-  2: "h3",
-  3: "h4",
-  default: "span"
 };
 
 const Ranking = async () => {
@@ -81,23 +79,7 @@ const Ranking = async () => {
           </section>
         </CardHeader>
         <CardBody className="d-flex flex-column h-100 overflow-y-auto">
-          {users
-            .sort((a, b) => b.cps - a.cps)
-            .map((user, i) => {
-              const Component = RankComponent[i + 1] || RankComponent.default;
-
-              return (
-                <Component
-                  key={user.key}
-                  className="d-flex justify-content-between border-bottom pb-2"
-                >
-                  <span>
-                    {i + 1}. {user.username || "???????"}
-                  </span>
-                  <span className="text-lowercase">{user.cps} cps</span>
-                </Component>
-              );
-            })}
+          <RankingList users={users} />
         </CardBody>
       </Card>
     </Container>

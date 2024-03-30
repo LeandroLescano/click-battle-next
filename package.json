@@ -16,7 +16,7 @@
     "clear-all": "rm -rf .next _static node_modules",
     "re-start": "rm -rf .next _static node_modules && yarn install && yarn dev",
     "re-build": "rm -rf .next _static node_modules && yarn install && yarn build",
-    "update-backup": "export-firestore && copy-bucket-data",
+    "update-backup": "npm run export-firestore && npm run copy-bucket-data",
     "export-firestore": "gsutil -m rm -r gs://click-battle-mp.appspot.com/backups && gcloud firestore export gs://click-battle-mp.appspot.com/backups",
     "copy-bucket-data": "gsutil -m cp -r gs://click-battle-mp.appspot.com/backups ."
   },
