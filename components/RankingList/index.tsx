@@ -114,6 +114,7 @@ export const RankingList = ({users}: RankingListProps) => {
                 <button className="btn-click small" onClick={toggleModal}>
                   Sign up
                 </button>
+                <button className="btn btn-close" onClick={handleHideToast} />
               </>
             )}
           </Toast.Body>
