@@ -292,6 +292,13 @@ function useAuthProvider(): AuthContextState {
 
             if (newKeyUser) {
               sessionStorage.setItem("userKey", newKeyUser);
+              logEvent(getAnalytics(), "sign_up", {
+                action: "sign_up",
+                playedAsAnonymous:
+                  gameUser?.maxScores && gameUser.maxScores.length > 0,
+                username: existingUser!.username,
+                ...userInfo
+              });
             } else {
               console.error("Error generating new user");
             }
