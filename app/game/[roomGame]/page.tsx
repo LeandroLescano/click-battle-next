@@ -51,6 +51,7 @@ import {addRoomStats} from "services/rooms";
 
 // Interfaces
 import {RoomStats} from "interfaces/RoomStats";
+import {ModalLoginProps} from "components/ModalLogin/types";
 
 const OpponentSection = dynamic(
   () => import("../../../components/roomGame/OpponentSection")
@@ -64,7 +65,7 @@ const CelebrationResult = dynamic(
 const ResultSection = dynamic(
   () => import("../../../components/roomGame/ResultSection")
 );
-const ModalLogin = dynamic(
+const ModalLogin = dynamic<ModalLoginProps>(
   () =>
     import("../../../components/ModalLogin").then(
       (component) => component.ModalLogin
