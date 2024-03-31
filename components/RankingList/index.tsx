@@ -25,6 +25,7 @@ export const RankingList = ({users}: RankingListProps) => {
 
     if (
       user &&
+      !user.isAnonymous &&
       hasMaxScores &&
       !usersList.find((user) => user.username === gameUser?.username)
     ) {
@@ -97,13 +98,24 @@ export const RankingList = ({users}: RankingListProps) => {
           animation
         >
           <Toast.Body className="d-flex gap-2 align-items-center py-3">
-            You want to be here?{" "}
-            {possiblePos && `You're at ${possiblePos} position 😲`}
-            <button className="btn-click small" onClick={toggleModal}>
-              Sign up
-            </button>{" "}
-            and play!
-            <button className="btn btn-close" onClick={handleHideToast} />
+            {!possiblePos ? (
+              <>
+                You want to be here?{" "}
+                <button className="btn-click small" onClick={toggleModal}>
+                  Sign up
+                </button>{" "}
+                and play!
+                <button className="btn btn-close" onClick={handleHideToast} />
+              </>
+            ) : (
+              <>
+                Wow! You&apos;re at position {possiblePos} on the leaderboard!
+                Want to claim your spot and keep playing?
+                <button className="btn-click small" onClick={toggleModal}>
+                  Sign up
+                </button>
+              </>
+            )}
           </Toast.Body>
         </Toast>
       </ToastContainer>
