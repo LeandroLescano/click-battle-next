@@ -3,7 +3,8 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "next dev | yarn emulators",
+    "dev": "bash ask-update-backup.sh",
+    "dev:start": "next dev | yarn emulators",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

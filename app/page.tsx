@@ -25,6 +25,7 @@ import {
 } from "components";
 import CreateSection from "components/CreateSection/CreateSection";
 import Loading from "components/Loading";
+import {ModalLoginProps} from "components/ModalLogin/types";
 
 // Utils
 import Swal from "sweetalert2";
@@ -32,9 +33,15 @@ import Swal from "sweetalert2";
 // Hooks
 import {useAuth} from "contexts/AuthContext";
 
-const ModalLogin = dynamic(() => import("../components/ModalLogin"), {
-  ssr: false
-});
+const ModalLogin = dynamic<ModalLoginProps>(
+  () =>
+    import("../components/ModalLogin").then(
+      (component) => component.ModalLogin
+    ),
+  {
+    ssr: false
+  }
+);
 
 const Home = () => {
   const [listGames, setListGames] = useState<Game[]>([]);

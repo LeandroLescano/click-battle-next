@@ -51,6 +51,7 @@ import {addRoomStats} from "services/rooms";
 
 // Interfaces
 import {RoomStats} from "interfaces/RoomStats";
+import {ModalLoginProps} from "components/ModalLogin/types";
 
 const OpponentSection = dynamic(
   () => import("../../../components/roomGame/OpponentSection")
@@ -64,9 +65,15 @@ const CelebrationResult = dynamic(
 const ResultSection = dynamic(
   () => import("../../../components/roomGame/ResultSection")
 );
-const ModalLogin = dynamic(() => import("../../../components/ModalLogin"), {
-  ssr: false
-});
+const ModalLogin = dynamic<ModalLoginProps>(
+  () =>
+    import("../../../components/ModalLogin").then(
+      (component) => component.ModalLogin
+    ),
+  {
+    ssr: false
+  }
+);
 
 function RoomGame() {
   const [isLocal, setIsLocal] = useState(false);
@@ -317,9 +324,7 @@ function RoomGame() {
             update(refGame, {timer: null});
           }
 
-          if (userKey) {
-            updateLocalMaxScore(userKey);
-          }
+          updateLocalMaxScore(userKey);
 
           loadCelebrationAnimation();
           return;
@@ -339,7 +344,7 @@ function RoomGame() {
         if (!currentGame.timer) {
           loadCelebrationAnimation();
 
-          userKey && updateLocalMaxScore(userKey);
+          updateLocalMaxScore(userKey);
         }
       }
     } else if (startCountdown && localUser.rol === "owner") {
@@ -378,8 +383,8 @@ function RoomGame() {
     }
   };
 
-  const updateLocalMaxScore = (userKey: string) => {
-    if (userKey && localUser.clicks && gameUser && currentGame) {
+  const updateLocalMaxScore = (userKey?: string | null) => {
+    if (localUser.clicks && gameUser && currentGame) {
       const currentMaxScore = gameUser.maxScores?.find(
         (score) => score.time === currentGame.settings.timer
       );
@@ -404,9 +409,11 @@ function RoomGame() {
             ];
           }
         }
-        updateUser(userKey, {
-          maxScores: updatedScores
-        });
+        if (userKey && gUser && !gUser.isAnonymous) {
+          updateUser(userKey, {
+            maxScores: updatedScores
+          });
+        }
         updateGameUser({maxScores: updatedScores});
       }
     }
