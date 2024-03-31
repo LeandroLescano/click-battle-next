@@ -9,25 +9,28 @@ import {useAuth} from "contexts/AuthContext";
 import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
 
 import RatingStars from "./RatingStars";
+import {ModalLogin} from "./ModalLogin";
 
 interface contactProps {
   title?: string;
   text?: string;
 }
 
+const ReactSwal = withReactContent(
+  Swal.mixin({
+    heightAuto: false,
+    buttonsStyling: false,
+    customClass: {
+      confirmButton: "btn-click small"
+    }
+  })
+);
+
 export const Footer = () => {
-  const ReactSwal = withReactContent(
-    Swal.mixin({
-      heightAuto: false,
-      buttonsStyling: false,
-      customClass: {
-        confirmButton: "btn-click small"
-      }
-    })
-  );
   const [rating, setRating] = useState(0);
+  const [showModal, setShowModal] = useState(false);
   const [send, setSend] = useState(false);
-  const {user, gameUser, signOut} = useAuth();
+  const {user, gameUser, signOut, updateGameUser} = useAuth();
   const router = useRouter();
 
   //Function for logout user.
@@ -35,6 +38,7 @@ export const Footer = () => {
     if (user) {
       signOut();
     }
+    updateGameUser({});
     localStorage.removeItem("user");
     sessionStorage.removeItem("userKey");
   };
@@ -163,6 +167,8 @@ export const Footer = () => {
     });
   };
 
+  const toggleModal = () => setShowModal((prev) => !prev);
+
   useEffect(() => {
     if (rating > 0 && ReactSwal.isVisible()) {
       ReactSwal.resetValidationMessage();
@@ -200,13 +206,15 @@ export const Footer = () => {
           <div className="d-flex gap-2 mx-auto mx-md-0 my-2">
             <a onClick={handleFeedback}>Feedback</a>
             <span>|</span>
-            <a onClick={() => handleContact()}>Contact</a>
+            <a onClick={() => handleContact}>Contact</a>
             <span>|</span>
             <a onClick={() => router.push("/ranking")}>Ranking</a>
           </div>
         ) : (
-          <div className="d-flex justify-content-center w-sm-100 flex-fill align-self-center pb-sm-2 pb-0">
+          <div className="d-flex gap-2 justify-content-center w-sm-100 flex-fill align-self-center pb-sm-2 pb-0">
             <a onClick={() => router.push("/ranking")}>Ranking</a>
+            <span>|</span>
+            <a onClick={toggleModal}>Save my data</a>
           </div>
         )}
         {gameUser?.username && (
@@ -223,6 +231,11 @@ export const Footer = () => {
           Max score: {gameUser.maxScores}
         </div>
       )} */}
+      <ModalLogin
+        allowAnonymous={false}
+        show={showModal}
+        onClose={toggleModal}
+      />
     </>
   );
 };

@@ -78,7 +78,7 @@ const Ranking = async () => {
             <UpdatedTime text="last update:" date={lastUpdate} />
           </section>
         </CardHeader>
-        <CardBody className="d-flex flex-column h-100 overflow-y-auto">
+        <CardBody className="d-flex flex-column h-100 overflow-y-auto p-1">
           <RankingList users={users} />
         </CardBody>
       </Card>

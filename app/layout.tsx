@@ -10,7 +10,6 @@ import "../styles/404.scss";
 import "../styles/footer.scss";
 import "../styles/about.scss";
 import "../styles/loginButton.scss";
-import "bootstrap/dist/css/bootstrap.css";
 
 import {getApp, getApps, initializeApp} from "firebase/app";
 
@@ -74,12 +73,6 @@ export default function Layout({children}: Props) {
         ></Script>
         <title>Click Battle</title>
         <meta name="viewport" content="width=device-width, minimum-scale=1" />
-        <link
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-          crossOrigin="anonymous"
-        />
         <meta
           name="description"
           content="Online multiplayer Click battle - Challenge your friends to a 10 second click battle!"

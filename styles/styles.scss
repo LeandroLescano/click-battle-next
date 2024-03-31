@@ -5,6 +5,15 @@ $--dark-pink: #f9c4d2;
 $--pink-border: #b18597;
 $--darker-pink: #f75580;
 
+$toast-max-width: 800px;
+$primary: #f75580;
+
+.toast {
+  width: fit-content !important;
+}
+
+@import "../node_modules/bootstrap/scss/bootstrap.scss";
+
 :root {
   --pink-shadow: #ffe3e2;
   --background-sidebar: #fff0f0;

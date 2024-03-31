@@ -48,7 +48,7 @@ const AUTH_PROVIDERS = {
   github: GithubAuthProvider
 };
 
-const AuthContext = createContext({
+const AuthContext = createContext<AuthContextState>({
   user: null,
   loading: true,
   isAuthenticated: false,
@@ -57,7 +57,7 @@ const AuthContext = createContext({
   signOut: () => ({}),
   createUsername: () => ({}),
   updateGameUser: () => ({})
-} as AuthContextState);
+});
 
 interface Props {
   children: JSX.Element;
@@ -72,7 +72,7 @@ export const useAuth = () => {
   return useContext(AuthContext);
 };
 
-function useAuthProvider() {
+function useAuthProvider(): AuthContextState {
   const [user, setUser] = useState<User | null>(null);
   const [gameUser, setGameUser] = useState<GameUser>();
   const [loading, setLoading] = useState(true);
@@ -286,8 +286,8 @@ function useAuthProvider() {
           if (userNew && userEmail) {
             const newKeyUser = await addUser({
               email: userEmail,
-              maxScores: [],
-              username: ""
+              maxScores: gameUser?.maxScores || [],
+              username: gameUser?.username || ""
             });
 
             if (newKeyUser) {
