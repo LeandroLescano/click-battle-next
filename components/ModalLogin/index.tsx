@@ -24,10 +24,10 @@ export const ModalLogin = ({
   };
 
   useEffect(() => {
-    if (user && !user.isAnonymous && !allowAnonymous) {
+    if (user && !user.isAnonymous && !allowAnonymous && show) {
       onClose?.();
     }
-  }, [user]);
+  }, [user, show]);
 
   return (
     <Modal
