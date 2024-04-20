@@ -13,3 +13,10 @@ export const RATING: {[key: number]: string} = {
 };
 
 export const AVAILABLE_TIMES = [5, 10, 15, 20, 30];
+
+export const DEFAULT_VALUES = {
+  DEFAULT_TIMER: 10,
+  MIN_TIMER: 5,
+  MAX_TIMER: 30,
+  MIN_USERS: 2
+};
