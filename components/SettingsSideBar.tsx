@@ -4,11 +4,12 @@ import {getDatabase, ref, update} from "@firebase/database";
 
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Swal from "sweetalert2";
-import {sha256} from "../services/encode";
-import {range} from "../utils/numbers";
+import {sha256} from "services/encode";
+import {range} from "utils/numbers";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {AVAILABLE_TIMES} from "resources/constants";
 import {Game} from "interfaces";
+import {adjustRoomSettings} from "utils/room";
 
 const Toast = Swal.mixin({
   toast: true,
@@ -19,7 +20,7 @@ const Toast = Swal.mixin({
   timerProgressBar: true
 });
 
-interface Settings {
+export interface Settings {
   maxUsers: number;
   roomName: string | undefined;
   password?: string | null;
@@ -81,6 +82,8 @@ function SettingsSideBar({
 
   const updateDatabase = async (settings: Settings) => {
     try {
+      settings = adjustRoomSettings({settings, maxUsers: config.maxUsers});
+
       const refGame = ref(db, `games/${idGame}`);
 
       await update(refGame, {
@@ -201,7 +204,7 @@ function SettingsSideBar({
         </div>
         <button
           className="btn-click small btn-settings"
-          onClick={() => handleUpdateSettings()}
+          onClick={handleUpdateSettings}
         >
           Save settings
         </button>

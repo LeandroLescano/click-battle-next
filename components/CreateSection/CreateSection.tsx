@@ -26,15 +26,15 @@ import {useRouter} from "next/navigation";
 import {sha256} from "services/encode";
 import Swal from "sweetalert2";
 import {range} from "utils/numbers";
-import {AVAILABLE_TIMES} from "resources/constants";
+import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
 import {Spinner} from "react-bootstrap";
 
 const CreateSection = () => {
   const [creating, setCreating] = useState(false);
   const {user, gameUser} = useAuth();
   const [room, setRoom] = useState<Partial<Room>>({
-    maxUsers: 2,
-    timer: 10
+    maxUsers: DEFAULT_VALUES.MIN_USERS,
+    timer: DEFAULT_VALUES.DEFAULT_TIMER
   });
   const [config, setConfig] = useState({
     maxUsers: 10
@@ -65,20 +65,23 @@ const CreateSection = () => {
         }
 
         if (room.timer) {
-          if (room.timer < 5) room.timer = 5;
-          if (room.timer > 30) room.timer = 30;
+          if (room.timer < DEFAULT_VALUES.MIN_TIMER)
+            room.timer = DEFAULT_VALUES.MIN_TIMER;
+          if (room.timer > DEFAULT_VALUES.MAX_TIMER)
+            room.timer = DEFAULT_VALUES.MAX_TIMER;
         }
 
         if (room.maxUsers) {
           if (room.maxUsers > config.maxUsers) room.maxUsers = config.maxUsers;
-          if (room.maxUsers < 2) room.maxUsers = 2;
+          if (room.maxUsers < DEFAULT_VALUES.MIN_USERS)
+            room.maxUsers = DEFAULT_VALUES.MIN_USERS;
         }
 
-        const timer = room.timer || 10;
+        const timer = room.timer || DEFAULT_VALUES.DEFAULT_TIMER;
 
         const settings: GameSettings = {
           timer,
-          maxUsers: room.maxUsers || 2
+          maxUsers: room.maxUsers || DEFAULT_VALUES.MIN_USERS
         };
 
         if (room.password) {
@@ -188,7 +191,9 @@ const CreateSection = () => {
           handleUpdateRoom({maxUsers: Number(ref.target.value)})
         }
       >
-        {[...Array.from(range(2, config.maxUsers + 1))].map((val, i) => (
+        {[
+          ...Array.from(range(DEFAULT_VALUES.MIN_USERS, config.maxUsers + 1))
+        ].map((val, i) => (
           <option key={i} value={val}>
             {val}
           </option>
