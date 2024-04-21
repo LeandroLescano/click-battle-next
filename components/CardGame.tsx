@@ -19,10 +19,7 @@ export const CardGame = ({
   return (
     game.ownerUser && (
       <div className="col col-card mb-3">
-        <div
-          className="card card-room shadow-sm"
-          onClick={() => handleEnterGame()}
-        >
+        <div className="card card-room shadow-sm" onClick={handleEnterGame}>
           <div className={`card-body ${game?.visitorUser ? "card-full" : ""}`}>
             <p>
               <b>

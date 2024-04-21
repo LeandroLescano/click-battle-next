@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 
 // React
@@ -32,6 +33,7 @@ import Swal from "sweetalert2";
 
 // Hooks
 import {useAuth} from "contexts/AuthContext";
+import {CardGameAd} from "components/CardGameAd";
 
 const ModalLogin = dynamic<ModalLoginProps>(
   () =>
@@ -51,6 +53,8 @@ const Home = () => {
   const {gameUser, user, loading} = useAuth();
 
   useEffect(() => {
+    //@ts-ignore
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
     //If exist userKey get user from DB
     if (params.get("kickedOut") === "true") {
       router.replace("/");
@@ -200,6 +204,16 @@ const Home = () => {
           </div>
           <div className="col-lg-8 order-md-0 rooms-section">
             <h2>Available rooms</h2>
+            <CardGameAd>
+              <ins
+                className="adsbygoogle"
+                style={{display: "block"}}
+                data-ad-format="fluid"
+                data-ad-layout-key="-gr-9+1i-2s+2u"
+                data-ad-client="ca-pub-4229101464965146"
+                data-ad-slot="9606023479"
+              ></ins>
+            </CardGameAd>
             {listGames.length > 0 ? (
               <div
                 className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mh-100 align-content-start"
