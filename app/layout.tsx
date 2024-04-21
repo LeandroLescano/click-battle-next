@@ -71,6 +71,7 @@ export default function Layout({children}: Props) {
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4229101464965146"
           crossOrigin="anonymous"
         ></Script>
+        <Script>(adsbygoogle = window.adsbygoogle || []).push({})</Script>
         <title>Click Battle</title>
         <meta name="viewport" content="width=device-width, minimum-scale=1" />
         <meta
