@@ -53,17 +53,17 @@ const Home = () => {
   const {gameUser, user, loading} = useAuth();
 
   useEffect(() => {
-    try {
+    //@ts-ignore
+    console.log(adsbygoogle, window.adsbygoogle);
+    //@ts-ignore
+    if (adsbygoogle && !adsbygoogle.loaded) {
       //@ts-ignore
-      console.log(adsbygoogle);
-      //@ts-ignore
-      if (adsbygoogle && !adsbygoogle.loaded) {
-        //@ts-ignore
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      }
-    } catch (err) {
-      console.log(err);
+      (adsbygoogle = window.adsbygoogle || []).push({});
     }
+    //@ts-ignore
+  }, [window.adsbygoogle]);
+
+  useEffect(() => {
     //If exist userKey get user from DB
     if (params.get("kickedOut") === "true") {
       router.replace("/");
