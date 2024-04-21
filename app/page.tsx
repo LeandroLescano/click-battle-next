@@ -55,7 +55,12 @@ const Home = () => {
   useEffect(() => {
     try {
       //@ts-ignore
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      console.log(adsbygoogle);
+      //@ts-ignore
+      if (adsbygoogle && !adsbygoogle.loaded) {
+        //@ts-ignore
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      }
     } catch (err) {
       console.log(err);
     }
