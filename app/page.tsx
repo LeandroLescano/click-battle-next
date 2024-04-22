@@ -213,7 +213,9 @@ const Home = () => {
                       roomNumber={i}
                       handleEnterGame={() => handleEnterGame(game)}
                     />
-                    {i !== 0 && (i % 5 === 0 || i === listGames.length - 1) && (
+                    {(listGames.length === 1 ||
+                      (i !== 0 &&
+                        (i % 5 === 0 || i === listGames.length - 1))) && (
                       <CardGameAd />
                     )}
                   </Fragment>
