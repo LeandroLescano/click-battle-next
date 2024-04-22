@@ -21,7 +21,9 @@ module.exports = {
     REACT_APP_PASSWORD: process.env.REACT_APP_PASSWORD,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
     PRIVATE_KEY: process.env.PRIVATE_KEY,
-    CLIENT_EMAIL: process.env.CLIENT_EMAIL
+    CLIENT_EMAIL: process.env.CLIENT_EMAIL,
+    NEXT_PUBLIC_ADSENSE_PUBLISHER_ID:
+      process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID
   }
 };
 
