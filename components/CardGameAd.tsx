@@ -10,7 +10,7 @@ export const CardGameAd = () => {
             className="adsbygoogle"
             style={{display: "block"}}
             data-ad-format="fluid"
-            data-ad-layout-key="-gr-9+1i-2s+2u"
+            data-ad-layout-key="-gv-9+1i-2s+2u"
             data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
             data-ad-slot="9606023479"
           ></ins>
