@@ -7,3 +7,4 @@ export * from "./RatingStars";
 export * from "./SettingsSideBar";
 export * from "./ModalCreateUsername";
 export * from "./Star";
+export * from "./CardGameAd";

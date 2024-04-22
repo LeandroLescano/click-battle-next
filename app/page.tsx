@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
-
 // React
-import React, {useEffect, useState} from "react";
+import React, {Fragment, useEffect, useState} from "react";
 
 // Interfaces
 import {Game, GameUser} from "interfaces";
@@ -21,7 +21,8 @@ import {
   CardGame,
   Footer,
   requestPassword,
-  ModalCreateUsername
+  ModalCreateUsername,
+  CardGameAd
 } from "components";
 import CreateSection from "components/CreateSection/CreateSection";
 import Loading from "components/Loading";
@@ -206,18 +207,29 @@ const Home = () => {
                 style={{minHeight: "90%"}}
               >
                 {listGames.map((game, i) => (
-                  <CardGame
-                    game={game}
-                    key={i}
-                    roomNumber={i}
-                    handleEnterGame={() => handleEnterGame(game)}
-                  />
+                  <Fragment key={i}>
+                    <CardGame
+                      game={game}
+                      roomNumber={i}
+                      handleEnterGame={() => handleEnterGame(game)}
+                    />
+                    {(listGames.length === 1 ||
+                      (i !== 0 &&
+                        (i % 5 === 0 || i === listGames.length - 1))) && (
+                      <CardGameAd />
+                    )}
+                  </Fragment>
                 ))}
               </div>
             ) : (
-              <h4 className="h-100">
-                No available rooms right now, create one!
-              </h4>
+              gameUser?.username && (
+                <div
+                  className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mh-100 align-content-start"
+                  style={{minHeight: "90%"}}
+                >
+                  <CardGameAd />
+                </div>
+              )
             )}
           </div>
         </div>

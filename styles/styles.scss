@@ -224,6 +224,10 @@ button.btn-click svg {
     background 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 
+.card.card-room:has(ins[data-ad-status="unfilled"]) {
+  display: none;
+}
+
 .card.card-room::before {
   position: absolute;
   content: "";
