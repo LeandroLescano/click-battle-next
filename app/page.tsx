@@ -201,25 +201,32 @@ const Home = () => {
           </div>
           <div className="col-lg-8 order-md-0 rooms-section">
             <h2>Available rooms</h2>
-            <CardGameAd />
             {listGames.length > 0 ? (
               <div
                 className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mh-100 align-content-start"
                 style={{minHeight: "90%"}}
               >
                 {listGames.map((game, i) => (
-                  <CardGame
-                    game={game}
-                    key={i}
-                    roomNumber={i}
-                    handleEnterGame={() => handleEnterGame(game)}
-                  />
+                  <>
+                    <CardGame
+                      game={game}
+                      key={i}
+                      roomNumber={i}
+                      handleEnterGame={() => handleEnterGame(game)}
+                    />
+                    {i !== 0 && (i % 5 === 0 || i === listGames.length - 1) && (
+                      <CardGameAd />
+                    )}
+                  </>
                 ))}
               </div>
             ) : (
-              <h4 className="h-100">
-                No available rooms right now, create one!
-              </h4>
+              <div
+                className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mh-100 align-content-start"
+                style={{minHeight: "90%"}}
+              >
+                <CardGameAd />
+              </div>
             )}
           </div>
         </div>
