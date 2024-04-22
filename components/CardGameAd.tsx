@@ -1,7 +1,15 @@
 import React from "react";
+import {AdblockDetector} from "adblock-detector";
+
 import GoogleAdUnit from "./GoogleAdUnit";
 
 export const CardGameAd = () => {
+  const adbDetector = new AdblockDetector();
+
+  const userHasAdblock = adbDetector.detect();
+
+  if (userHasAdblock) return <></>;
+
   return (
     <div className="col col-card mb-3">
       <div className="card card-room shadow-sm">
