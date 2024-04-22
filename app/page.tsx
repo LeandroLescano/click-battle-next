@@ -21,7 +21,8 @@ import {
   CardGame,
   Footer,
   requestPassword,
-  ModalCreateUsername
+  ModalCreateUsername,
+  CardGameAd
 } from "components";
 import CreateSection from "components/CreateSection/CreateSection";
 import Loading from "components/Loading";
@@ -32,7 +33,6 @@ import Swal from "sweetalert2";
 
 // Hooks
 import {useAuth} from "contexts/AuthContext";
-import {CardGameAd} from "components/CardGameAd";
 
 const ModalLogin = dynamic<ModalLoginProps>(
   () =>
