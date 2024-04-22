@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 // React
-import React, {useEffect, useState} from "react";
+import React, {Fragment, useEffect, useState} from "react";
 
 // Interfaces
 import {Game, GameUser} from "interfaces";
@@ -207,17 +207,16 @@ const Home = () => {
                 style={{minHeight: "90%"}}
               >
                 {listGames.map((game, i) => (
-                  <>
+                  <Fragment key={i}>
                     <CardGame
                       game={game}
-                      key={i}
                       roomNumber={i}
                       handleEnterGame={() => handleEnterGame(game)}
                     />
                     {i !== 0 && (i % 5 === 0 || i === listGames.length - 1) && (
                       <CardGameAd />
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </div>
             ) : (
