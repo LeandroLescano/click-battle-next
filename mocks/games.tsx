@@ -10,7 +10,6 @@ export const gamesMock: Game[] = [
     roomName: "Waiting Room",
     timeStart: 0,
     timer: 300,
-    visitorUser: "guest",
     created: new Date(),
     settings: {
       maxUsers: 10,
@@ -26,7 +25,6 @@ export const gamesMock: Game[] = [
     roomName: "Solo Challenge",
     timeStart: Date.now(), // Current timestamp
     timer: 10,
-    visitorUser: "",
     created: new Date(),
     settings: {
       maxUsers: 1,
@@ -42,7 +40,6 @@ export const gamesMock: Game[] = [
     roomName: "Brain Teaser",
     timeStart: 0,
     timer: 120,
-    visitorUser: "",
     created: new Date("2024-02-15"), // February 15, 2024
     settings: {
       maxUsers: 2,
@@ -62,7 +59,6 @@ export const gamesMock: Game[] = [
     roomName: "Epic Duel",
     timeStart: 1646918400000, // Timestamp from a previous date
     timer: 0,
-    visitorUser: "",
     created: new Date("2024-03-09"), // March 9, 2024
     settings: {
       timer: 0,
@@ -81,7 +77,6 @@ export const gamesMock: Game[] = [
     roomName: "My Awesome Game",
     timeStart: 0,
     timer: 60,
-    visitorUser: "",
     created: new Date(2024, 2, 10), // March 10, 2024
     settings: {
       maxUsers: 4,

@@ -16,7 +16,7 @@ import {getApp, getApps, initializeApp} from "firebase/app";
 import {connectAuthEmulator, getAuth} from "firebase/auth";
 import {connectDatabaseEmulator, getDatabase} from "firebase/database";
 import {AuthProvider} from "contexts/AuthContext";
-import Loading from "components/Loading";
+import {Loading} from "components/Loading";
 import {connectFirestoreEmulator, getFirestore} from "firebase/firestore";
 import {
   getAnalytics,

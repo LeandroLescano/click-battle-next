@@ -27,19 +27,19 @@ export interface Settings {
   timer: number;
 }
 
-type AppProps = {
+type SettingsSideBarProps = {
   options: Settings;
   idGame: string | undefined;
   showSideBar: boolean;
   handleSideBar: (value: boolean) => void;
 };
 
-function SettingsSideBar({
+export const SettingsSideBar = ({
   options,
   idGame,
   showSideBar,
   handleSideBar
-}: AppProps) {
+}: SettingsSideBarProps) => {
   const [settings, setSettings] = useState(options);
   const [deletePassword, setDeletePassword] = useState(false);
   const [config, setConfig] = useState({
@@ -211,6 +211,4 @@ function SettingsSideBar({
       </aside>
     </>
   );
-}
-
-export default SettingsSideBar;
+};

@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-const useIsMobile = (): boolean => {
+export const useIsMobile = (): boolean => {
   const [isMobile, setIsMobile] = useState(false);
   const isSSR = typeof window === "undefined";
 
@@ -32,5 +32,3 @@ const useIsMobile = (): boolean => {
 
   return isMobile;
 };
-
-export default useIsMobile;

@@ -1,4 +1,4 @@
-import {GameUser} from "./IGameUser";
+import {GameUser} from "./GameUser";
 
 export interface Game {
   key?: string | null;
@@ -9,7 +9,6 @@ export interface Game {
   roomName: string;
   timeStart: number;
   timer: number;
-  visitorUser: string;
   created?: Date | object;
   settings: GameSettings;
 }
