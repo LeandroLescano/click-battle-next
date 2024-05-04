@@ -20,7 +20,7 @@ export const CardGame = ({
     game.ownerUser && (
       <div className="col col-card mb-3">
         <div className="card card-room shadow-sm" onClick={handleEnterGame}>
-          <div className={`card-body ${game?.visitorUser ? "card-full" : ""}`}>
+          <div className="card-body">
             <p>
               <b>
                 {game.roomName !== "" ? game.roomName : `Room N°${roomNumber}`}

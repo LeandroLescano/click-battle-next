@@ -21,7 +21,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import {GameUser} from "interfaces";
 import {addUser, getUser, getUserByEmail, updateUser} from "services/user";
-import useUserInfo from "hooks/useUserInfo";
+import {useUserInfo} from "hooks/userInfo";
 
 export type AuthProviders = keyof typeof AUTH_PROVIDERS;
 

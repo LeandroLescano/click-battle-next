@@ -1,10 +1,13 @@
 "use client";
 
 import React, {useEffect, useState} from "react";
-import {RankingListProps} from "./types";
-import {useAuth} from "contexts/AuthContext";
 import {Toast, ToastContainer} from "react-bootstrap";
+import {getAnalytics, logEvent} from "firebase/analytics";
+
+import {useAuth} from "contexts/AuthContext";
 import {ModalLogin} from "components/ModalLogin";
+
+import {RankingListProps} from "./types";
 
 const RankComponent: Record<string, keyof JSX.IntrinsicElements> = {
   1: "h2",
@@ -65,7 +68,13 @@ export const RankingList = ({users}: RankingListProps) => {
 
   const handleHideToast = () => setHideToast(true);
 
-  const toggleModal = () => setShowModal((prev) => !prev);
+  const toggleModal = () => {
+    setShowModal((prev) => !prev);
+    logEvent(getAnalytics(), "toggle_modal_from_motivation", {
+      action: "toggle_modal_from_motivation",
+      possiblePos
+    });
+  };
 
   return (
     <>

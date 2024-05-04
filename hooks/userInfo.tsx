@@ -9,7 +9,7 @@ interface UserInfo {
   ipAddress?: string;
 }
 
-const useUserInfo = () => {
+export const useUserInfo = () => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   useEffect(() => {
@@ -83,5 +83,3 @@ const useUserInfo = () => {
 
   return userInfo;
 };
-
-export default useUserInfo;

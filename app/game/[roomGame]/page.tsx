@@ -1,15 +1,7 @@
 "use client";
-// React
 import React, {useEffect, useRef, useState} from "react";
 import dynamic from "next/dynamic";
-
-// Interfaces
-import {Game, GameUser, MaxScore} from "interfaces";
-
-//Router
 import {useParams, useRouter} from "next/navigation";
-
-// Firebase
 import {
   getDatabase,
   onDisconnect,
@@ -21,37 +13,26 @@ import {
   Unsubscribe
 } from "@firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
-
-// Icons
+import lottie from "lottie-web";
+import Swal from "sweetalert2";
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 
-// Utils
-import lottie from "lottie-web";
-import Swal from "sweetalert2";
-import celebrationAnim from "../../../lotties/celebrationAnim.json";
+import celebrationAnim from "lotties/celebrationAnim.json";
 import {getSuffixPosition} from "utils/string";
-
-// Components
-import {requestPassword} from "components/Alerts";
-import SettingsSideBar from "components/SettingsSideBar";
-import {ModalCreateUsername} from "components";
-import Loading from "components/Loading";
-
-// Context
+import {
+  ModalCreateUsername,
+  Loading,
+  requestPassword,
+  SettingsSideBar
+} from "components";
+import {ModalLoginProps} from "components/ModalLogin/types";
 import {useAuth} from "contexts/AuthContext";
-
-// Hooks
-import useIsMobileDevice from "hooks/useIsMobileDevice";
-
-// Services
+import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import {updateUser} from "services/user";
 import {addRoomStats} from "services/rooms";
-
-// Interfaces
-import {RoomStats} from "interfaces/RoomStats";
-import {ModalLoginProps} from "components/ModalLogin/types";
+import {Game, GameUser, MaxScore, RoomStats} from "interfaces";
 
 const OpponentSection = dynamic(
   () => import("../../../components/roomGame/OpponentSection")
@@ -104,6 +85,7 @@ function RoomGame() {
   const router = useRouter();
   const query = useParams();
   const db = getDatabase();
+  const {setNewUser} = useNewPlayerAlert(listUsers, localUser, currentGame);
   const {
     gameUser,
     user: gUser,
@@ -216,6 +198,9 @@ function RoomGame() {
                   router.push("/?kickedOut=true");
                 }
               });
+              if (listUsersToPush.length > listUsers.length) {
+                setNewUser(true);
+              }
               setListUsers(listUsersToPush);
               if (game.ownerUser?.username === actualUser) {
                 setIsLocal(true);

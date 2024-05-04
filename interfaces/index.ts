@@ -1,3 +1,4 @@
-export * from "./IGame";
-export * from "./IGameUser";
-export * from "./IRoom";
+export * from "./Game";
+export * from "./GameUser";
+export * from "./Room";
+export * from "./RoomStats";

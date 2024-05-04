@@ -3,7 +3,7 @@
 import React, {useEffect} from "react";
 import {Modal} from "react-bootstrap";
 
-import useIsMobile from "hooks/useIsMobile";
+import {useIsMobile} from "hooks/mobile";
 import {AuthProviders, useAuth} from "contexts/AuthContext";
 
 import GoogleButton from "./components/GoogleButton";

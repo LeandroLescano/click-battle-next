@@ -1,0 +1,22 @@
+/* TEAM */
+    Chief: Lescano Leandro
+    Contact: leandrolescano11@gmail.com
+    Site: https://www.linkedin.com/in/leandrolescano/
+    Twitter: @LeanLescano_
+    Location: Buenos Aires, Argentina
+
+/* THANKS */
+    Suggester: Elias Valenzuela
+    Location: Buenos Aires, Argentina
+
+    Suggester: Francisco Janza
+    Location: Buenos Aires, Argentina
+
+    Suggester: Marcos Monaco
+    Location: Buenos Aires, Argentina
+
+    Suggester: Belen Allegue
+    Location: Buenos Aires, Argentina
+
+    Suggester: Milagros Allegue
+    Location: Buenos Aires, Argentina

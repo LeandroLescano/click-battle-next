@@ -30,7 +30,7 @@ import {
 import {getDatabase, onValue, ref} from "firebase/database";
 import {_DeepPartialArray} from "chart.js/dist/types/utils";
 
-import Loading from "components/Loading";
+import {Loading} from "components/Loading";
 import {useAuth} from "contexts/AuthContext";
 import {RoomStats} from "interfaces/RoomStats";
 import {getRoomStats} from "services/rooms";

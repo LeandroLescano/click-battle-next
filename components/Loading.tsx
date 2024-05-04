@@ -2,7 +2,7 @@ import React, {useEffect, useRef} from "react";
 import loadingAnim from "../lotties/loading.json";
 import Lottie from "lottie-web";
 
-const Loading = () => {
+export const Loading = () => {
   const loadingContainer = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,5 +23,3 @@ const Loading = () => {
     </section>
   );
 };
-
-export default Loading;

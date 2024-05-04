@@ -94,7 +94,6 @@ const CreateSection = () => {
           gameStart: false,
           listUsers: [],
           ownerUser: gameUser,
-          visitorUser: "",
           timeStart: 3,
           timer,
           created: serverTimestamp(),
