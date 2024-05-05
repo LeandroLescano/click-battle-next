@@ -6,7 +6,7 @@ import GoogleAdUnit from "./GoogleAdUnit";
 export const CardGameAd = () => {
   const adbDetector = new AdblockDetector();
 
-  const userHasAdblock = adbDetector.detect() || true;
+  const userHasAdblock = adbDetector.detect() ?? true;
 
   if (userHasAdblock) return <></>;
 
