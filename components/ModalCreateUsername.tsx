@@ -24,7 +24,7 @@ export const ModalCreateUsername = () => {
     if (trimmedName.length >= 3) {
       setLoading(true);
       if (await isUsernameAvailable(trimmedName)) {
-        createUsername(trimmedName, user?.isAnonymous || true);
+        createUsername(trimmedName, user?.isAnonymous ?? true);
         setName("");
       } else {
         Swal.fire({
