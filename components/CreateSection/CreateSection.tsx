@@ -1,11 +1,11 @@
 // React
-import React, {useEffect, useState} from "react";
-
-// Hooks
-import {useAuth} from "contexts/AuthContext";
-
-// Firebase
+import React, {useEffect, useRef, useState} from "react";
+import Image from "next/image";
+import {useRouter} from "next/navigation";
+import {Spinner} from "react-bootstrap";
+import Swal from "sweetalert2";
 import {getAnalytics, logEvent} from "firebase/analytics";
+import lottie from "lottie-web";
 import {
   child,
   get,
@@ -16,18 +16,12 @@ import {
   set
 } from "firebase/database";
 
-// Interfaces
+import logoAnim from "lotties/logo-animated.json";
 import {Game, GameSettings, GameUser, Room} from "interfaces";
-
-// Router
-import {useRouter} from "next/navigation";
-
-// Utils
+import {useAuth} from "contexts/AuthContext";
 import {sha256} from "services/encode";
-import Swal from "sweetalert2";
 import {range} from "utils/numbers";
 import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
-import {Spinner} from "react-bootstrap";
 
 const CreateSection = () => {
   const [creating, setCreating] = useState(false);
@@ -39,6 +33,7 @@ const CreateSection = () => {
   const [config, setConfig] = useState({
     maxUsers: 10
   });
+  const logoContainer = useRef<HTMLDivElement>(null);
   const db = getDatabase();
   const router = useRouter();
 
@@ -145,12 +140,24 @@ const CreateSection = () => {
           sessionStorage.setItem("config", JSON.stringify(defaultConfig));
         }
       });
+      if (logoContainer?.current?.innerHTML === "") {
+        lottie.loadAnimation({
+          container: logoContainer.current!,
+          animationData: logoAnim,
+          renderer: "svg",
+          loop: true,
+          autoplay: true
+        });
+      }
     }
   }, [gameUser?.username]);
 
   return (
     <>
-      <h1 className="text-center mb-4">Click battle!</h1>
+      <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2 mb-2">
+        <div ref={logoContainer} style={{height: "100px"}} />
+        <h1 className="text-center mb-0 flex-1">Click battle!</h1>
+      </div>
       <button
         className="btn-click mb-3 mb-md-5 d-flex justify-content-center align-items-center"
         disabled={!gameUser?.username || creating}

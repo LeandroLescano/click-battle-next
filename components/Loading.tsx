@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from "react";
-import loadingAnim from "../lotties/loading.json";
+import logoAnim from "lotties/logo-animated.json";
 import Lottie from "lottie-web";
 
 export const Loading = () => {
@@ -9,17 +9,20 @@ export const Loading = () => {
     if (loadingContainer?.current?.innerHTML === "") {
       Lottie.loadAnimation({
         container: loadingContainer.current!,
-        animationData: loadingAnim
+        animationData: logoAnim,
+        loop: true,
+        autoplay: true,
+        renderer: "svg"
       });
     }
   }, []);
 
   return (
     <section
-      className="d-flex justify-content-center align-items-center overflow-y-hidden"
+      className="d-flex justify-content-center align-items-center overflow-y-hidden px-4"
       style={{height: "95vh"}}
     >
-      <div className="w-25" ref={loadingContainer} />
+      <div className="h-100 w-100" ref={loadingContainer} />
     </section>
   );
 };

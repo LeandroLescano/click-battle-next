@@ -115,7 +115,6 @@ function useAuthProvider(): AuthContextState {
         // User is anonymous
 
         if (gUser.uid && username) {
-          localStorage.setItem("uid", gUser.uid);
           setGameUser({username: username});
         }
       } else {
