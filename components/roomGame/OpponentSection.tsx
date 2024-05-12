@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
 
-import OpponentList from "./OpponentList";
 import {GameUser} from "interfaces";
 
+import OpponentList from "./OpponentList";
 interface OpponentSectionProps {
   opponents: GameUser[];
   isLocal: boolean;
@@ -20,6 +21,7 @@ function OpponentSection({
     list: opponents,
     count: 0
   });
+  const {t} = useTranslation();
 
   useEffect(() => {
     if (
@@ -51,13 +53,13 @@ function OpponentSection({
         <div className="row">
           <div className="col-10">
             <p className="mb-2">
-              Opponents ({opponents.length - 1}/{maxUsers - 1})
+              {t("Opponents")} ({opponents.length - 1}/{maxUsers - 1})
             </p>
           </div>
           <div className="col-2 text-center">Clicks</div>
         </div>
       ) : (
-        isLocal && <h4>Waiting for opponents...</h4>
+        isLocal && <h4>{t("Waiting for opponents...")}</h4>
       )}
       <div className="row">
         <div className="col-10">

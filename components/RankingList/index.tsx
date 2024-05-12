@@ -3,6 +3,7 @@
 import React, {useEffect, useState} from "react";
 import {Toast, ToastContainer} from "react-bootstrap";
 import {getAnalytics, logEvent} from "firebase/analytics";
+import {useTranslation} from "react-i18next";
 
 import {useAuth} from "contexts/AuthContext";
 import {ModalLogin} from "components/ModalLogin";
@@ -22,6 +23,7 @@ export const RankingList = ({users}: RankingListProps) => {
   const [hideToast, setHideToast] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const {gameUser, loading, user} = useAuth();
+  const {t} = useTranslation();
 
   useEffect(() => {
     const hasMaxScores = gameUser?.maxScores && gameUser.maxScores.length > 0;
@@ -109,19 +111,20 @@ export const RankingList = ({users}: RankingListProps) => {
           <Toast.Body className="d-flex gap-2 align-items-center py-3">
             {!possiblePos ? (
               <>
-                You want to be here?{" "}
+                {t("You want to be here?")}{" "}
                 <button className="btn-click small" onClick={toggleModal}>
-                  Sign up
+                  {t("Sign up")}
                 </button>{" "}
-                and play!
+                {t("and play!")}
                 <button className="btn btn-close" onClick={handleHideToast} />
               </>
             ) : (
               <>
-                Wow! You&apos;re at position {possiblePos} on the leaderboard!
-                Want to claim your spot and keep playing?
+                {t(
+                  "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?"
+                )}
                 <button className="btn-click small" onClick={toggleModal}>
-                  Sign up
+                  {t("Sign up")}
                 </button>
                 <button className="btn btn-close" onClick={handleHideToast} />
               </>

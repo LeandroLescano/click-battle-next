@@ -18,10 +18,12 @@ import {
 import Swal from "sweetalert2";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import * as Sentry from "@sentry/nextjs";
+import {getApp, getApps, initializeApp} from "firebase/app";
 
 import {GameUser} from "interfaces";
 import {addUser, getUser, getUserByEmail, updateUser} from "services/user";
 import {useUserInfo} from "hooks/userInfo";
+import {firebaseConfig} from "resources/config";
 
 export type AuthProviders = keyof typeof AUTH_PROVIDERS;
 
@@ -77,7 +79,8 @@ function useAuthProvider(): AuthContextState {
   const [gameUser, setGameUser] = useState<GameUser>();
   const [loading, setLoading] = useState(true);
   const userInfo = useUserInfo();
-  const auth = getAuth();
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  const auth = getAuth(app);
 
   const updateGameUser = (gameUserProps: Partial<GameUser>) => {
     setGameUser((prev) => prev && {...prev, ...gameUserProps});
@@ -115,7 +118,6 @@ function useAuthProvider(): AuthContextState {
         // User is anonymous
 
         if (gUser.uid && username) {
-          localStorage.setItem("uid", gUser.uid);
           setGameUser({username: username});
         }
       } else {

@@ -1,19 +1,22 @@
 import Swal, {SweetAlertResult} from "sweetalert2";
-import {sha256} from "../services/encode";
+import {TFunction} from "i18next";
+
+import {sha256} from "services/encode";
 
 export const requestPassword = async (
-  password: string
+  password: string,
+  t: TFunction
 ): Promise<SweetAlertResult> => {
   return await Swal.fire({
-    title: "Enter the password",
+    title: t("Enter the password"),
     input: "password",
     showCancelButton: true,
-    cancelButtonText: "Cancel",
-    confirmButtonText: "Enter",
+    cancelButtonText: t("Cancel"),
+    confirmButtonText: t("Enter"),
     reverseButtons: true,
     inputValidator: (val) => {
       if (!val) {
-        return "Plese enter the password";
+        return t("Plese enter the password");
       }
       return null;
     },

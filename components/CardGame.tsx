@@ -1,9 +1,10 @@
+import React from "react";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {faLock, faUser} from "@fortawesome/free-solid-svg-icons";
-
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {useTranslation} from "react-i18next";
+
 import {Game} from "interfaces";
-import React from "react";
 
 type CardGameProps = {
   game: Game;
@@ -16,6 +17,8 @@ export const CardGame = ({
   handleEnterGame,
   roomNumber
 }: CardGameProps) => {
+  const {t} = useTranslation();
+
   return (
     game.ownerUser && (
       <div className="col col-card mb-3">
@@ -23,14 +26,16 @@ export const CardGame = ({
           <div className="card-body">
             <p>
               <b>
-                {game.roomName !== "" ? game.roomName : `Room N°${roomNumber}`}
+                {game.roomName !== ""
+                  ? game.roomName
+                  : t("Room N°", {roomName: roomNumber})}
                 {game.settings.password ? (
                   <FontAwesomeIcon icon={faLock as IconProp} className="mx-1" />
                 ) : null}
               </b>
             </p>
             <span>
-              Owner: <br />
+              {t("Owner")}: <br />
               {game.ownerUser?.username}
             </span>
           </div>

@@ -1,9 +1,11 @@
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React from "react";
-import {Game, GameUser} from "interfaces";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faTrophy} from "@fortawesome/free-solid-svg-icons";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {get, getDatabase, ref, update} from "firebase/database";
+import {useTranslation} from "react-i18next";
+
+import {Game, GameUser} from "interfaces";
 
 interface ResultSectionProps {
   localPosition: string | undefined;
@@ -21,6 +23,7 @@ function ResultSection({
   currentGame
 }: ResultSectionProps) {
   const db = getDatabase();
+  const {t} = useTranslation();
 
   // function for reset all data
   const handleReset = () => {
@@ -46,7 +49,7 @@ function ResultSection({
     >
       <div>
         <h1 id="result" className="no-select">
-          Result - {localPosition} place
+          {t("Result position", {position: localPosition})}
         </h1>
         {listUsers
           .sort((a, b) => ((a.clicks || 0) < (b.clicks || 0) ? 1 : -1))
@@ -64,7 +67,8 @@ function ResultSection({
                     className="mx-1"
                   />
                 )}
-                <b>{user.username}</b> with {user.clicks} clicks!
+                <b>{user.username}</b>{" "}
+                {t("with n clicks!", {clicks: user.clicks})}
                 {i === 0 && (
                   <FontAwesomeIcon
                     icon={faTrophy as IconProp}

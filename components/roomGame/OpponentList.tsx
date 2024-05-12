@@ -1,8 +1,10 @@
+import React from "react";
 import {getDatabase, ref, update} from "firebase/database";
 import {useParams} from "next/navigation";
-import React from "react";
 import {Flipped, Flipper} from "react-flip-toolkit";
 import Swal from "sweetalert2";
+import {useTranslation} from "react-i18next";
+
 import {GameUser} from "interfaces";
 
 interface Props {
@@ -17,6 +19,7 @@ interface Props {
 const OpponentList = ({countPositions, localUsername, isLocal}: Props) => {
   const pathIdGame = useParams()?.roomGame;
   const db = getDatabase();
+  const {t} = useTranslation();
 
   const kickUser = (userKey: string | null) => {
     if (userKey) {
@@ -49,15 +52,15 @@ const OpponentList = ({countPositions, localUsername, isLocal}: Props) => {
               localUsername === username && "local-row"
             }`}
           >
-            <div className="col-10 text-start">{username}</div>
+            <div className="col text-start">{username}</div>
             {isLocal && localUsername !== username && (
               <div
-                className="col-2 btn-kick"
+                className="col-auto btn-kick"
                 onClick={() => {
                   kickUser(userKey || null);
                 }}
               >
-                kick
+                {t("Kick")}
               </div>
             )}
           </div>

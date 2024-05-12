@@ -2,14 +2,23 @@ import React, {useEffect, useState} from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import {useRouter} from "next/navigation";
+import {useTranslation} from "react-i18next";
+import {changeLanguage} from "i18next";
 
 import {timeout} from "utils/timeout";
 import {updateUser} from "services/user";
 import {useAuth} from "contexts/AuthContext";
 import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
+import {languages} from "app/i18n/settings";
 
 import RatingStars from "./RatingStars";
 import {ModalLogin} from "./ModalLogin";
+import {
+  Dropdown,
+  DropdownButton,
+  OverlayTrigger,
+  Tooltip
+} from "react-bootstrap";
 
 interface contactProps {
   title?: string;
@@ -32,6 +41,7 @@ export const Footer = () => {
   const [send, setSend] = useState(false);
   const {user, gameUser, signOut, updateGameUser} = useAuth();
   const router = useRouter();
+  const {t, i18n} = useTranslation();
 
   //Function for logout user.
   const handleLogOut = () => {
@@ -206,22 +216,45 @@ export const Footer = () => {
           <div className="d-flex gap-2 mx-auto mx-md-0 my-2">
             <a onClick={handleFeedback}>Feedback</a>
             <span>|</span>
-            <a onClick={() => handleContact}>Contact</a>
+            <a onClick={() => handleContact}>{t("Contact")}</a>
             <span>|</span>
-            <a onClick={() => router.push("/ranking")}>Ranking</a>
+            <a onClick={() => router.push("/ranking")}>{t("Ranking")}</a>
           </div>
         ) : (
           <div className="d-flex gap-2 justify-content-center w-sm-100 flex-fill align-self-center pb-sm-2 pb-0">
-            <a onClick={() => router.push("/ranking")}>Ranking</a>
+            <a onClick={() => router.push("/ranking")}>{t("Ranking")}</a>
             <span>|</span>
-            <a onClick={toggleModal}>Save my data</a>
+            <a onClick={toggleModal}>{t("Save my data")}</a>
           </div>
         )}
         {gameUser?.username && (
-          <div className="txt-user text-center mx-auto mx-md-0 mt-1">
-            {`logged as ${gameUser.username} - `}
+          <div className="txt-user text-center mx-auto mx-md-0 mt-1 d-flex align-items-center gap-2">
+            <DropdownButton
+              title={<img src={`/flags/${i18n.language}.svg`} height={25} />}
+              variant="secondary"
+              size="sm"
+              drop="up"
+            >
+              {languages.map((lang) => (
+                <Dropdown.Item
+                  as="button"
+                  key={lang}
+                  active={i18n.language === lang}
+                  onClick={() => changeLanguage(lang)}
+                >
+                  <img src={`/flags/${lang}.svg`} />
+                </Dropdown.Item>
+              ))}
+            </DropdownButton>
+            <OverlayTrigger
+              overlay={
+                <Tooltip>{t("Logged as", {name: gameUser.username})}</Tooltip>
+              }
+            >
+              <img src="/icons/clicky-right.svg" height={35} />
+            </OverlayTrigger>
             <button className="btn-logout btn-click" onClick={handleLogOut}>
-              Log out
+              {t("Log out")}
             </button>
           </div>
         )}

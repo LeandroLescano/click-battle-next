@@ -1,37 +1,24 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
-// React
 import React, {Fragment, useEffect, useState} from "react";
-
-// Interfaces
-import {Game, GameUser} from "interfaces";
-
-// Router
+import Swal from "sweetalert2";
+import {useTranslation} from "react-i18next";
+import {getAnalytics, logEvent} from "firebase/analytics";
 import {useRouter, useSearchParams} from "next/navigation";
-
-// Next
+import {child, getDatabase, onValue, ref, set} from "@firebase/database";
 import dynamic from "next/dynamic";
 
-// Firebase
-import {child, getDatabase, onValue, ref, set} from "@firebase/database";
-import {getAnalytics, logEvent} from "firebase/analytics";
-
-// Components
+import {Game, GameUser} from "interfaces";
 import {
   CardGame,
   Footer,
   requestPassword,
   ModalCreateUsername,
-  CardGameAd
+  CardGameAd,
+  Loading
 } from "components";
 import CreateSection from "components/CreateSection/CreateSection";
-import {Loading} from "components/Loading";
 import {ModalLoginProps} from "components/ModalLogin/types";
-
-// Utils
-import Swal from "sweetalert2";
-
-// Hooks
 import {useAuth} from "contexts/AuthContext";
 
 const ModalLogin = dynamic<ModalLoginProps>(
@@ -50,6 +37,7 @@ const Home = () => {
   const params = useSearchParams();
   const db = getDatabase();
   const {gameUser, user, loading} = useAuth();
+  const {t} = useTranslation();
 
   useEffect(() => {
     //If exist userKey get user from DB
@@ -57,7 +45,7 @@ const Home = () => {
       router.replace("/");
       //TODO: Add a global Swal mixin with heightAuto:false
       Swal.fire({
-        title: "You were kicked out by the owner.",
+        title: t("You were kicked out by the owner"),
         icon: "error",
         confirmButtonText: "Ok",
         heightAuto: false
@@ -65,7 +53,7 @@ const Home = () => {
     } else if (params.get("fullRoom") === "true") {
       router.replace("/");
       Swal.fire({
-        title: "The room is full.",
+        title: t("Room is full"),
         icon: "error",
         confirmButtonText: "Ok",
         heightAuto: false
@@ -73,8 +61,10 @@ const Home = () => {
     } else if (params.get("suspicionOfHack") === "true") {
       router.replace("/");
       Swal.fire({
-        title: "Fair play is important to us",
-        text: "Please refrain from using unauthorized tools or hacks while playing.",
+        title: t("Fair play is important to us"),
+        text: t(
+          "Please refrain from using unauthorized tools or hacks while playing."
+        ),
         icon: "warning",
         confirmButtonText: "Ok",
         heightAuto: false
@@ -124,7 +114,7 @@ const Home = () => {
         if (Object.keys(game.listUsers).length === game.settings.maxUsers) {
           Swal.fire({
             icon: "warning",
-            title: "Room is full",
+            title: t("Room is full"),
             toast: true,
             showConfirmButton: false,
             position: "bottom-end",
@@ -132,7 +122,7 @@ const Home = () => {
           });
         } else {
           if (game.settings.password) {
-            requestPassword(game.settings.password).then((val) => {
+            requestPassword(game.settings.password, t).then((val) => {
               if (game.key && val.isConfirmed) {
                 configRoomToEnter(game);
               }
@@ -146,7 +136,7 @@ const Home = () => {
       console.error(error);
       Swal.fire({
         icon: "error",
-        title: "Ups! We couldn't enter the room, please try again.",
+        title: t("Ups! We couldn't enter the room, please try again."),
         timer: 3000,
         timerProgressBar: true,
         heightAuto: false
@@ -200,7 +190,7 @@ const Home = () => {
             <CreateSection />
           </div>
           <div className="col-lg-8 order-md-0 rooms-section">
-            <h2>Available rooms</h2>
+            <h2>{t("Available rooms")}</h2>
             {listGames.length > 0 ? (
               <div
                 className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mh-100 align-content-start"

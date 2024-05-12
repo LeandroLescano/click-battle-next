@@ -1,11 +1,10 @@
 // React
-import React, {useEffect, useState} from "react";
-
-// Hooks
-import {useAuth} from "contexts/AuthContext";
-
-// Firebase
+import React, {useEffect, useRef, useState} from "react";
+import {useRouter} from "next/navigation";
+import {Spinner} from "react-bootstrap";
+import Swal from "sweetalert2";
 import {getAnalytics, logEvent} from "firebase/analytics";
+import lottie from "lottie-web";
 import {
   child,
   get,
@@ -15,19 +14,14 @@ import {
   serverTimestamp,
   set
 } from "firebase/database";
+import {useTranslation} from "react-i18next";
 
-// Interfaces
+import logoAnim from "lotties/logo-animated.json";
 import {Game, GameSettings, GameUser, Room} from "interfaces";
-
-// Router
-import {useRouter} from "next/navigation";
-
-// Utils
+import {useAuth} from "contexts/AuthContext";
 import {sha256} from "services/encode";
-import Swal from "sweetalert2";
 import {range} from "utils/numbers";
 import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
-import {Spinner} from "react-bootstrap";
 
 const CreateSection = () => {
   const [creating, setCreating] = useState(false);
@@ -39,8 +33,10 @@ const CreateSection = () => {
   const [config, setConfig] = useState({
     maxUsers: 10
   });
+  const logoContainer = useRef<HTMLDivElement>(null);
   const db = getDatabase();
   const router = useRouter();
+  const {t} = useTranslation();
 
   const handleUpdateRoom = (data: Partial<Room>) => {
     setRoom((prev) => ({...prev, ...data}));
@@ -145,6 +141,15 @@ const CreateSection = () => {
           sessionStorage.setItem("config", JSON.stringify(defaultConfig));
         }
       });
+      if (logoContainer?.current?.innerHTML === "") {
+        lottie.loadAnimation({
+          container: logoContainer.current!,
+          animationData: logoAnim,
+          renderer: "svg",
+          loop: true,
+          autoplay: true
+        });
+      }
     }
   }, [gameUser?.username]);
 
@@ -156,12 +161,12 @@ const CreateSection = () => {
         disabled={!gameUser?.username || creating}
         onClick={handleCreate}
       >
-        <span className={creating ? "opacity-0" : ""}>Create game</span>
+        <span className={creating ? "opacity-0" : ""}>{t("Create game")}</span>
         <Spinner
           className={`position-absolute ${!creating ? "opacity-0" : ""}`}
         />
       </button>
-      <span>Insert room name</span>
+      <span>{t("Insert room name")}</span>
       <input
         type="text"
         className="form-name mb-2"
@@ -169,22 +174,24 @@ const CreateSection = () => {
         value={room?.name}
         onChange={(ref) => handleUpdateRoom({name: ref.target.value})}
         placeholder={
-          gameUser?.username ? `${gameUser.username}'s room` : "Room name"
+          gameUser?.username
+            ? t("Name's room", {name: gameUser.username})
+            : t("Room name")
         }
       />
-      <span>Insert room password (op)</span>
+      <span>{t("Insert room password (OP)")}</span>
       <input
         type="password"
         className="form-name mb-2"
         data-label="Password"
         value={room?.password || ""}
         onChange={(ref) => handleUpdateRoom({password: ref.target.value})}
-        placeholder={`Password`}
+        placeholder={t("Password")}
       />
-      <span>Max number of users</span>
+      <span>{t("Max number of users")}</span>
       <select
         className="form-name mb-2"
-        data-label="Room name"
+        data-label="Max number of users"
         value={room?.maxUsers}
         onChange={(ref) =>
           handleUpdateRoom({maxUsers: Number(ref.target.value)})
@@ -198,7 +205,7 @@ const CreateSection = () => {
           </option>
         ))}
       </select>
-      <span>Timer</span>
+      <span>{t("Timer")}</span>
       <select
         className="form-name mb-2"
         data-label="Room name"

@@ -5,6 +5,11 @@
     Twitter: @LeanLescano_
     Location: Buenos Aires, Argentina
 
+    UX/UI Designer: Martina Tricarico
+    Contact: https://www.behance.net/martinatricari2
+    Site: https://ar.linkedin.com/in/martinavictoriatricarico
+    Loaction: Buenos Aires, Argentina
+
 /* THANKS */
     Suggester: Elias Valenzuela
     Location: Buenos Aires, Argentina
