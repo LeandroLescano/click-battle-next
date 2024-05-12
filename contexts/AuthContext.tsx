@@ -13,12 +13,20 @@ import {
   TwitterAuthProvider,
   GithubAuthProvider,
   linkWithCredential,
-  OAuthProvider
+  OAuthProvider,
+  connectAuthEmulator
 } from "firebase/auth";
 import Swal from "sweetalert2";
-import {getAnalytics, logEvent} from "firebase/analytics";
+import {
+  getAnalytics,
+  logEvent,
+  isSupported,
+  setAnalyticsCollectionEnabled
+} from "firebase/analytics";
 import * as Sentry from "@sentry/nextjs";
 import {getApp, getApps, initializeApp} from "firebase/app";
+import {connectDatabaseEmulator, getDatabase} from "firebase/database";
+import {connectFirestoreEmulator, getFirestore} from "firebase/firestore";
 
 import {GameUser} from "interfaces";
 import {addUser, getUser, getUserByEmail, updateUser} from "services/user";
@@ -63,6 +71,24 @@ const AuthContext = createContext<AuthContextState>({
 
 interface Props {
   children: JSX.Element;
+}
+
+if (process.env.NODE_ENV === "development") {
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  try {
+    connectAuthEmulator(getAuth(app), "http://localhost:9099", {
+      disableWarnings: true
+    });
+    connectFirestoreEmulator(getFirestore(app), "localhost", 8080);
+    connectDatabaseEmulator(getDatabase(app), "localhost", 9000);
+
+    isSupported().then(
+      (supported) =>
+        supported && setAnalyticsCollectionEnabled(getAnalytics(), false)
+    );
+  } catch (error) {
+    console.log({error});
+  }
 }
 
 export function AuthProvider({children}: Props) {

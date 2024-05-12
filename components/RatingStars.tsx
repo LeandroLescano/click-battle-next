@@ -1,5 +1,8 @@
 import React, {useEffect, useState} from "react";
-import {RATING} from "../resources/constants";
+import {useTranslation} from "react-i18next";
+
+import {RATING} from "resources/constants";
+
 import Star from "./Star";
 
 interface Props {
@@ -26,6 +29,7 @@ const RatingStars = ({
     value: initialValue,
     isSelected: initialValue ? true : false
   });
+  const {t} = useTranslation();
 
   useEffect(() => {
     if (onChange) {
@@ -45,7 +49,9 @@ const RatingStars = ({
       <div>
         {showNumberRating ? (
           <h3 style={{...numberStyle}}>
-            {rating.isSelected ? RATING[rating.value] : RATING[hoverPosition]}
+            {rating.isSelected
+              ? t(RATING[rating.value])
+              : t(RATING[hoverPosition])}
           </h3>
         ) : null}
       </div>
