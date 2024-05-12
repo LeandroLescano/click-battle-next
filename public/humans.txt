@@ -8,7 +8,7 @@
     UX/UI Designer: Martina Tricarico
     Contact: https://www.behance.net/martinatricari2
     Site: https://ar.linkedin.com/in/martinavictoriatricarico
-    Loaction: Buenos Aires, Argentina
+    Location: Buenos Aires, Argentina
 
 /* THANKS */
     Suggester: Elias Valenzuela
