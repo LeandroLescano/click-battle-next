@@ -49,7 +49,7 @@ const Home = () => {
       router.replace("/");
       //TODO: Add a global Swal mixin with heightAuto:false
       Swal.fire({
-        title: "You were kicked out by the owner.",
+        title: t("You were kicked out by the owner"),
         icon: "error",
         confirmButtonText: "Ok",
         heightAuto: false
@@ -57,7 +57,7 @@ const Home = () => {
     } else if (params.get("fullRoom") === "true") {
       router.replace("/");
       Swal.fire({
-        title: "The room is full.",
+        title: t("Room is full"),
         icon: "error",
         confirmButtonText: "Ok",
         heightAuto: false
@@ -65,8 +65,10 @@ const Home = () => {
     } else if (params.get("suspicionOfHack") === "true") {
       router.replace("/");
       Swal.fire({
-        title: "Fair play is important to us",
-        text: "Please refrain from using unauthorized tools or hacks while playing.",
+        title: t("Fair play is important to us"),
+        text: t(
+          "Please refrain from using unauthorized tools or hacks while playing."
+        ),
         icon: "warning",
         confirmButtonText: "Ok",
         heightAuto: false

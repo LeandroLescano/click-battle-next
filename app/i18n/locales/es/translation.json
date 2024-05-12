@@ -57,5 +57,7 @@
   "and play!": "y juega!",
   "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?": "Wow! Estás en la posición {{position}} de la clasificación! ¿Quieres reclamar tu lugar y seguir jugando?",
   "Last update": "Última actualización",
-  "Language": "Idioma"
+  "Fair play is important to us": "El juego limpio es importante para nosotros",
+  "Please refrain from using unauthorized tools or hacks while playing.": "Por favor abstenerse de usar herramientas no authorizadas o hacks mientras juegas",
+  "You were kicked out by the owner": "Fuiste expulsado por el host"
 }
