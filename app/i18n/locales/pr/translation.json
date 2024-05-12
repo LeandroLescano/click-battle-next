@@ -60,5 +60,5 @@
   "Fair play is important to us": "O jogo justo é importante para nós",
   "Please refrain from using unauthorized tools or hacks while playing.": "Por favor, abstenha-se de usar ferramentas ou hacks não autorizados durante o jogo.",
   "You were kicked out by the owner": "Você foi expulso pelo anfitrião",
-  "inviteText": "Oi!\n\nJunte-se a mim em uma batalha de cliques! Vamos ver quem consegue clicar mais rápido. Clique aqui para participar: {{link}}.\n\nVejo você lá! 📱"
+  "inviteText": "Oi!\n\nJunte-se a mim em uma batalha de cliques! Vamos ver quem consegue clicar mais rápido. Clique aqui para participar: {{- link}}.\n\nVejo você lá! 📱"
 }

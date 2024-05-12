@@ -70,32 +70,32 @@ export default async function Layout({children}: Props) {
           <meta name="viewport" content="width=device-width, minimum-scale=1" />
           <meta
             name="description"
-            content="Online multiplayer Click battle - Challenge your friends to a 10 second click battle!"
+            content="Click Battle is an online multiplayer click battle game where you can challenge your friends to a 10 second click battle. The player with the most clicks at the end of the battle wins. Click Battle is a fun and addictive game that is perfect for a quick break or a long gaming session."
           />
           <meta
             name="keywords"
-            content="click, clicks, battle, game, multiplayer, online, friends"
+            content="click, clicks, battle, game, multiplayer, online, friends, competition, challenge, high score, leaderboard, social, fun, addictive, casual, free"
           />
           <meta property="og:type" content="article" />
-          <meta property="og:title" content="CLICK BATTLE" />
+          <meta property="og:title" content="Click Battle" />
           <meta
             property="og:image"
-            content="http://pngimg.com/uploads/cursor/cursor_PNG100721.png"
+            content="https://www.click-battle.com.ar/logo/logo.svg"
           />
           <meta
             property="og:description"
-            content="Online multiplayer Click battle game"
+            content="Online multiplayer click battle game"
           />
-          <meta property="og:url" content="https://click-battle-mp.web.app/" />
-          <meta property="og:site_name" content="Click battle" />
-          <meta name="twitter:title" content="Click battle" />
+          <meta property="og:url" content="https://www.click-battle.com.ar/" />
+          <meta property="og:site_name" content="Click Battle" />
+          <meta name="twitter:title" content="Click Battle" />
           <meta
             name="twitter:description"
-            content="Online multiplayer Click battle game"
+            content="Online multiplayer click battle game"
           />
           <meta
             name="twitter:image"
-            content="http://pngimg.com/uploads/cursor/cursor_PNG100721.png"
+            content="https://www.click-battle.com.ar/logo/logo.svg"
           />
           <meta name="twitter:creator" content="@LeanLescano_" />
           <meta name="author" content="Lescano Leandro Nicolas" />

@@ -437,13 +437,9 @@ function RoomGame() {
     }
     const data: ShareData = {
       title: "Click Battle",
-      text: `Hey!
-
-Join me in a click battle! Let's see who can click the fastest. Click here to join: ${link}.
-
-See you there! 📱🖱️`
+      text: t("inviteText", {link})
     };
-    if (mobileDevice && navigator.canShare(data)) {
+    if (mobileDevice && navigator.share && navigator.canShare(data)) {
       navigator.share(data).catch((e: unknown) => {
         console.error(e);
       });
