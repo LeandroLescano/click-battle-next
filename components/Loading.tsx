@@ -1,3 +1,5 @@
+"use client";
+
 import React, {useEffect, useRef} from "react";
 import logoAnim from "lotties/logo-animated.json";
 import Lottie from "lottie-web";

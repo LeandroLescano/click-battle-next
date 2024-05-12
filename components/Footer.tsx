@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import {useRouter} from "next/navigation";
+import {useTranslation} from "react-i18next";
 
 import {timeout} from "utils/timeout";
 import {updateUser} from "services/user";
@@ -32,6 +33,7 @@ export const Footer = () => {
   const [send, setSend] = useState(false);
   const {user, gameUser, signOut, updateGameUser} = useAuth();
   const router = useRouter();
+  const {t} = useTranslation();
 
   //Function for logout user.
   const handleLogOut = () => {
@@ -206,22 +208,25 @@ export const Footer = () => {
           <div className="d-flex gap-2 mx-auto mx-md-0 my-2">
             <a onClick={handleFeedback}>Feedback</a>
             <span>|</span>
-            <a onClick={() => handleContact}>Contact</a>
+            <a onClick={() => handleContact}>{t("Contact")}</a>
             <span>|</span>
-            <a onClick={() => router.push("/ranking")}>Ranking</a>
+            <a onClick={() => router.push("/ranking")}>{t("Ranking")}</a>
           </div>
         ) : (
           <div className="d-flex gap-2 justify-content-center w-sm-100 flex-fill align-self-center pb-sm-2 pb-0">
-            <a onClick={() => router.push("/ranking")}>Ranking</a>
+            <a onClick={() => router.push("/ranking")}>{t("Ranking")}</a>
             <span>|</span>
-            <a onClick={toggleModal}>Save my data</a>
+            <a onClick={toggleModal}>{t("Save my data")}</a>
           </div>
         )}
         {gameUser?.username && (
           <div className="txt-user text-center mx-auto mx-md-0 mt-1">
-            {`logged as ${gameUser.username} - `}
-            <button className="btn-logout btn-click" onClick={handleLogOut}>
-              Log out
+            {t("Logged as", {name: gameUser.username})} -
+            <button
+              className="btn-logout btn-click ms-2"
+              onClick={handleLogOut}
+            >
+              {t("Log out")}
             </button>
           </div>
         )}

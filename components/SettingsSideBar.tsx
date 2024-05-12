@@ -1,12 +1,13 @@
 import React, {useEffect, useRef, useState} from "react";
-import {faCog, faTimes} from "@fortawesome/free-solid-svg-icons";
 import {getDatabase, ref, update} from "@firebase/database";
-
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Swal from "sweetalert2";
+import {faCog, faTimes} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {useTranslation} from "react-i18next";
+
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
-import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {AVAILABLE_TIMES} from "resources/constants";
 import {Game} from "interfaces";
 import {adjustRoomSettings} from "utils/room";
@@ -47,6 +48,7 @@ export const SettingsSideBar = ({
   });
   const inputPassword = useRef<HTMLInputElement>(null);
   const db = getDatabase();
+  const {t} = useTranslation();
 
   useEffect(() => {
     setSettings({
@@ -97,13 +99,13 @@ export const SettingsSideBar = ({
       } as Partial<Game>);
 
       Toast.fire({
-        title: "Settings updated",
+        title: t("Settings updated"),
         icon: "success"
       });
     } catch (error) {
       console.error(error);
       Toast.fire({
-        title: "There was an error",
+        title: t("There was an error"),
         icon: "error"
       });
     }
@@ -116,7 +118,7 @@ export const SettingsSideBar = ({
       </div>
       <aside className={`sidebar ${showSideBar && "active"}`}>
         <div className="d-flex justify-content-between align-items-center">
-          <h2 className="m-0">Settings</h2>
+          <h2 className="m-0">{t("Settings")}</h2>
           <FontAwesomeIcon
             icon={faTimes as IconProp}
             className="close-icon"
@@ -126,7 +128,7 @@ export const SettingsSideBar = ({
         <hr />
         <div className="d-flex flex-column justify-content-between">
           <section>
-            <span>room name</span>
+            <span>{t("Room name")}</span>
             <input
               type="text"
               className="form-name mb-2"
@@ -138,7 +140,9 @@ export const SettingsSideBar = ({
             />
           </section>
           <section>
-            <span>{options.password ? "change" : "set"} password</span>
+            <span>
+              {options.password ? t("Change password") : t("Set password")}
+            </span>
             <div className="position-relative">
               <input
                 ref={inputPassword}
@@ -149,7 +153,7 @@ export const SettingsSideBar = ({
                 onChange={(ref) =>
                   setSettings({...settings, password: ref.target.value})
                 }
-                placeholder={`Password`}
+                placeholder={t("Password")}
               />
               {options.password && (
                 <>
@@ -161,14 +165,14 @@ export const SettingsSideBar = ({
                       onChange={() => setDeletePassword((prev) => !prev)}
                     />
                     <span className="checkmark"></span>
-                    <label>Delete password</label>
+                    <label>{t("Delete password")}</label>
                   </div>
                 </>
               )}
             </div>
           </section>
           <section className="settings-users">
-            <span>Max number of users</span>
+            <span>{t("Max number of users")}</span>
             <select
               className="form-name ms-4"
               data-label="Room name"
@@ -185,7 +189,7 @@ export const SettingsSideBar = ({
             </select>
           </section>
           <section className="settings-users">
-            <span>Timer</span>
+            <span>{t("Timer")}</span>
             <select
               className="form-name ms-4"
               data-label="Room name"
@@ -206,7 +210,7 @@ export const SettingsSideBar = ({
           className="btn-click small btn-settings"
           onClick={handleUpdateSettings}
         >
-          Save settings
+          {t("Save settings")}
         </button>
       </aside>
     </>

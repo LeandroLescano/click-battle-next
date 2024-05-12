@@ -1,0 +1,16 @@
+{
+  "Create game": "Create game",
+  "Insert room name": "Insert room name",
+  "Room name": "Room name",
+  "Name's room": "{{name}}'s room",
+  "Insert room password (OP)": "Insert room password (OP)",
+  "Max number of users": "Max number of users",
+  "Timer": "Timer",
+  "Logged as": "Logged as {{name}}",
+  "Room N°": "Room N°{{roomName}}",
+  "N seconds remaining!": "{{seconds}} seconds remaining!",
+  "Result position": "Result - {{position}} place",
+  "with n clicks!": "with {{clicks}} clicks!",
+  "You have n clicks!": "You have {{clicks}} clicks!",
+  "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?": "Wow! You're at position {{position}} on the leaderboard! Want to claim your spot and keep playing?"
+}

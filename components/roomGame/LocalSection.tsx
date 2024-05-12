@@ -1,13 +1,11 @@
 import React, {useState} from "react";
-import {getDatabase, ref, update} from "firebase/database";
 import {useRouter} from "next/navigation";
-
-// Interfaces
-import {GameUser} from "interfaces";
-
-// Contexts
-import {useAuth} from "contexts/AuthContext";
+import {getDatabase, ref, update} from "firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
+import {useTranslation} from "react-i18next";
+
+import {GameUser} from "interfaces";
+import {useAuth} from "contexts/AuthContext";
 
 interface LocalSectionProps {
   idGame: string;
@@ -30,6 +28,7 @@ function LocalSection({
   const router = useRouter();
   const db = getDatabase();
   const {user: gUser} = useAuth();
+  const {t} = useTranslation();
 
   const cantStart = !start && listUsers.length < 2;
 
@@ -66,12 +65,12 @@ function LocalSection({
     <>
       {!start && !startCountdown ? (
         isLocal ? (
-          <h4>press start to play</h4>
+          <h4>{t("Press start to play")}</h4>
         ) : (
-          <h4>Waiting for host...</h4>
+          <h4>{t("Waiting for host...")}</h4>
         )
       ) : (
-        <h4>You have {localUser.clicks} clicks!</h4>
+        <h4>{t("You have n clicks!", {clicks: localUser.clicks})}</h4>
       )}
       <div className="d-flex justify-content-around gap-2">
         <button
@@ -87,13 +86,13 @@ function LocalSection({
             disabled={cantStart}
             onClick={handleStart}
           >
-            Start!
+            {t("Start!")}
           </button>
         )}
       </div>
       <p className="mt-3 mb-0">{localUser.username}</p>
       {cantStart && (
-        <sub> This game requires at least 2 players. Grab a friend!</sub>
+        <sub>{t("This game requires at least 2 players. Grab a friend!")}</sub>
       )}
     </>
   );

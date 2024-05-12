@@ -18,6 +18,7 @@ import Swal from "sweetalert2";
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {useTranslation} from "react-i18next";
 
 import celebrationAnim from "lotties/celebrationAnim.json";
 import {getSuffixPosition} from "utils/string";
@@ -95,6 +96,7 @@ function RoomGame() {
   } = useAuth();
   const localUserRef = useRef<GameUser>();
   const mobileDevice = useIsMobileDevice();
+  const {t} = useTranslation();
 
   let unsubscribe: Unsubscribe;
 
@@ -220,7 +222,7 @@ function RoomGame() {
                 ) {
                   flagEnter.current = true;
                   if (!query?.pwd || query.pwd !== game.settings.password) {
-                    requestPassword(game.settings.password).then((val) => {
+                    requestPassword(game.settings.password, t).then((val) => {
                       if (val.isConfirmed) {
                         clearPath(pathIdGame);
                         sessionStorage.setItem("actualIDGame", pathIdGame);
@@ -275,7 +277,7 @@ function RoomGame() {
     if (currentGame?.timer === undefined) {
       for (const i in listUsers) {
         if (listUsers[i].username === localUser.username) {
-          setLocalPosition(getSuffixPosition(Number(i) + 1));
+          setLocalPosition(getSuffixPosition(Number(i) + 1, t));
         }
       }
     }
@@ -505,7 +507,7 @@ See you there! 📱🖱️`
                     size="xs"
                     className="me-2"
                   />
-                  Go back
+                  {t("Go back")}
                 </button>
                 <span className="d-block d-md-none m-auto">
                   {currentGame?.roomName || ""}
@@ -547,7 +549,7 @@ See you there! 📱🖱️`
                 {currentGame?.timer !== undefined &&
                   currentGame.currentGame && (
                     <h2 className="text-center">
-                      {currentGame?.timer} seconds remaining!
+                      {t("N seconds remaining!", {seconds: currentGame?.timer})}
                     </h2>
                   )}
               </div>
@@ -555,7 +557,7 @@ See you there! 📱🖱️`
                 className="btn-click small position-absolute bottom-0 end-0 me-4 mb-4"
                 onClick={handleInvite}
               >
-                Invite friends
+                {t("Invite friends")}
               </button>
             </main>
           </div>

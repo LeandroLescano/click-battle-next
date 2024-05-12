@@ -1,6 +1,5 @@
 // React
 import React, {useEffect, useRef, useState} from "react";
-import Image from "next/image";
 import {useRouter} from "next/navigation";
 import {Spinner} from "react-bootstrap";
 import Swal from "sweetalert2";
@@ -15,6 +14,7 @@ import {
   serverTimestamp,
   set
 } from "firebase/database";
+import {useTranslation} from "react-i18next";
 
 import logoAnim from "lotties/logo-animated.json";
 import {Game, GameSettings, GameUser, Room} from "interfaces";
@@ -36,6 +36,7 @@ const CreateSection = () => {
   const logoContainer = useRef<HTMLDivElement>(null);
   const db = getDatabase();
   const router = useRouter();
+  const {t} = useTranslation();
 
   const handleUpdateRoom = (data: Partial<Room>) => {
     setRoom((prev) => ({...prev, ...data}));
@@ -163,12 +164,12 @@ const CreateSection = () => {
         disabled={!gameUser?.username || creating}
         onClick={handleCreate}
       >
-        <span className={creating ? "opacity-0" : ""}>Create game</span>
+        <span className={creating ? "opacity-0" : ""}>{t("Create game")}</span>
         <Spinner
           className={`position-absolute ${!creating ? "opacity-0" : ""}`}
         />
       </button>
-      <span>Insert room name</span>
+      <span>{t("Insert room name")}</span>
       <input
         type="text"
         className="form-name mb-2"
@@ -176,22 +177,24 @@ const CreateSection = () => {
         value={room?.name}
         onChange={(ref) => handleUpdateRoom({name: ref.target.value})}
         placeholder={
-          gameUser?.username ? `${gameUser.username}'s room` : "Room name"
+          gameUser?.username
+            ? t("Name's room", {name: gameUser.username})
+            : t("Room name")
         }
       />
-      <span>Insert room password (op)</span>
+      <span>{t("Insert room password (OP)")}</span>
       <input
         type="password"
         className="form-name mb-2"
         data-label="Password"
         value={room?.password || ""}
         onChange={(ref) => handleUpdateRoom({password: ref.target.value})}
-        placeholder={`Password`}
+        placeholder={t("Password")}
       />
-      <span>Max number of users</span>
+      <span>{t("Max number of users")}</span>
       <select
         className="form-name mb-2"
-        data-label="Room name"
+        data-label="Max number of users"
         value={room?.maxUsers}
         onChange={(ref) =>
           handleUpdateRoom({maxUsers: Number(ref.target.value)})
@@ -205,7 +208,7 @@ const CreateSection = () => {
           </option>
         ))}
       </select>
-      <span>Timer</span>
+      <span>{t("Timer")}</span>
       <select
         className="form-name mb-2"
         data-label="Room name"

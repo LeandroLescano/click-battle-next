@@ -2,6 +2,7 @@
 
 import React, {useEffect} from "react";
 import {Modal} from "react-bootstrap";
+import {useTranslation} from "react-i18next";
 
 import {useIsMobile} from "hooks/mobile";
 import {AuthProviders, useAuth} from "contexts/AuthContext";
@@ -18,6 +19,7 @@ export const ModalLogin = ({
 }: ModalLoginProps) => {
   const isMobile = useIsMobile();
   const {signInWithProvider, signInAnonymously, user} = useAuth();
+  const {t} = useTranslation();
 
   const handleLogin = (provider: AuthProviders = "google") => {
     signInWithProvider(provider);
@@ -46,13 +48,13 @@ export const ModalLogin = ({
                 allowAnonymous ? "col-lg-6" : ""
               } text-center align-self-center gap-4 d-flex flex-column`}
             >
-              <h5>Login with</h5>
+              <h5>{t("Login with")}</h5>
               <div className="d-flex gap-3 justify-content-center">
                 <GoogleButton onClick={() => handleLogin("google")} />
                 <GithubButton onClick={() => handleLogin("github")} />
                 <TwitterButton onClick={() => handleLogin("twitter")} />
               </div>
-              <sub className="mb-2">Save score, username and more!</sub>
+              <sub className="mb-2">{t("Save score, username and more!")}</sub>
             </div>
             {allowAnonymous ? (
               <div
@@ -65,12 +67,12 @@ export const ModalLogin = ({
                   onClick={signInAnonymously}
                   type="submit"
                 >
-                  Login as guest
+                  {t("Login as guest")}
                 </button>
               </div>
             ) : (
               <button className="btn-click small mt-4" onClick={onClose}>
-                Cancel
+                {t("Cancel")}
               </button>
             )}
           </div>

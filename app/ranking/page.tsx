@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 
 import {GameUser} from "interfaces";
 import {RankingList} from "components/RankingList";
+import {getServerTranslations} from "app/i18n/server";
 
 const UpdatedTime = dynamic(() => import("components/UpdatedTime"), {
   ssr: false
@@ -56,6 +57,7 @@ const getRanking = async () => {
 };
 
 const Ranking = async () => {
+  const {t} = await getServerTranslations("translation");
   const {users, lastUpdate} = await getRanking();
 
   return (
@@ -75,7 +77,7 @@ const Ranking = async () => {
               </Link>
               <h1 className="mb-0">Click masters</h1>
             </span>
-            <UpdatedTime text="last update:" date={lastUpdate} />
+            <UpdatedTime text={t("Last update") + ":"} date={lastUpdate} />
           </section>
         </CardHeader>
         <CardBody className="d-flex flex-column h-100 overflow-y-auto p-1">
