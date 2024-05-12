@@ -11,16 +11,8 @@ import "../styles/loginButton.scss";
 
 import {getApp, getApps, initializeApp} from "firebase/app";
 
-import {connectAuthEmulator, getAuth} from "firebase/auth";
-import {connectDatabaseEmulator, getDatabase} from "firebase/database";
 import {AuthProvider} from "contexts/AuthContext";
 import {Loading} from "components/Loading";
-import {connectFirestoreEmulator, getFirestore} from "firebase/firestore";
-import {
-  getAnalytics,
-  isSupported,
-  setAnalyticsCollectionEnabled
-} from "firebase/analytics";
 import {detectLanguage} from "app/i18n/server";
 import {I18nProvider} from "app/i18n/i18n-context";
 import {firebaseConfig} from "resources/config";
@@ -31,31 +23,12 @@ if (!getApps.length) {
   getApp(); // if already initialized, use that one
 }
 
-if (process.env.NODE_ENV === "development") {
-  try {
-    connectAuthEmulator(getAuth(), "http://localhost:9099", {
-      disableWarnings: true
-    });
-    connectFirestoreEmulator(getFirestore(), "localhost", 8080);
-    connectDatabaseEmulator(getDatabase(), "localhost", 9000);
-
-    isSupported().then(
-      (supported) =>
-        supported && setAnalyticsCollectionEnabled(getAnalytics(), false)
-    );
-  } catch (error) {
-    console.log({error});
-  }
-}
-
 type Props = {
   children: JSX.Element;
 };
 
 export default async function Layout({children}: Props) {
   const lng = await detectLanguage();
-
-  console.log({lng});
 
   return (
     <I18nProvider language={lng}>

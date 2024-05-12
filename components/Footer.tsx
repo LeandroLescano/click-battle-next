@@ -54,8 +54,8 @@ export const Footer = () => {
   };
 
   const handleContact = async ({
-    title = "Contact us",
-    text = "You can send a criticism, a complaint or whatever you want..."
+    title = t("Contact us"),
+    text = t("You can send a criticism, a complaint or whatever you want...")
   }: contactProps = {}) => {
     if (user?.isAnonymous) {
       loginWithGoogleAlert();
@@ -64,7 +64,7 @@ export const Footer = () => {
     ReactSwal.fire({
       title: title,
       html: `<textarea type="text" id="message" class="form-name w-100" placeholder="${text}">`,
-      confirmButtonText: "Send message",
+      confirmButtonText: t("Send message"),
       showCloseButton: true,
       preConfirm: async () => {
         const value = (document.getElementById("message") as HTMLInputElement)
@@ -72,7 +72,7 @@ export const Footer = () => {
         if (value.length > 0) {
           return value;
         } else {
-          ReactSwal.showValidationMessage("Please enter a valid message");
+          ReactSwal.showValidationMessage(t("Please enter a valid message"));
           await timeout(2500);
           ReactSwal.resetValidationMessage();
           return false;
@@ -87,7 +87,7 @@ export const Footer = () => {
 
   const sendEmail = async (message: string) => {
     if (user?.email) {
-      loadingAlert("Sending email...");
+      loadingAlert(t("Sending email..."));
       fetch("/api/sendEmail", {
         method: "POST",
         body: JSON.stringify({
@@ -100,8 +100,8 @@ export const Footer = () => {
           ReactSwal.fire({
             icon: isSuccess ? "success" : "error",
             title: isSuccess
-              ? "Thanks for your time!"
-              : "Oops, we have a problem sending your feedback",
+              ? t("Thanks for your time!")
+              : t("Oops, we have a problem sending your feedback"),
             toast: true,
             position: "bottom",
             timerProgressBar: true,
@@ -117,14 +117,14 @@ export const Footer = () => {
     } else {
       Swal.fire({
         title: "Error",
-        text: "We can't send the email, please try again",
+        text: t("We can't send the email, please try again"),
         heightAuto: false
       });
     }
   };
 
   const sendRating = async () => {
-    loadingAlert("Sending feedback...");
+    loadingAlert(t("Sending feedback..."));
     const key = sessionStorage.getItem("userKey");
     if (key) {
       await updateUser(key, {rating: rating});
@@ -132,13 +132,13 @@ export const Footer = () => {
 
     if (rating > 0 && rating < 3) {
       handleContact({
-        title: "We're sad about your rating 🥺",
-        text: "Please tell us what can do to improve your experience 🤗..."
+        title: t("We're sad about your rating 🥺"),
+        text: t("Please tell us what can do to improve your experience 🤗...")
       });
     } else {
       ReactSwal.fire({
         icon: "success",
-        title: "Thanks for your time!",
+        title: t("Thanks for your time!"),
         toast: true,
         position: "bottom",
         timerProgressBar: true,
@@ -164,7 +164,7 @@ export const Footer = () => {
           initialValue={rating > 0 ? rating : undefined}
         />
       ),
-      confirmButtonText: "Send feedback",
+      confirmButtonText: t("Send feedback"),
       didOpen: () => {
         ReactSwal.disableButtons();
       }
@@ -216,7 +216,7 @@ export const Footer = () => {
           <div className="d-flex gap-2 mx-auto mx-md-0 my-2">
             <a onClick={handleFeedback}>Feedback</a>
             <span>|</span>
-            <a onClick={() => handleContact}>{t("Contact")}</a>
+            <a onClick={() => handleContact()}>{t("Contact")}</a>
             <span>|</span>
             <a onClick={() => router.push("/ranking")}>{t("Ranking")}</a>
           </div>
