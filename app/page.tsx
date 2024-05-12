@@ -37,7 +37,7 @@ const Home = () => {
   const params = useSearchParams();
   const db = getDatabase();
   const {gameUser, user, loading} = useAuth();
-  const {t, i18n} = useTranslation();
+  const {t} = useTranslation();
 
   useEffect(() => {
     //If exist userKey get user from DB
