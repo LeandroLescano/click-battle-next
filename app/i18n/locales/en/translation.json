@@ -12,5 +12,6 @@
   "Result position": "Result - {{position}} place",
   "with n clicks!": "with {{clicks}} clicks!",
   "You have n clicks!": "You have {{clicks}} clicks!",
-  "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?": "Wow! You're at position {{position}} on the leaderboard! Want to claim your spot and keep playing?"
+  "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?": "Wow! You're at position {{position}} on the leaderboard! Want to claim your spot and keep playing?",
+  "inviteText": "Hey!\n\nJoin me in a click battle! Let's see who can click the fastest. Click here to join: {{link}}.\n\nSee you there! 📱"
 }

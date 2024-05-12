@@ -3,14 +3,22 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import {useRouter} from "next/navigation";
 import {useTranslation} from "react-i18next";
+import {changeLanguage} from "i18next";
 
 import {timeout} from "utils/timeout";
 import {updateUser} from "services/user";
 import {useAuth} from "contexts/AuthContext";
 import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
+import {languages} from "app/i18n/settings";
 
 import RatingStars from "./RatingStars";
 import {ModalLogin} from "./ModalLogin";
+import {
+  Dropdown,
+  DropdownButton,
+  OverlayTrigger,
+  Tooltip
+} from "react-bootstrap";
 
 interface contactProps {
   title?: string;
@@ -33,7 +41,7 @@ export const Footer = () => {
   const [send, setSend] = useState(false);
   const {user, gameUser, signOut, updateGameUser} = useAuth();
   const router = useRouter();
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
 
   //Function for logout user.
   const handleLogOut = () => {
@@ -220,12 +228,32 @@ export const Footer = () => {
           </div>
         )}
         {gameUser?.username && (
-          <div className="txt-user text-center mx-auto mx-md-0 mt-1">
-            {t("Logged as", {name: gameUser.username})} -
-            <button
-              className="btn-logout btn-click ms-2"
-              onClick={handleLogOut}
+          <div className="txt-user text-center mx-auto mx-md-0 mt-1 d-flex align-items-center gap-2">
+            <DropdownButton
+              title={<img src={`/flags/${i18n.language}.svg`} height={25} />}
+              variant="secondary"
+              size="sm"
+              drop="up"
             >
+              {languages.map((lang) => (
+                <Dropdown.Item
+                  as="button"
+                  key={lang}
+                  active={i18n.language === lang}
+                  onClick={() => changeLanguage(lang)}
+                >
+                  <img src={`/flags/${lang}.svg`} />
+                </Dropdown.Item>
+              ))}
+            </DropdownButton>
+            <OverlayTrigger
+              overlay={
+                <Tooltip>{t("Logged as", {name: gameUser.username})}</Tooltip>
+              }
+            >
+              <img src="/icons/clicky-right.svg" height={35} />
+            </OverlayTrigger>
+            <button className="btn-logout btn-click" onClick={handleLogOut}>
               {t("Log out")}
             </button>
           </div>

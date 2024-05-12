@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import {useRouter} from "next/navigation";
 import {getDatabase, ref, update} from "firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
@@ -28,6 +28,7 @@ function LocalSection({
   const router = useRouter();
   const db = getDatabase();
   const {user: gUser} = useAuth();
+  const suspicionOfHackCounter = useRef(0);
   const {t} = useTranslation();
 
   const cantStart = !start && listUsers.length < 2;
@@ -43,19 +44,27 @@ function LocalSection({
     update(refGame, {gameStart: true});
   };
 
-  // function for update clicks
   const handleClick = () => {
     const now = Date.now();
 
     // 1000ms / 25 clicks = 40ms
     if (lastClickTime && now - lastClickTime < 40) {
-      // router.push({href: "/", query: {suspicionOfHack: true}});
-      router.push("/?suspicionOfHack=true");
-      return;
+      suspicionOfHackCounter.current++;
+      if (suspicionOfHackCounter.current >= 5) {
+        logEvent(getAnalytics(), "kicked_suspicion_hack", {
+          action: "kicked_suspicion_hack",
+          clickInterval: now - lastClickTime,
+          date: new Date()
+        });
+        router.push("/?suspicionOfHack=true");
+        return;
+      }
     }
 
     if (localUser.clicks !== undefined && gUser) {
-      setLastClickTime(now);
+      setTimeout(() => {
+        setLastClickTime(now);
+      }, 100);
       const refGame = ref(db, `games/${idGame}/listUsers/${gUser.uid}`);
       update(refGame, {clicks: localUser.clicks + 1});
     }

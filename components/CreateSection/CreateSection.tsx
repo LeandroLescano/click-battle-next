@@ -155,10 +155,7 @@ const CreateSection = () => {
 
   return (
     <>
-      <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2 mb-2">
-        <div ref={logoContainer} style={{height: "100px"}} />
-        <h1 className="text-center mb-0 flex-1">Click battle!</h1>
-      </div>
+      <h1 className="text-center mb-4">Click battle!</h1>
       <button
         className="btn-click mb-3 mb-md-5 d-flex justify-content-center align-items-center"
         disabled={!gameUser?.username || creating}

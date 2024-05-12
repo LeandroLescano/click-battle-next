@@ -3,8 +3,6 @@
 import React, {Fragment, useEffect, useState} from "react";
 import Swal from "sweetalert2";
 import {useTranslation} from "react-i18next";
-import {Dropdown} from "react-bootstrap";
-import {changeLanguage} from "i18next";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {useRouter, useSearchParams} from "next/navigation";
 import {child, getDatabase, onValue, ref, set} from "@firebase/database";
@@ -22,8 +20,6 @@ import {
 import CreateSection from "components/CreateSection/CreateSection";
 import {ModalLoginProps} from "components/ModalLogin/types";
 import {useAuth} from "contexts/AuthContext";
-
-const LANGUAGES = ["es", "en", "pr"];
 
 const ModalLogin = dynamic<ModalLoginProps>(
   () =>
@@ -228,25 +224,6 @@ const Home = () => {
           </div>
         </div>
         <Footer />
-        <div className="position-absolute top-0 start-0 p-2">
-          <Dropdown>
-            <Dropdown.Toggle variant="secondary">
-              <img src={`/flags/${i18n.language}.svg`} />
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {LANGUAGES.map((lang) => (
-                <Dropdown.Item
-                  disabled={lang === "pr"}
-                  key={lang}
-                  active={i18n.language === lang}
-                  onClick={() => changeLanguage(lang)}
-                >
-                  <img src={`/flags/${lang}.svg`} />
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
       </div>
       <ModalLogin />
       <ModalCreateUsername />

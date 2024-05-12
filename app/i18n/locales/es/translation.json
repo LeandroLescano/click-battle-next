@@ -59,5 +59,6 @@
   "Last update": "Última actualización",
   "Fair play is important to us": "El juego limpio es importante para nosotros",
   "Please refrain from using unauthorized tools or hacks while playing.": "Por favor abstenerse de usar herramientas no authorizadas o hacks mientras juegas",
-  "You were kicked out by the owner": "Fuiste expulsado por el host"
+  "You were kicked out by the owner": "Fuiste expulsado por el host",
+  "inviteText": "¡Hola!\n\n¡Únete a mí en una batalla de clicks! Veamos quién puede hacer click más rápido. Haz click aquí para unirte: {{link}}.\n\n¡Nos vemos allí! 📱"
 }
