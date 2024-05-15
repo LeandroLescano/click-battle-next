@@ -81,7 +81,7 @@ function ResultSection({
       </div>
       {isLocal && (
         <button className="btn-click mt-5" onClick={handleReset}>
-          Reset
+          {t("Reset")}
         </button>
       )}
     </div>
