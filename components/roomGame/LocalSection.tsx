@@ -30,6 +30,7 @@ function LocalSection({
   const {user: gUser} = useAuth();
   const suspicionOfHackCounter = useRef(0);
   const {t} = useTranslation();
+  const [disableUI, setDisableUI] = useState(false);
 
   const cantStart = !start && listUsers.length < 2;
 
@@ -51,6 +52,7 @@ function LocalSection({
     if (lastClickTime && now - lastClickTime < 40) {
       suspicionOfHackCounter.current++;
       if (suspicionOfHackCounter.current >= 5) {
+        setDisableUI(true);
         logEvent(getAnalytics(), "kicked_suspicion_hack", {
           action: "kicked_suspicion_hack",
           clickInterval: now - lastClickTime,
@@ -62,9 +64,7 @@ function LocalSection({
     }
 
     if (localUser.clicks !== undefined && gUser) {
-      setTimeout(() => {
-        setLastClickTime(now);
-      }, 100);
+      setLastClickTime(now);
       const refGame = ref(db, `games/${idGame}/listUsers/${gUser.uid}`);
       update(refGame, {clicks: localUser.clicks + 1});
     }
@@ -84,7 +84,7 @@ function LocalSection({
       <div className="d-flex justify-content-around gap-2">
         <button
           className="btn-click my-2"
-          disabled={!start}
+          disabled={!start || disableUI}
           onClick={handleClick}
         >
           Click

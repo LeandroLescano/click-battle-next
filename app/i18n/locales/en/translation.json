@@ -1,11 +1,5 @@
 {
-  "Create game": "Create game",
-  "Insert room name": "Insert room name",
-  "Room name": "Room name",
   "Name's room": "{{name}}'s room",
-  "Insert room password (OP)": "Insert room password (OP)",
-  "Max number of users": "Max number of users",
-  "Timer": "Timer",
   "Logged as": "Logged as {{name}}",
   "Room N°": "Room N°{{roomName}}",
   "N seconds remaining!": "{{seconds}} seconds remaining!",
