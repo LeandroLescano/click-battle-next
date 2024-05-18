@@ -26,7 +26,11 @@ import {
 import * as Sentry from "@sentry/nextjs";
 import {getApp, getApps, initializeApp} from "firebase/app";
 import {connectDatabaseEmulator, getDatabase} from "firebase/database";
-import {connectFirestoreEmulator, getFirestore} from "firebase/firestore";
+import {
+  connectFirestoreEmulator,
+  getFirestore,
+  Timestamp
+} from "firebase/firestore";
 
 import {GameUser} from "interfaces";
 import {addUser, getUser, getUserByEmail, updateUser} from "services/user";
@@ -303,6 +307,24 @@ function useAuthProvider(): AuthContextState {
             localStorage.setItem("user", existingUser.username);
             sessionStorage.setItem("userKey", existingUser.key);
             setGameUser(existingUser);
+
+            const dataToUpdate: Partial<GameUser> = {
+              lastLogin: Timestamp.now()
+            };
+
+            if (
+              existingUser.providers?.length === 0 ||
+              data.user.providerData.some(
+                (pd) => !existingUser.providers?.includes(pd.providerId)
+              )
+            ) {
+              dataToUpdate.providers = data.user.providerData.map(
+                (provider) => provider.providerId
+              );
+            }
+
+            updateUser(existingUser.key, dataToUpdate);
+
             logEvent(getAnalytics(), "login", {
               action: "login",
               isAnonymously: false,
@@ -312,10 +334,15 @@ function useAuthProvider(): AuthContextState {
           }
 
           if (userNew && userEmail) {
+            const now = Timestamp.now();
             const newKeyUser = await addUser({
               email: userEmail,
               maxScores: gameUser?.maxScores || [],
-              username: gameUser?.username || ""
+              username: gameUser?.username || "",
+              created: now,
+              updated: now,
+              lastLogin: now,
+              providers: [data.user.providerData[0].providerId]
             });
 
             if (newKeyUser) {
