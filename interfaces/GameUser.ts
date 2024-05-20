@@ -1,3 +1,5 @@
+import {Timestamp} from "firebase/firestore";
+
 export interface GameUser {
   username: string;
   clicks?: number;
@@ -7,6 +9,10 @@ export interface GameUser {
   kickOut?: boolean;
   email?: string;
   rating?: number;
+  created?: Timestamp;
+  updated?: Timestamp;
+  lastLogin?: Timestamp;
+  providers?: string[];
 }
 
 export interface MaxScore {

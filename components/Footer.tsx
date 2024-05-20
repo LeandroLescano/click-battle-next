@@ -1,9 +1,16 @@
 import React, {useEffect, useState} from "react";
+import Link from "next/link";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import {useRouter} from "next/navigation";
 import {useTranslation} from "react-i18next";
 import {changeLanguage} from "i18next";
+import {
+  Dropdown,
+  DropdownButton,
+  OverlayTrigger,
+  Tooltip
+} from "react-bootstrap";
 
 import {timeout} from "utils/timeout";
 import {updateUser} from "services/user";
@@ -13,12 +20,6 @@ import {languages} from "app/i18n/settings";
 
 import RatingStars from "./RatingStars";
 import {ModalLogin} from "./ModalLogin";
-import {
-  Dropdown,
-  DropdownButton,
-  OverlayTrigger,
-  Tooltip
-} from "react-bootstrap";
 
 interface contactProps {
   title?: string;
@@ -218,11 +219,11 @@ export const Footer = () => {
             <span>|</span>
             <a onClick={() => handleContact()}>{t("Contact")}</a>
             <span>|</span>
-            <a onClick={() => router.push("/ranking")}>{t("Ranking")}</a>
+            <Link href="/ranking">{t("Ranking")}</Link>
           </div>
         ) : (
           <div className="d-flex gap-2 justify-content-center w-sm-100 flex-fill align-self-center pb-sm-2 pb-0">
-            <a onClick={() => router.push("/ranking")}>{t("Ranking")}</a>
+            <Link href="/ranking">{t("Ranking")}</Link>
             <span>|</span>
             <a onClick={toggleModal}>{t("Save my data")}</a>
           </div>

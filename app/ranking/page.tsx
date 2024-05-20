@@ -44,7 +44,7 @@ const getRanking = async () => {
           ...user,
           key: doc.id,
           maxScores: user.maxScores,
-          cps,
+          cps: Math.round(cps * 100) / 100, // This rounds to max 2 decimal places
           time
         });
       }

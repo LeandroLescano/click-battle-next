@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "bash ask-update-backup.sh",
-    "dev:start": "next dev | yarn emulators",
+    "dev:start": "concurrently -p \"[{name}]\" -n \"NEXT,FIREBASE\" \"next dev\" \"yarn emulators\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -70,6 +70,7 @@
     "@types/react": "18.2.6",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
+    "concurrently": "^8.2.2",
     "eslint": "^8.50.0",
     "eslint-config-next": "^14.1.3",
     "eslint-config-prettier": "^9.0.0",
