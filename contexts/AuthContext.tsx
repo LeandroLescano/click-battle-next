@@ -32,7 +32,7 @@ import {
   Timestamp
 } from "firebase/firestore";
 
-import {GameUser} from "interfaces";
+import {GameUser, MaxScore} from "interfaces";
 import {addUser, getUser, getUserByEmail, updateUser} from "services/user";
 import {useUserInfo} from "hooks/userInfo";
 import {firebaseConfig} from "resources/config";
@@ -323,7 +323,23 @@ function useAuthProvider(): AuthContextState {
               );
             }
 
+            if (
+              gameUser?.points &&
+              existingUser.points &&
+              gameUser.points > existingUser.points
+            ) {
+              dataToUpdate.points = gameUser.points;
+            }
+
+            if (gameUser?.maxScores && existingUser.maxScores) {
+              dataToUpdate.maxScores = mergeMaxScores(
+                existingUser.maxScores,
+                gameUser.maxScores
+              );
+            }
+
             updateUser(existingUser.key, dataToUpdate);
+            setGameUser({...existingUser, ...dataToUpdate});
 
             logEvent(getAnalytics(), "login", {
               action: "login",
@@ -337,8 +353,9 @@ function useAuthProvider(): AuthContextState {
             const now = Timestamp.now();
             const newKeyUser = await addUser({
               email: userEmail,
-              maxScores: gameUser?.maxScores || [],
-              username: gameUser?.username || "",
+              maxScores: gameUser?.maxScores ?? [],
+              username: gameUser?.username ?? "",
+              points: gameUser?.points ?? 0,
               created: now,
               updated: now,
               lastLogin: now,
@@ -390,4 +407,44 @@ function useAuthProvider(): AuthContextState {
     createUsername,
     updateGameUser
   };
+}
+
+function mergeMaxScores(
+  originalMaxScores?: MaxScore[],
+  newMaxScores?: MaxScore[]
+): MaxScore[] | undefined {
+  if (!originalMaxScores || !newMaxScores || newMaxScores.length === 0) {
+    return originalMaxScores;
+  }
+
+  const mergedScores: MaxScore[] = [];
+  const originalMap = new Map<number, MaxScore>();
+
+  if (originalMaxScores) {
+    for (const score of originalMaxScores) {
+      const existingScore = originalMap.get(score.time);
+      if (!existingScore || score.clicks > existingScore.clicks) {
+        originalMap.set(score.time, score);
+      }
+    }
+  }
+
+  for (const score of newMaxScores) {
+    const existingScore = originalMap.get(score.time);
+    if (!existingScore || score.clicks > existingScore.clicks) {
+      originalMap.set(score.time, score);
+    }
+  }
+
+  for (const value of originalMap.values()) {
+    mergedScores.push(value);
+  }
+
+  return originalMaxScores?.every((score) =>
+    mergedScores.some(
+      (merged) => merged.time === score.time && merged.clicks === score.clicks
+    )
+  )
+    ? undefined
+    : mergedScores;
 }
