@@ -41,7 +41,6 @@ export const Footer = () => {
   const [showModal, setShowModal] = useState(false);
   const [send, setSend] = useState(false);
   const {user, gameUser, signOut, updateGameUser} = useAuth();
-  const router = useRouter();
   const {t, i18n} = useTranslation();
 
   //Function for logout user.

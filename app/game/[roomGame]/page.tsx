@@ -277,7 +277,8 @@ function RoomGame() {
     if (currentGame?.timer === undefined) {
       for (const i in listUsers) {
         if (listUsers[i].username === localUser.username) {
-          setLocalPosition(getSuffixPosition(Number(i) + 1, t));
+          const position = Number(i) + 1;
+          setLocalPosition(getSuffixPosition(position, t));
         }
       }
     }
@@ -294,7 +295,7 @@ function RoomGame() {
       if (localUser.rol === "owner") {
         // localUser is owner
         if (!currentGame.timer) {
-          if (localUser.rol === "owner" && currentGame.timer === 0) {
+          if (currentGame.timer === 0) {
             logEvent(getAnalytics(), "game_finish", {
               date: new Date(),
               users: listUsers,
@@ -309,9 +310,8 @@ function RoomGame() {
             });
             const refGame = ref(db, `games/${idGame}`);
             update(refGame, {timer: null});
+            updateLocalMaxScore(userKey);
           }
-
-          updateLocalMaxScore(userKey);
 
           loadCelebrationAnimation();
           return;
@@ -326,13 +326,10 @@ function RoomGame() {
         }, 1000);
 
         return () => clearInterval(intervalId);
-      } else {
+      } else if (currentGame.timer === 0) {
         // localUser is visitor
-        if (!currentGame.timer) {
-          loadCelebrationAnimation();
-
-          updateLocalMaxScore(userKey);
-        }
+        loadCelebrationAnimation();
+        updateLocalMaxScore(userKey);
       }
     } else if (startCountdown && localUser.rol === "owner") {
       if (!currentGame?.timeStart) {
@@ -376,8 +373,8 @@ function RoomGame() {
         (score) => score.time === currentGame.settings.timer
       );
 
+      let updatedScores: MaxScore[] | undefined = gameUser.maxScores;
       if (!currentMaxScore || localUser.clicks > currentMaxScore.clicks) {
-        let updatedScores: MaxScore[] | undefined = gameUser.maxScores;
         if (!gameUser.maxScores) {
           updatedScores = [
             {clicks: localUser.clicks, time: currentGame.settings.timer}
@@ -396,12 +393,23 @@ function RoomGame() {
             ];
           }
         }
+      }
+
+      const position =
+        listUsers.findIndex((user) => user.username === localUser.username) + 1;
+      const pointsEarned = listUsers.length - position;
+
+      if (updatedScores || pointsEarned > 0) {
         if (userKey && gUser && !gUser.isAnonymous) {
           updateUser(userKey, {
-            maxScores: updatedScores
+            maxScores: updatedScores,
+            points: (gameUser.points ?? 0) + pointsEarned
           });
         }
-        updateGameUser({maxScores: updatedScores});
+        updateGameUser({
+          maxScores: updatedScores,
+          points: (gameUser.points ?? 0) + pointsEarned
+        });
       }
     }
   };

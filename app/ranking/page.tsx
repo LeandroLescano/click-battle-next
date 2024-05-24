@@ -41,7 +41,7 @@ const getRanking = async () => {
         const time =
           user.maxScores.find((ms) => ms.clicks / ms.time === cps)?.time || 10;
         usersWithScore.push({
-          ...user,
+          username: user.username,
           key: doc.id,
           maxScores: user.maxScores,
           cps: Math.round(cps * 100) / 100, // This rounds to max 2 decimal places

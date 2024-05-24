@@ -7,6 +7,7 @@ export interface GameUser {
   maxScores?: MaxScore[];
   key?: string;
   kickOut?: boolean;
+  points?: number;
   email?: string;
   rating?: number;
   created?: Timestamp;
