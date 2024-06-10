@@ -58,6 +58,7 @@ const getRanking = async () => {
 
 const Ranking = async () => {
   const {t} = await getServerTranslations("translation");
+  //ESTE ES UN CAMBIO
   const {users, lastUpdate} = await getRanking();
 
   return (

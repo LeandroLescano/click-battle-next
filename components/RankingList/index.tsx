@@ -19,7 +19,7 @@ const RankComponent: Record<string, keyof JSX.IntrinsicElements> = {
 
 export const RankingList = ({users}: RankingListProps) => {
   const [usersList, setUsersList] = useState(users);
-  const [possiblePos, setPossiblePos] = useState<number>();
+  const [possiblePos, setPossiblePos] = useState<number>(2);
   const [hideToast, setHideToast] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const {gameUser, loading, user} = useAuth();
@@ -121,7 +121,8 @@ export const RankingList = ({users}: RankingListProps) => {
             ) : (
               <>
                 {t(
-                  "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?"
+                  "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?",
+                  {position: possiblePos}
                 )}
                 <button className="btn-click small" onClick={toggleModal}>
                   {t("Sign up")}
