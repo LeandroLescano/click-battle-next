@@ -121,7 +121,8 @@ export const RankingList = ({users}: RankingListProps) => {
             ) : (
               <>
                 {t(
-                  "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?"
+                  "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?",
+                  {position: possiblePos}
                 )}
                 <button className="btn-click small" onClick={toggleModal}>
                   {t("Sign up")}
