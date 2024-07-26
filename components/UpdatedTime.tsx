@@ -24,7 +24,7 @@ const UpdatedTime = ({text, date}: UpdatedTimeProps) => {
   return (
     <div className="d-flex flex-column">
       <span>
-        {text} {date.toLocaleString()}
+        {text} {moment(date).format("DD/MM/YYYY HH:mm:ss")}
       </span>
       <ProgressBar now={progress} max={3600} animated />
     </div>
