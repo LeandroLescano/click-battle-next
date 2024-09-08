@@ -6,6 +6,7 @@ import {useTranslation} from "react-i18next";
 
 import {GameUser} from "interfaces";
 import {useAuth} from "contexts/AuthContext";
+import {useGame} from "contexts/GameContext";
 
 interface LocalSectionProps {
   idGame: string;
@@ -13,7 +14,6 @@ interface LocalSectionProps {
   localUser: GameUser;
   start: boolean;
   startCountdown: boolean;
-  listUsers: GameUser[];
 }
 
 function LocalSection({
@@ -21,8 +21,7 @@ function LocalSection({
   isLocal,
   localUser,
   start,
-  startCountdown,
-  listUsers
+  startCountdown
 }: LocalSectionProps) {
   const [lastClickTime, setLastClickTime] = useState<number>();
   const router = useRouter();
@@ -31,15 +30,16 @@ function LocalSection({
   const suspicionOfHackCounter = useRef(0);
   const {t} = useTranslation();
   const [disableUI, setDisableUI] = useState(false);
+  const {game} = useGame();
 
-  const cantStart = !start && listUsers.length < 2;
+  const cantStart = !start && game.listUsers.length < 2;
 
   // function for start game
   const handleStart = () => {
     const refGame = ref(db, `games/${idGame}`);
     logEvent(getAnalytics(), "start_game", {
       action: "start_game",
-      users: listUsers.length,
+      users: game.listUsers.length,
       date: new Date()
     });
     update(refGame, {gameStart: true});

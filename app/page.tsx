@@ -20,6 +20,7 @@ import {
 import CreateSection from "components/CreateSection/CreateSection";
 import {ModalLoginProps} from "components/ModalLogin/types";
 import {useAuth} from "contexts/AuthContext";
+import {useGame} from "contexts/GameContext";
 
 const ModalLogin = dynamic<ModalLoginProps>(
   () =>
@@ -37,6 +38,7 @@ const Home = () => {
   const params = useSearchParams();
   const db = getDatabase();
   const {gameUser, user, loading} = useAuth();
+  const {resetGame, setGame} = useGame();
   const {t} = useTranslation();
 
   useEffect(() => {
@@ -76,6 +78,7 @@ const Home = () => {
     let mounted = true;
     //Get rooms of games from DB
     if (gameUser?.username) {
+      resetGame();
       const refGames = ref(db, `games`);
       onValue(refGames, (snapshot) => {
         const list: {[key: string]: Game} | null = snapshot.val();
@@ -152,8 +155,7 @@ const Home = () => {
       gameUser &&
       game.ownerUser.username !== gameUser.username
     ) {
-      sessionStorage.setItem("actualIDGame", game.key);
-      sessionStorage.setItem("actualOwner", game.ownerUser.username);
+      setGame(game);
       if (user?.uid) {
         const userToPush: GameUser = {
           username: gameUser.username,

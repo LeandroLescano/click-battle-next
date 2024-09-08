@@ -49,7 +49,6 @@ export const Footer = () => {
       signOut();
     }
     updateGameUser({});
-    localStorage.removeItem("user");
     sessionStorage.removeItem("userKey");
   };
 

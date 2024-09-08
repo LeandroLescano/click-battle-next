@@ -6,17 +6,16 @@ import {get, getDatabase, ref, update} from "firebase/database";
 import {useTranslation} from "react-i18next";
 
 import {Game, GameUser} from "interfaces";
+import {useGame} from "contexts/GameContext";
 
 interface ResultSectionProps {
   localPosition: string | undefined;
-  listUsers: Array<GameUser>;
   localUser: GameUser;
   isLocal: boolean;
   currentGame: Game;
 }
 
 function ResultSection({
-  listUsers,
   localPosition,
   localUser,
   isLocal,
@@ -24,6 +23,7 @@ function ResultSection({
 }: ResultSectionProps) {
   const db = getDatabase();
   const {t} = useTranslation();
+  const {game} = useGame();
 
   // function for reset all data
   const handleReset = () => {
@@ -51,7 +51,7 @@ function ResultSection({
         <h1 id="result" className="no-select">
           {t("Result position", {position: localPosition})}
         </h1>
-        {listUsers
+        {game.listUsers
           .sort((a, b) => ((a.clicks || 0) < (b.clicks || 0) ? 1 : -1))
           .map((user, i) => {
             return (

@@ -34,6 +34,7 @@ import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import {updateUser} from "services/user";
 import {addRoomStats} from "services/rooms";
 import {Game, GameUser, MaxScore, RoomStats} from "interfaces";
+import {useGame} from "contexts/GameContext";
 
 const OpponentSection = dynamic(
   () => import("../../../components/roomGame/OpponentSection")
@@ -59,18 +60,13 @@ const ModalLogin = dynamic<ModalLoginProps>(
 
 function RoomGame() {
   const [isLocal, setIsLocal] = useState(false);
-  const [currentGame, setCurrentGame] = useState<Game>();
   const [idGame, setIdGame] = useState<string>();
   const [startCountdown, setStartCountdown] = useState(false);
-  const [localPosition, setLocalPosition] = useState<string>();
   const [showSideBar, setShowSideBar] = useState(false);
   const [localUser, setLocalUser] = useState<GameUser>({
     username: "",
     clicks: 0
   });
-  const [listUsers, setListUsers] = useState<GameUser[]>([
-    {username: "", clicks: 0, rol: "visitor"}
-  ]);
   const roomStats = useRef<RoomStats>({
     name: "",
     gamesPlayed: [],
@@ -86,7 +82,6 @@ function RoomGame() {
   const router = useRouter();
   const query = useSearchParams();
   const db = getDatabase();
-  const {setNewUser} = useNewPlayerAlert(listUsers, localUser, currentGame);
   const {
     gameUser,
     user: gUser,
@@ -94,21 +89,29 @@ function RoomGame() {
     loading,
     isAuthenticated
   } = useAuth();
+  const {
+    game: currentGame,
+    setGame: setCurrentGame,
+    localPosition,
+    setGame,
+    setLocalPosition
+  } = useGame();
+  const {setNewUser} = useNewPlayerAlert(
+    currentGame.listUsers,
+    localUser,
+    currentGame
+  );
   const localUserRef = useRef<GameUser>();
-  const mobileDevice = useIsMobileDevice();
+  const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();
 
   let unsubscribe: Unsubscribe;
 
   useEffect(() => {
     if (isAuthenticated && gUser?.uid) {
-      const pathIdGame = window.location.pathname.slice(1).substring(5);
-      const user = localStorage.getItem("user");
-      const userOwner = sessionStorage.getItem("actualOwner");
+      const gamePath = `games/${currentGame.key}`;
 
-      const gamePath = `games/${pathIdGame}`;
-
-      if (user === userOwner) {
+      if (gameUser?.username === currentGame.ownerUser.username) {
         onDisconnect(ref(db, gamePath))
           .remove()
           .catch((e) => console.error(e));
@@ -127,11 +130,14 @@ function RoomGame() {
           remove(refGame);
         };
       } else {
-        onDisconnect(ref(db, `games/${pathIdGame}/listUsers/${gUser.uid}`))
+        onDisconnect(ref(db, `games/${currentGame.key}/listUsers/${gUser.uid}`))
           .remove()
           .catch((e) => console.error(e));
         return () => {
-          const refGame = ref(db, `games/${pathIdGame}/listUsers/${gUser.uid}`);
+          const refGame = ref(
+            db,
+            `games/${currentGame.key}/listUsers/${gUser.uid}`
+          );
           remove(refGame);
         };
       }
@@ -140,15 +146,11 @@ function RoomGame() {
 
   // useEffect for update all data in local state
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && currentGame.key) {
       try {
-        const idGame = sessionStorage.getItem("actualIDGame");
-        const pathIdGame = window.location.pathname.slice(1).substring(5);
-        const user = localStorage.getItem("user");
-        const actualUser = localStorage.getItem("user");
-        const refGame = ref(db, `games/${pathIdGame}/`);
+        const refGame = ref(db, `games/${currentGame.key}/`);
 
-        setIdGame(pathIdGame);
+        setIdGame(currentGame.key);
         unsubscribe = onValue(refGame, (snapshot) => {
           const game: Game | null = snapshot.val();
           try {
@@ -200,16 +202,17 @@ function RoomGame() {
                   router.push("/?kickedOut=true");
                 }
               });
-              if (listUsersToPush.length > listUsers.length) {
+              if (listUsersToPush.length > currentGame.listUsers.length) {
                 setNewUser(true);
               }
-              setListUsers(listUsersToPush);
-              if (game.ownerUser?.username === actualUser) {
+              setGame({listUsers: listUsersToPush});
+              if (game.ownerUser?.username === gameUser?.username) {
                 setIsLocal(true);
               } else if (gUser?.uid) {
                 if (
-                  listUsersToPush.filter((u) => u.username !== user).length ===
-                  game.settings.maxUsers
+                  listUsersToPush.filter(
+                    (u) => u.username !== gameUser?.username
+                  ).length === game.settings.maxUsers
                 ) {
                   router.push("/?fullRoom=true");
                   return;
@@ -217,7 +220,7 @@ function RoomGame() {
 
                 if (
                   game.settings.password &&
-                  idGame !== pathIdGame &&
+                  idGame !== currentGame.key &&
                   !flagEnter.current
                 ) {
                   flagEnter.current = true;
@@ -227,8 +230,7 @@ function RoomGame() {
                   ) {
                     requestPassword(game.settings.password, t).then((val) => {
                       if (val.isConfirmed) {
-                        clearPath(pathIdGame);
-                        sessionStorage.setItem("actualIDGame", pathIdGame);
+                        clearPath(currentGame.key!);
                         addNewUserToDB(game);
                       } else {
                         router.push("/");
@@ -236,8 +238,7 @@ function RoomGame() {
                       }
                     });
                   } else {
-                    clearPath(pathIdGame);
-                    sessionStorage.setItem("actualIDGame", pathIdGame);
+                    clearPath(currentGame.key!);
                     addNewUserToDB(game);
                   }
                 }
@@ -253,7 +254,13 @@ function RoomGame() {
             }
           } catch (error) {
             console.log(
-              JSON.stringify({game, roomStats, actualUser, listUsers, isLocal})
+              JSON.stringify({
+                game,
+                roomStats,
+                username: gameUser?.username,
+                listUsers: currentGame.listUsers,
+                isLocal
+              })
             );
             throw error;
           }
@@ -278,17 +285,17 @@ function RoomGame() {
   // useEffect for put the position of the localUser
   useEffect(() => {
     if (currentGame?.timer === undefined) {
-      for (const i in listUsers) {
-        if (listUsers[i].username === localUser.username) {
+      for (const i in currentGame.listUsers) {
+        if (currentGame.listUsers[i].username === localUser.username) {
           const position = Number(i) + 1;
           setLocalPosition(getSuffixPosition(position, t));
         }
       }
     }
-    if (roomStats.current.maxUsersConnected < listUsers.length) {
-      roomStats.current.maxUsersConnected = listUsers.length;
+    if (roomStats.current.maxUsersConnected < currentGame.listUsers.length) {
+      roomStats.current.maxUsersConnected = currentGame.listUsers.length;
     }
-  }, [listUsers]);
+  }, [currentGame.listUsers]);
 
   // useEffect for update timer in state and show result
   useEffect(() => {
@@ -301,18 +308,22 @@ function RoomGame() {
           if (currentGame.timer === 0) {
             logEvent(getAnalytics(), "game_finish", {
               date: new Date(),
-              users: listUsers,
+              users: currentGame.listUsers,
               maxClicks: Math.max(
-                ...listUsers.map((users) => users.clicks || 0)
+                ...currentGame.listUsers.map((users) => users.clicks || 0)
               )
             });
+
             roomStats.current.gamesPlayed.push({
-              maxClicks: Math.max(...listUsers.map((lu) => lu.clicks || 0)),
-              numberOfUsers: listUsers.length,
+              maxClicks: Math.max(
+                ...currentGame.listUsers.map((lu) => lu.clicks || 0)
+              ),
+              numberOfUsers: currentGame.listUsers.length,
               timer: currentGame.settings.timer
             });
+
             const refGame = ref(db, `games/${idGame}`);
-            update(refGame, {timer: null});
+            update(refGame, {timer: null, currentGame: false});
             updateLocalMaxScore(userKey);
           }
 
@@ -399,8 +410,10 @@ function RoomGame() {
       }
 
       const position =
-        listUsers.findIndex((user) => user.username === localUser.username) + 1;
-      const pointsEarned = listUsers.length - position;
+        currentGame.listUsers.findIndex(
+          (user) => user.username === localUser.username
+        ) + 1;
+      const pointsEarned = currentGame.listUsers.length - position;
 
       if (updatedScores || pointsEarned > 0) {
         if (userKey && gUser && !gUser.isAnonymous) {
@@ -450,7 +463,7 @@ function RoomGame() {
       title: "Click Battle",
       text: t("inviteText", {link})
     };
-    if (mobileDevice && navigator.share && navigator.canShare(data)) {
+    if (isMobileDevice && navigator.share && navigator.canShare(data)) {
       navigator.share(data).catch((e: unknown) => {
         console.error(e);
       });
@@ -483,7 +496,6 @@ function RoomGame() {
           <CelebrationResult
             celebrationContainer={celebrationContainer}
             timer={currentGame?.timer}
-            listUsers={listUsers}
             localUser={localUser}
           />
           <div className="container-fluid vh-100">
@@ -526,7 +538,6 @@ function RoomGame() {
                     <div className="col-md-6 text-center opponents-container">
                       <OpponentSection
                         isLocal={isLocal}
-                        opponents={listUsers}
                         localUsername={gameUser?.username || ""}
                         maxUsers={currentGame.settings.maxUsers}
                       />
@@ -535,7 +546,6 @@ function RoomGame() {
                       <LocalSection
                         idGame={idGame || ""}
                         isLocal={isLocal}
-                        listUsers={listUsers}
                         localUser={localUser}
                         start={currentGame.currentGame}
                         startCountdown={startCountdown}
@@ -545,7 +555,6 @@ function RoomGame() {
                 </>
               ) : (
                 <ResultSection
-                  listUsers={listUsers}
                   localUser={localUser}
                   isLocal={isLocal}
                   localPosition={localPosition}
