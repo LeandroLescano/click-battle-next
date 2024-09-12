@@ -14,7 +14,8 @@ import {
   GithubAuthProvider,
   linkWithCredential,
   OAuthProvider,
-  connectAuthEmulator
+  connectAuthEmulator,
+  updateProfile
 } from "firebase/auth";
 import Swal from "sweetalert2";
 import {
@@ -281,6 +282,7 @@ function useAuthProvider(): AuthContextState {
     if (isAnonymously) {
       setGameUser({username});
     }
+    updateProfile(auth.currentUser!, {displayName: username});
 
     logEvent(getAnalytics(), "login", {
       action: "login",
