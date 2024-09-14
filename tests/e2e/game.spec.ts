@@ -4,18 +4,11 @@ test.describe("Game", () => {
   test.describe.configure({mode: "serial"});
 
   test("Should play a game between two users", async ({
-    hostPage: {page: hostPage},
+    hostPage,
     userPage: {page: userPage}
   }) => {
-    /* #region Create Room - Host */
-    await hostPage.getByText("Create game").click();
-    await hostPage.waitForURL(/\/game\//);
-
-    const roomID = hostPage.url().split("/").pop();
-
-    expect(roomID).toBeDefined();
-    await expect(hostPage.getByText("Press start to play")).toBeVisible();
-    /* #endregion */
+    const roomID = await hostPage.createRoom();
+    await expect(hostPage.page.getByText("Press start to play")).toBeVisible();
 
     /* #region Enter room - User */
     await userPage.getByText("guesthost1's roomOwner: guesthost11/").click();
@@ -25,17 +18,17 @@ test.describe("Game", () => {
     /* #endregion */
 
     /* #region Start game - Host */
-    expect(hostPage.getByText("guestuser1")).toBeVisible();
-    await hostPage.getByText("Start!").click();
+    expect(hostPage.page.getByText("guestuser1")).toBeVisible();
+    await hostPage.page.getByText("Start!").click();
 
     // Wait for countdown
     userPage.waitForTimeout(3000);
-    hostPage.waitForTimeout(3000);
+    hostPage.page.waitForTimeout(3000);
     /* #endregion */
 
     /* #region Make clicks - Both */
     await Promise.all([
-      hostPage
+      hostPage.page
         .getByRole("button", {name: "Click"})
         .click({clickCount: 20, delay: 100}),
       userPage
@@ -43,7 +36,7 @@ test.describe("Game", () => {
         .click({clickCount: 10, delay: 200})
     ]);
 
-    await expect(hostPage.getByText("Result - 1st place")).toBeVisible({
+    await expect(hostPage.page.getByText("Result - 1st place")).toBeVisible({
       timeout: 10000
     });
     await expect(userPage.getByText("Result - 2nd place")).toBeVisible({
@@ -54,22 +47,11 @@ test.describe("Game", () => {
   });
 
   test("Should create a room with password", async ({
-    hostPage: {page: hostPage},
+    hostPage,
     userPage: {page: userPage}
   }) => {
-    /* #region Create Room - Host */
     const pwd = "123456";
-
-    await hostPage.getByRole("textbox", {name: "Password"}).fill(pwd);
-    await hostPage.getByText("Create game").click();
-    await hostPage.waitForURL(/\/game\//);
-
-    const roomID = hostPage.url().split("/").pop();
-
-    expect(roomID).toBeDefined();
-
-    await expect(hostPage.getByText("Press start to play")).toBeVisible();
-    /* #endregion */
+    const roomID = await hostPage.createRoom(pwd);
 
     /* #region Enter room - User */
     await userPage.getByText("guesthost1's roomOwner: guesthost11/").click();
@@ -82,19 +64,12 @@ test.describe("Game", () => {
   });
 
   test("Should kick user when press on Kick button", async ({
-    hostPage: {page: hostPage},
+    hostPage,
     userPage: {page: userPage}
   }) => {
-    /* #region Create Room - Host */
-    await hostPage.getByText("Create game").click();
-    await hostPage.waitForURL(/\/game\//);
+    const roomID = await hostPage.createRoom();
 
-    const roomID = hostPage.url().split("/").pop();
-
-    expect(roomID).toBeDefined();
-
-    await expect(hostPage.getByText("Press start to play")).toBeVisible();
-    /* #endregion */
+    await expect(hostPage.page.getByText("Press start to play")).toBeVisible();
 
     /* #region Enter room - User */
     await userPage.getByText("guesthost1's roomOwner: guesthost11/").click();
@@ -104,9 +79,11 @@ test.describe("Game", () => {
     /* #endregion */
 
     /* #region Kick user - Host */
-    await hostPage.getByText("Kick").click();
+    await hostPage.page.getByText("Kick").click();
 
-    await expect(hostPage.getByText("Waiting for opponents...")).toBeVisible();
+    await expect(
+      hostPage.page.getByText("Waiting for opponents...")
+    ).toBeVisible();
     await expect(
       userPage.getByText("You were kicked out by the owner")
     ).toBeVisible();

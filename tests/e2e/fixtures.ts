@@ -1,27 +1,33 @@
 import {test as base, type Page} from "@playwright/test";
 import {authenticate} from "./auth.utils";
 
-// Page Object Model for the "admin" page.
-// Here you can add locators and helper methods specific to the admin page.
-class HostPage {
-  // Page signed in as "host".
+class GenericPage {
   page: Page;
 
   constructor(page: Page) {
     this.page = page;
   }
+
+  async createRoom(password?: string): Promise<string> {
+    if (password) {
+      await this.page.getByRole("textbox", {name: "Password"}).fill(password);
+    }
+    await this.page.getByText("Create game").click();
+    await this.page.waitForURL(/\/game\//);
+
+    const roomID = this.page.url().split("/").pop();
+
+    return roomID || "";
+  }
 }
+
+// Page Object Model for the "admin" page.
+// Here you can add locators and helper methods specific to the admin page.
+class HostPage extends GenericPage {}
 
 // Page Object Model for the "user" page.
 // Here you can add locators and helper methods specific to the user page.
-class UserPage {
-  // Page signed in as "user".
-  page: Page;
-
-  constructor(page: Page) {
-    this.page = page;
-  }
-}
+class UserPage extends GenericPage {}
 
 // Declare the types of your fixtures.
 type MyFixtures = {
