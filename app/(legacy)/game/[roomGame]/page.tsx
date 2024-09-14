@@ -76,7 +76,10 @@ function RoomGame() {
 
   const router = useRouter();
   const query = useSearchParams();
+<<<<<<< HEAD:app/(legacy)/game/[roomGame]/page.tsx
   const {roomGame: roomID} = useParams<{roomGame: string}>();
+=======
+>>>>>>> 68cf098 (change the way that we get search params and add tests):app/game/[roomGame]/page.tsx
   const db = getDatabase();
   const {
     gameUser,
