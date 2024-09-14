@@ -9,6 +9,9 @@ test.describe("Game", () => {
   }) => {
     const roomID = await hostPage.createRoom();
     await expect(hostPage.page.getByText("Press start to play")).toBeVisible();
+    await expect(
+      hostPage.page.getByRole("button", {name: "Start!"})
+    ).toBeDisabled();
 
     /* #region Enter room - User */
     await userPage.getByText("guesthost1's roomOwner: guesthost11/").click();
@@ -42,6 +45,10 @@ test.describe("Game", () => {
     await expect(userPage.getByText("Result - 2nd place")).toBeVisible({
       timeout: 10000
     });
+    await expect(hostPage.page.getByText(/remaining/i)).not.toBeVisible();
+    await expect(
+      hostPage.page.getByRole("button", {name: "Reset"})
+    ).toBeVisible();
 
     /* #endregion */
   });
@@ -88,5 +95,50 @@ test.describe("Game", () => {
       userPage.getByText("You were kicked out by the owner")
     ).toBeVisible();
     /* #endregion */
+  });
+
+  test("Should enter room with password by invite link", async ({
+    hostPage,
+    userPage
+  }) => {
+    await hostPage.page
+      .context()
+      .grantPermissions(["clipboard-read", "clipboard-write"]);
+
+    await hostPage.createRoom("123");
+    await hostPage.page.getByText("Invite friends").click();
+
+    const inviteLink = await (
+      await hostPage.page.evaluateHandle(() => navigator.clipboard.readText())
+    ).jsonValue();
+
+    await userPage.page.goto(inviteLink);
+
+    await expect(
+      userPage.page.getByText("Enter the password")
+    ).not.toBeVisible();
+  });
+
+  test("Should enter room with password by link asking for password", async ({
+    hostPage,
+    userPage
+  }) => {
+    await hostPage.page
+      .context()
+      .grantPermissions(["clipboard-read", "clipboard-write"]);
+
+    const pwd = "123";
+    const roomID = await hostPage.createRoom(pwd);
+
+    await userPage.page.goto(`/game/${roomID}`);
+
+    await expect(userPage.page.getByText("Enter the password")).toBeVisible();
+
+    await userPage.page.locator("#swal2-input").fill(pwd);
+    await userPage.page.getByRole("button", {name: "Enter"}).click();
+
+    await expect(
+      userPage.page.getByText("Enter the password")
+    ).not.toBeVisible();
   });
 });
