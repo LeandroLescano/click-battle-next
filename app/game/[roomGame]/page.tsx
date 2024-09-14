@@ -1,7 +1,7 @@
 "use client";
 import React, {useEffect, useRef, useState} from "react";
 import dynamic from "next/dynamic";
-import {useParams, useRouter} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 import {
   getDatabase,
   onDisconnect,
@@ -84,7 +84,7 @@ function RoomGame() {
   const celebrationContainer = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
-  const query = useParams();
+  const query = useSearchParams();
   const db = getDatabase();
   const {setNewUser} = useNewPlayerAlert(listUsers, localUser, currentGame);
   const {
@@ -221,7 +221,10 @@ function RoomGame() {
                   !flagEnter.current
                 ) {
                   flagEnter.current = true;
-                  if (!query?.pwd || query.pwd !== game.settings.password) {
+                  if (
+                    !query.get("pwd") ||
+                    query.get("pwd") !== game.settings.password
+                  ) {
                     requestPassword(game.settings.password, t).then((val) => {
                       if (val.isConfirmed) {
                         clearPath(pathIdGame);
@@ -423,8 +426,8 @@ function RoomGame() {
     if (gUser?.uid) {
       const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
       set(refUser, {clicks: 0, rol: "visitor", username: gameUser?.username});
-    } else if (query?.invite) {
-      if (Date.now() > Number(query?.invite)) {
+    } else if (query.get("invite")) {
+      if (Date.now() > Number(query.get("invite"))) {
         router.push("/");
       }
     } else {
