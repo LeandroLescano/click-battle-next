@@ -1,9 +1,6 @@
-import {test, expect} from "@playwright/test";
-import {loginAsGuest} from "./utils";
+import {test, expect} from "./fixtures";
 
-test("Should navigate to ranking page", async ({page}) => {
-  await loginAsGuest(page, "guesttest1");
-
+test("Should navigate to ranking page", async ({userPage: {page}}) => {
   await page.click("text=Ranking");
 
   await expect(
