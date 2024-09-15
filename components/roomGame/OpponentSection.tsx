@@ -6,16 +6,11 @@ import {GameUser} from "interfaces";
 import OpponentList from "./OpponentList";
 import {useGame} from "contexts/GameContext";
 interface OpponentSectionProps {
-  isLocal: boolean;
   localUsername: string;
   maxUsers: number;
 }
 
-function OpponentSection({
-  isLocal,
-  localUsername,
-  maxUsers
-}: OpponentSectionProps) {
+function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
   const [countPositions, setCountPositions] = useState<{
     list: GameUser[];
     count: number;
@@ -24,7 +19,7 @@ function OpponentSection({
     count: 0
   });
   const {t} = useTranslation();
-  const {game} = useGame();
+  const {game, isHost} = useGame();
 
   useEffect(() => {
     if (
@@ -62,12 +57,11 @@ function OpponentSection({
           <div className="col-2 text-center">Clicks</div>
         </div>
       ) : (
-        isLocal && <h4>{t("Waiting for opponents...")}</h4>
+        isHost && <h4>{t("Waiting for opponents...")}</h4>
       )}
       <div className="row">
         <div className="col-10">
           <OpponentList
-            isLocal={isLocal}
             countPositions={countPositions}
             localUsername={localUsername}
           />

@@ -1,7 +1,7 @@
 "use client";
 import React, {useEffect, useRef, useState} from "react";
 import dynamic from "next/dynamic";
-import {useRouter, useSearchParams} from "next/navigation";
+import {useParams, useRouter, useSearchParams} from "next/navigation";
 import {
   getDatabase,
   onDisconnect,
@@ -21,7 +21,6 @@ import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {useTranslation} from "react-i18next";
 
 import celebrationAnim from "lotties/celebrationAnim.json";
-import {getSuffixPosition} from "utils/string";
 import {
   ModalCreateUsername,
   Loading,
@@ -35,6 +34,7 @@ import {updateUser} from "services/user";
 import {addRoomStats} from "services/rooms";
 import {Game, GameUser, MaxScore, RoomStats} from "interfaces";
 import {useGame} from "contexts/GameContext";
+import {handleInvite} from "utils/invite";
 
 const OpponentSection = dynamic(
   () => import("../../../components/roomGame/OpponentSection")
@@ -59,14 +59,8 @@ const ModalLogin = dynamic<ModalLoginProps>(
 );
 
 function RoomGame() {
-  const [isLocal, setIsLocal] = useState(false);
-  const [idGame, setIdGame] = useState<string>();
   const [startCountdown, setStartCountdown] = useState(false);
   const [showSideBar, setShowSideBar] = useState(false);
-  const [localUser, setLocalUser] = useState<GameUser>({
-    username: "",
-    clicks: 0
-  });
   const roomStats = useRef<RoomStats>({
     name: "",
     gamesPlayed: [],
@@ -81,6 +75,7 @@ function RoomGame() {
 
   const router = useRouter();
   const query = useSearchParams();
+  const {roomGame: roomID} = useParams<{roomGame: string}>();
   const db = getDatabase();
   const {
     gameUser,
@@ -91,10 +86,13 @@ function RoomGame() {
   } = useAuth();
   const {
     game: currentGame,
+    localUser,
+    isHost,
     setGame: setCurrentGame,
-    localPosition,
     setGame,
-    setLocalPosition
+    setLocalUser,
+    setIsHost,
+    calculatePosition
   } = useGame();
   const {setNewUser} = useNewPlayerAlert(
     currentGame.listUsers,
@@ -107,6 +105,7 @@ function RoomGame() {
 
   let unsubscribe: Unsubscribe;
 
+  // useEffect for remove user or remove room if host disconnects
   useEffect(() => {
     if (isAuthenticated && gUser?.uid) {
       const gamePath = `games/${currentGame.key}`;
@@ -146,11 +145,10 @@ function RoomGame() {
 
   // useEffect for update all data in local state
   useEffect(() => {
-    if (isAuthenticated && currentGame.key) {
+    if (isAuthenticated) {
       try {
-        const refGame = ref(db, `games/${currentGame.key}/`);
+        const refGame = ref(db, `games/${roomID}/`);
 
-        setIdGame(currentGame.key);
         unsubscribe = onValue(refGame, (snapshot) => {
           const game: Game | null = snapshot.val();
           try {
@@ -164,6 +162,7 @@ function RoomGame() {
               }
 
               setCurrentGame(game);
+              setStartCountdown(game.gameStart);
 
               if (!roomStats.current.name) {
                 roomStats.current.name = game.roomName;
@@ -174,8 +173,6 @@ function RoomGame() {
                 );
               }
 
-              setStartCountdown(game.gameStart);
-
               const listUsersToPush: GameUser[] = [];
               let listUsersDB: GameUser[] = game.listUsers;
               if (!listUsersDB) {
@@ -183,13 +180,7 @@ function RoomGame() {
               }
               listUsersDB.forEach((val) => {
                 if (!val.kickOut) {
-                  const objUser: GameUser = {
-                    username: val.username,
-                    clicks: val.clicks,
-                    rol: val.rol,
-                    maxScores: val.maxScores,
-                    key: val.key
-                  };
+                  const objUser: GameUser = {...val};
 
                   if (val.key === gUser?.uid) {
                     if (objUser.clicks !== localUserRef.current?.clicks) {
@@ -202,12 +193,15 @@ function RoomGame() {
                   router.push("/?kickedOut=true");
                 }
               });
+
               if (listUsersToPush.length > currentGame.listUsers.length) {
                 setNewUser(true);
               }
+
               setGame({listUsers: listUsersToPush});
+
               if (game.ownerUser?.username === gameUser?.username) {
-                setIsLocal(true);
+                setIsHost(true);
               } else if (gUser?.uid) {
                 if (
                   listUsersToPush.filter(
@@ -218,11 +212,7 @@ function RoomGame() {
                   return;
                 }
 
-                if (
-                  game.settings.password &&
-                  idGame !== currentGame.key &&
-                  !flagEnter.current
-                ) {
+                if (game.settings.password && !flagEnter.current) {
                   flagEnter.current = true;
                   if (
                     !query.get("pwd") ||
@@ -230,7 +220,7 @@ function RoomGame() {
                   ) {
                     requestPassword(game.settings.password, t).then((val) => {
                       if (val.isConfirmed) {
-                        clearPath(currentGame.key!);
+                        clearPath(roomID);
                         addNewUserToDB(game);
                       } else {
                         router.push("/");
@@ -238,7 +228,7 @@ function RoomGame() {
                       }
                     });
                   } else {
-                    clearPath(currentGame.key!);
+                    clearPath(roomID);
                     addNewUserToDB(game);
                   }
                 }
@@ -259,7 +249,7 @@ function RoomGame() {
                 roomStats,
                 username: gameUser?.username,
                 listUsers: currentGame.listUsers,
-                isLocal
+                isLocal: isHost
               })
             );
             throw error;
@@ -282,16 +272,8 @@ function RoomGame() {
     };
   }, [isAuthenticated, gUser?.uid]);
 
-  // useEffect for put the position of the localUser
+  // useEffect for update the maxUsersConnected
   useEffect(() => {
-    if (currentGame?.timer === undefined) {
-      for (const i in currentGame.listUsers) {
-        if (currentGame.listUsers[i].username === localUser.username) {
-          const position = Number(i) + 1;
-          setLocalPosition(getSuffixPosition(position, t));
-        }
-      }
-    }
     if (roomStats.current.maxUsersConnected < currentGame.listUsers.length) {
       roomStats.current.maxUsersConnected = currentGame.listUsers.length;
     }
@@ -306,6 +288,7 @@ function RoomGame() {
         // localUser is owner
         if (!currentGame.timer) {
           if (currentGame.timer === 0) {
+            calculatePosition();
             logEvent(getAnalytics(), "game_finish", {
               date: new Date(),
               users: currentGame.listUsers,
@@ -322,7 +305,7 @@ function RoomGame() {
               timer: currentGame.settings.timer
             });
 
-            const refGame = ref(db, `games/${idGame}`);
+            const refGame = ref(db, `games/${roomID}`);
             update(refGame, {timer: null, currentGame: false});
             updateLocalMaxScore(userKey);
           }
@@ -334,7 +317,7 @@ function RoomGame() {
         lottie.destroy();
         const intervalId = setInterval(() => {
           if (localUser.rol === "owner") {
-            const refGame = ref(db, `games/${idGame}`);
+            const refGame = ref(db, `games/${roomID}`);
             update(refGame, {timer: currentGame?.timer - 1});
           }
         }, 1000);
@@ -343,11 +326,12 @@ function RoomGame() {
       } else if (currentGame.timer === 0) {
         // localUser is visitor
         loadCelebrationAnimation();
+        calculatePosition();
         updateLocalMaxScore(userKey);
       }
     } else if (startCountdown && localUser.rol === "owner") {
       if (!currentGame?.timeStart) {
-        const refGame = ref(db, `games/${idGame}`);
+        const refGame = ref(db, `games/${roomID}`);
 
         update(refGame, {
           gameStart: false,
@@ -359,7 +343,7 @@ function RoomGame() {
 
       const intervalIdStart = setInterval(() => {
         if (currentGame) {
-          const refGame = ref(db, `games/${idGame}`);
+          const refGame = ref(db, `games/${roomID}`);
           update(refGame, {timeStart: currentGame.timeStart - 1});
         }
       }, 1000);
@@ -448,36 +432,14 @@ function RoomGame() {
     }
   };
 
-  const toggleSideBar = () => {
+  const closeSideBar = () => {
     if (showSideBar) {
       setShowSideBar(false);
     }
   };
 
-  const handleInvite = () => {
-    let link = window.location.href + `?invite=${Date.now() + 5 * 60 * 1000}`;
-    if (currentGame?.settings.password) {
-      link += `&pwd=${currentGame.settings.password}`;
-    }
-    const data: ShareData = {
-      title: "Click Battle",
-      text: t("inviteText", {link})
-    };
-    if (isMobileDevice && navigator.share && navigator.canShare(data)) {
-      navigator.share(data).catch((e: unknown) => {
-        console.error(e);
-      });
-    } else {
-      navigator.clipboard.writeText(link);
-      Swal.fire({
-        toast: true,
-        title: "Link copied to clipoard!",
-        position: "bottom-left",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true
-      });
-    }
+  const handleOnInvite = () => {
+    handleInvite(isMobileDevice, t, currentGame?.settings.password);
   };
 
   return (
@@ -499,11 +461,11 @@ function RoomGame() {
             localUser={localUser}
           />
           <div className="container-fluid vh-100">
-            {isLocal && (
+            {isHost && (
               <SettingsSideBar
                 showSideBar={showSideBar}
                 handleSideBar={(val: boolean) => setShowSideBar(val)}
-                idGame={idGame}
+                idGame={roomID}
                 options={{
                   maxUsers: currentGame?.settings.maxUsers || 2,
                   roomName: currentGame?.roomName,
@@ -512,7 +474,7 @@ function RoomGame() {
                 }}
               />
             )}
-            <main className="main" onClick={() => toggleSideBar()}>
+            <main className="main" onClick={closeSideBar}>
               <div className="room-name position-absolute d-none d-md-block">
                 {currentGame?.roomName || ""}
               </div>
@@ -537,15 +499,13 @@ function RoomGame() {
                   <div className="row mb-3 w-100 g-4">
                     <div className="col-md-6 text-center opponents-container">
                       <OpponentSection
-                        isLocal={isLocal}
                         localUsername={gameUser?.username || ""}
                         maxUsers={currentGame.settings.maxUsers}
                       />
                     </div>
                     <div className="col-md-6 text-center">
                       <LocalSection
-                        idGame={idGame || ""}
-                        isLocal={isLocal}
+                        idGame={roomID || ""}
                         localUser={localUser}
                         start={currentGame.currentGame}
                         startCountdown={startCountdown}
@@ -556,8 +516,6 @@ function RoomGame() {
               ) : (
                 <ResultSection
                   localUser={localUser}
-                  isLocal={isLocal}
-                  localPosition={localPosition}
                   currentGame={currentGame}
                 />
               )}
@@ -571,18 +529,18 @@ function RoomGame() {
               </div>
               <button
                 className="btn-click small position-absolute bottom-0 end-0 me-4 mb-4"
-                onClick={handleInvite}
+                onClick={handleOnInvite}
               >
                 {t("Invite friends")}
               </button>
             </main>
           </div>
-        </>
-      )}
-      {!isAuthenticated && (
-        <>
-          <ModalLogin />
-          <ModalCreateUsername />
+          {!isAuthenticated && (
+            <>
+              <ModalLogin />
+              <ModalCreateUsername />
+            </>
+          )}
         </>
       )}
     </div>

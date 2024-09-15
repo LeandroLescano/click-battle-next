@@ -10,7 +10,6 @@ import {useGame} from "contexts/GameContext";
 
 interface LocalSectionProps {
   idGame: string;
-  isLocal: boolean;
   localUser: GameUser;
   start: boolean;
   startCountdown: boolean;
@@ -18,7 +17,6 @@ interface LocalSectionProps {
 
 function LocalSection({
   idGame,
-  isLocal,
   localUser,
   start,
   startCountdown
@@ -30,7 +28,7 @@ function LocalSection({
   const suspicionOfHackCounter = useRef(0);
   const {t} = useTranslation();
   const [disableUI, setDisableUI] = useState(false);
-  const {game} = useGame();
+  const {game, isHost} = useGame();
 
   const cantStart = !start && game.listUsers.length < 2;
 
@@ -73,7 +71,7 @@ function LocalSection({
   return (
     <>
       {!start && !startCountdown ? (
-        isLocal ? (
+        isHost ? (
           <h4>{t("Press start to play")}</h4>
         ) : (
           <h4>{t("Waiting for host...")}</h4>
@@ -89,7 +87,7 @@ function LocalSection({
         >
           Click
         </button>
-        {isLocal && !start && !startCountdown && (
+        {isHost && !start && !startCountdown && (
           <button
             className="btn-click my-2"
             disabled={cantStart}

@@ -1,15 +1,21 @@
 "use client";
 
 import React, {useState, useContext, createContext, useEffect} from "react";
+import {useTranslation} from "react-i18next";
 
-import {Game} from "interfaces";
+import {Game, GameUser} from "interfaces";
+import {getSuffixPosition} from "utils/string";
 
 interface GameContextState {
   game: Game;
   setGame: (game: Partial<Game>) => void;
   localPosition?: string;
-  setLocalPosition: (position: string) => void;
   resetGame: VoidFunction;
+  localUser: GameUser;
+  setLocalUser: (user: GameUser) => void;
+  isHost: boolean;
+  setIsHost: (isHost: boolean) => void;
+  calculatePosition: VoidFunction;
 }
 
 const initialGame = {
@@ -32,10 +38,17 @@ const initialGame = {
 
 const GameContext = createContext<GameContextState>({
   game: initialGame,
-  setGame: () => {},
+  isHost: false,
   localPosition: undefined,
-  setLocalPosition: () => {},
-  resetGame: () => {}
+  localUser: {
+    username: "",
+    clicks: 0
+  },
+  setGame: () => {},
+  resetGame: () => {},
+  setLocalUser: () => {},
+  setIsHost: () => {},
+  calculatePosition: () => {}
 });
 
 interface Props {
@@ -54,6 +67,13 @@ export const useGame = () => {
 function useGameProvider(): GameContextState {
   const [game, setGame] = useState<Game>(initialGame);
   const [localPosition, setLocalPosition] = useState<string>();
+  const [localUser, setLocalUser] = useState<GameUser>({
+    username: "",
+    clicks: 0
+  });
+  const [isHost, setIsHost] = useState(false);
+
+  const {t} = useTranslation();
 
   useEffect(() => {
     const storedGame = sessionStorage.getItem("game");
@@ -66,6 +86,15 @@ function useGameProvider(): GameContextState {
     sessionStorage.setItem("game", JSON.stringify(game));
   }, [game]);
 
+  const calculatePosition = () => {
+    for (const i in game.listUsers) {
+      if (game.listUsers[i].username === localUser.username) {
+        const position = Number(i) + 1;
+        setLocalPosition(getSuffixPosition(position, t));
+      }
+    }
+  };
+
   const setPartialGame = (partialGame: Partial<Game>) => {
     setGame((prev) => ({...prev, ...partialGame}));
   };
@@ -76,9 +105,13 @@ function useGameProvider(): GameContextState {
 
   return {
     game,
-    setGame: setPartialGame,
     localPosition,
-    setLocalPosition,
-    resetGame
+    localUser,
+    isHost,
+    setGame: setPartialGame,
+    setLocalUser,
+    resetGame,
+    setIsHost,
+    calculatePosition
   };
 }

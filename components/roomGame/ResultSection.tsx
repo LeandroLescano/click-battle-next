@@ -9,21 +9,14 @@ import {Game, GameUser} from "interfaces";
 import {useGame} from "contexts/GameContext";
 
 interface ResultSectionProps {
-  localPosition: string | undefined;
   localUser: GameUser;
-  isLocal: boolean;
   currentGame: Game;
 }
 
-function ResultSection({
-  localPosition,
-  localUser,
-  isLocal,
-  currentGame
-}: ResultSectionProps) {
+function ResultSection({localUser, currentGame}: ResultSectionProps) {
   const db = getDatabase();
   const {t} = useTranslation();
-  const {game} = useGame();
+  const {game, localPosition, isHost} = useGame();
 
   // function for reset all data
   const handleReset = () => {
@@ -79,7 +72,7 @@ function ResultSection({
             );
           })}
       </div>
-      {isLocal && (
+      {isHost && (
         <button className="btn-click mt-5" onClick={handleReset}>
           {t("Reset")}
         </button>
