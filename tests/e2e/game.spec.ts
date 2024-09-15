@@ -12,12 +12,14 @@ test.describe("Game", () => {
     await expect(
       hostPage.page.getByRole("button", {name: "Start!"})
     ).toBeDisabled();
+    await expect(hostPage.page.locator(".settings-icon")).toBeVisible();
 
     /* #region Enter room - User */
     await userPage.getByText("guesthost1's roomOwner: guesthost11/").click();
     await userPage.waitForURL(/\/game\//);
 
     expect(userPage.url().split("/").pop()).toEqual(roomID);
+    await expect(userPage.locator(".settings-icon")).not.toBeVisible();
     /* #endregion */
 
     /* #region Start game - Host */

@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import {useTranslation} from "react-i18next";
 
 import {GameUser} from "interfaces";
+import {useGame} from "contexts/GameContext";
 
 interface Props {
   countPositions: {
@@ -13,13 +14,13 @@ interface Props {
     list: GameUser[];
   };
   localUsername: string;
-  isLocal: boolean;
 }
 
-const OpponentList = ({countPositions, localUsername, isLocal}: Props) => {
+const OpponentList = ({countPositions, localUsername}: Props) => {
   const pathIdGame = useParams()?.roomGame;
   const db = getDatabase();
   const {t} = useTranslation();
+  const {isHost} = useGame();
 
   const kickUser = (userKey: string | null) => {
     if (userKey) {
@@ -53,7 +54,7 @@ const OpponentList = ({countPositions, localUsername, isLocal}: Props) => {
             }`}
           >
             <div className="col text-start">{username}</div>
-            {isLocal && localUsername !== username && (
+            {isHost && localUsername !== username && (
               <div
                 className="col-auto btn-kick"
                 onClick={() => {

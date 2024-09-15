@@ -30,7 +30,7 @@ export interface Settings {
 
 type SettingsSideBarProps = {
   options: Settings;
-  idGame: string | undefined;
+  idGame: string;
   showSideBar: boolean;
   handleSideBar: (value: boolean) => void;
 };

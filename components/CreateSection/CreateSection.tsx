@@ -22,6 +22,7 @@ import {useAuth} from "contexts/AuthContext";
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
 import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
+import {useGame} from "contexts/GameContext";
 
 const CreateSection = () => {
   const [creating, setCreating] = useState(false);
@@ -37,6 +38,7 @@ const CreateSection = () => {
   const db = getDatabase();
   const router = useRouter();
   const {t} = useTranslation();
+  const {setGame} = useGame();
 
   const handleUpdateRoom = (data: Partial<Room>) => {
     setRoom((prev) => ({...prev, ...data}));
@@ -113,8 +115,11 @@ const CreateSection = () => {
             isRegistered: !user?.isAnonymous
           });
 
-          sessionStorage.setItem("actualIDGame", objRoom.key);
-          sessionStorage.setItem("actualOwner", gameUser.username);
+          setGame({
+            ...objRoom,
+            key: objRoom.key
+          });
+
           sessionStorage.setItem("gameUserKey", "0");
 
           router.push("/game/" + objRoom.key);
