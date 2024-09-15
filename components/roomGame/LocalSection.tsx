@@ -6,23 +6,20 @@ import {useTranslation} from "react-i18next";
 
 import {GameUser} from "interfaces";
 import {useAuth} from "contexts/AuthContext";
+import {useGame} from "contexts/GameContext";
 
 interface LocalSectionProps {
   idGame: string;
-  isLocal: boolean;
   localUser: GameUser;
   start: boolean;
   startCountdown: boolean;
-  listUsers: GameUser[];
 }
 
 function LocalSection({
   idGame,
-  isLocal,
   localUser,
   start,
-  startCountdown,
-  listUsers
+  startCountdown
 }: LocalSectionProps) {
   const [lastClickTime, setLastClickTime] = useState<number>();
   const router = useRouter();
@@ -31,15 +28,16 @@ function LocalSection({
   const suspicionOfHackCounter = useRef(0);
   const {t} = useTranslation();
   const [disableUI, setDisableUI] = useState(false);
+  const {game, isHost} = useGame();
 
-  const cantStart = !start && listUsers.length < 2;
+  const cantStart = !start && game.listUsers.length < 2;
 
   // function for start game
   const handleStart = () => {
     const refGame = ref(db, `games/${idGame}`);
     logEvent(getAnalytics(), "start_game", {
       action: "start_game",
-      users: listUsers.length,
+      users: game.listUsers.length,
       date: new Date()
     });
     update(refGame, {gameStart: true});
@@ -73,7 +71,7 @@ function LocalSection({
   return (
     <>
       {!start && !startCountdown ? (
-        isLocal ? (
+        isHost ? (
           <h4>{t("Press start to play")}</h4>
         ) : (
           <h4>{t("Waiting for host...")}</h4>
@@ -89,7 +87,7 @@ function LocalSection({
         >
           Click
         </button>
-        {isLocal && !start && !startCountdown && (
+        {isHost && !start && !startCountdown && (
           <button
             className="btn-click my-2"
             disabled={cantStart}

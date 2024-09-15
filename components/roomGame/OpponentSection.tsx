@@ -4,38 +4,36 @@ import {useTranslation} from "react-i18next";
 import {GameUser} from "interfaces";
 
 import OpponentList from "./OpponentList";
+import {useGame} from "contexts/GameContext";
 interface OpponentSectionProps {
-  opponents: GameUser[];
-  isLocal: boolean;
   localUsername: string;
   maxUsers: number;
 }
 
-function OpponentSection({
-  opponents,
-  isLocal,
-  localUsername,
-  maxUsers
-}: OpponentSectionProps) {
-  const [countPositions, setCountPositions] = useState({
-    list: opponents,
+function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
+  const [countPositions, setCountPositions] = useState<{
+    list: GameUser[];
+    count: number;
+  }>({
+    list: [],
     count: 0
   });
   const {t} = useTranslation();
+  const {game, isHost} = useGame();
 
   useEffect(() => {
     if (
       !checkOrderArray(
         countPositions.list,
-        opponents.sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
+        game.listUsers.sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
       )
     ) {
       setCountPositions((prev) => ({
-        list: opponents.sort((a, b) => (b.clicks || 0) - (a.clicks || 0)),
+        list: game.listUsers.sort((a, b) => (b.clicks || 0) - (a.clicks || 0)),
         count: prev.count + 1
       }));
     }
-  }, [opponents]);
+  }, [game.listUsers]);
 
   const checkOrderArray = (arr1: GameUser[], arr2: GameUser[]) => {
     if (arr1.length !== arr2.length) return false;
@@ -49,28 +47,27 @@ function OpponentSection({
 
   return (
     <>
-      {opponents.length > 1 ? (
+      {game.listUsers.length > 1 ? (
         <div className="row">
           <div className="col-10">
             <p className="mb-2">
-              {t("Opponents")} ({opponents.length - 1}/{maxUsers - 1})
+              {t("Opponents")} ({game.listUsers.length - 1}/{maxUsers - 1})
             </p>
           </div>
           <div className="col-2 text-center">Clicks</div>
         </div>
       ) : (
-        isLocal && <h4>{t("Waiting for opponents...")}</h4>
+        isHost && <h4>{t("Waiting for opponents...")}</h4>
       )}
       <div className="row">
         <div className="col-10">
           <OpponentList
-            isLocal={isLocal}
             countPositions={countPositions}
             localUsername={localUsername}
           />
         </div>
         <div className="col-2">
-          {opponents
+          {game.listUsers
             .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
             .map((user, i) => {
               return (

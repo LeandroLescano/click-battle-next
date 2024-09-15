@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import {useRouter} from "next/navigation";
 import {useTranslation} from "react-i18next";
 import {changeLanguage} from "i18next";
 import {
@@ -230,7 +229,13 @@ export const Footer = () => {
         {gameUser?.username && (
           <div className="txt-user text-center mx-auto mx-md-0 mt-1 d-flex align-items-center gap-2">
             <DropdownButton
-              title={<img src={`/flags/${i18n.language}.svg`} height={25} />}
+              title={
+                <img
+                  src={`/flags/${i18n.language}.svg`}
+                  height={25}
+                  alt={i18n.language}
+                />
+              }
               variant="secondary"
               size="sm"
               drop="up"
@@ -242,7 +247,7 @@ export const Footer = () => {
                   active={i18n.language === lang}
                   onClick={() => changeLanguage(lang)}
                 >
-                  <img src={`/flags/${lang}.svg`} />
+                  <img src={`/flags/${lang}.svg`} alt={lang} />
                 </Dropdown.Item>
               ))}
             </DropdownButton>
