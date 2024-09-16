@@ -91,7 +91,7 @@ const CreateSection = () => {
           currentGame: false,
           gameStart: false,
           listUsers: [],
-          ownerUser: gameUser,
+          ownerUser: {...gameUser, key: user?.uid},
           timeStart: 3,
           timer,
           created: serverTimestamp(),
