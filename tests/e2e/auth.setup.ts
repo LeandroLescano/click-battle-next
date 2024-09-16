@@ -5,7 +5,6 @@ const hostFile = "tests/.auth/host.json";
 
 setup("authenticate as guest host", async ({page}) => {
   // Perform authentication steps. Replace these actions with your own.
-  console.log("Authenticate as Guest Host");
   await page.goto("/");
   await page.getByRole("button", {name: "Login as guest"}).click();
 

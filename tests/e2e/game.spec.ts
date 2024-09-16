@@ -85,6 +85,7 @@ test.describe("Game", () => {
     await userPage.waitForURL(/\/game\//);
 
     expect(userPage.url().split("/").pop()).toEqual(roomID);
+    await expect(userPage.getByText("Kick")).not.toBeVisible();
     /* #endregion */
 
     /* #region Kick user - Host */

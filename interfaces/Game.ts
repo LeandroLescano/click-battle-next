@@ -5,7 +5,7 @@ export interface Game {
   listUsers: Pick<GameUser, "clicks" | "rol" | "username" | "key">[];
   currentGame: boolean;
   gameStart: boolean;
-  ownerUser: Pick<GameUser, "username">;
+  ownerUser: Pick<GameUser, "username" | "key">;
   roomName: string;
   timeStart: number;
   timer: number;

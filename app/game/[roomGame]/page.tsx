@@ -200,7 +200,7 @@ function RoomGame() {
 
               setGame({listUsers: listUsersToPush});
 
-              if (game.ownerUser?.username === gameUser?.username) {
+              if (game.ownerUser?.key === gUser?.uid) {
                 setIsHost(true);
               } else if (gUser?.uid) {
                 if (
