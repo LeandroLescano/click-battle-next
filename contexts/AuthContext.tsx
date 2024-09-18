@@ -269,8 +269,13 @@ function useAuthProvider(): AuthContextState {
   };
 
   const signOut = async () => {
-    await authSignOut(auth);
-    handleUser(null);
+    if (user) {
+      await authSignOut(auth);
+      handleUser(null);
+    }
+    updateGameUser({});
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("userKey");
   };
 
   const createUsername = async (username: string, isAnonymously: boolean) => {

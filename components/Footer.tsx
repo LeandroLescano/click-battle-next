@@ -15,7 +15,7 @@ import {timeout} from "utils/timeout";
 import {updateUser} from "services/user";
 import {useAuth} from "contexts/AuthContext";
 import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
-import {languages} from "app/i18n/settings";
+import {languages} from "app/(legacy)/i18n/settings";
 
 import RatingStars from "./RatingStars";
 import {ModalLogin} from "./ModalLogin";
@@ -39,18 +39,8 @@ export const Footer = () => {
   const [rating, setRating] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [send, setSend] = useState(false);
-  const {user, gameUser, signOut, updateGameUser} = useAuth();
+  const {user, gameUser, signOut} = useAuth();
   const {t, i18n} = useTranslation();
-
-  //Function for logout user.
-  const handleLogOut = () => {
-    if (user) {
-      signOut();
-    }
-    updateGameUser({});
-    localStorage.removeItem("user");
-    sessionStorage.removeItem("userKey");
-  };
 
   const handleContact = async ({
     title = t("Contact us"),
@@ -258,7 +248,7 @@ export const Footer = () => {
             >
               <img src="/icons/clicky-right.svg" height={35} />
             </OverlayTrigger>
-            <button className="btn-logout btn-click" onClick={handleLogOut}>
+            <button className="btn-logout btn-click" onClick={signOut}>
               {t("Log out")}
             </button>
           </div>
