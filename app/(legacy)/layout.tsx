@@ -1,20 +1,20 @@
 import React, {Suspense} from "react";
 import Script from "next/script";
-import "../styles/globals.scss";
-import "../styles/styles.scss";
-import "../styles/roomGame.scss";
-import "../styles/index.scss";
-import "../styles/404.scss";
-import "../styles/footer.scss";
-import "../styles/about.scss";
-import "../styles/loginButton.scss";
+import "../../styles/globals.scss";
+import "../../styles/styles.scss";
+import "../../styles/roomGame.scss";
+import "../../styles/index.scss";
+import "../../styles/404.scss";
+import "../../styles/footer.scss";
+import "../../styles/about.scss";
+import "../../styles/loginButton.scss";
 
 import {getApp, getApps, initializeApp} from "firebase/app";
 
 import {AuthProvider} from "contexts/AuthContext";
 import {Loading} from "components/Loading";
-import {detectLanguage} from "app/i18n/server";
-import {I18nProvider} from "app/i18n/i18n-context";
+import {detectLanguage} from "app/(legacy)/i18n/server";
+import {I18nProvider} from "app/(legacy)/i18n/i18n-context";
 import {firebaseConfig} from "resources/config";
 import {GameProvider} from "contexts/GameContext";
 

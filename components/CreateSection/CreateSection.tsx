@@ -160,7 +160,7 @@ const CreateSection = () => {
 
   return (
     <>
-      <h1 className="text-center mb-4">Click battle!</h1>
+      <h1 className="text-center mb-4 text-3xl">Click battle!</h1>
       <button
         className="btn-click mb-3 mb-md-5 d-flex justify-content-center align-items-center"
         disabled={!gameUser?.username || creating}
