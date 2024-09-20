@@ -1,5 +1,5 @@
 .button {
-  @apply border-2 rounded-md font-bold text-center;
+  @apply border-2 rounded-md font-bold text-center h-10 leading-none;
 
   &-primary {
     @apply bg-primary-200 text-primary-600 border-primary-300;

@@ -11,7 +11,7 @@ import {unstable_cache} from "next/cache";
 
 import {GameUser} from "interfaces";
 import {RankingList} from "components/RankingList";
-import {getServerTranslations} from "app/i18n/server";
+import {getServerTranslations} from "i18n/server";
 
 const UpdatedTime = dynamic(() => import("components/UpdatedTime"), {
   ssr: false
