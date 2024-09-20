@@ -38,20 +38,20 @@ import {useGame} from "contexts/GameContext";
 import {handleInvite} from "utils/invite";
 
 const OpponentSection = dynamic(
-  () => import("../../../components/roomGame/OpponentSection")
+  () => import("../../../../components/roomGame/OpponentSection")
 );
 const LocalSection = dynamic(
-  () => import("../../../components/roomGame/LocalSection")
+  () => import("../../../../components/roomGame/LocalSection")
 );
 const CelebrationResult = dynamic(
-  () => import("../../../components/roomGame/CelebrationResult")
+  () => import("../../../../components/roomGame/CelebrationResult")
 );
 const ResultSection = dynamic(
-  () => import("../../../components/roomGame/ResultSection")
+  () => import("../../../../components/roomGame/ResultSection")
 );
 const ModalLogin = dynamic<ModalLoginProps>(
   () =>
-    import("../../../components/ModalLogin").then(
+    import("../../../../components/ModalLogin").then(
       (component) => component.ModalLogin
     ),
   {

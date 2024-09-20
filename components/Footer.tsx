@@ -15,7 +15,7 @@ import {timeout} from "utils/timeout";
 import {updateUser} from "services/user";
 import {useAuth} from "contexts/AuthContext";
 import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
-import {languages} from "app/(legacy)/i18n/settings";
+import {languages} from "i18n/settings";
 
 import RatingStars from "./RatingStars";
 import {ModalLogin} from "./ModalLogin";

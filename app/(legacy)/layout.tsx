@@ -13,8 +13,8 @@ import {getApp, getApps, initializeApp} from "firebase/app";
 
 import {AuthProvider} from "contexts/AuthContext";
 import {Loading} from "components/Loading";
-import {detectLanguage} from "app/(legacy)/i18n/server";
-import {I18nProvider} from "app/(legacy)/i18n/i18n-context";
+import {detectLanguage} from "i18n/server";
+import {I18nProvider} from "i18n/i18n-context";
 import {firebaseConfig} from "resources/config";
 import {GameProvider} from "contexts/GameContext";
 

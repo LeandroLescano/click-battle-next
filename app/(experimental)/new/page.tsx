@@ -22,6 +22,7 @@ import {ModalLoginProps} from "components/ModalLogin/types";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {Button} from "components-new/Button";
+import {Header} from "components-new";
 
 const ModalLogin = dynamic<ModalLoginProps>(
   () =>
@@ -38,7 +39,7 @@ const Home = () => {
   const router = useRouter();
   const params = useSearchParams();
   const db = getDatabase();
-  const {gameUser, user, loading, signOut} = useAuth();
+  const {gameUser, user, loading} = useAuth();
   const {resetGame, setGame} = useGame();
   const {t} = useTranslation();
 
@@ -188,21 +189,10 @@ const Home = () => {
   return (
     <main>
       <div className="px-32 py-14 h-dvh d-flex dark:text-primary-200">
-        <header className="flex justify-between items-center">
-          <h1 className="text-7xl drop-shadow-sm font-tiny5 [text-shadow:5px_0px_0px_var(--color-primary-400)]">
-            Click Battle!
-          </h1>
-          <Button
-            onClick={signOut}
-            variant="outlined"
-            className="px-5 py-1 uppercase text-2xl w-36"
-          >
-            {t("Log out")}
-          </Button>
-        </header>
+        <Header />
         <h2 className="text-6xl font-bold">Welcome to Click Battle!</h2>
-        {/* <div className="d-flex flex-md-row flex-column w-100 flex-fill p-md-0 p-4">
-          <div className="col-lg-4 order-md-1 create-section">
+        <div className="d-flex flex-md-row flex-column w-100 flex-fill p-md-0 p-4">
+          {/* <div className="col-lg-4 order-md-1 create-section">
             <CreateSection />
           </div>
           <div className="col-lg-8 order-md-0 rooms-section">
@@ -237,9 +227,9 @@ const Home = () => {
                 </div>
               )
             )}
-          </div>
-        </div> */}
-        {/* <Footer /> */}
+          </div> */}
+        </div>
+        <Footer />
       </div>
       {/* <ModalLogin />
       <ModalCreateUsername /> */}
