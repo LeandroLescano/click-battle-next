@@ -11,7 +11,6 @@ import dynamic from "next/dynamic";
 import {Game, GameUser} from "interfaces";
 import {
   CardGame,
-  Footer,
   requestPassword,
   ModalCreateUsername,
   CardGameAd,
@@ -21,8 +20,7 @@ import CreateSection from "components/CreateSection/CreateSection";
 import {ModalLoginProps} from "components/ModalLogin/types";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Button} from "components-new/Button";
-import {Header} from "components-new";
+import {Header, Button, Footer, LoginModal} from "components-new";
 
 const ModalLogin = dynamic<ModalLoginProps>(
   () =>
@@ -231,8 +229,9 @@ const Home = () => {
         </div>
         <Footer />
       </div>
-      {/* <ModalLogin />
-      <ModalCreateUsername /> */}
+      <LoginModal />
+
+      {/*<ModalCreateUsername /> */}
     </main>
   );
 };
