@@ -19,6 +19,7 @@ import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {useTranslation} from "react-i18next";
+import {Timestamp} from "firebase/firestore";
 
 import celebrationAnim from "lotties/celebrationAnim.json";
 import {
@@ -375,19 +376,27 @@ function RoomGame() {
       if (!currentMaxScore || localUser.clicks > currentMaxScore.clicks) {
         if (!gameUser.maxScores) {
           updatedScores = [
-            {clicks: localUser.clicks, time: currentGame.settings.timer}
+            {
+              clicks: localUser.clicks,
+              time: currentGame.settings.timer,
+              date: Timestamp.now()
+            }
           ];
         } else {
           if (currentMaxScore) {
             updatedScores = gameUser.maxScores.map((score) =>
               score.time === currentGame.settings.timer
-                ? {...score, clicks: localUser.clicks!}
+                ? {...score, clicks: localUser.clicks!, date: Timestamp.now()}
                 : score
             );
           } else {
             updatedScores = [
               ...gameUser.maxScores,
-              {time: currentGame.settings.timer, clicks: localUser.clicks}
+              {
+                time: currentGame.settings.timer,
+                clicks: localUser.clicks,
+                date: Timestamp.now()
+              }
             ];
           }
         }
