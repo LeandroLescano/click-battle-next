@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 
 const PointerAnimation = dynamic(
-  () => import("../../components/pointerAnimation")
+  () => import("../../../../components/pointerAnimation")
 );
 
 const NotFound = () => {

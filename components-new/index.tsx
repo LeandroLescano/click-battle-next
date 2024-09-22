@@ -5,3 +5,5 @@ export * from "./LoginModal";
 export * from "./Footer";
 export * from "./RatingStars";
 export * from "./Input";
+export * from "./CardGame";
+export * from "./CardGameAd";

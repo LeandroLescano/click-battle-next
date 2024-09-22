@@ -9,23 +9,20 @@ import {child, getDatabase, onValue, ref, set} from "@firebase/database";
 import dynamic from "next/dynamic";
 
 import {Game, GameUser} from "interfaces";
-import {
-  CardGame,
-  requestPassword,
-  ModalCreateUsername,
-  CardGameAd,
-  Loading
-} from "components";
-import CreateSection from "components/CreateSection/CreateSection";
-import {ModalLoginProps} from "components/ModalLogin/types";
+import {requestPassword, Loading} from "components";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Header, Button, Footer, LoginModal} from "components-new";
+import {Header, Footer, CardGame, CardGameAd} from "components-new";
+import {CreateSection} from "components-new/CreateSection";
+import {Transition} from "@headlessui/react";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faClose} from "@fortawesome/free-solid-svg-icons";
+import {LoginModalProps} from "components-new/LoginModal/types";
 
-const ModalLogin = dynamic<ModalLoginProps>(
+const LoginModal = dynamic<LoginModalProps>(
   () =>
-    import("../../../components/ModalLogin").then(
-      (component) => component.ModalLogin
+    import("../../../components-new/LoginModal").then(
+      (component) => component.LoginModal
     ),
   {
     ssr: false
@@ -34,6 +31,8 @@ const ModalLogin = dynamic<ModalLoginProps>(
 
 const Home = () => {
   const [listGames, setListGames] = useState<Game[]>([]);
+  const [showMessage, setShowMessage] = useState(false);
+
   const router = useRouter();
   const params = useSearchParams();
   const db = getDatabase();
@@ -71,6 +70,10 @@ const Home = () => {
         confirmButtonText: "Ok",
         heightAuto: false
       });
+    }
+
+    if (!localStorage?.getItem("welcomeMessage")) {
+      setShowMessage(true);
     }
   }, []);
 
@@ -182,24 +185,44 @@ const Home = () => {
     }
   };
 
+  const handleCloseMessage = () => {
+    localStorage?.setItem("welcomeMessage", "true");
+    setShowMessage((prev) => !prev);
+  };
+
   if (loading) return <Loading />;
 
   return (
     <main>
-      <div className="px-32 py-14 h-dvh d-flex dark:text-primary-200">
+      <div className="px-32 py-14 dark:text-primary-200 h-screen flex flex-col">
         <Header />
-        <h2 className="text-6xl font-bold">Welcome to Click Battle!</h2>
-        <div className="d-flex flex-md-row flex-column w-100 flex-fill p-md-0 p-4">
-          {/* <div className="col-lg-4 order-md-1 create-section">
+        <div className="flex flex-col md:flex-row w-full flex-1 p-md-0 p-4 overflow-hidden max-h-[600px] mt-auto">
+          <div className="w-1/3 flex flex-col max-h-[480px] md:order-1">
             <CreateSection />
           </div>
-          <div className="col-lg-8 order-md-0 rooms-section">
-            <h2>{t("Available rooms")}</h2>
+          <div className="flex flex-col justify-start items-start w-2/3 order-md-0 max-w-[73%] relative">
+            <Transition show={showMessage}>
+              <div className="flex gap-2">
+                <h2 className="text-6xl font-bold">Welcome to Click Battle!</h2>
+                <FontAwesomeIcon
+                  icon={faClose}
+                  className="cursor-pointer"
+                  size="lg"
+                  onClick={handleCloseMessage}
+                />
+              </div>
+              <p className="text-3xl w-2/3 mt-4">
+                Compete in real time against other players, test your speed and
+                accuracy, and climb the leaderboard - click faster than anyone
+                else and prove you&apos;re the best!
+              </p>
+              <p className="text-3xl font-bold my-3">
+                Are you up for the challenge?
+              </p>
+            </Transition>
+            <h3 className="text-4xl font-bold mb-8">{t("Available rooms")}</h3>
             {listGames.length > 0 ? (
-              <div
-                className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mh-100 align-content-start"
-                style={{minHeight: "90%"}}
-              >
+              <div className="games-container grid grid-cols-1 md:grid-cols-2 gap-6 p-2 overflow-y-auto">
                 {listGames.map((game, i) => (
                   <Fragment key={i}>
                     <CardGame
@@ -209,29 +232,20 @@ const Home = () => {
                     />
                     {(listGames.length === 1 ||
                       (i !== 0 &&
-                        (i % 5 === 0 || i === listGames.length - 1))) && (
+                        (i % 4 === 0 || i === listGames.length - 1))) && (
                       <CardGameAd />
                     )}
                   </Fragment>
                 ))}
               </div>
             ) : (
-              gameUser?.username && (
-                <div
-                  className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mh-100 align-content-start"
-                  style={{minHeight: "90%"}}
-                >
-                  <CardGameAd />
-                </div>
-              )
+              gameUser?.username && <CardGameAd />
             )}
-          </div> */}
+          </div>
         </div>
         <Footer />
       </div>
       <LoginModal />
-
-      {/*<ModalCreateUsername /> */}
     </main>
   );
 };

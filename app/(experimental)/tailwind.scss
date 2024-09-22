@@ -3,15 +3,50 @@
 @tailwind utilities;
 
 main {
-  background-color: white;
-  background-image: url("../../public/squares.png");
+  background: url("../../public/squares.png") no-repeat center center fixed
+    white;
   background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  min-height: 100vh;
 }
 
 @media (prefers-color-scheme: dark) {
   main {
-    background-color: #191919;
-    background-image: url("../../public/squares.png");
+    background: url("../../public/squares.png") no-repeat center center fixed
+      #191919;
     background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    min-height: 100vh;
+  }
+
+  .games-container {
+    --sb-track-color: transparent;
+    --sb-thumb-color: var(--color-primary-200);
+    --sb-size: 8px;
+  }
+
+  .games-container::-webkit-scrollbar {
+    width: var(--sb-size);
+  }
+
+  .games-container::-webkit-scrollbar-track {
+    background: var(--sb-track-color);
+    border-radius: 6px;
+  }
+
+  .games-container::-webkit-scrollbar-thumb {
+    background: var(--sb-thumb-color);
+    border-radius: 6px;
+    border: 5px solid transparent;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    .games-container {
+      scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
+    }
   }
 }

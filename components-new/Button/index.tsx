@@ -9,6 +9,7 @@ export const Button = ({
   children,
   className,
   loading,
+  loadingText,
   onClick,
   ...rest
 }: ButtonProps) => {
@@ -16,7 +17,7 @@ export const Button = ({
 
   return (
     <button
-      className={`button button-${variant} ${className}`}
+      className={`button button-${variant} ${className || ""}`}
       onClick={onClick}
       {...rest}
       disabled={rest.disabled || loading}
@@ -28,14 +29,14 @@ export const Button = ({
             width="1em"
             height="1em"
             viewBox="0 0 24 24"
-            className="inline w-4 h-4 me-3 text-gray-200 animate-spin dark:text-gray-600"
+            className="inline w-5 h-5 me-3 text-gray-200 animate-spin dark:text-gray-600"
           >
             <path
               fill="currentColor"
               d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
             />
           </svg>
-          {t("Loading...")}
+          {t(loadingText || "Loading...")}
         </span>
       ) : (
         children

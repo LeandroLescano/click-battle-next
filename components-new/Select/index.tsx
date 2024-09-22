@@ -1,28 +1,28 @@
 import React from "react";
 
-import {InputProps} from "./types";
+import {SelectProps} from "./types";
 import {
   Field,
   Label,
-  Input as HeadLessInput,
+  Select as HeadLessSelect,
   Description
 } from "@headlessui/react";
 
-export const Input = ({
+export const Select = ({
   label,
   description,
   className,
   descriptionClassName,
-  labelColor = "text-white",
   containerClassName,
+  labelColor = "text-white",
   ...rest
-}: InputProps) => {
+}: SelectProps) => {
   return (
     <Field className={containerClassName}>
       {label && (
         <Label className={`text-lg font-medium ${labelColor}`}>{label}</Label>
       )}
-      <HeadLessInput
+      <HeadLessSelect
         className={`mt-3 block w-full rounded-lg border border-white/60 bg-primary-700 py-1.5 px-6 text-base text-white ${className}`}
         {...rest}
       />
