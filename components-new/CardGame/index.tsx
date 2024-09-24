@@ -93,34 +93,6 @@ export const CardGame = ({
             ? `${Object.keys(game.listUsers).length}/${game.settings.maxUsers}`
             : `1/${game.settings.maxUsers}`}
         </div>
-        {/* <div
-            className="card card-room shadow-sm bg-primary-100 text-primary-500 px-4 py-3 rounded-md"
-            onClick={handleEnterGame}
-          >
-            <div className="card-body">
-              <p>
-                <b>
-                  {game.roomName !== ""
-                    ? game.roomName
-                    : t("Room N°", {roomName: roomNumber})}
-                  {game.settings.password ? (
-                    <FontAwesomeIcon icon={faLock as IconProp} className="mx-1" />
-                  ) : null}
-                </b>
-              </p>
-              <span>
-                {t("Owner")}: {game.ownerUser?.username}
-              </span>
-            </div>
-            <div className="txt-cant-users">
-              <FontAwesomeIcon icon={faUser as IconProp} className="mx-1" />
-              {game.listUsers
-                ? `${Object.keys(game.listUsers).length}/${
-                    game.settings.maxUsers
-                  }`
-                : `1/${game.settings.maxUsers}`}
-            </div>
-          </div> */}
       </Button>
     )
   );

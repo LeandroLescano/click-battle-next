@@ -124,7 +124,7 @@ export const CreateSection = () => {
 
           sessionStorage.setItem("gameUserKey", "0");
 
-          router.push("/game/" + objRoom.key);
+          router.push("/new/game/" + objRoom.key);
         } else {
           Swal.fire({
             icon: "error",
