@@ -43,7 +43,7 @@ const Home = () => {
   useEffect(() => {
     //If exist userKey get user from DB
     if (params.get("kickedOut") === "true") {
-      router.replace("/");
+      router.replace("/new");
       //TODO: Add a global Swal mixin with heightAuto:false
       Swal.fire({
         title: t("You were kicked out by the owner"),
@@ -52,7 +52,7 @@ const Home = () => {
         heightAuto: false
       });
     } else if (params.get("fullRoom") === "true") {
-      router.replace("/");
+      router.replace("/new");
       Swal.fire({
         title: t("Room is full"),
         icon: "error",
@@ -60,7 +60,7 @@ const Home = () => {
         heightAuto: false
       });
     } else if (params.get("suspicionOfHack") === "true") {
-      router.replace("/");
+      router.replace("/new");
       Swal.fire({
         title: t("Fair play is important to us"),
         text: t(
@@ -178,7 +178,7 @@ const Home = () => {
           maxUsers: game.settings.maxUsers,
           isRegistered: !user.isAnonymous
         });
-        router.push(`game/${game.key}`);
+        router.push(`/new/game/${game.key}`);
       } else {
         console.error("Error loading user to game");
       }
