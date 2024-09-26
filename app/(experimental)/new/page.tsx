@@ -194,7 +194,7 @@ const Home = () => {
 
   return (
     <main>
-      <div className="px-32 py-14 dark:text-primary-200 h-screen flex flex-col">
+      <div className="px-32 py-14 text-primary-200 h-screen flex flex-col">
         <Header />
         <div className="flex flex-col md:flex-row w-full flex-1 p-md-0 p-4 overflow-hidden max-h-[600px] mt-auto">
           <div className="w-1/3 flex flex-col max-h-[480px] md:order-1">
@@ -220,7 +220,9 @@ const Home = () => {
                 Are you up for the challenge?
               </p>
             </Transition>
-            <h3 className="text-4xl font-bold mb-8">{t("Available rooms")}</h3>
+            <h3 className="text-4xl font-bold mb-8 text-primary-600 dark:text-primary-100">
+              {t("Available rooms")}
+            </h3>
             {listGames.length > 0 ? (
               <div className="games-container grid grid-cols-1 md:grid-cols-2 gap-6 p-2 overflow-y-auto">
                 {listGames.map((game, i) => (

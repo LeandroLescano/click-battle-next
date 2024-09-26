@@ -79,16 +79,26 @@ export const LoginModal = ({
       className="relative z-10 focus:outline-none"
     >
       <DialogBackdrop className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
-      <div className="fixed inset-0 flex w-screen items-center justify-center dark:text-white">
-        <DialogPanel className="flex items-center content-center min-h-64 rounded-md p-16 dark:bg-primary-600">
+      <div className="fixed inset-0 flex w-screen items-center justify-center  dark:text-white">
+        <DialogPanel className="flex items-center content-center min-h-64 rounded-md p-16 bg-primary-50 dark:bg-primary-600">
           <div
             className={`flex ${
               allowAnonymous ? "w-full flex-col md:flex-row" : "flex-col"
             } md:gap-11`}
           >
             <div className="gap-4 flex flex-col justify-between flex-1">
-              <h2 className="text-2xl font-bold">{t("Login with")}</h2>
-              <div className="flex gap-4">
+              <h2
+                className={`text-2xl font-bold ${
+                  !allowAnonymous ? "text-center" : ""
+                }`}
+              >
+                {t("Login with")}
+              </h2>
+              <div
+                className={`flex gap-4 center ${
+                  !allowAnonymous ? "justify-center" : ""
+                }`}
+              >
                 <SocialButton
                   variant="google"
                   onClick={() => handleLogin("google")}
@@ -102,7 +112,11 @@ export const LoginModal = ({
                   onClick={() => handleLogin("twitter")}
                 />
               </div>
-              <p className="mb-2 text-lg">
+              <p
+                className={`mb-2 text-lg ${
+                  !allowAnonymous ? "mb-0 text-center" : ""
+                }`}
+              >
                 {t(
                   "Log in with your account to save your name, score and more!"
                 )}
@@ -110,7 +124,7 @@ export const LoginModal = ({
             </div>
             {allowAnonymous ? (
               <div
-                className={`flex-1 mt-4 pt-4 border-t border-white/60 md:border-l md:border-t-0 md:pl-11 md:pt-0 md:mt-0
+                className={`flex-1 mt-4 pt-4 border-t border-primary-700 dark:border-white/60 md:border-l-2 md:border-t-0 md:pl-11 md:pt-0 md:mt-0
 
                   `}
               >
@@ -137,7 +151,7 @@ export const LoginModal = ({
                 </Button>
               </div>
             ) : (
-              <Button className="w-full" onClick={handleOnClose}>
+              <Button className="w-full text-2xl py-2" onClick={handleOnClose}>
                 {t("Cancel")}
               </Button>
             )}

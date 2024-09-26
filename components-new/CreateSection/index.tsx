@@ -162,14 +162,14 @@ export const CreateSection = () => {
 
   return (
     <>
-      <h2 className="text-5xl font-extrabold self-start">
+      <h2 className="text-5xl font-extrabold self-start text-primary-600 dark:text-primary-100">
         {t("Create your own room")}
       </h2>
       <div className="flex-1 flex flex-col justify-end">
         <div className="flex justify-between items-end gap-9 w-full flex-1">
           <Input
             label={t("Insert room name")}
-            labelColor="text-primary-200"
+            labelColor="text-primary-500 dark:text-primary-200"
             type="text"
             className="mb-2 h-12"
             containerClassName="flex-1"
@@ -184,7 +184,7 @@ export const CreateSection = () => {
           />
           <Input
             label={t("Insert room password (op)")}
-            labelColor="text-primary-200"
+            labelColor="text-primary-500 dark:text-primary-200"
             type="password"
             className="mb-2 h-12"
             containerClassName="flex-1"
@@ -197,7 +197,7 @@ export const CreateSection = () => {
         <div className="flex justify-between items-center gap-9 w-full flex-1">
           <Select
             label={t("Max number of users")}
-            labelColor="text-primary-200"
+            labelColor="text-primary-500 dark:text-primary-200"
             className="mb-2 h-12"
             containerClassName="flex-1"
             data-label="Max number of users"
@@ -218,7 +218,7 @@ export const CreateSection = () => {
           </Select>
           <Select
             label={t("Timer")}
-            labelColor="text-primary-200"
+            labelColor="text-primary-500 dark:text-primary-200 font-"
             className="mb-2 h-12"
             containerClassName="flex-1"
             data-label="Timer"
