@@ -14,7 +14,7 @@ export default function ErrorPage({error}: {error: Error & {digest?: string}}) {
       <h2>Sorry, Something went wrong!</h2>
       <button
         className="btn-click small mt-3"
-        onClick={() => (window.location.href = "/")}
+        onClick={() => (window.location.href = "/new")}
       >
         Reload
       </button>

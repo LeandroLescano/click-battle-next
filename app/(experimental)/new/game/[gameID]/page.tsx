@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import dynamic from "next/dynamic";
 import {useParams, useRouter, useSearchParams} from "next/navigation";
 import {
@@ -233,7 +233,7 @@ function RoomGame() {
                 }
               }
             } else {
-              router.replace("/");
+              router.replace("/new");
             }
           } catch (error) {
             console.log(
@@ -443,6 +443,10 @@ function RoomGame() {
     handleInvite(isMobileDevice, t, currentGame?.settings.password);
   };
 
+  const handleOnBack = useCallback(() => {
+    router.push("/new");
+  }, []);
+
   return (
     <main>
       <div className="px-32 py-14 dark:text-primary-200 h-screen flex flex-col">
@@ -477,7 +481,10 @@ function RoomGame() {
               />
             )} */}
               <div onClick={closeSideBar}>
-                <GameHeader onOpenSettings={() => setShowSideBar(true)} />
+                <GameHeader
+                  onOpenSettings={() => setShowSideBar(true)}
+                  onBack={handleOnBack}
+                />
                 <h1 className="text-6xl font-bold">
                   {currentGame?.roomName || ""}
                 </h1>

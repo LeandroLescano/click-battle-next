@@ -3,25 +3,24 @@
 @tailwind utilities;
 
 main {
-  background: url("../../public/squares.png") no-repeat center center fixed
-    white;
-  background-size: cover;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  min-height: 100vh;
-}
-
-@media (prefers-color-scheme: dark) {
-  main {
-    background: url("../../public/squares.png") no-repeat center center fixed
-      #191919;
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("../../public/squares-white.jpg") no-repeat center center
+      fixed;
+    background-blend-mode: color;
     background-size: cover;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
-    min-height: 100vh;
+    opacity: 0.02;
+    z-index: -1;
   }
+  min-height: 100vh;
 
   .games-container {
     --sb-track-color: transparent;
@@ -48,5 +47,17 @@ main {
     .games-container {
       scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
     }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  main {
+    background: url("../../public/squares.png") no-repeat center center fixed
+      #191919;
+    background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    min-height: 100vh;
   }
 }

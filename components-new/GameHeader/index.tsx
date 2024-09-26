@@ -7,7 +7,7 @@ import {Gear} from "icons/Gear";
 
 import {GameHeaderProps} from "./types";
 
-export const GameHeader = ({onOpenSettings}: GameHeaderProps) => {
+export const GameHeader = ({onOpenSettings, onBack}: GameHeaderProps) => {
   const {t} = useTranslation();
 
   return (
@@ -15,7 +15,7 @@ export const GameHeader = ({onOpenSettings}: GameHeaderProps) => {
       <Button
         variant="outlined"
         className="px-5 py-1 text-2xl flex gap-2"
-        onClick={onOpenSettings}
+        onClick={onBack}
       >
         <LeftArrow />
         {t("Go Back!")}
