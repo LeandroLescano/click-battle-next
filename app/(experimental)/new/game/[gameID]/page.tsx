@@ -38,7 +38,7 @@ const LocalSection = dynamic(
   () => import("../../../../../components-new/LocalSection")
 );
 const CelebrationResult = dynamic(
-  () => import("../../../../../components/roomGame/CelebrationResult")
+  () => import("../../../../../components-new/CelebrationResult")
 );
 const ResultSection = dynamic(
   () => import("../../../../../components/roomGame/ResultSection")
@@ -457,7 +457,7 @@ function RoomGame() {
             {startCountdown &&
               currentGame?.timeStart &&
               currentGame.timeStart >= 0 && (
-                <div className="start-countdown">
+                <div className="start-countdown text-9xl">
                   {currentGame.timeStart === 0 ? "Go" : currentGame.timeStart}
                 </div>
               )}
@@ -466,8 +466,7 @@ function RoomGame() {
               timer={currentGame?.timer}
               localUser={localUser}
             />
-            <div className="w-full h-screen">
-              {/* {isHost && (
+            {/* {isHost && (
               <SettingsSideBar
                 showSideBar={showSideBar}
                 handleSideBar={(val: boolean) => setShowSideBar(val)}
@@ -480,53 +479,40 @@ function RoomGame() {
                 }}
               />
             )} */}
-              <div onClick={closeSideBar}>
-                <GameHeader
-                  onOpenSettings={() => setShowSideBar(true)}
-                  onBack={handleOnBack}
-                />
-                <h1 className="text-6xl font-bold">
-                  {currentGame?.roomName || ""}
-                </h1>
-                {currentGame?.timer && currentGame?.timer > 0 ? (
-                  <>
-                    <div className="flex">
-                      <LocalSection
-                        idGame={gameID || ""}
-                        localUser={localUser}
-                        start={currentGame.currentGame}
-                        startCountdown={startCountdown}
-                      />
-                      <OpponentSection
-                        localUsername={gameUser?.username || ""}
-                        maxUsers={currentGame.settings.maxUsers}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <ResultSection
+            <div onClick={closeSideBar} className="flex flex-col gap-4 h-full">
+              <GameHeader
+                onOpenSettings={() => setShowSideBar(true)}
+                onBack={handleOnBack}
+              />
+              <h1 className="text-6xl font-bold mb-2 text-primary-400 dark:text-primary-100">
+                {currentGame?.roomName || ""}
+              </h1>
+              {currentGame?.timer && currentGame?.timer > 0 ? (
+                <div className="flex min-w-0 flex-1">
+                  <LocalSection
+                    idGame={gameID || ""}
                     localUser={localUser}
-                    currentGame={currentGame}
+                    start={currentGame.currentGame}
+                    startCountdown={startCountdown}
                   />
-                )}
-                {/* <div className="room-info">
-                  {currentGame?.timer !== undefined &&
-                    currentGame.currentGame && (
-                      <h2 className="text-center">
-                        {t("N seconds remaining!", {
-                          seconds: currentGame?.timer
-                        })}
-                      </h2>
-                    )}
-                </div> */}
-                <Button
-                  variant="outlined"
-                  className="absolute bottom-12 right-32 text-2xl px-6 py-1"
-                  onClick={handleOnInvite}
-                >
-                  {t("Invite friends")}
-                </Button>
-              </div>
+                  <OpponentSection
+                    localUsername={gameUser?.username || ""}
+                    maxUsers={currentGame.settings.maxUsers}
+                  />
+                </div>
+              ) : (
+                <ResultSection
+                  localUser={localUser}
+                  currentGame={currentGame}
+                />
+              )}
+              <Button
+                variant="outlined"
+                className="text-2xl px-6 py-1 self-end"
+                onClick={handleOnInvite}
+              >
+                {t("Invite friends")}
+              </Button>
             </div>
             {!isAuthenticated && <LoginModal />}
           </>
