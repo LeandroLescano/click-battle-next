@@ -18,6 +18,7 @@
   "Room N°": "Sala N°{{roomName}}",
   "Owner": "Host",
   "Opponents": "Oponentes",
+  "Name": "Nombre",
   "Waiting for opponents...": "Esperando oponentes...",
   "Press start to play": "Presiona comenzar para jugar",
   "Waiting for host...": "Esperando al host...",

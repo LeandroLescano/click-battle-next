@@ -48,6 +48,20 @@ main {
       scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
     }
   }
+
+  .start-countdown {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: white;
+    background-color: #00000080;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

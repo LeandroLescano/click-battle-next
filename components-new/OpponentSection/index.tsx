@@ -47,25 +47,28 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
     return true;
   };
 
+  const OpponentsText = () => (
+    <span>
+      {t("Opponents")} ({game.listUsers.length - 1}/{maxUsers - 1})
+    </span>
+  );
+
   return (
-    <div className="opponents-section w-1/2 text-3xl font-medium">
-      {game.listUsers.length > 1 ? (
-        <div className="flex flex-row">
-          <div className="w-5/6">
-            <p className="mb-2">
-              {t("Opponents")} ({game.listUsers.length - 1}/{maxUsers - 1})
-            </p>
-          </div>
-          <div className="w-1/6 text-center">Clicks</div>
+    <div className="w-1/2 text-3xl font-medium h-full flex flex-col">
+      <h4 className="text-5xl font-bold mb-12 text-primary-600 dark:text-primary-200">
+        {game.listUsers.length === 1 && isHost ? (
+          t("Waiting for opponents...")
+        ) : (
+          <OpponentsText />
+        )}
+      </h4>
+      <div className="flex flex-row mb-5 text-primary-600 dark:text-primary-200">
+        <div className="w-5/6">
+          <p className="mb-2">{t("Name")}</p>
         </div>
-      ) : (
-        isHost && (
-          <h4 className="text-5xl font-bold">
-            {t("Waiting for opponents...")}
-          </h4>
-        )
-      )}
-      <div className="flex flex-row">
+        <div className="w-1/6 text-center">Clicks</div>
+      </div>
+      <div className="opponents-container flex flex-row min-w-0 overflow-y-auto pl-1 pt-1">
         <div className="w-5/6">
           <OpponentList
             countPositions={countPositions}
