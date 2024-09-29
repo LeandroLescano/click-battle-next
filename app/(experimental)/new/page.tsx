@@ -9,10 +9,10 @@ import {child, getDatabase, onValue, ref, set} from "@firebase/database";
 import dynamic from "next/dynamic";
 
 import {Game, GameUser} from "interfaces";
-import {requestPassword, Loading} from "components";
+import {requestPassword} from "components";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Header, Footer, CardGame, CardGameAd} from "components-new";
+import {Header, Footer, CardGame, CardGameAd, Loading} from "components-new";
 import {CreateSection} from "components-new/CreateSection";
 import {Transition} from "@headlessui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";

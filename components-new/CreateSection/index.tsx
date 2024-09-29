@@ -1,4 +1,3 @@
-// React
 import React, {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/navigation";
 import Swal from "sweetalert2";

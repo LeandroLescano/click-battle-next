@@ -19,7 +19,7 @@ import {useTranslation} from "react-i18next";
 import {Timestamp} from "firebase/firestore";
 
 import celebrationAnim from "lotties/celebrationAnim.json";
-import {requestPassword, SettingsSideBar} from "components";
+import {requestPassword} from "components";
 import {useAuth} from "contexts/AuthContext";
 import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import {updateUser} from "services/user";
@@ -28,7 +28,7 @@ import {Game, GameUser, MaxScore, RoomStats} from "interfaces";
 import {useGame} from "contexts/GameContext";
 import {handleInvite} from "utils/invite";
 import {LoginModalProps} from "components-new/LoginModal/types";
-import {Button, Loading} from "components-new";
+import {Button, Loading, SettingsSidebar} from "components-new";
 import {GameHeader} from "components-new/GameHeader";
 
 const OpponentSection = dynamic(
@@ -466,8 +466,8 @@ function RoomGame() {
               timer={currentGame?.timer}
               localUser={localUser}
             />
-            {/* {isHost && (
-              <SettingsSideBar
+            {isHost && (
+              <SettingsSidebar
                 showSideBar={showSideBar}
                 handleSideBar={(val: boolean) => setShowSideBar(val)}
                 idGame={gameID}
@@ -478,7 +478,7 @@ function RoomGame() {
                   timer: currentGame?.timer || 10
                 }}
               />
-            )} */}
+            )}
             <div onClick={closeSideBar} className="flex flex-col gap-4 h-full">
               <GameHeader
                 onOpenSettings={() => setShowSideBar(true)}
