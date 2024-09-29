@@ -24,7 +24,7 @@ export const handleInvite = (
     navigator.clipboard.writeText(link);
     Swal.fire({
       toast: true,
-      title: "Link copied to clipoard!",
+      title: t("Link copied to clipoard!"),
       position: "bottom-left",
       showConfirmButton: false,
       timer: 1500,

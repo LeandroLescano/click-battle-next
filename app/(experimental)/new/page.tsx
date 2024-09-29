@@ -203,7 +203,9 @@ const Home = () => {
           <div className="flex flex-col justify-start items-start w-2/3 order-md-0 max-w-[73%] relative">
             <Transition show={showMessage}>
               <div className="flex gap-2">
-                <h2 className="text-6xl font-bold">Welcome to Click Battle!</h2>
+                <h2 className="text-6xl font-bold">
+                  {t("Welcome to Click Battle!")}
+                </h2>
                 <FontAwesomeIcon
                   icon={faClose}
                   className="cursor-pointer"
@@ -212,12 +214,12 @@ const Home = () => {
                 />
               </div>
               <p className="text-3xl w-2/3 mt-4">
-                Compete in real time against other players, test your speed and
-                accuracy, and climb the leaderboard - click faster than anyone
-                else and prove you&apos;re the best!
+                {t(
+                  "Compete in real time against other players, test your speed and accuracy, and climb the leaderboard - click faster than anyone else and prove you're the best!"
+                )}
               </p>
               <p className="text-3xl font-bold my-3">
-                Are you up for the challenge?
+                {t("Are you up for the challenge?")}
               </p>
             </Transition>
             <h3 className="text-4xl font-bold mb-8 text-primary-600 dark:text-primary-100">

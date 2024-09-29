@@ -16,7 +16,7 @@ export const requestPassword = async (
     reverseButtons: true,
     inputValidator: (val) => {
       if (!val) {
-        return t("Plese enter the password");
+        return t("Please enter the password");
       }
       return null;
     },

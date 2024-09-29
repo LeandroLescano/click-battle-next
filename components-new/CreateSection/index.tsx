@@ -216,7 +216,7 @@ export const CreateSection = () => {
             ))}
           </Select>
           <Select
-            label={t("Timer")}
+            label={t("Timer")} //TODO: Check to add an aclaration for seconds
             labelColor="text-primary-500 dark:text-primary-200 font-"
             className="mb-2 h-12"
             containerClassName="flex-1"
