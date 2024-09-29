@@ -19,7 +19,7 @@ import {useTranslation} from "react-i18next";
 import {Timestamp} from "firebase/firestore";
 
 import celebrationAnim from "lotties/celebrationAnim.json";
-import {Loading, requestPassword, SettingsSideBar} from "components";
+import {requestPassword, SettingsSideBar} from "components";
 import {useAuth} from "contexts/AuthContext";
 import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import {updateUser} from "services/user";
@@ -28,7 +28,7 @@ import {Game, GameUser, MaxScore, RoomStats} from "interfaces";
 import {useGame} from "contexts/GameContext";
 import {handleInvite} from "utils/invite";
 import {LoginModalProps} from "components-new/LoginModal/types";
-import {Button} from "components-new";
+import {Button, Loading} from "components-new";
 import {GameHeader} from "components-new/GameHeader";
 
 const OpponentSection = dynamic(
@@ -41,7 +41,7 @@ const CelebrationResult = dynamic(
   () => import("../../../../../components-new/CelebrationResult")
 );
 const ResultSection = dynamic(
-  () => import("../../../../../components/roomGame/ResultSection")
+  () => import("../../../../../components-new/ResultSection")
 );
 const LoginModal = dynamic<LoginModalProps>(
   () =>
@@ -484,9 +484,11 @@ function RoomGame() {
                 onOpenSettings={() => setShowSideBar(true)}
                 onBack={handleOnBack}
               />
-              <h1 className="text-6xl font-bold mb-2 text-primary-400 dark:text-primary-100">
-                {currentGame?.roomName || ""}
-              </h1>
+              {currentGame?.timer && currentGame?.timer > 0 ? (
+                <h1 className="text-6xl font-bold mb-2 text-primary-400 dark:text-primary-100">
+                  {currentGame?.roomName || ""}
+                </h1>
+              ) : null}
               {currentGame?.timer && currentGame?.timer > 0 ? (
                 <div className="flex min-w-0 flex-1">
                   <LocalSection
@@ -501,10 +503,7 @@ function RoomGame() {
                   />
                 </div>
               ) : (
-                <ResultSection
-                  localUser={localUser}
-                  currentGame={currentGame}
-                />
+                <ResultSection />
               )}
               <Button
                 variant="outlined"

@@ -7,3 +7,4 @@ export * from "./RatingStars";
 export * from "./Input";
 export * from "./CardGame";
 export * from "./CardGameAd";
+export * from "./Loading";

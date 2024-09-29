@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useMemo, useRef, useState} from "react";
 import {useRouter} from "next/navigation";
 import {getDatabase, ref, update} from "firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
@@ -88,19 +88,26 @@ function LocalSection({
     return null;
   };
 
+  const importantInfo = useMemo<string>(() => {
+    if (!start && !startCountdown) {
+      if (isHost) {
+        return t("Press start to play");
+      }
+      return t("Waiting for host...");
+    }
+
+    return t("You have n clicks", {clicks: localUser.clicks});
+  }, [start, startCountdown, isHost, localUser.clicks]);
+
   return (
     <div className="w-1/2">
-      {!start && !startCountdown ? (
-        <h4 className="text-5xl font-extrabold tracking-wide mb-12 text-primary-600 dark:text-primary-200">
-          {isHost ? t("Press start to play") : t("Waiting for host...")}
-        </h4>
-      ) : (
-        <h4>{t("You have n clicks!", {clicks: localUser.clicks})}</h4>
-      )}
+      <h4 className="text-5xl font-extrabold tracking-wide mb-12 text-primary-600 dark:text-primary-200">
+        {importantInfo}
+      </h4>
       <h5 className="text-4xl mb-6 text-primary-500 dark:text-primary-100 max-w-md">
         <AdditionalInfo />
       </h5>
-      <div className="d-flex justify-content-around gap-2">
+      <div>
         {(!isHost || start || startCountdown) && (
           <Button
             className="text-4xl w-96 px-5 py-4"
