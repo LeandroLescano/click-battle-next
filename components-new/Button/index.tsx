@@ -10,7 +10,7 @@ export const Button = ({
   className,
   loading,
   loadingText,
-  onClick,
+  onClick = () => {},
   ...rest
 }: ButtonProps) => {
   const {t} = useTranslation();
