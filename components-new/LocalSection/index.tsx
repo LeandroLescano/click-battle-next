@@ -9,6 +9,8 @@ import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {Button} from "components-new/Button";
 import {Watch} from "icons/Watch";
+import {Card} from "components-new/Card";
+import GoogleAdUnit from "components-new/CardGameAd/GoogleAdUnit";
 
 interface LocalSectionProps {
   idGame: string;
@@ -100,7 +102,7 @@ function LocalSection({
   }, [start, startCountdown, isHost, localUser.clicks]);
 
   return (
-    <div className="w-1/2">
+    <div className="w-1/2 flex flex-col">
       <h4 className="text-5xl font-extrabold tracking-wide mb-12 text-primary-600 dark:text-primary-200">
         {importantInfo}
       </h4>
@@ -132,6 +134,18 @@ function LocalSection({
           </h2>
         )}
       </div>
+      <Card className="w-full m-auto">
+        <GoogleAdUnit>
+          <ins
+            className="adsbygoogle ad-local-section"
+            style={{display: "block"}}
+            data-ad-client="ca-pub-4229101464965146"
+            data-ad-slot="6440984608"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          ></ins>
+        </GoogleAdUnit>
+      </Card>
     </div>
   );
 }
