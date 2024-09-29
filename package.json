@@ -15,6 +15,7 @@
     "lint:fix": "eslint --fix --ext .ts,.tsx .",
     "lint:quiet": "next lint --quiet src",
     "check:tsc": "tsc --noEmit -p . --pretty",
+    "check:i18n": "bash check-translations.sh",
     "export": "yarn build && next export",
     "clear-all": "rm -rf .next _static node_modules",
     "re-start": "rm -rf .next _static node_modules && yarn install && yarn dev",
