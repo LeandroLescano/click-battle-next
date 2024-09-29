@@ -30,7 +30,7 @@ function LocalSection({
   const db = getDatabase();
   const {user: gUser} = useAuth();
   const suspicionOfHackCounter = useRef(0);
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const [disableUI, setDisableUI] = useState(false);
   const {game, isHost} = useGame();
 
@@ -99,7 +99,7 @@ function LocalSection({
     }
 
     return t("You have n clicks", {clicks: localUser.clicks});
-  }, [start, startCountdown, isHost, localUser.clicks]);
+  }, [start, startCountdown, isHost, localUser.clicks, i18n.language]);
 
   return (
     <div className="w-1/2 flex flex-col">
