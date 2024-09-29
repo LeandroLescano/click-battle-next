@@ -1,7 +1,7 @@
 import React from "react";
 import {AdblockDetector} from "adblock-detector";
 
-import {Button} from "components-new/Button";
+import {Card} from "components-new/Card";
 
 import GoogleAdUnit from "./GoogleAdUnit";
 
@@ -13,7 +13,7 @@ export const CardGameAd = () => {
   if (userHasAdblock) return <></>;
 
   return (
-    <Button variant="card" className="w-64">
+    <Card className="w-64 p-0">
       <GoogleAdUnit>
         <ins
           className="adsbygoogle"
@@ -24,6 +24,6 @@ export const CardGameAd = () => {
           data-ad-slot="9606023479"
         ></ins>
       </GoogleAdUnit>
-    </Button>
+    </Card>
   );
 };

@@ -134,15 +134,13 @@ function LocalSection({
           </h2>
         )}
       </div>
-      <Card className="w-full m-auto">
+      <Card className="mt-auto mr-auto">
         <GoogleAdUnit>
           <ins
-            className="adsbygoogle ad-local-section"
-            style={{display: "block"}}
+            className="adsbygoogle"
+            style={{display: "inline-block", width: "384px", height: "118px"}}
             data-ad-client="ca-pub-4229101464965146"
             data-ad-slot="6440984608"
-            data-ad-format="auto"
-            data-full-width-responsive="true"
           ></ins>
         </GoogleAdUnit>
       </Card>
