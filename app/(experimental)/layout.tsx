@@ -6,7 +6,7 @@ import "./tailwind.scss";
 import {getApp, getApps, initializeApp} from "firebase/app";
 
 import {AuthProvider} from "contexts/AuthContext";
-import {Loading} from "components/Loading";
+import {Loading} from "components-new/Loading";
 import {detectLanguage} from "i18n/server";
 import {I18nProvider} from "i18n/i18n-context";
 import {firebaseConfig} from "resources/config";
