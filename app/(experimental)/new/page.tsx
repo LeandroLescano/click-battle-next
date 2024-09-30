@@ -196,7 +196,7 @@ const Home = () => {
     <main>
       <div className="px-32 py-14 text-primary-200 h-screen flex flex-col">
         <Header />
-        <div className="flex flex-col md:flex-row w-full flex-1 p-md-0 p-4 overflow-hidden max-h-[600px] mt-auto">
+        <div className="flex flex-col md:flex-row w-full flex-1 p-md-0 overflow-hidden max-h-[600px] mt-auto">
           <div className="w-1/3 flex flex-col max-h-[480px] md:order-1">
             <CreateSection />
           </div>

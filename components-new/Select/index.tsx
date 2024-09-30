@@ -22,10 +22,28 @@ export const Select = ({
       {label && (
         <Label className={`text-lg font-medium ${labelColor}`}>{label}</Label>
       )}
-      <HeadLessSelect
-        className={`mt-3 block w-full rounded-lg border dark:border-white/60 bg-primary-50 dark:bg-primary-700 py-1.5 px-6 text-base text-gray-500 dark:text-white ${className}`}
-        {...rest}
-      />
+      <div className="relative">
+        <HeadLessSelect
+          className={`cursor-pointer mt-3 block w-full rounded-lg border dark:border-white/60 bg-primary-50 dark:bg-primary-700 py-1.5 px-6 text-base text-gray-500 dark:text-white appearance-none ${className}`}
+          {...rest}
+        />
+        <svg
+          className="pointer-events-none absolute top-4 right-5 size-4 transition-all"
+          width="16"
+          height="10"
+          viewBox="0 0 16 10"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M1 1.5L8 8.5L15 1.5"
+            stroke="#6B6B6B"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
       {description && (
         <Description
           className={`text-start text-sm mt-4 ${descriptionClassName}`}

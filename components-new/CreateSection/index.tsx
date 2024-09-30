@@ -50,7 +50,8 @@ export const CreateSection = () => {
     try {
       if (gameUser && room) {
         setCreating(true);
-        const newRoomName = room.name || gameUser.username + "'s room";
+        const newRoomName =
+          room.name || t("Name's room", {name: gameUser.username});
         const newGameRef = ref(db, "games/");
 
         const userToPush: GameUser = {
