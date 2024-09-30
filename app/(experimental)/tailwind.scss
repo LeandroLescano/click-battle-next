@@ -22,6 +22,10 @@ main {
   }
   min-height: 100vh;
 
+  div:has(> ins[data-ad-status="unfilled"]) {
+    @apply hidden;
+  }
+
   .games-container {
     --sb-track-color: transparent;
     --sb-thumb-color: var(--color-primary-200);
