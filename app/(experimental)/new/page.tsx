@@ -200,7 +200,7 @@ const Home = () => {
           <div className="w-1/3 flex flex-col max-h-[480px] md:order-1">
             <CreateSection />
           </div>
-          <div className="flex flex-col justify-start items-start w-2/3 order-md-0 max-w-[73%] relative">
+          <div className="flex flex-col justify-start items-start w-2/3 order-md-0 max-w-[73%] relative pl-1">
             <Transition show={showMessage}>
               <div className="flex gap-2">
                 <h2 className="text-6xl font-bold">
@@ -225,26 +225,24 @@ const Home = () => {
             <h3 className="text-4xl font-bold mb-8 text-primary-600 dark:text-primary-100">
               {t("Available rooms")}
             </h3>
-            {listGames.length > 0 ? (
-              <div className="games-container grid grid-cols-1 md:grid-cols-2 gap-6 p-2 overflow-y-auto">
-                {listGames.map((game, i) => (
-                  <Fragment key={i}>
-                    <CardGame
-                      game={game}
-                      roomNumber={i}
-                      handleEnterGame={() => handleEnterGame(game)}
-                    />
-                    {(listGames.length === 1 ||
-                      (i !== 0 &&
-                        (i % 4 === 0 || i === listGames.length - 1))) && (
-                      <CardGameAd />
-                    )}
-                  </Fragment>
-                ))}
-              </div>
-            ) : (
-              gameUser?.username && <CardGameAd />
-            )}
+            <div className="games-container grid grid-cols-1 md:grid-cols-2 gap-6 p-2 overflow-y-auto">
+              {listGames.length > 0
+                ? listGames.map((game, i) => (
+                    <Fragment key={i}>
+                      <CardGame
+                        game={game}
+                        roomNumber={i}
+                        handleEnterGame={() => handleEnterGame(game)}
+                      />
+                      {(listGames.length === 1 ||
+                        (i !== 0 &&
+                          (i % 4 === 0 || i === listGames.length - 1))) && (
+                        <CardGameAd />
+                      )}
+                    </Fragment>
+                  ))
+                : gameUser?.username && <CardGameAd />}
+            </div>
           </div>
         </div>
         <Footer />
