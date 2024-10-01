@@ -40,6 +40,7 @@
     "adblock-detector": "^2.1.0",
     "bootstrap": "^5.3.2",
     "chart.js": "^4.4.2",
+    "clsx": "^2.1.1",
     "firebase": "^9.5.0",
     "firebase-admin": "^12.0.0",
     "framer-motion": "^7.2.0",
@@ -65,6 +66,7 @@
     "sass-loader": "^12.3.0",
     "sweetalert2": "^11.10.6",
     "sweetalert2-react-content": "^5.0.3",
+    "tailwind-merge": "^2.5.2",
     "web-vitals": "^2.1.2",
     "webpack": "^5.64.4"
   },

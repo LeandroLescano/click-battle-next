@@ -197,11 +197,11 @@ export const Footer = () => {
             <span> | </span>
             <a onClick={() => handleContact()}>{t("Contact")}</a>
             <span> | </span>
-            <Link href="/ranking">{t("Ranking")}</Link>
+            <Link href="/new/ranking">{t("Ranking")}</Link>
           </div>
         ) : (
           <div className="flex justify-end self-center gap-2 w-full pb-sm-2 pb-0 uppercase">
-            <Link href="/ranking">{t("Ranking")}</Link>
+            <Link href="/new/ranking">{t("Ranking")}</Link>
             <span> | </span>
             <span onClick={toggleModal} className="cursor-pointer">
               {t("Save my data")}
@@ -209,11 +209,6 @@ export const Footer = () => {
           </div>
         )}
       </footer>
-      {/* {gameUser?.email && (
-        <div className="score-container float-right">
-          Max score: {gameUser.maxScores}
-        </div>
-      )} */}
       <LoginModal
         allowAnonymous={false}
         show={showModal}

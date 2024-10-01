@@ -1,5 +1,4 @@
 .card {
-  @apply border-2 rounded-md bg-primary-100 border-primary-300;
   transform: translateY(-4px) translateX(-4px);
   box-shadow: 3px 4px theme("colors.primary.250");
 }
