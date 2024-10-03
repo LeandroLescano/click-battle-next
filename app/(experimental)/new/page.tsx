@@ -18,6 +18,8 @@ import {Transition} from "@headlessui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faClose} from "@fortawesome/free-solid-svg-icons";
 import {LoginModalProps} from "components-new/LoginModal/types";
+import {NotificationModal} from "components-new/NotificationModal";
+import {NotificationType} from "components-new/NotificationModal/types";
 
 const LoginModal = dynamic<LoginModalProps>(
   () =>
@@ -32,6 +34,13 @@ const LoginModal = dynamic<LoginModalProps>(
 const Home = () => {
   const [listGames, setListGames] = useState<Game[]>([]);
   const [showMessage, setShowMessage] = useState(false);
+  const [notificationModal, setNotificationModal] = useState<{
+    show: boolean;
+    type: NotificationType;
+  }>({
+    show: false,
+    type: "fullRoom"
+  });
 
   const router = useRouter();
   const params = useSearchParams();
@@ -44,31 +53,21 @@ const Home = () => {
     //If exist userKey get user from DB
     if (params.get("kickedOut") === "true") {
       router.replace("/new");
-      //TODO: Add a global Swal mixin with heightAuto:false
-      Swal.fire({
-        title: t("You were kicked out by the owner"),
-        icon: "error",
-        confirmButtonText: "Ok",
-        heightAuto: false
+      setNotificationModal({
+        show: true,
+        type: "kickedOut"
       });
     } else if (params.get("fullRoom") === "true") {
       router.replace("/new");
-      Swal.fire({
-        title: t("Room is full"),
-        icon: "error",
-        confirmButtonText: "Ok",
-        heightAuto: false
+      setNotificationModal({
+        show: true,
+        type: "fullRoom"
       });
     } else if (params.get("suspicionOfHack") === "true") {
       router.replace("/new");
-      Swal.fire({
-        title: t("Fair play is important to us"),
-        text: t(
-          "Please refrain from using unauthorized tools or hacks while playing."
-        ),
-        icon: "warning",
-        confirmButtonText: "Ok",
-        heightAuto: false
+      setNotificationModal({
+        show: true,
+        type: "hacks"
       });
     }
 
@@ -248,6 +247,13 @@ const Home = () => {
         <Footer />
       </div>
       <LoginModal />
+      <NotificationModal
+        show={notificationModal.show}
+        onClose={() =>
+          setNotificationModal({...notificationModal, show: false})
+        }
+        type={notificationModal.type}
+      />
     </main>
   );
 };

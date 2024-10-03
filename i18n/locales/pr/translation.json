@@ -102,5 +102,8 @@
   "Excellent": "Excelente",
   "Reset": "Reiniciar",
   "Comments": "Comentários",
-  "Sending message...": "Enviando mensagem..."
+  "Sending message...": "Enviando mensagem...",
+  "Disconnected": "Desconectado",
+  "Misuse detected": "Detecção de uso incorreto",
+  "Accept": "Aceitar"
 }
