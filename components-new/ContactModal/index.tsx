@@ -47,7 +47,7 @@ export const ContactModal = ({
               showCloseButton: true
             });
             if (isSuccess) {
-              onClose();
+              handleOnClose();
             }
           },
           (e) => {
@@ -67,6 +67,7 @@ export const ContactModal = ({
   };
 
   const handleOnClose = () => {
+    setMessage("");
     onClose();
   };
 
