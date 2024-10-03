@@ -71,6 +71,12 @@ export const ContactModal = ({
     onClose();
   };
 
+  const handleChangeMessage = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setMessage(event.target.value);
+  };
+
   return (
     <Dialog
       open={show}
@@ -94,7 +100,7 @@ export const ContactModal = ({
             <Textarea
               id="message"
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={handleChangeMessage}
               className={clsx(
                 "w-full rounded-lg border dark:border-white/60 bg-primary-50 dark:bg-primary-700 py-1.5 px-6 text-base text-slate-500 dark:text-white"
               )}
