@@ -1,12 +1,14 @@
 import React from "react";
-
-import {InputProps} from "./types";
 import {
   Field,
   Label,
   Input as HeadLessInput,
   Description
 } from "@headlessui/react";
+import {twMerge} from "tailwind-merge";
+import clsx from "clsx";
+
+import {InputProps} from "./types";
 
 export const Input = ({
   label,
@@ -28,7 +30,9 @@ export const Input = ({
       />
       {description && (
         <Description
-          className={`text-start text-sm mt-4 ${descriptionClassName}`}
+          className={twMerge(
+            clsx("text-start text-sm mt-4", descriptionClassName)
+          )}
         >
           {description}
         </Description>

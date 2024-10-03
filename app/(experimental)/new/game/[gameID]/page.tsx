@@ -507,7 +507,7 @@ function RoomGame() {
               )}
               <Button
                 variant="outlined"
-                className="text-2xl px-6 py-1 self-end"
+                className="text-2xl px-6 py-1 self-end z-10"
                 onClick={handleOnInvite}
               >
                 {t("Invite friends")}

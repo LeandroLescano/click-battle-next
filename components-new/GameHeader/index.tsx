@@ -13,7 +13,7 @@ export const GameHeader = ({onOpenSettings, onBack}: GameHeaderProps) => {
   const {isHost} = useGame();
 
   return (
-    <header className="flex justify-between items-center">
+    <header className="flex justify-between items-center z-10">
       <Button
         variant="outlined"
         className="px-5 py-1 text-2xl flex gap-2"

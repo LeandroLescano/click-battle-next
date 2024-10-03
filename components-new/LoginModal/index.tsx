@@ -20,8 +20,13 @@ export const LoginModal = ({
   const [loading, setLoading] = useState(false);
   const [incorrectLength, setIncorrectLength] = useState(false);
 
-  const {signInWithProvider, signInAnonymously, user, createUsername} =
-    useAuth();
+  const {
+    signInWithProvider,
+    signInAnonymously,
+    user,
+    gameUser,
+    createUsername
+  } = useAuth();
   const {t} = useTranslation();
 
   const handleLogin = (provider: AuthProviders = "google") => {
@@ -74,7 +79,11 @@ export const LoginModal = ({
 
   return (
     <Dialog
-      open={allowAnonymous ? !user : show}
+      open={
+        allowAnonymous
+          ? !user || (user.isAnonymous && !gameUser?.username)
+          : show
+      }
       onClose={handleOnClose}
       className="relative z-10 focus:outline-none"
     >

@@ -86,7 +86,10 @@
   "Send feedback": "Enviar feedback",
   "We're sad about your rating 🥺": "Ficamos tristes com a sua avaliação 🥺",
   "Please tell us what can do to improve your experience 🤗...": "Por favor, diga-nos o que podemos fazer para melhorar sua experiência 🤗...",
+  "We are sorry to hear that your experience was not the best": "Lamentamos saber que sua experiência não foi a melhor",
+  "Tell us what we can improve. Your opinion will help us to offer you a better service.": "Diga -nos o que podemos melhorar. Sua opinião nos ajudará a oferecer um serviço melhor.",
   "Choose a rating": "Escolha uma classificação",
+  "rateUs": "Como foi sua experiência?<1/>Avalie -nos com estrelas",
   "Lousy": "Horrível",
   "Very Bad": "Muito ruim",
   "Bad": "Ruim",
@@ -97,5 +100,7 @@
   "Great": "Ótimo",
   "Almost Excellent": "Quase Excelente",
   "Excellent": "Excelente",
-  "Reset": "Reiniciar"
+  "Reset": "Reiniciar",
+  "Comments": "Comentários",
+  "Sending message...": "Enviando mensagem..."
 }
