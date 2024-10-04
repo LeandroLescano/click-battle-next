@@ -2,6 +2,8 @@ import React, {ChangeEvent, useCallback, useState} from "react";
 import {Dialog, DialogBackdrop, DialogPanel} from "@headlessui/react";
 import {useTranslation} from "react-i18next";
 import Swal from "sweetalert2";
+import clsx from "clsx";
+import {twMerge} from "tailwind-merge";
 
 import {Button, Input} from "components-new";
 import {AuthProviders, useAuth} from "contexts/AuthContext";
@@ -88,25 +90,37 @@ export const LoginModal = ({
       className="relative z-10 focus:outline-none"
     >
       <DialogBackdrop className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
-      <div className="fixed inset-0 flex w-screen items-center justify-center  dark:text-white">
-        <DialogPanel className="flex items-center content-center min-h-64 rounded-md p-16 bg-primary-50 dark:bg-primary-600">
+      <div className="fixed inset-0 flex w-screen items-center justify-center dark:text-white">
+        <DialogPanel className="mx-3 sm:mx-0 flex items-center content-center min-h-64 rounded-md px-4 py-7 sm:p-16 bg-primary-50 dark:bg-primary-600">
           <div
-            className={`flex ${
-              allowAnonymous ? "w-full flex-col md:flex-row" : "flex-col"
-            } md:gap-11`}
+            className={twMerge(
+              clsx(
+                "flex",
+                allowAnonymous
+                  ? "w-full flex-col md:flex-row"
+                  : "flex-col gap-6",
+                "md:gap-11"
+              )
+            )}
           >
             <div className="gap-4 flex flex-col justify-between flex-1">
               <h2
-                className={`text-2xl font-bold ${
-                  !allowAnonymous ? "text-center" : ""
-                }`}
+                className={twMerge(
+                  "text-2xl font-bold",
+                  !allowAnonymous ? "text-center" : "text-center md:text-start"
+                )}
               >
                 {t("Login with")}
               </h2>
               <div
-                className={`flex gap-4 center ${
-                  !allowAnonymous ? "justify-center" : ""
-                }`}
+                className={twMerge(
+                  clsx(
+                    "flex gap-4 center",
+                    !allowAnonymous
+                      ? "justify-center"
+                      : "justify-center md:justify-start"
+                  )
+                )}
               >
                 <SocialButton
                   variant="google"
@@ -122,9 +136,14 @@ export const LoginModal = ({
                 />
               </div>
               <p
-                className={`mb-2 text-lg ${
-                  !allowAnonymous ? "mb-0 text-center" : ""
-                }`}
+                className={twMerge(
+                  clsx(
+                    "mb-2 text-lg text-balance",
+                    !allowAnonymous
+                      ? "mb-0 text-center"
+                      : "text-center md:text-start"
+                  )
+                )}
               >
                 {t(
                   "Log in with your account to save your name, score and more!"

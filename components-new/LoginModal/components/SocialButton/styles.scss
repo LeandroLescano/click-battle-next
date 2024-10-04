@@ -1,4 +1,6 @@
 .login-button {
+  @apply h-10 w-10 min-w-10 sm:h-16 sm:w-16;
+
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -15,8 +17,6 @@
   cursor: pointer;
   font-family: Roboto, arial, sans-serif;
   font-size: 14px;
-  height: 66px;
-  width: 66px;
   letter-spacing: 0.25px;
   outline: none;
   overflow: hidden;
@@ -43,10 +43,8 @@
 }
 
 .login-button .login-button-icon {
-  height: 66px;
+  @apply h-10 w-10 min-w-10 sm:h-16 sm:w-16 sm:min-w-16;
   margin-right: 12px;
-  min-width: 66px;
-  width: 66px;
   margin: 0;
   padding: 5px;
 }
