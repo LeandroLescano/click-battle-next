@@ -181,7 +181,7 @@ const Home = () => {
 
   return (
     <main>
-      <div className="px-5 py-6 md:px-32 md:py-14 text-primary-200 h-screen flex flex-col">
+      <div className="px-5 py-6 md:px-32 md:py-14 text-primary-200 h-svh flex flex-col">
         <Header />
         <div className="flex flex-col md:flex-row w-full flex-1 p-md-0 overflow-hidden max-h-[600px] mt-auto">
           <div className="md:w-1/3 flex flex-col md:max-h-[480px] md:order-1">
@@ -219,7 +219,7 @@ const Home = () => {
         </div>
         <Footer />
       </div>
-      <LoginModal />
+      {/* <LoginModal /> */}
       <NotificationModal
         show={notificationModal.show}
         onClose={() =>
