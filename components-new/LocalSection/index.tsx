@@ -139,7 +139,7 @@ function LocalSection({
           <ins
             className="adsbygoogle"
             style={{display: "inline-block", width: "384px", height: "125px"}}
-            data-ad-client="ca-pub-4229101464965146"
+            data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
             data-ad-slot="6440984608"
           ></ins>
         </GoogleAdUnit>

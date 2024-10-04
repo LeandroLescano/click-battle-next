@@ -22,9 +22,13 @@ export const CardGame = ({
 
   return (
     game.ownerUser && (
-      <Button onClick={handleEnterGame} variant="card" className="w-64">
+      <Button
+        onClick={handleEnterGame}
+        variant="card"
+        className="w-full md:w-64"
+      >
         <div>
-          <p className="text-2xl">
+          <p className="text-xs md:text-2xl">
             {game.roomName !== ""
               ? game.roomName
               : t("Room N°", {roomName: roomNumber})}
@@ -36,14 +40,13 @@ export const CardGame = ({
               />
             )}
           </p>
-          <span className="text-lg">
+          <span className="text-[10px] md:text-lg">
             {t("Owner")}: {game.ownerUser?.username}
           </span>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="text-[8px] md:text-base flex gap-2 items-center">
           <svg
-            width="19"
-            height="19"
+            className="size-4 md:size-7"
             viewBox="0 0 19 19"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

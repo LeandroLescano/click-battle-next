@@ -121,7 +121,7 @@ export const SettingsSidebar = ({
       <div className="flex flex-col justify-between gap-4">
         <Input
           label={t("Room name")}
-          labelColor="text-primary-500 dark:text-primary-200"
+          labelClassname="text-primary-500 dark:text-primary-200"
           type="text"
           className="h-12"
           containerClassName="flex-1"
@@ -134,7 +134,7 @@ export const SettingsSidebar = ({
         <div>
           <Input
             label={options.password ? t("Change password") : t("Set password")}
-            labelColor="text-primary-500 dark:text-primary-200"
+            labelClassname="text-primary-500 dark:text-primary-200"
             type="password"
             className="h-12 mb-2"
             containerClassName="flex-1"

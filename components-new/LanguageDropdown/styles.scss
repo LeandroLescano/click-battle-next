@@ -1,9 +1,18 @@
 .language-menu {
-  padding: 7px 9px;
+  padding: 4px 6px;
+
+  @media (min-width: 768px) {
+    padding: 7px 9px;
+  }
 
   .flag-img {
-    height: 26px;
-    width: 36px;
+    height: 9px;
+    width: 12px;
     object-fit: cover;
+
+    @media (min-width: 768px) {
+      height: 26px;
+      width: 36px;
+    }
   }
 }

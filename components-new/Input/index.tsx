@@ -15,17 +15,21 @@ export const Input = ({
   description,
   className,
   descriptionClassName,
-  labelColor = "text-white",
+  labelClassname,
   containerClassName,
   ...rest
 }: InputProps) => {
   return (
     <Field className={containerClassName}>
       {label && (
-        <Label className={`text-lg font-medium ${labelColor}`}>{label}</Label>
+        <Label
+          className={twMerge("text-lg font-medium text-white", labelClassname)}
+        >
+          {label}
+        </Label>
       )}
       <HeadLessInput
-        className={`mt-3 block w-full rounded-lg border dark:border-white/60 bg-primary-50 dark:bg-primary-700 py-1.5 px-6 text-base text-slate-500 dark:text-white ${className}`}
+        className={`mt-1.5 md:mt-3 block w-full rounded-lg border dark:border-white/60 bg-primary-50 dark:bg-primary-700 py-1.5 px-3 md:px-6 text-base text-slate-500 dark:text-white ${className}`}
         {...rest}
       />
       {description && (

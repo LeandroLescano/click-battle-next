@@ -14,12 +14,10 @@ import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {Header, Footer, CardGame, CardGameAd, Loading} from "components-new";
 import {CreateSection} from "components-new/CreateSection";
-import {Transition} from "@headlessui/react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faClose} from "@fortawesome/free-solid-svg-icons";
 import {LoginModalProps} from "components-new/LoginModal/types";
 import {NotificationModal} from "components-new/NotificationModal";
 import {NotificationType} from "components-new/NotificationModal/types";
+import {WelcomeMessage} from "components-new/WelcomeMessage";
 
 const LoginModal = dynamic<LoginModalProps>(
   () =>
@@ -33,7 +31,6 @@ const LoginModal = dynamic<LoginModalProps>(
 
 const Home = () => {
   const [listGames, setListGames] = useState<Game[]>([]);
-  const [showMessage, setShowMessage] = useState(false);
   const [notificationModal, setNotificationModal] = useState<{
     show: boolean;
     type: NotificationType;
@@ -69,10 +66,6 @@ const Home = () => {
         show: true,
         type: "hacks"
       });
-    }
-
-    if (!localStorage?.getItem("welcomeMessage")) {
-      setShowMessage(true);
     }
   }, []);
 
@@ -184,47 +177,27 @@ const Home = () => {
     }
   };
 
-  const handleCloseMessage = () => {
-    localStorage?.setItem("welcomeMessage", "true");
-    setShowMessage((prev) => !prev);
-  };
-
   if (loading) return <Loading />;
 
   return (
     <main>
-      <div className="px-32 py-14 text-primary-200 h-screen flex flex-col">
+      <div className="px-5 py-6 md:px-32 md:py-14 text-primary-200 h-screen flex flex-col">
         <Header />
         <div className="flex flex-col md:flex-row w-full flex-1 p-md-0 overflow-hidden max-h-[600px] mt-auto">
-          <div className="w-1/3 flex flex-col max-h-[480px] md:order-1">
+          <div className="md:w-1/3 flex flex-col md:max-h-[480px] md:order-1">
+            <div className="md:hidden">
+              <WelcomeMessage />
+            </div>
             <CreateSection />
           </div>
-          <div className="flex flex-col justify-start items-start w-2/3 order-md-0 max-w-[73%] relative pl-1">
-            <Transition show={showMessage}>
-              <div className="flex gap-2">
-                <h2 className="text-6xl font-bold">
-                  {t("Welcome to Click Battle!")}
-                </h2>
-                <FontAwesomeIcon
-                  icon={faClose}
-                  className="cursor-pointer"
-                  size="lg"
-                  onClick={handleCloseMessage}
-                />
-              </div>
-              <p className="text-3xl w-2/3 mt-4">
-                {t(
-                  "Compete in real time against other players, test your speed and accuracy, and climb the leaderboard - click faster than anyone else and prove you're the best!"
-                )}
-              </p>
-              <p className="text-3xl font-bold my-3">
-                {t("Are you up for the challenge?")}
-              </p>
-            </Transition>
-            <h3 className="text-4xl font-bold mb-8 text-primary-600 dark:text-primary-100">
+          <div className="flex flex-col justify-start items-start md:w-2/3 order-md-0 md:max-w-[73%] relative pl-1 min-h-0">
+            <div className="hidden md:block">
+              <WelcomeMessage />
+            </div>
+            <h3 className="text-base md:text-4xl font-bold mt-2 md:mt-0 md:mb-8 text-primary-600 dark:text-primary-100">
               {t("Available rooms")}
             </h3>
-            <div className="games-container grid grid-cols-1 md:grid-cols-2 gap-6 p-2 overflow-y-auto">
+            <div className="games-container grid grid-cols-2 gap-6 p-2 overflow-y-auto overflow-x-hidden w-full md:w-fit">
               {listGames.length > 0
                 ? listGames.map((game, i) => (
                     <Fragment key={i}>

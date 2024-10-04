@@ -24,11 +24,11 @@ export const Select = ({
       )}
       <div className="relative">
         <HeadLessSelect
-          className={`cursor-pointer mt-3 block w-full rounded-lg border dark:border-white/60 bg-primary-50 dark:bg-primary-700 py-1.5 px-6 text-base text-gray-500 dark:text-white appearance-none ${className}`}
+          className={`cursor-pointer mt-1.5 md:mt-3 block w-full rounded-lg border dark:border-white/60 bg-primary-50 dark:bg-primary-700 py-1.5 px-6 text-base text-gray-500 dark:text-white appearance-none ${className}`}
           {...rest}
         />
         <svg
-          className="pointer-events-none absolute top-4 right-5 size-4 transition-all"
+          className="pointer-events-none absolute top-3 right-3 md:top-4 md:right-5 size-3 md:size-4 transition-all"
           width="16"
           height="10"
           viewBox="0 0 16 10"
