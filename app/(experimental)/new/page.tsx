@@ -219,7 +219,7 @@ const Home = () => {
         </div>
         <Footer />
       </div>
-      {/* <LoginModal /> */}
+      <LoginModal />
       <NotificationModal
         show={notificationModal.show}
         onClose={() =>
