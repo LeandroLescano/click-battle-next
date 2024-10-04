@@ -4,6 +4,6 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   description?: string;
   descriptionClassName?: string;
-  labelColor?: string;
+  labelClassname?: string;
   containerClassName?: string;
 }

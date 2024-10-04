@@ -8,5 +8,6 @@
   "You have n clicks": "You have {{clicks}} clicks",
   "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?": "Wow! You're at position {{position}} on the leaderboard! Want to claim your spot and keep playing?",
   "inviteText": "Hey!\n\nJoin me in a click battle! Let's see who can click the fastest. Click here to join: {{- link}}.\n\nSee you there! 📱",
-  "twoPlayersRequired": "This game requires at least 2 players.<1/><strong>Grab a friend!</strong>"
+  "twoPlayersRequired": "This game requires at least 2 players.<1/><strong>Grab a friend!</strong>",
+  "rateUs": "How was your experience?<1/>Rate us with stars"
 }

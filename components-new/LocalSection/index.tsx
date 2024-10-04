@@ -9,6 +9,8 @@ import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {Button} from "components-new/Button";
 import {Watch} from "icons/Watch";
+import {Card} from "components-new/Card";
+import GoogleAdUnit from "components-new/CardGameAd/GoogleAdUnit";
 
 interface LocalSectionProps {
   idGame: string;
@@ -28,7 +30,7 @@ function LocalSection({
   const db = getDatabase();
   const {user: gUser} = useAuth();
   const suspicionOfHackCounter = useRef(0);
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const [disableUI, setDisableUI] = useState(false);
   const {game, isHost} = useGame();
 
@@ -97,10 +99,10 @@ function LocalSection({
     }
 
     return t("You have n clicks", {clicks: localUser.clicks});
-  }, [start, startCountdown, isHost, localUser.clicks]);
+  }, [start, startCountdown, isHost, localUser.clicks, i18n.language]);
 
   return (
-    <div className="w-1/2">
+    <div className="w-1/2 flex flex-col">
       <h4 className="text-5xl font-extrabold tracking-wide mb-12 text-primary-600 dark:text-primary-200">
         {importantInfo}
       </h4>
@@ -132,6 +134,16 @@ function LocalSection({
           </h2>
         )}
       </div>
+      <Card className="mt-auto mr-auto">
+        <GoogleAdUnit>
+          <ins
+            className="adsbygoogle"
+            style={{display: "inline-block", width: "384px", height: "125px"}}
+            data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
+            data-ad-slot="6440984608"
+          ></ins>
+        </GoogleAdUnit>
+      </Card>
     </div>
   );
 }

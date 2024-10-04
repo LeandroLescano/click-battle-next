@@ -70,10 +70,10 @@ const Star = ({
   return (
     <>
       <FontAwesomeIcon
-        className="star-rate"
+        className="min-w-16 transition-all duration-200 hover:scale-125"
         icon={icon}
-        size="2x"
-        color={rating.isSelected ? "goldenrod" : "default"}
+        size="3x"
+        color={rating.isSelected ? "var(--color-primary-400)" : "default"}
         onMouseEnter={() => onHover(position)}
         onMouseMove={(e) =>
           Math.ceil(

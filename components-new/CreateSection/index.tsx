@@ -50,7 +50,8 @@ export const CreateSection = () => {
     try {
       if (gameUser && room) {
         setCreating(true);
-        const newRoomName = room.name || gameUser.username + "'s room";
+        const newRoomName =
+          room.name || t("Name's room", {name: gameUser.username});
         const newGameRef = ref(db, "games/");
 
         const userToPush: GameUser = {
@@ -161,16 +162,16 @@ export const CreateSection = () => {
 
   return (
     <>
-      <h2 className="text-5xl font-extrabold self-start text-primary-600 dark:text-primary-100">
+      <h2 className="text-xl md:text-5xl font-extrabold self-start text-primary-600 dark:text-primary-100">
         {t("Create your own room")}
       </h2>
       <div className="flex-1 flex flex-col justify-end">
         <div className="flex justify-between items-end gap-9 w-full flex-1">
           <Input
             label={t("Insert room name")}
-            labelColor="text-primary-500 dark:text-primary-200"
+            labelClassname="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
             type="text"
-            className="mb-2 h-12"
+            className="mb-2 h-9 md:h-12 text-xs md:text-lg leading-none"
             containerClassName="flex-1"
             data-label="Room name"
             value={room?.name}
@@ -183,9 +184,9 @@ export const CreateSection = () => {
           />
           <Input
             label={t("Insert room password (op)")}
-            labelColor="text-primary-500 dark:text-primary-200"
+            labelClassname="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
             type="password"
-            className="mb-2 h-12"
+            className="mb-2 h-9 md:h-12 text-xs md:text-lg"
             containerClassName="flex-1"
             data-label="Password"
             value={room?.password || ""}
@@ -196,8 +197,8 @@ export const CreateSection = () => {
         <div className="flex justify-between items-center gap-9 w-full flex-1">
           <Select
             label={t("Max number of users")}
-            labelColor="text-primary-500 dark:text-primary-200"
-            className="mb-2 h-12"
+            labelColor="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+            className="mb-2 h-9 md:h-12 text-xs md:text-lg"
             containerClassName="flex-1"
             data-label="Max number of users"
             value={room?.maxUsers}
@@ -217,8 +218,8 @@ export const CreateSection = () => {
           </Select>
           <Select
             label={t("Timer")}
-            labelColor="text-primary-500 dark:text-primary-200 font-"
-            className="mb-2 h-12"
+            labelColor="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+            className="mb-2 h-9 md:h-12 text-xs md:text-lg"
             containerClassName="flex-1"
             data-label="Timer"
             value={room?.timer}
@@ -234,15 +235,17 @@ export const CreateSection = () => {
           </Select>
         </div>
       </div>
-      <Button
-        className="self-start w-80 text-3xl p-6 leading-none"
-        disabled={!gameUser?.username || creating}
-        onClick={handleCreate}
-        loading={creating}
-        loadingText="Creating..."
-      >
-        {t("Create game")}
-      </Button>
+      <div className="pl-1 md:pl-0 mt-2 md:mt-0">
+        <Button
+          className="self-start w-full md:w-9/12 text-lg md:text-3xl p-2 md:p-6 leading-none overflow-visible"
+          disabled={!gameUser?.username || creating}
+          onClick={handleCreate}
+          loading={creating}
+          loadingText="Creating..."
+        >
+          {t("Create game")}
+        </Button>
+      </div>
     </>
   );
 };

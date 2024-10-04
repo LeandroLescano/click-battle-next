@@ -10,15 +10,15 @@ export const Header = () => {
 
   return (
     <header className="flex justify-between items-center">
-      <h1 className="text-7xl drop-shadow-sm font-tiny5 [text-shadow:5px_0px_0px_var(--color-primary-400)]">
+      <h1 className="text-3xl md:text-7xl drop-shadow-sm font-tiny5 [text-shadow:2px_0px_0px_var(--color-primary-400)] md:[text-shadow:5px_0px_0px_var(--color-primary-400)]">
         Click Battle!
       </h1>
-      <div className="flex items-center gap-9">
+      <div className="flex items-center gap-1 md:gap-9 flex-col-reverse md:flex-row">
         <LanguageDropdown />
         <Button
           onClick={signOut}
           variant="outlined"
-          className="px-5 py-1 uppercase text-2xl min-w-36"
+          className="px-4 py-0.5 uppercase text-xs md:text-2xl md:min-w-36 w-full md:w-fit"
         >
           {t("Log out")}
         </Button>

@@ -56,7 +56,7 @@ const ResultSection = () => {
             return (
               <Card
                 key={i}
-                className={`w-full sm:w-3/4 text-3xl flex px-5 py-6 justify-between text-primary-500`}
+                className="w-full sm:w-3/4 text-3xl flex px-5 py-6 justify-between text-primary-500 max-w-2xl"
               >
                 <div>
                   <b className="mr-5">

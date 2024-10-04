@@ -36,10 +36,10 @@ export const LanguageDropdown = () => {
   }, []);
 
   return (
-    <div className="relative inline-block" ref={dropdownRef}>
+    <div className="relative inline-block md:min-w-28" ref={dropdownRef}>
       <button
         type="button"
-        className="language-menu inline-flex justify-between items-center w-full rounded-md shadow-sm uppercase text-2xl leading-none font-bold bg-white dark:bg-primary-400 dark:text-white"
+        className="language-menu inline-flex justify-between items-center w-full rounded-md shadow-sm uppercase text-xs md:text-2xl leading-none font-bold bg-white dark:bg-primary-400 dark:text-white"
         id="language-menu"
         aria-haspopup="true"
         aria-expanded={isOpen}
@@ -55,7 +55,7 @@ export const LanguageDropdown = () => {
           <img
             src="/icons/chevron-down.svg"
             alt="chevron-down"
-            className="w-6 h-6 object-cover dark:invert"
+            className="w-3 h-3 md:w-6 md:h-6 object-cover dark:invert"
           />
         </span>
       </button>
@@ -85,9 +85,6 @@ export const LanguageDropdown = () => {
                   className="w-5 h-4 mr-3 object-cover"
                 />
                 {language}
-                {/* {i18n.language === language && (
-                  <Check className="w-5 h-5 ml-auto text-indigo-600" aria-hidden="true" />
-                )} */}
               </button>
             ))}
           </div>
@@ -95,18 +92,4 @@ export const LanguageDropdown = () => {
       )}
     </div>
   );
-  // return (
-  //   // <select
-  //   //   className={`${className} text-2xl p-2 uppercase font-bold`}
-  //   //   value={selectedItem}
-  //   //   onChange={(e) => onClick(e.target.value)}
-  //   // >
-  //   //   {items.map((item) => (
-  //   //     <option value={item} key={item} className="font-bold">
-  //   //       <img src={`/flags/${item}.svg`} height={25} alt={item} />
-  //   //       {item}
-  //   //     </option>
-  //   //   ))}
-  //   // </select>
-  // );
 };

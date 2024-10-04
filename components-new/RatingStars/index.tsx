@@ -45,17 +45,20 @@ export const RatingStars = ({
   }, [rating]);
 
   return (
-    <div className="d-flex justify-content-center flex-column">
-      <div>
-        {showNumberRating ? (
-          <h3 style={{...numberStyle}}>
+    <div className="flex flex-col justify-center items-center text-center gap-4">
+      {showNumberRating ? (
+        <div>
+          <h3
+            className="text-3xl font-bold text-primary-700 dark:text-primary-200"
+            style={{...numberStyle}}
+          >
             {rating.isSelected
               ? t(RATING[rating.value])
               : t(RATING[hoverPosition])}
           </h3>
-        ) : null}
-      </div>
-      <div className="stars-container">
+        </div>
+      ) : null}
+      <div className="min-h-10">
         {[...Array(cant)].map((val, i) => {
           return (
             <Star
