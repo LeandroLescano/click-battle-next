@@ -3,7 +3,7 @@ body {
 }
 
 .sidebar {
-  @apply px-20 pt-24 bg-primary-50 dark:bg-primary-600;
+  @apply px-10 py-12 md:px-20 md:pt-24 bg-primary-50 dark:bg-primary-600;
 
   z-index: 999;
   position: absolute;

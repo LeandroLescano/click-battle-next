@@ -60,7 +60,7 @@ const OpponentList = ({
           {isHost && localUsername !== username && (
             <Button
               variant="outlined"
-              className="px-2 text-2xl"
+              className="px-2 text-sm md:text-2xl"
               onClick={() => {
                 kickUser(userKey || null);
               }}

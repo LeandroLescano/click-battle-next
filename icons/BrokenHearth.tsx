@@ -3,8 +3,7 @@ import React from "react";
 export const BrokenHearth = () => {
   return (
     <svg
-      width="61"
-      height="58"
+      className="size-9 md:size-14"
       viewBox="0 0 61 58"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

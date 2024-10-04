@@ -14,7 +14,7 @@ function CelebrationResult({celebrationContainer, timer, localUser}: Props) {
   return (
     <div
       ref={celebrationContainer}
-      className={`absolute bottom-0 mx-auto left-0 h-full ${
+      className={`absolute bottom-0 mx-auto left-0 h-full scale-[4] md:scale-1 ${
         timer && timer > 0
           ? "hidden"
           : game.listUsers.sort((a, b) => (b.clicks || 0) - (a.clicks || 0))[0]

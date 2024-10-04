@@ -3,9 +3,8 @@ import React from "react";
 export const Gear = () => {
   return (
     <svg
-      width="28"
-      height="29"
-      viewBox="0 0 28 29"
+      className="size-4 md:size-7"
+      viewBox="0 0 28 28"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >

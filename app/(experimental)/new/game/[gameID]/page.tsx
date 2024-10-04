@@ -449,7 +449,7 @@ function RoomGame() {
 
   return (
     <main>
-      <div className="px-32 py-14 dark:text-primary-200 h-screen flex flex-col">
+      <div className="px-5 py-6 md:px-32 md:py-14 dark:text-primary-200 h-svh flex flex-col overflow-hidden">
         {loading || !currentGame ? (
           <Loading />
         ) : (
@@ -457,7 +457,7 @@ function RoomGame() {
             {startCountdown &&
               currentGame?.timeStart &&
               currentGame.timeStart >= 0 && (
-                <div className="start-countdown text-9xl">
+                <div className="start-countdown text-8xl md:text-9xl">
                   {currentGame.timeStart === 0 ? "Go" : currentGame.timeStart}
                 </div>
               )}
@@ -485,12 +485,12 @@ function RoomGame() {
                 onBack={handleOnBack}
               />
               {currentGame?.timer && currentGame?.timer > 0 ? (
-                <h1 className="text-6xl font-bold mb-2 text-primary-400 dark:text-primary-100">
+                <h1 className="text-2xl md:text-6xl text-center md:text-start font-bold mb-2 text-primary-400 dark:text-primary-100">
                   {currentGame?.roomName || ""}
                 </h1>
               ) : null}
               {currentGame?.timer && currentGame?.timer > 0 ? (
-                <div className="flex min-w-0 flex-1">
+                <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start">
                   <LocalSection
                     idGame={gameID || ""}
                     localUser={localUser}
@@ -507,7 +507,7 @@ function RoomGame() {
               )}
               <Button
                 variant="outlined"
-                className="text-2xl px-6 py-1 self-end z-10"
+                className="text-xl md:text-2xl py-0.5 px-3 md:py-1 md:px-6 self-center md:self-end z-10"
                 onClick={handleOnInvite}
               >
                 {t("Invite friends")}

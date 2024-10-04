@@ -3,8 +3,7 @@ import React from "react";
 export const Trophy = () => {
   return (
     <svg
-      width="60"
-      height="60"
+      className="size-6 md:size-14"
       viewBox="0 0 60 60"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

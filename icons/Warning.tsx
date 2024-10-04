@@ -3,8 +3,7 @@ import React from "react";
 export const Warning = () => {
   return (
     <svg
-      width="93"
-      height="82"
+      className="size-14"
       viewBox="0 0 93 82"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

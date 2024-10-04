@@ -49,7 +49,7 @@ export const RatingStars = ({
       {showNumberRating ? (
         <div>
           <h3
-            className="text-3xl font-bold text-primary-700 dark:text-primary-200"
+            className="md:text-3xl font-bold text-primary-700 dark:text-primary-200"
             style={{...numberStyle}}
           >
             {rating.isSelected

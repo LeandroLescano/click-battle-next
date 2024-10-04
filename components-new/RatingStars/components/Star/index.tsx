@@ -70,9 +70,8 @@ const Star = ({
   return (
     <>
       <FontAwesomeIcon
-        className="min-w-16 transition-all duration-200 hover:scale-125"
+        className="md:min-w-16 transition-all duration-200 md:hover:scale-110 size-9 md:size-16"
         icon={icon}
-        size="3x"
         color={rating.isSelected ? "var(--color-primary-400)" : "default"}
         onMouseEnter={() => onHover(position)}
         onMouseMove={(e) =>

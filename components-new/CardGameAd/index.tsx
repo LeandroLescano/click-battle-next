@@ -17,25 +17,23 @@ export const CardGameAd = () => {
   return (
     <Card className="w-full md:w-64 p-0">
       <GoogleAdUnit>
-        <div className="relative">
-          {width > 768 ? (
-            <ins
-              className="adsbygoogle"
-              style={{display: "block", height: "120px"}}
-              data-ad-format="fluid"
-              data-ad-layout-key="-gv-9+1i-2s+2u"
-              data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
-              data-ad-slot="9606023479"
-            ></ins>
-          ) : (
-            <ins
-              className="adsbygoogle"
-              data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
-              style={{display: "inline-block", width: "149px", height: "63px"}}
-              data-ad-slot="4369393021"
-            ></ins>
-          )}
-        </div>
+        {width > 768 ? (
+          <ins
+            className="adsbygoogle"
+            style={{display: "block", height: "120px"}}
+            data-ad-format="fluid"
+            data-ad-layout-key="-gv-9+1i-2s+2u"
+            data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
+            data-ad-slot="9606023479"
+          ></ins>
+        ) : (
+          <ins
+            className="adsbygoogle"
+            data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
+            style={{display: "inline-block", width: "149px", height: "63px"}}
+            data-ad-slot="4369393021"
+          ></ins>
+        )}
       </GoogleAdUnit>
     </Card>
   );

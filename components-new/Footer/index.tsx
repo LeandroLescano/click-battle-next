@@ -32,8 +32,8 @@ export const Footer = () => {
 
   return (
     <>
-      <footer className="mt-auto flex flex-row text-sm md:text-2xl font-semibold text-primary-700 dark:text-primary-100 justify-center md:justify-between w-full items-baseline md:pb-2">
-        <div className="mx-auto md:mx-0 py-2">
+      <footer className="mt-auto flex flex-row text-sm md:text-2xl font-semibold text-primary-700 dark:text-primary-100 justify-center md:justify-between w-full items-center md:pb-2">
+        <div className="mx-auto md:mx-0 md:pt-2 w-32 md:w-auto">
           <a
             href="https://cafecito.app/leanlescano"
             rel="noreferrer"

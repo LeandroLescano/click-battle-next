@@ -85,13 +85,13 @@ export const ContactModal = ({
     >
       <DialogBackdrop className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
       <div className="fixed inset-0 flex w-screen items-center justify-center dark:text-white">
-        <DialogPanel className="flex items-center content-center rounded-md py-16 px-36 bg-primary-50 dark:bg-primary-600">
-          <div className="px-4 flex flex-col gap-6 max-w-md items-center">
+        <DialogPanel className="flex items-center content-center rounded-md mx-3 sm:mx-0 px-7 py-16 md:px-36 bg-primary-50 dark:bg-primary-600">
+          <div className="px-4 flex flex-col gap-3 md:gap-6 max-w-md items-center">
             {title && <BrokenHearth />}
-            <h2 className="text-5xl text-center font-extrabold text-primary-700 dark:text-primary-200">
+            <h2 className="text-4xl md:text-5xl text-center font-extrabold text-primary-700 dark:text-primary-200">
               {title ?? t("Comments")}
             </h2>
-            <h3 className="text-2xl text-center font-semibold text-primary-700 dark:text-primary-200">
+            <h3 className="md:text-2xl text-center font-semibold text-primary-700 dark:text-primary-200">
               {text ??
                 t(
                   "Leave us your suggestions or impressions about your experience or what you want to share."
@@ -108,7 +108,7 @@ export const ContactModal = ({
               rows={3}
             />
             <Button
-              className="p-2 text-primary-500 text-2xl font-semibold w-full mt-2"
+              className="p-1 md:p-2 text-primary-500 md:text-2xl font-semibold w-full mt-2"
               disabled={message.length === 0}
               loading={loading}
               loadingText={t("Sending message...")}

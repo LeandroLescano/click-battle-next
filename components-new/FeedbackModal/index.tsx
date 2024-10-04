@@ -65,12 +65,12 @@ export const FeedbackModal = ({
     >
       <DialogBackdrop className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
       <div className="fixed inset-0 flex w-screen items-center justify-center dark:text-white">
-        <DialogPanel className="flex items-center content-center rounded-md py-16 px-36 bg-primary-50 dark:bg-primary-600">
-          <div className="px-4 flex flex-col gap-6">
-            <h2 className="text-5xl text-center font-extrabold text-primary-700 dark:text-primary-200">
+        <DialogPanel className="flex items-center content-center rounded-md mx-3 sm:mx-0 px-7 py-16 md:px-36 bg-primary-50 dark:bg-primary-600">
+          <div className="px-4 flex flex-col gap-3 md:gap-6">
+            <h2 className="text-3xl md:text-5xl text-center font-extrabold text-primary-700 dark:text-primary-200">
               Feedback
             </h2>
-            <h3 className="text-3xl text-center font-semibold text-primary-700 dark:text-primary-200">
+            <h3 className="md:text-3xl text-center font-semibold text-primary-700 dark:text-primary-200">
               {<Trans i18nKey="rateUs" components={{1: <br />}} />}
             </h3>
             <RatingStars
@@ -78,7 +78,7 @@ export const FeedbackModal = ({
               initialValue={rating > 0 ? rating : undefined}
             />
             <Button
-              className="p-2 text-primary-500 text-2xl font-semibold w-full mt-2"
+              className="p-1 md:p-2 text-primary-500 text-sm md:text-2xl font-semibold w-full mt-2"
               disabled={!rating}
               onClick={sendRating}
               loading={loadingFeedback}

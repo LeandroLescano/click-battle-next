@@ -36,10 +36,13 @@ export const LanguageDropdown = () => {
   }, []);
 
   return (
-    <div className="relative inline-block md:min-w-28" ref={dropdownRef}>
+    <div
+      className="relative inline-block md:min-w-28 self-stretch"
+      ref={dropdownRef}
+    >
       <button
         type="button"
-        className="language-menu inline-flex justify-between items-center w-full rounded-md shadow-sm uppercase text-xs md:text-2xl leading-none font-bold bg-white dark:bg-primary-400 dark:text-white"
+        className="language-menu inline-flex justify-between items-center w-full h-full rounded-md shadow-sm uppercase text-xs md:text-2xl leading-none font-bold bg-white dark:bg-primary-400 dark:text-white"
         id="language-menu"
         aria-haspopup="true"
         aria-expanded={isOpen}

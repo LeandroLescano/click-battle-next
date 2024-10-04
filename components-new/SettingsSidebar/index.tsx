@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {getDatabase, ref, update} from "@firebase/database";
 import Swal from "sweetalert2";
 import {useTranslation} from "react-i18next";
+import clsx from "clsx";
 
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
@@ -108,22 +109,22 @@ export const SettingsSidebar = ({
   };
 
   return (
-    <aside className={`sidebar ${showSideBar && "active"}`}>
+    <aside className={clsx("sidebar fixed md:static", {active: showSideBar})}>
       <div className="flex justify-between items-center">
-        <h2 className="font-extrabold text-primary-300 text-5xl mb-6">
+        <h2 className="font-extrabold text-primary-300 text-2xl md:text-5xl mb-3 md:mb-6">
           {t("Settings")}
         </h2>
         <Cross
-          className="absolute top-11 right-4"
+          className="absolute top-11 right-8 md:right-4 size-8"
           onClick={() => handleSideBar(false)}
         />
       </div>
-      <div className="flex flex-col justify-between gap-4">
+      <div className="flex flex-col justify-between gap-2 md:gap-4">
         <Input
           label={t("Room name")}
-          labelClassname="text-primary-500 dark:text-primary-200"
+          labelClassname="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
           type="text"
-          className="h-12"
+          className="h-9 md:h-12 text-xs md:text-lg mb-2"
           containerClassName="flex-1"
           data-label="Room name"
           value={settings.roomName ?? ""}
@@ -134,9 +135,9 @@ export const SettingsSidebar = ({
         <div>
           <Input
             label={options.password ? t("Change password") : t("Set password")}
-            labelClassname="text-primary-500 dark:text-primary-200"
+            labelClassname="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
             type="password"
-            className="h-12 mb-2"
+            className="h-9 md:h-12 text-xs md:text-lg mb-2"
             containerClassName="flex-1"
             data-label="Password"
             onChange={(ref) =>
@@ -155,8 +156,8 @@ export const SettingsSidebar = ({
         </div>
         <Select
           label={t("Max number of users")}
-          labelColor="text-primary-500 dark:text-primary-200"
-          className="h-12"
+          labelColor="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+          className="mb-2 h-9 md:h-12 text-xs md:text-lg"
           containerClassName="flex-1"
           data-label="Max number of users"
           value={settings.maxUsers}
@@ -172,8 +173,8 @@ export const SettingsSidebar = ({
         </Select>
         <Select
           label={t("Timer")}
-          labelColor="text-primary-500 dark:text-primary-200"
-          className="h-12"
+          labelColor="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+          className="mb-2 h-9 md:h-12 text-xs md:text-lg"
           containerClassName="flex-1"
           data-label="Timer"
           value={settings.timer}
@@ -188,7 +189,7 @@ export const SettingsSidebar = ({
           ))}
         </Select>
         <Button
-          className="w-full py-4 px-5 text-3xl mt-4"
+          className="w-full py-2 px-3 md:py-4 md:px-5 text-base md:text-3xl mt-4"
           onClick={handleUpdateSettings}
         >
           {t("Save settings")}

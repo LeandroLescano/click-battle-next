@@ -18,14 +18,14 @@ export const Cross = ({className, onClick = () => {}}: CrossProps) => {
     >
       <path
         d="M30 10L10 30"
-        stroke="black"
+        stroke="var(--color-primary-300)"
         strokeWidth="3.33333"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M10 10L30 30"
-        stroke="black"
+        stroke="var(--color-primary-300)"
         strokeWidth="3.33333"
         strokeLinecap="round"
         strokeLinejoin="round"

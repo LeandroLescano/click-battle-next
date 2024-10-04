@@ -49,22 +49,22 @@ export const NotificationModal = ({
     >
       <DialogBackdrop className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
       <div className="fixed inset-0 flex w-screen items-center justify-center dark:text-white">
-        <DialogPanel className="flex items-center content-center rounded-md max-w-2xl py-7 px-36 bg-primary-50 dark:bg-primary-600">
+        <DialogPanel className="flex items-center content-center rounded-md max-w-2xl mx-3 sm:mx-0 px-7 py-16 md:px-36 bg-primary-50 dark:bg-primary-600">
           <div className="flex flex-col items-center gap-8">
             <div className="flex flex-col items-center gap-4">
               <Icon />
-              <h2 className="text-5xl text-center font-extrabold text-primary-700 dark:text-primary-200">
+              <h2 className="text-3xl md:text-5xl text-center font-extrabold text-primary-700 dark:text-primary-200">
                 {TYPE_CONTENTS[type].title}
               </h2>
             </div>
             {TYPE_CONTENTS[type].text && (
-              <h3 className="text-3xl text-center font-semibold text-primary-700 dark:text-primary-200">
+              <h3 className="md:last:text-3xl text-center font-semibold text-primary-700 dark:text-primary-200">
                 {TYPE_CONTENTS[type].text}
               </h3>
             )}
 
             <Button
-              className="py-3 px-3 mb-3 flex justify-center items-center w-full text-2xl"
+              className="p-1.5 md:backdrop:p-3 mb-3 flex justify-center items-center w-full md:text-2xl"
               onClick={onClose}
             >
               {t("Accept")}

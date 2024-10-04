@@ -54,15 +54,15 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
   );
 
   return (
-    <div className="w-1/2 text-3xl font-medium h-full flex flex-col">
-      <h4 className="text-5xl font-bold mb-12 text-primary-600 dark:text-primary-200">
+    <div className="w-full md:w-1/2 max-h-[275px] md:max-h-full text-sm md:text-3xl px-4 md:px-0 font-medium h-full flex flex-col">
+      <h4 className="text-xl md:text-5xl text-center md:text-start font-bold mb-4 md:mb-12 text-primary-600 dark:text-primary-200">
         {game.listUsers.length === 1 && isHost ? (
           t("Waiting for opponents...")
         ) : (
           <OpponentsText />
         )}
       </h4>
-      <div className="flex flex-row mb-5 text-primary-600 dark:text-primary-200">
+      <div className="flex flex-row mb-2 md:mb-5 text-primary-600 dark:text-primary-200">
         <div className="w-5/6">
           <p className="mb-2">{t("Name")}</p>
         </div>
@@ -81,7 +81,7 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
             .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
             .map((user, i) => {
               return (
-                <div key={i} className="h-20 mb-3 content-center">
+                <div key={i} className="h-12 md:h-20 mb-3 content-center">
                   {user.clicks}
                 </div>
               );

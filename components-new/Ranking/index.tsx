@@ -17,12 +17,12 @@ export const Ranking = ({lastUpdate, usersWithScore}: RankingProps) => {
 
   return (
     <main>
-      <div className="px-32 py-14 text-primary-200 h-screen flex flex-col gap-6">
+      <div className="px-5 py-6 md:px-32 md:py-14 text-primary-200 h-screen flex flex-col gap-3 md:gap-6">
         <div className="flex justify-between items-center gap-9">
           <Link href="/new" passHref>
             <Button
               variant="outlined"
-              className="px-5 py-1 text-2xl flex gap-2"
+              className="px-2.5 py-0.5 md:px-5 md:py-1 text-sm md:text-2xl flex gap-1 md:gap-2 items-center"
             >
               <LeftArrow />
               {t("Go Back!")}
@@ -30,10 +30,10 @@ export const Ranking = ({lastUpdate, usersWithScore}: RankingProps) => {
           </Link>
           <LanguageDropdown />
         </div>
-        <h1 className="text-7xl text-primary-400 dark:text-primary-200 font-bold text-center">
+        <h1 className="text-5xl md:text-7xl text-primary-400 dark:text-primary-200 font-bold text-center">
           Click masters
         </h1>
-        <h3 className="text-3xl text-primary-600 dark:text-primary-100 font-semibold text-center">
+        <h3 className="text-xl md:text-3xl text-primary-600 dark:text-primary-100 font-semibold text-center">
           {t("Last update")}: {moment(lastUpdate).format("DD/MM/YYYY HH:mm:ss")}
         </h3>
         <RankingList users={usersWithScore} />

@@ -2,7 +2,8 @@
 export default {
   content: [
     "./app/(experimental)/**/*.{ts,tsx}",
-    "./components-new/**/*.{ts,tsx}"
+    "./components-new/**/*.{ts,tsx}",
+    "./icons/*.{ts,tsx}"
   ],
   theme: {
     extend: {

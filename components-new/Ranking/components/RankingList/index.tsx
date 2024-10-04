@@ -80,14 +80,14 @@ export const RankingList = ({users}: RankingListProps) => {
             return (
               <div
                 key={user.key}
-                className="flex w-full items-center gap-6 max-w-4xl self-center"
+                className="flex w-full items-center gap-3 md:gap-6 max-w-4xl self-center"
               >
-                <span className="text-5xl font-extrabold text-primary-600 dark:text-primary-200 w-1/12 text-center">
+                <span className="text-lg md:text-5xl font-extrabold text-primary-600 dark:text-primary-200 w-1/12 text-center">
                   {i + 1}.
                 </span>
                 <Card
                   className={clsx(
-                    "flex w-11/12 justify-between px-5 py-6 mb-0 text-3xl font-bold text-primary-500",
+                    "flex w-11/12 justify-between p-2.5 md:px-5 md:py-6 mb-0 text-sm md:text-3xl font-bold text-primary-500",
                     gameUser?.username === user.username && ownClasses
                   )}
                 >
@@ -101,24 +101,30 @@ export const RankingList = ({users}: RankingListProps) => {
           })}
       </div>
       {!showModal && !loading && (!user || user.isAnonymous) && (
-        <Card className="px-5 py-6 text-3xl text-primary-400 w-fit self-center">
+        <Card className="px-5 py-4 md:py-6 text-sm md:text-3xl text-primary-400 w-fit self-center mx-2 md:mx-0">
           {!possiblePos ? (
             <>
               {t("You want to be here?")}{" "}
-              <span className="cursor-pointer underline" onClick={toggleModal}>
+              <span
+                className="cursor-pointer underline font-bold"
+                onClick={toggleModal}
+              >
                 {t("Sign up")}
               </span>{" "}
               {t("and play!")}
             </>
           ) : (
-            <div className="flex gap-8 px-4">
+            <div className="flex px-4 flex-col items-center gap-2 md:gap-8 md:flex-row text-center md:text-left">
               <span>
                 {t(
                   "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?",
                   {position: 2}
                 )}
               </span>
-              <span className="cursor-pointer underline" onClick={toggleModal}>
+              <span
+                className="cursor-pointer underline font-bold"
+                onClick={toggleModal}
+              >
                 {t("Sign up")}
               </span>
             </div>

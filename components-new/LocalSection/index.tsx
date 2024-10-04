@@ -11,6 +11,7 @@ import {Button} from "components-new/Button";
 import {Watch} from "icons/Watch";
 import {Card} from "components-new/Card";
 import GoogleAdUnit from "components-new/CardGameAd/GoogleAdUnit";
+import {useWindowSize} from "hooks";
 
 interface LocalSectionProps {
   idGame: string;
@@ -33,6 +34,7 @@ function LocalSection({
   const {t, i18n} = useTranslation();
   const [disableUI, setDisableUI] = useState(false);
   const {game, isHost} = useGame();
+  const {width} = useWindowSize();
 
   const cantStart = !start && game.listUsers.length < 2;
 
@@ -73,18 +75,21 @@ function LocalSection({
   };
 
   const AdditionalInfo = () => {
+    let text: string | React.ReactNode;
     if (cantStart) {
-      return <Trans i18nKey="twoPlayersRequired" components={{1: <br />}} />;
+      text = <Trans i18nKey="twoPlayersRequired" components={{1: <br />}} />;
     }
 
     if (!isHost && !start && !startCountdown) {
-      return (
-        <>
-          {t(
-            "The room is complete. All that remains is for the host to start the game - get ready to begin!"
-          )}
-        </>
+      text = t(
+        "The room is complete. All that remains is for the host to start the game - get ready to begin!"
       );
+    }
+
+    if (text) {
+      <h5 className="text-2xl md:text-4xl text-center md:text-start mb-6 text-primary-500 dark:text-primary-100 max-w-md">
+        {text}
+      </h5>;
     }
 
     return null;
@@ -102,17 +107,15 @@ function LocalSection({
   }, [start, startCountdown, isHost, localUser.clicks, i18n.language]);
 
   return (
-    <div className="w-1/2 flex flex-col">
-      <h4 className="text-5xl font-extrabold tracking-wide mb-12 text-primary-600 dark:text-primary-200">
+    <div className="w-full md:w-1/2 flex flex-col px-4 md:px-0">
+      <h4 className="text-2xl md:text-5xl text-center md:text-start font-extrabold tracking-wide mb-4 md:mb-12 text-primary-600 dark:text-primary-200">
         {importantInfo}
       </h4>
-      <h5 className="text-4xl mb-6 text-primary-500 dark:text-primary-100 max-w-md">
-        <AdditionalInfo />
-      </h5>
+      <AdditionalInfo />
       <div>
         {(!isHost || start || startCountdown) && (
           <Button
-            className="text-4xl w-96 px-5 py-4"
+            className="text-xl md:text-4xl w-full md:w-9/12 px-3.5 md:px-5 py-3 md:py-4"
             disabled={!start || disableUI}
             onClick={handleClick}
           >
@@ -121,7 +124,7 @@ function LocalSection({
         )}
         {isHost && !start && !startCountdown && (
           <Button
-            className="text-4xl w-96 px-5 py-4"
+            className="text-xl md:text-4xl w-full md:w-9/12 px-3.5 md:px-5 py-3 md:py-4"
             disabled={cantStart}
             onClick={handleStart}
           >
@@ -129,21 +132,23 @@ function LocalSection({
           </Button>
         )}
         {game?.timer !== undefined && game.currentGame && (
-          <h2 className="flex gap-6 font-semibold text-6xl mt-10">
+          <h2 className="flex items-center gap-3 md:gap-6 font-semibold text-3xl md:text-6xl mt-10 justify-center md:justify-start">
             <Watch /> 00:{String(game?.timer).padStart(2, "0")}
           </h2>
         )}
       </div>
-      <Card className="mt-auto mr-auto">
-        <GoogleAdUnit>
-          <ins
-            className="adsbygoogle"
-            style={{display: "inline-block", width: "384px", height: "125px"}}
-            data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
-            data-ad-slot="6440984608"
-          ></ins>
-        </GoogleAdUnit>
-      </Card>
+      {width > 768 && (
+        <Card className="mt-auto mr-auto">
+          <GoogleAdUnit>
+            <ins
+              className="adsbygoogle"
+              style={{display: "inline-block", width: "384px", height: "125px"}}
+              data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
+              data-ad-slot="6440984608"
+            ></ins>
+          </GoogleAdUnit>
+        </Card>
+      )}
     </div>
   );
 }
