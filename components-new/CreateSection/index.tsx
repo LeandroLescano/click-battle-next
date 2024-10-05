@@ -165,7 +165,7 @@ export const CreateSection = () => {
       <h2 className="text-xl md:text-5xl font-extrabold self-start text-primary-600 dark:text-primary-100">
         {t("Create your own room")}
       </h2>
-      <div className="flex-1 flex flex-col justify-end">
+      <div className="flex-1 flex flex-col justify-end pr-1">
         <div className="flex justify-between items-end gap-x-9 w-full flex-1 flex-wrap">
           <Input
             label={t("Insert room name")}

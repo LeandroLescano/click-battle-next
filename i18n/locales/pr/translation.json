@@ -31,6 +31,7 @@
   "Start!": "Iniciar!",
   "This game requires at least 2 players. Grab a friend!": "Este jogo requer pelo menos 2 jogadores. Chame um amigo!",
   "twoPlayersRequired": "Este jogo requer pelo menos 2 jogadores.<1/><strong>Chame um amigo!</strong>",
+  "The room is complete. All that remains is for the host to start the game - get ready to begin!": "A sala está completa. Tudo o que resta é que o anfitrião inicie o jogo - prepare -se para começar!",
   "Invite friends": "Convidar amigos",
   "Link copied to clipoard!": "Link copiado para a área de transferência!",
   "N seconds remaining!": "{{seconds}} segundos restantes!",
@@ -106,5 +107,11 @@
   "Sending message...": "Enviando mensagem...",
   "Disconnected": "Desconectado",
   "Misuse detected": "Detecção de uso incorreto",
-  "Accept": "Aceitar"
+  "Accept": "Aceitar",
+  "Check out our fresh new look!": "Confira nosso novo visual!",
+  "Try it now": "Experimente agora",
+  "Try new style": "Experimente novo estilo",
+  "Enjoying the new experience?": "Desfrutando da nova experiência?",
+  "Thank you for your feedback!": "Obrigado pelo seu feedback!",
+  "Switch to Old Style": "Mudar para o estilo antigo"
 }

@@ -86,7 +86,8 @@ function RoomGame() {
     setGame,
     setLocalUser,
     setIsHost,
-    calculatePosition
+    calculatePosition,
+    resetContext
   } = useGame();
   const {setNewUser} = useNewPlayerAlert(
     currentGame.listUsers,
@@ -262,6 +263,7 @@ function RoomGame() {
 
     return () => {
       unsubscribe?.();
+      resetContext();
     };
   }, [isAuthenticated, gUser?.uid]);
 

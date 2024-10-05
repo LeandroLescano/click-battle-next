@@ -75,6 +75,7 @@
   "You were kicked out by the owner": "Fuiste expulsado por el host",
   "inviteText": "¡Hola!\n\n¡Únete a mí en una batalla de clicks! Veamos quién puede hacer click más rápido. Haz click aquí para unirte: {{- link}}.\n\n¡Nos vemos allí! 📱",
   "twoPlayersRequired": "Se requieren al menos 2 jugadores,<1/><strong>llama a un amigo!</strong>",
+  "The room is complete. All that remains is for the host to start the game - get ready to begin!": "La sala está completa. Todo lo que queda es que el host comience el juego - ¡prepárate para comenzar!",
   "Contact us": "Contáctanos",
   "You can send a criticism, a complaint or whatever you want...": "Puedes enviar una crítica, una queja o lo que quieras...",
   "Thanks for your time!": "¡Gracias por tu tiempo!",
@@ -106,5 +107,11 @@
   "Sending message...": "Enviando mensaje...",
   "Disconnected": "Desconectado",
   "Misuse detected": "Detección de uso incorrecto",
-  "Accept": "Aceptar"
+  "Accept": "Aceptar",
+  "Check out our fresh new look!": "¡Mira nuestro nuevo diseño!",
+  "Try it now": "Pruébalo ahora",
+  "Try new style": "Prueba el nuevo diseño",
+  "Enjoying the new experience?": "¿Disfrutando de la nueva experiencia?",
+  "Thank you for your feedback!": "¡Gracias por tus comentarios!",
+  "Switch to Old Style": "Cambiar al diseño antiguo"
 }

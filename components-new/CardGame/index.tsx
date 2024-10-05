@@ -25,7 +25,7 @@ export const CardGame = ({
       <Button
         onClick={handleEnterGame}
         variant="card"
-        className="w-full md:w-64"
+        className="w-full md:w-64 md:h-[124px]"
       >
         <div>
           <p className="text-xs md:text-2xl">
