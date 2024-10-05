@@ -17,9 +17,10 @@ import {
   Filler,
   ScriptableContext,
   ChartOptions,
-  BarElement
+  BarElement,
+  ArcElement
 } from "chart.js";
-import {Bar, Line} from "react-chartjs-2";
+import {Bar, Line, Doughnut} from "react-chartjs-2";
 import moment from "moment";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
@@ -35,6 +36,8 @@ import {useAuth} from "contexts/AuthContext";
 import {RoomStats} from "interfaces/RoomStats";
 import {getRoomStats} from "services/rooms";
 import {formatDate, minutesBetween} from "utils/date";
+import {DesignPreference} from "interfaces/DesignPreferences";
+import {getDesignPreferences} from "services/experience";
 
 const ALLOWED_EMAILS = [
   "tatilescano11@gmail.com",
@@ -47,6 +50,7 @@ ChartJS.register(
   BarElement,
   PointElement,
   LineElement,
+  ArcElement,
   Filler,
   Title,
   Tooltip,
@@ -115,9 +119,25 @@ const commonBarOpts = (title?: string): ChartOptions<"bar"> => ({
   }
 });
 
+const commonDoughnutOpts = (title?: string): ChartOptions<"doughnut"> => ({
+  plugins: {
+    title: {
+      display: true,
+      text: title
+    }
+  },
+  interaction: {
+    intersect: false,
+    mode: "index"
+  }
+});
+
 const Admin = () => {
   const [rooms, setRooms] = useState<RoomStats[]>([]);
   const [currentRooms, setCurrentRooms] = useState(0);
+  const [designPreferences, setDesignPreferences] = useState<
+    DesignPreference[]
+  >([]);
   const {user, loading} = useAuth();
   const router = useRouter();
   const db = getDatabase();
@@ -133,6 +153,9 @@ const Admin = () => {
       const unsubscribe = onValue(refGames, (snapshot) => {
         setCurrentRooms(snapshot.size);
       });
+      getDesignPreferences().then((designPreferences) =>
+        setDesignPreferences(designPreferences ?? [])
+      );
 
       return unsubscribe;
     }
@@ -269,6 +292,29 @@ const Admin = () => {
     return {labels, datasets};
   }, [rooms]);
 
+  const designPreferencesData = useMemo(() => {
+    const datasets: ChartDataset<"doughnut", (number | Point | null)[]>[] = [];
+    const labels = ["Yes", "No"];
+
+    const data = designPreferences.reduce(
+      (acc, dp) => {
+        acc[dp.likesNewDesign ? 0 : 1] += 1;
+        return acc;
+      },
+      [0, 0]
+    );
+
+    datasets.push({
+      label: "Votes",
+      data,
+      backgroundColor: ["rgba(54, 162, 235, 0.2)", "rgba(255, 99, 132, 0.2)"],
+      borderColor: ["rgba(54, 162, 235, 1)", "rgba(255, 99, 132, 1)"],
+      borderWidth: 1
+    });
+
+    return {labels, datasets};
+  }, [designPreferences]);
+
   if (loading) return <Loading />;
 
   if (!user?.email || !ALLOWED_EMAILS.includes(user.email)) router.push("/");
@@ -373,6 +419,17 @@ const Admin = () => {
           <Card bg="dark">
             <CardBody>
               <Bar options={commonBarOpts("Game data")} data={gamesData} />
+            </CardBody>
+          </Card>
+        </Col>
+        <Col sm={6}>
+          <Card bg="dark">
+            <CardBody>
+              <Doughnut
+                style={{maxHeight: 450}}
+                options={commonDoughnutOpts("Users likes the new design?")}
+                data={designPreferencesData}
+              />
             </CardBody>
           </Card>
         </Col>
