@@ -21,7 +21,7 @@ export const Loading = () => {
 
   return (
     <main>
-      <section className="flex justify-center items-center overflow-y-hidden h-screen">
+      <section className="flex justify-center items-center overflow-y-hidden h-dvh">
         <div className="h-1/3 w-1/3" ref={loadingContainer} />
       </section>
     </main>
