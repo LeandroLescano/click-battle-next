@@ -207,7 +207,7 @@ const Home = () => {
     <>
       <ToastContainer position="top-center" className="mt-2">
         <Toast show={showNewStyleToast} animation>
-          <Toast.Body className="d-flex gap-2 align-items-center py-3 bg-white">
+          <Toast.Body className="d-flex gap-2 align-items-center py-3 bg-white rounded">
             <>
               <span className="text-dark">
                 {t("Check out our fresh new look!")}
