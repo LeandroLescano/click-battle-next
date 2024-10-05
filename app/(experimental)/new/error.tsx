@@ -3,6 +3,8 @@
 import React, {useEffect} from "react";
 import * as Sentry from "@sentry/nextjs";
 
+import {Button} from "components-new";
+
 export default function ErrorPage({error}: {error: Error & {digest?: string}}) {
   useEffect(() => {
     // Log the error to Sentry
@@ -10,14 +12,21 @@ export default function ErrorPage({error}: {error: Error & {digest?: string}}) {
   }, [error]);
 
   return (
-    <div className="d-flex flex-column align-items-center justify-content-center vh-100">
-      <h2>Sorry, Something went wrong!</h2>
-      <button
-        className="btn-click small mt-3"
-        onClick={() => (window.location.href = "/new")}
-      >
-        Reload
-      </button>
+    <div className="flex flex-col items-center justify-center h-dvh">
+      <h2 className="text-4xl text-primary-200 dark:text-primary-100 font-bold">
+        Sorry, Something went wrong!
+      </h2>
+      <div className="flex gap-4">
+        <Button className="p-2 mt-3" onClick={() => window.location.reload()}>
+          Reload
+        </Button>
+        <Button
+          className="p-2 mt-3"
+          onClick={() => (window.location.href = "/new")}
+        >
+          Back to home
+        </Button>
+      </div>
     </div>
   );
 }
