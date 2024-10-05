@@ -87,9 +87,11 @@ function LocalSection({
     }
 
     if (text) {
-      <h5 className="text-2xl md:text-4xl text-center md:text-start mb-6 text-primary-500 dark:text-primary-100 max-w-md">
-        {text}
-      </h5>;
+      return (
+        <h5 className="text-2xl md:text-4xl text-center md:text-start mb-6 text-primary-500 dark:text-primary-100 max-w-md">
+          {text}
+        </h5>
+      );
     }
 
     return null;

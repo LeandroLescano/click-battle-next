@@ -449,7 +449,7 @@ function RoomGame() {
 
   return (
     <main>
-      <div className="px-5 py-6 md:px-32 md:py-14 dark:text-primary-200 h-svh flex flex-col overflow-hidden">
+      <div className="px-5 py-6 md:px-32 md:py-14 dark:text-primary-200 h-dvh flex flex-col overflow-hidden">
         {loading || !currentGame ? (
           <Loading />
         ) : (

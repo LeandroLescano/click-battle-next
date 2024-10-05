@@ -11,7 +11,7 @@ main {
     right: 0;
     bottom: 0;
     background: url("../../public/squares-white.jpg") no-repeat center center
-      fixed;
+      scroll;
     background-blend-mode: color;
     background-size: cover;
     -webkit-background-size: cover;
@@ -20,6 +20,7 @@ main {
     opacity: 0.02;
     z-index: -1;
   }
+
   min-height: 100vh;
 
   div:has(> ins[data-ad-status="unfilled"]) {
@@ -70,7 +71,7 @@ main {
 
 @media (prefers-color-scheme: dark) {
   main {
-    background: url("../../public/squares.png") no-repeat center center fixed
+    background: url("../../public/squares.png") no-repeat center center scroll
       #191919;
     background-size: cover;
     -webkit-background-size: cover;
