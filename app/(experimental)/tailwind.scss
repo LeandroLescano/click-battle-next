@@ -2,7 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-main {
+body:has(> ins[data-anchor-shown="true"]) {
+  padding-top: 15px !important;
+}
+
+@media screen and (min-width: 1000px) {
+  body {
+    padding: 0 !important;
+  }
+}
+
+html {
   &:before {
     content: "";
     position: absolute;
@@ -70,7 +80,7 @@ main {
 }
 
 @media (prefers-color-scheme: dark) {
-  main {
+  html {
     background: url("../../public/squares.png") no-repeat center center scroll
       #191919;
     background-size: cover;
