@@ -166,12 +166,12 @@ export const CreateSection = () => {
         {t("Create your own room")}
       </h2>
       <div className="flex-1 flex flex-col justify-end">
-        <div className="flex justify-between items-end gap-9 w-full flex-1">
+        <div className="flex justify-between items-end gap-x-9 w-full flex-1 flex-wrap">
           <Input
             label={t("Insert room name")}
-            labelClassname="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
             type="text"
-            className="mb-2 h-9 md:h-12 text-xs md:text-lg leading-none"
+            className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
             containerClassName="flex-1"
             data-label="Room name"
             value={room?.name}
@@ -184,9 +184,9 @@ export const CreateSection = () => {
           />
           <Input
             label={t("Insert room password (op)")}
-            labelClassname="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
             type="password"
-            className="mb-2 h-9 md:h-12 text-xs md:text-lg"
+            className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
             containerClassName="flex-1"
             data-label="Password"
             value={room?.password || ""}
@@ -194,11 +194,11 @@ export const CreateSection = () => {
             placeholder={t("Password")}
           />
         </div>
-        <div className="flex justify-between items-center gap-9 w-full flex-1">
+        <div className="flex justify-between items-center gap-x-9 w-full flex-1 flex-wrap">
           <Select
             label={t("Max number of users")}
-            labelColor="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
-            className="mb-2 h-9 md:h-12 text-xs md:text-lg"
+            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+            className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
             containerClassName="flex-1"
             data-label="Max number of users"
             value={room?.maxUsers}
@@ -218,8 +218,8 @@ export const CreateSection = () => {
           </Select>
           <Select
             label={t("Timer")}
-            labelColor="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
-            className="mb-2 h-9 md:h-12 text-xs md:text-lg"
+            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+            className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
             containerClassName="flex-1"
             data-label="Timer"
             value={room?.timer}
@@ -235,9 +235,9 @@ export const CreateSection = () => {
           </Select>
         </div>
       </div>
-      <div className="pl-1 md:pl-0 mt-2 md:mt-0">
+      <div className="pl-1 md:pl-0 mt-2">
         <Button
-          className="self-start w-full md:w-9/12 text-lg md:text-3xl p-2 md:p-6 leading-none overflow-visible"
+          className="self-start w-full lg:w-9/12 text-lg md:text-3xl p-2 lg:p-6 leading-none overflow-visible"
           disabled={!gameUser?.username || creating}
           onClick={handleCreate}
           loading={creating}

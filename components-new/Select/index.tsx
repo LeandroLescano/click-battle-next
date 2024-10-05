@@ -1,6 +1,5 @@
 import React from "react";
-
-import {SelectProps} from "./types";
+import clsx from "clsx";
 import {
   Field,
   Label,
@@ -8,19 +7,23 @@ import {
   Description
 } from "@headlessui/react";
 
+import {SelectProps} from "./types";
+
 export const Select = ({
   label,
   description,
   className,
   descriptionClassName,
   containerClassName,
-  labelColor = "text-white",
+  labelClassName = "text-white",
   ...rest
 }: SelectProps) => {
   return (
     <Field className={containerClassName}>
       {label && (
-        <Label className={`text-lg font-medium ${labelColor}`}>{label}</Label>
+        <Label className={`text-lg font-medium ${labelClassName}`}>
+          {label}
+        </Label>
       )}
       <div className="relative">
         <HeadLessSelect
@@ -46,7 +49,7 @@ export const Select = ({
       </div>
       {description && (
         <Description
-          className={`text-start text-sm mt-4 ${descriptionClassName}`}
+          className={clsx("text-start text-sm mt-4", descriptionClassName)}
         >
           {description}
         </Description>

@@ -120,7 +120,7 @@ export const SettingsSidebar = ({
         <div className="flex flex-col justify-between gap-2 md:gap-4">
           <Input
             label={t("Room name")}
-            labelClassname="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
             type="text"
             className="h-9 md:h-12 text-xs md:text-lg mb-2"
             containerClassName="flex-1"
@@ -135,7 +135,7 @@ export const SettingsSidebar = ({
               label={
                 options.password ? t("Change password") : t("Set password")
               }
-              labelClassname="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+              labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
               type="password"
               className="h-9 md:h-12 text-xs md:text-lg mb-2"
               containerClassName="flex-1"
@@ -156,7 +156,7 @@ export const SettingsSidebar = ({
           </div>
           <Select
             label={t("Max number of users")}
-            labelColor="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
             className="mb-2 h-9 md:h-12 text-xs md:text-lg"
             containerClassName="flex-1"
             data-label="Max number of users"
@@ -173,7 +173,7 @@ export const SettingsSidebar = ({
           </Select>
           <Select
             label={t("Timer")}
-            labelColor="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
             className="mb-2 h-9 md:h-12 text-xs md:text-lg"
             containerClassName="flex-1"
             data-label="Timer"

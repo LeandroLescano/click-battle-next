@@ -15,7 +15,7 @@ export const Input = ({
   description,
   className,
   descriptionClassName,
-  labelClassname,
+  labelClassName,
   containerClassName,
   ...rest
 }: InputProps) => {
@@ -23,7 +23,7 @@ export const Input = ({
     <Field className={containerClassName}>
       {label && (
         <Label
-          className={twMerge("text-lg font-medium text-white", labelClassname)}
+          className={twMerge("text-lg font-medium text-white", labelClassName)}
         >
           {label}
         </Label>

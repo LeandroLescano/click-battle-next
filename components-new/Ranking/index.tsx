@@ -17,7 +17,7 @@ export const Ranking = ({lastUpdate, usersWithScore}: RankingProps) => {
 
   return (
     <main>
-      <div className="px-5 py-6 md:px-32 md:py-14 text-primary-200 h-dvh flex flex-col gap-3 md:gap-6">
+      <div className="text-primary-200 h-dvh flex flex-col gap-3 md:gap-6">
         <div className="flex justify-between items-center gap-9">
           <Link href="/new" passHref>
             <Button

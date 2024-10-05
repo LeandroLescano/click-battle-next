@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        md: "805px"
+      },
       colors: {
         primary: {
           50: "#F9F9F9",

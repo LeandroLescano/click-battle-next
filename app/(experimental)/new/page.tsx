@@ -181,16 +181,16 @@ const Home = () => {
 
   return (
     <main>
-      <div className="px-5 py-6 md:px-32 md:py-14 text-primary-200 h-dvh flex flex-col">
+      <div className="text-primary-200 h-dvh flex flex-col gap-4 md:gap-0">
         <Header />
-        <div className="flex flex-col md:flex-row w-full flex-1 p-md-0 overflow-hidden max-h-[600px] mt-auto">
-          <div className="md:w-1/3 flex flex-col md:max-h-[480px] md:order-1">
+        <div className="flex flex-col md:flex-row-reverse w-full md:gap-4 lg:gap-0 flex-1 p-md-0 overflow-hidden">
+          <div className="md:w1/2 lg:w-1/3 flex flex-col md:max-h-[480px]">
             <div className="md:hidden">
               <WelcomeMessage />
             </div>
             <CreateSection />
           </div>
-          <div className="flex flex-col justify-start items-start md:w-2/3 order-md-0 md:max-w-[73%] relative pl-1 min-h-0">
+          <div className="flex flex-col justify-start items-start lg:w-2/3 order-md-0 md:max-w-[73%] md:min-w-[560px] relative pl-1 min-h-0">
             <div className="hidden md:block">
               <WelcomeMessage />
             </div>
