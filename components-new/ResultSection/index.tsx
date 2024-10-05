@@ -45,7 +45,7 @@ const ResultSection = () => {
           id="result"
           className="no-select uppercase text-6xl md:text-9xl font-extrabold"
         >
-          {t("Result position", {position: localPosition})}
+          {t("resultPosition", {position: localPosition})}
         </h1>
         <h3 className="text-2xl md:text-6xl flex gap-1.5 md:gap-3 justify-center items-center">
           <Trophy />
@@ -63,7 +63,7 @@ const ResultSection = () => {
               >
                 <div>
                   <b className="mr-5">
-                    {t("Result position", {
+                    {t("resultPosition", {
                       position: getSuffixPosition(i + 1, t)
                     })}
                   </b>{" "}

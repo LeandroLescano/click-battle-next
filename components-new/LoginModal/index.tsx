@@ -131,7 +131,7 @@ export const LoginModal = ({
                   onClick={() => handleLogin("github")}
                 />
                 <SocialButton
-                  variant="twitter"
+                  variant="twitter-new"
                   onClick={() => handleLogin("twitter")}
                 />
               </div>

@@ -3,7 +3,7 @@ import React from "react";
 import "./styles.scss";
 
 interface SocialButtonProps {
-  variant: "google" | "github" | "twitter";
+  variant: "google" | "github" | "twitter-new";
   onClick?: VoidFunction;
 }
 
