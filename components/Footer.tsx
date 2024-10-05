@@ -10,6 +10,8 @@ import {
   OverlayTrigger,
   Tooltip
 } from "react-bootstrap";
+import {useRouter} from "next/navigation";
+import {getAnalytics, logEvent} from "firebase/analytics";
 
 import {timeout} from "utils/timeout";
 import {updateUser} from "services/user";
@@ -41,6 +43,7 @@ export const Footer = () => {
   const [send, setSend] = useState(false);
   const {user, gameUser, signOut} = useAuth();
   const {t, i18n} = useTranslation();
+  const router = useRouter();
 
   const handleContact = async ({
     title = t("Contact us"),
@@ -168,6 +171,11 @@ export const Footer = () => {
 
   const toggleModal = () => setShowModal((prev) => !prev);
 
+  const handleSwitchNewStyle = () => {
+    logEvent(getAnalytics(), "switch_to_new_style");
+    router.push("/new");
+  };
+
   useEffect(() => {
     if (rating > 0 && ReactSwal.isVisible()) {
       ReactSwal.resetValidationMessage();
@@ -208,12 +216,16 @@ export const Footer = () => {
             <a onClick={() => handleContact()}>{t("Contact")}</a>
             <span>|</span>
             <Link href="/ranking">{t("Ranking")}</Link>
+            <span>|</span>
+            <a onClick={handleSwitchNewStyle}>{t("Try new style")}</a>
           </div>
         ) : (
           <div className="d-flex gap-2 justify-content-center w-sm-100 flex-fill align-self-center pb-sm-2 pb-0">
             <Link href="/ranking">{t("Ranking")}</Link>
             <span>|</span>
             <a onClick={toggleModal}>{t("Save my data")}</a>
+            <span>|</span>
+            <a onClick={handleSwitchNewStyle}>{t("Try new style")}</a>
           </div>
         )}
         {gameUser?.username && (

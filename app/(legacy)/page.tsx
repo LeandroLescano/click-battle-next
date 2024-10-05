@@ -7,6 +7,7 @@ import {getAnalytics, logEvent} from "firebase/analytics";
 import {useRouter, useSearchParams} from "next/navigation";
 import {child, getDatabase, onValue, ref, set} from "@firebase/database";
 import dynamic from "next/dynamic";
+import {Toast, ToastContainer} from "react-bootstrap";
 
 import {Game, GameUser} from "interfaces";
 import {
@@ -34,6 +35,7 @@ const ModalLogin = dynamic<ModalLoginProps>(
 
 const Home = () => {
   const [listGames, setListGames] = useState<Game[]>([]);
+  const [showNewStyleToast, setShowNewStyleToast] = useState(false);
   const router = useRouter();
   const params = useSearchParams();
   const db = getDatabase();
@@ -71,6 +73,10 @@ const Home = () => {
         confirmButtonText: "Ok",
         heightAuto: false
       });
+    }
+
+    if (!localStorage.getItem("newStyle")) {
+      setShowNewStyleToast(true);
     }
   }, []);
 
@@ -182,10 +188,44 @@ const Home = () => {
     }
   };
 
+  const handleOnConfirmStyling = () => {
+    logEvent(getAnalytics(), "confirm_styling");
+    localStorage.setItem("newStyle", "true");
+    setShowNewStyleToast(false);
+    router.push("/new");
+  };
+
+  const handleOnCancelStyling = () => {
+    logEvent(getAnalytics(), "cancel_styling");
+    localStorage.setItem("newStyle", "false");
+    setShowNewStyleToast(false);
+  };
+
   if (loading) return <Loading />;
 
   return (
     <>
+      <ToastContainer position="top-center" className="mt-2">
+        <Toast show={showNewStyleToast} animation>
+          <Toast.Body className="d-flex gap-2 align-items-center py-3 bg-white">
+            <>
+              <span className="text-dark">
+                {t("Check out our fresh new look!")}
+              </span>
+              <button
+                className="btn-click small"
+                onClick={handleOnConfirmStyling}
+              >
+                {t("Try it now")}
+              </button>
+              <button
+                className="btn btn-close"
+                onClick={handleOnCancelStyling}
+              />
+            </>
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
       <div className="main h-100 d-flex overflow-y-auto">
         <div className="d-flex flex-md-row flex-column w-100 flex-fill p-md-0 p-4">
           <div className="col-lg-4 order-md-1 create-section">

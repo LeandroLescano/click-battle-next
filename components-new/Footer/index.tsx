@@ -1,12 +1,14 @@
 import React, {useCallback, useState} from "react";
 import Link from "next/link";
 import {useTranslation} from "react-i18next";
+import {useRouter} from "next/navigation";
 
 import {useAuth} from "contexts/AuthContext";
 import {LoginModal} from "components-new";
 import {UsernameModal} from "components-new/UsernameModal";
 import {FeedbackModal} from "components-new/FeedbackModal";
 import {ContactModal} from "components-new/ContactModal";
+import {getAnalytics, logEvent} from "firebase/analytics";
 
 export const Footer = () => {
   const [showModal, setShowModal] = useState(false);
@@ -17,6 +19,7 @@ export const Footer = () => {
 
   const {user} = useAuth();
   const {t} = useTranslation();
+  const router = useRouter();
 
   const handleFeedback = () => {
     setShowFeedbackModal(true);
@@ -29,6 +32,11 @@ export const Footer = () => {
   };
 
   const toggleModal = useCallback(() => setShowModal((prev) => !prev), []);
+
+  const handleSwitchOldStyle = () => {
+    logEvent(getAnalytics(), "switch_to_old_style");
+    router.push("/");
+  };
 
   return (
     <>
@@ -60,6 +68,10 @@ export const Footer = () => {
             </a>
             <span> | </span>
             <Link href="/new/ranking">{t("Ranking")}</Link>
+            <span> | </span>
+            <span onClick={handleSwitchOldStyle} className="cursor-pointer">
+              {t("Switch to Old Style")}
+            </span>
           </div>
         ) : (
           <div className="flex justify-end self-center gap-2 w-full pb-sm-2 pb-0 uppercase">
@@ -67,6 +79,10 @@ export const Footer = () => {
             <span> | </span>
             <span onClick={toggleModal} className="cursor-pointer">
               {t("Save my data")}
+            </span>
+            <span> | </span>
+            <span onClick={handleSwitchOldStyle} className="cursor-pointer">
+              {t("Switch to Old Style")}
             </span>
           </div>
         )}
