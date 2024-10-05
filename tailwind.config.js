@@ -8,7 +8,8 @@ export default {
   theme: {
     extend: {
       screens: {
-        md: "805px"
+        md: "805px",
+        short: {raw: "(max-height: 600px)"}
       },
       colors: {
         primary: {

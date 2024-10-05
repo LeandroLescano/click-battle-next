@@ -19,7 +19,7 @@ body {
 }
 
 main > div {
-  @apply px-5 py-6 xl:px-32 xl:py-14;
+  @apply px-5 py-6 xl:px-32 xl:py-14 short:py-1;
 }
 
 html {
@@ -29,29 +29,29 @@ html {
     @apply hidden;
   }
 
-  .games-container {
+  * {
     --sb-track-color: transparent;
     --sb-thumb-color: var(--color-primary-200);
     --sb-size: 8px;
   }
 
-  .games-container::-webkit-scrollbar {
+  *::-webkit-scrollbar {
     width: var(--sb-size);
   }
 
-  .games-container::-webkit-scrollbar-track {
+  *::-webkit-scrollbar-track {
     background: var(--sb-track-color);
     border-radius: 6px;
   }
 
-  .games-container::-webkit-scrollbar-thumb {
+  *::-webkit-scrollbar-thumb {
     background: var(--sb-thumb-color);
     border-radius: 6px;
     border: 5px solid transparent;
   }
 
   @supports not selector(::-webkit-scrollbar) {
-    .games-container {
+    * {
       scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
     }
   }
