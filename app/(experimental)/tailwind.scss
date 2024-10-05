@@ -2,14 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-body:has(> ins[data-anchor-shown="true"]) {
-  padding-top: 15px !important;
+/* STYLES TO AVOID ANCHOR ADS MOVES THE LAYOUT */
+[data-anchor-shown="true"] + main > div {
+  padding-top: calc(1.5rem + 15px);
 }
 
-@media screen and (min-width: 1000px) {
-  body {
-    padding: 0 !important;
+@media (min-width: 768px) {
+  [data-anchor-shown="true"] + main > div {
+    padding-top: 3.5rem;
   }
+}
+/* END STYLES TO AVOID ANCHOR ADS MOVES THE LAYOUT */
+
+body {
+  padding: 0 !important;
 }
 
 html {
