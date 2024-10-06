@@ -45,3 +45,10 @@ yarn-error.log*
 
 # Sentry Config File
 .sentryclirc
+
+# Playwright
+/tests/.auth/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

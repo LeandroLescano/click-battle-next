@@ -19,4 +19,5 @@ export interface GameUser {
 export interface MaxScore {
   clicks: number;
   time: number;
+  date: Timestamp;
 }

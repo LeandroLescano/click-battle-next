@@ -1,0 +1,24 @@
+.sidebar {
+  @apply absolute bg-primary-50 dark:bg-primary-600;
+
+  z-index: 999;
+  top: 0;
+  right: 0;
+  height: 100%;
+  min-width: 0;
+  transition: 0.6s all cubic-bezier(0.51, 0.22, 0.55, 0.32);
+  width: 0;
+  overflow: hidden;
+
+  &.active {
+    width: 100vw;
+  }
+}
+
+@media screen and (min-width: 640px) {
+  .sidebar {
+    &.active {
+      width: 470px;
+    }
+  }
+}

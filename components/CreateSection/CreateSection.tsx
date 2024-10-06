@@ -22,6 +22,7 @@ import {useAuth} from "contexts/AuthContext";
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
 import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
+import {useGame} from "contexts/GameContext";
 
 const CreateSection = () => {
   const [creating, setCreating] = useState(false);
@@ -37,6 +38,7 @@ const CreateSection = () => {
   const db = getDatabase();
   const router = useRouter();
   const {t} = useTranslation();
+  const {setGame} = useGame();
 
   const handleUpdateRoom = (data: Partial<Room>) => {
     setRoom((prev) => ({...prev, ...data}));
@@ -89,7 +91,7 @@ const CreateSection = () => {
           currentGame: false,
           gameStart: false,
           listUsers: [],
-          ownerUser: gameUser,
+          ownerUser: {...gameUser, key: user?.uid},
           timeStart: 3,
           timer,
           created: serverTimestamp(),
@@ -113,8 +115,11 @@ const CreateSection = () => {
             isRegistered: !user?.isAnonymous
           });
 
-          sessionStorage.setItem("actualIDGame", objRoom.key);
-          sessionStorage.setItem("actualOwner", gameUser.username);
+          setGame({
+            ...objRoom,
+            key: objRoom.key
+          });
+
           sessionStorage.setItem("gameUserKey", "0");
 
           router.push("/game/" + objRoom.key);
@@ -155,7 +160,7 @@ const CreateSection = () => {
 
   return (
     <>
-      <h1 className="text-center mb-4">Click battle!</h1>
+      <h1 className="text-center mb-4 text-3xl">Click battle!</h1>
       <button
         className="btn-click mb-3 mb-md-5 d-flex justify-content-center align-items-center"
         disabled={!gameUser?.username || creating}

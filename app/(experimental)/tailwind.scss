@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* STYLES TO AVOID ANCHOR ADS MOVES THE LAYOUT */
+body:has([data-anchor-shown="true"]) main > div {
+  padding-top: calc(1.5rem + 15px);
+}
+
+@media (min-width: 768px) {
+  body:has([data-anchor-shown="true"]) main > div {
+    padding-top: 3.5rem;
+  }
+}
+/* END STYLES TO AVOID ANCHOR ADS MOVES THE LAYOUT */
+
+body {
+  padding: 0 !important;
+}
+
+main > div {
+  @apply px-5 py-6 xl:px-32 xl:py-14 short:py-1;
+}
+
+html {
+  min-height: 100vh;
+
+  div:has(> ins[data-ad-status="unfilled"]) {
+    @apply hidden;
+  }
+
+  * {
+    --sb-track-color: transparent;
+    --sb-thumb-color: var(--color-primary-200);
+    --sb-size: 8px;
+  }
+
+  *::-webkit-scrollbar {
+    width: var(--sb-size);
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--sb-track-color);
+    border-radius: 6px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--sb-thumb-color);
+    border-radius: 6px;
+    border: 5px solid transparent;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
+    }
+  }
+
+  .start-countdown {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: white;
+    background-color: #00000080;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  html {
+    &:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("../../public/squares-white.jpg") no-repeat center center
+        scroll;
+      background-blend-mode: color;
+      background-size: cover;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      opacity: 0.02;
+      z-index: -1;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    background: url("../../public/squares.png") no-repeat center center scroll
+      #191919;
+    background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    min-height: 100vh;
+  }
+}

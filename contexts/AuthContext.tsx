@@ -14,7 +14,8 @@ import {
   GithubAuthProvider,
   linkWithCredential,
   OAuthProvider,
-  connectAuthEmulator
+  connectAuthEmulator,
+  updateProfile
 } from "firebase/auth";
 import Swal from "sweetalert2";
 import {
@@ -45,7 +46,7 @@ interface AuthContextState {
   loading: boolean;
   isAuthenticated: boolean;
   signInWithProvider: (provider?: AuthProviders) => void;
-  signInAnonymously: VoidFunction;
+  signInAnonymously: () => Promise<void>;
   signOut: VoidFunction;
   createUsername: (username: string, isAnonymously: boolean) => void;
   updateGameUser: (props: Partial<GameUser>) => void;
@@ -67,7 +68,7 @@ const AuthContext = createContext<AuthContextState>({
   loading: true,
   isAuthenticated: false,
   signInWithProvider: () => ({}),
-  signInAnonymously: () => ({}),
+  signInAnonymously: () => Promise.resolve(),
   signOut: () => ({}),
   createUsername: () => ({}),
   updateGameUser: () => ({})
@@ -263,13 +264,18 @@ function useAuthProvider(): AuthContextState {
   };
 
   //Function for login a guest user
-  const signInAnonymously = () => {
-    authSignInAnonymously(auth).catch((e) => console.error(e));
+  const signInAnonymously = async () => {
+    await authSignInAnonymously(auth).catch((e) => console.error(e));
   };
 
   const signOut = async () => {
-    await authSignOut(auth);
-    handleUser(null);
+    if (user) {
+      await authSignOut(auth);
+      handleUser(null);
+    }
+    updateGameUser({});
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("userKey");
   };
 
   const createUsername = async (username: string, isAnonymously: boolean) => {
@@ -281,6 +287,7 @@ function useAuthProvider(): AuthContextState {
     if (isAnonymously) {
       setGameUser({username});
     }
+    updateProfile(auth.currentUser!, {displayName: username});
 
     logEvent(getAnalytics(), "login", {
       action: "login",

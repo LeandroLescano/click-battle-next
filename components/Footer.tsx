@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import {useRouter} from "next/navigation";
 import {useTranslation} from "react-i18next";
 import {changeLanguage} from "i18next";
 import {
@@ -11,12 +10,14 @@ import {
   OverlayTrigger,
   Tooltip
 } from "react-bootstrap";
+import {useRouter} from "next/navigation";
+import {getAnalytics, logEvent} from "firebase/analytics";
 
 import {timeout} from "utils/timeout";
 import {updateUser} from "services/user";
 import {useAuth} from "contexts/AuthContext";
 import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
-import {languages} from "app/i18n/settings";
+import {languages} from "i18n/settings";
 
 import RatingStars from "./RatingStars";
 import {ModalLogin} from "./ModalLogin";
@@ -40,18 +41,9 @@ export const Footer = () => {
   const [rating, setRating] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [send, setSend] = useState(false);
-  const {user, gameUser, signOut, updateGameUser} = useAuth();
+  const {user, gameUser, signOut} = useAuth();
   const {t, i18n} = useTranslation();
-
-  //Function for logout user.
-  const handleLogOut = () => {
-    if (user) {
-      signOut();
-    }
-    updateGameUser({});
-    localStorage.removeItem("user");
-    sessionStorage.removeItem("userKey");
-  };
+  const router = useRouter();
 
   const handleContact = async ({
     title = t("Contact us"),
@@ -179,6 +171,11 @@ export const Footer = () => {
 
   const toggleModal = () => setShowModal((prev) => !prev);
 
+  const handleSwitchNewStyle = () => {
+    logEvent(getAnalytics(), "switch_to_new_style");
+    router.push("/new");
+  };
+
   useEffect(() => {
     if (rating > 0 && ReactSwal.isVisible()) {
       ReactSwal.resetValidationMessage();
@@ -219,18 +216,28 @@ export const Footer = () => {
             <a onClick={() => handleContact()}>{t("Contact")}</a>
             <span>|</span>
             <Link href="/ranking">{t("Ranking")}</Link>
+            <span>|</span>
+            <a onClick={handleSwitchNewStyle}>{t("Try new style")}</a>
           </div>
         ) : (
           <div className="d-flex gap-2 justify-content-center w-sm-100 flex-fill align-self-center pb-sm-2 pb-0">
             <Link href="/ranking">{t("Ranking")}</Link>
             <span>|</span>
             <a onClick={toggleModal}>{t("Save my data")}</a>
+            <span>|</span>
+            <a onClick={handleSwitchNewStyle}>{t("Try new style")}</a>
           </div>
         )}
         {gameUser?.username && (
           <div className="txt-user text-center mx-auto mx-md-0 mt-1 d-flex align-items-center gap-2">
             <DropdownButton
-              title={<img src={`/flags/${i18n.language}.svg`} height={25} />}
+              title={
+                <img
+                  src={`/flags/${i18n.language}.svg`}
+                  height={25}
+                  alt={i18n.language}
+                />
+              }
               variant="secondary"
               size="sm"
               drop="up"
@@ -242,7 +249,7 @@ export const Footer = () => {
                   active={i18n.language === lang}
                   onClick={() => changeLanguage(lang)}
                 >
-                  <img src={`/flags/${lang}.svg`} />
+                  <img src={`/flags/${lang}.svg`} alt={lang} />
                 </Dropdown.Item>
               ))}
             </DropdownButton>
@@ -253,7 +260,7 @@ export const Footer = () => {
             >
               <img src="/icons/clicky-right.svg" height={35} />
             </OverlayTrigger>
-            <button className="btn-logout btn-click" onClick={handleLogOut}>
+            <button className="btn-logout btn-click" onClick={signOut}>
               {t("Log out")}
             </button>
           </div>
