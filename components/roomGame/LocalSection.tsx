@@ -77,7 +77,7 @@ function LocalSection({
           <h4>{t("Waiting for host...")}</h4>
         )
       ) : (
-        <h4>{t("You have n clicks!", {clicks: localUser.clicks})}</h4>
+        <h4>{t("You have n clicks", {clicks: localUser.clicks})}</h4>
       )}
       <div className="d-flex justify-content-around gap-2">
         <button

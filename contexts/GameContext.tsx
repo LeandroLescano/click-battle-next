@@ -16,6 +16,7 @@ interface GameContextState {
   isHost: boolean;
   setIsHost: (isHost: boolean) => void;
   calculatePosition: VoidFunction;
+  resetContext: VoidFunction;
 }
 
 const initialGame = {
@@ -48,7 +49,8 @@ const GameContext = createContext<GameContextState>({
   resetGame: () => {},
   setLocalUser: () => {},
   setIsHost: () => {},
-  calculatePosition: () => {}
+  calculatePosition: () => {},
+  resetContext: () => {}
 });
 
 interface Props {
@@ -103,6 +105,13 @@ function useGameProvider(): GameContextState {
     setGame(initialGame);
   };
 
+  const resetContext = () => {
+    setGame(initialGame);
+    setLocalPosition(undefined);
+    setLocalUser({username: "", clicks: 0});
+    setIsHost(false);
+  };
+
   return {
     game,
     localPosition,
@@ -112,6 +121,7 @@ function useGameProvider(): GameContextState {
     setLocalUser,
     resetGame,
     setIsHost,
-    calculatePosition
+    calculatePosition,
+    resetContext
   };
 }

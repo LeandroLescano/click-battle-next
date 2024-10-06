@@ -24,11 +24,6 @@ export const useIsMobileDevice = () => {
     }
 
     setIsMobile(hasTouchScreen);
-
-    // Clean up the event listener (if needed)
-    return () => {
-      // Add cleanup logic here if necessary
-    };
   }, []);
 
   return isMobile;
