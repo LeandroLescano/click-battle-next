@@ -18,6 +18,7 @@ import {LoginModalProps} from "components-new/LoginModal/types";
 import {NotificationModal} from "components-new/NotificationModal";
 import {NotificationType} from "components-new/NotificationModal/types";
 import {WelcomeMessage} from "components-new/WelcomeMessage";
+import {THEMES} from "resources/constants";
 
 const LoginModal = dynamic<LoginModalProps>(
   () =>
@@ -45,6 +46,9 @@ const Home = () => {
   const {gameUser, user, loading} = useAuth();
   const {resetGame, setGame} = useGame();
   const {t} = useTranslation();
+  const [theme, setTheme] = useState<"BLUE" | "PINK">("BLUE");
+
+  const TONES = [50, 100, 200, 250, 300, 400, 500, 600, 700];
 
   useEffect(() => {
     //If exist userKey get user from DB
@@ -177,6 +181,15 @@ const Home = () => {
     }
   };
 
+  useEffect(() => {
+    for (const tone of TONES) {
+      document.documentElement.style.setProperty(
+        `--color-primary-${tone}`,
+        THEMES[theme][tone]
+      );
+    }
+  }, [theme]);
+
   if (loading) return <Loading />;
 
   return (
@@ -188,6 +201,11 @@ const Home = () => {
             <div className="md:hidden">
               <WelcomeMessage />
             </div>
+            {["PINK", "BLUE"].map((theme) => (
+              <div key={theme}>
+                <button onClick={() => setTheme(theme)}>{theme}</button>
+              </div>
+            ))}
             <CreateSection />
           </div>
           <div className="flex flex-col justify-start items-start lg:w-2/3 order-md-0 md:max-w-[73%] md:min-w-[560px] relative pl-1 min-h-0">

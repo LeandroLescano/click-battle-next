@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+//create a css variable
+:root {
+  --color-primary-50: #f9f9f9;
+  --color-primary-100: #fac8dd;
+  --color-primary-200: #f18ca2;
+  --color-primary-250: #e08297;
+  --color-primary-300: #e65654;
+  --color-primary-400: #ba425a;
+  --color-primary-500: #8e3058;
+  --color-primary-600: #602049;
+  --color-primary-700: #40353e;
+}
+
 /* STYLES TO AVOID ANCHOR ADS MOVES THE LAYOUT */
 body:has([data-anchor-shown="true"]) main > div {
   padding-top: calc(1.5rem + 15px);
