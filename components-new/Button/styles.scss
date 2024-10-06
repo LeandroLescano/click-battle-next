@@ -37,6 +37,7 @@
 
   &-card {
     @apply bg-primary-100 border border-primary-300 text-primary-500 px-2 py-1.5 md:px-4 md:py-3 text-start;
+
     transform-style: preserve-3d;
     transition:
       transform 150ms cubic-bezier(0, 0, 0.58, 1),

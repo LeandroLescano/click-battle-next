@@ -7,6 +7,7 @@
 
 .opponent-row {
   @apply p-3 md:p-5 mb-4 border-2 rounded-md bg-primary-100 text-primary-500 border-primary-300;
+
   animation: 0.2s ease;
   transform-style: preserve-3d;
   transition:
