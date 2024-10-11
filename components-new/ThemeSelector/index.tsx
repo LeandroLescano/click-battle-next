@@ -52,7 +52,9 @@ export const ThemeSelector = () => {
             type="color"
             className="size-4 md:size-6 rounded"
             defaultValue={customColor}
-            onChange={(e) => changeCustomColor(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              changeCustomColor(e.target.value)
+            }
           />
         )}
         {theme}
