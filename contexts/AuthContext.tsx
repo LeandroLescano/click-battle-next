@@ -37,6 +37,7 @@ import {GameUser, MaxScore} from "interfaces";
 import {addUser, getUser, getUserByEmail, updateUser} from "services/user";
 import {useUserInfo} from "hooks/userInfo";
 import {firebaseConfig} from "resources/config";
+import {useTheme} from "contexts/ThemeContext";
 
 export type AuthProviders = keyof typeof AUTH_PROVIDERS;
 
@@ -112,6 +113,7 @@ function useAuthProvider(): AuthContextState {
   const userInfo = useUserInfo();
   const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   const auth = getAuth(app);
+  const {clear} = useTheme();
 
   const updateGameUser = (gameUserProps: Partial<GameUser>) => {
     setGameUser((prev) => prev && {...prev, ...gameUserProps});
@@ -273,6 +275,7 @@ function useAuthProvider(): AuthContextState {
       await authSignOut(auth);
       handleUser(null);
     }
+    clear();
     updateGameUser({});
     localStorage.removeItem("user");
     sessionStorage.removeItem("userKey");

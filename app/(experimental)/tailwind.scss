@@ -3,7 +3,28 @@
 @tailwind utilities;
 
 //create a css variable
-:root {
+@layer base {
+  :root {
+    --color-primary-50: #f9f9f9;
+    --color-primary-100: #c8d6fa;
+    --color-primary-200: #8ca8f1;
+    --color-primary-250: #758fd1;
+    --color-primary-300: #5463e6;
+    --color-primary-400: #4255ba;
+    --color-primary-500: #30458e;
+    --color-primary-600: #202660;
+    --color-primary-700: #323232;
+
+    ::-webkit-color-swatch-wrapper {
+      @apply p-px aspect-square;
+    }
+    ::-webkit-color-swatch {
+      @apply border-none rounded aspect-square;
+    }
+  }
+}
+
+.theme-pink {
   --color-primary-50: #f9f9f9;
   --color-primary-100: #fac8dd;
   --color-primary-200: #f18ca2;
