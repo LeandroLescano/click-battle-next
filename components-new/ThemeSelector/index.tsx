@@ -3,6 +3,7 @@ import {Input} from "@headlessui/react";
 
 import {useAuth} from "contexts/AuthContext";
 import {Theme, THEMES, useTheme} from "contexts/ThemeContext";
+import {stopPropagation} from "utils/events";
 
 export const ThemeSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,6 +17,10 @@ export const ThemeSelector = () => {
   const handleOnChange = (theme: Theme) => {
     changeTheme(theme);
     setIsOpen(false);
+  };
+
+  const handleOnChangeColor = (e: React.ChangeEvent<HTMLInputElement>) => {
+    changeCustomColor(e.target.value);
   };
 
   useEffect(() => {
@@ -50,11 +55,10 @@ export const ThemeSelector = () => {
         {theme === "custom" && (
           <Input
             type="color"
-            className="size-4 md:size-6 rounded"
+            className="size-4 md:size-6 rounded cursor-pointer"
             defaultValue={customColor}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              changeCustomColor(e.target.value)
-            }
+            onClick={stopPropagation}
+            onChange={handleOnChangeColor}
           />
         )}
         {theme}

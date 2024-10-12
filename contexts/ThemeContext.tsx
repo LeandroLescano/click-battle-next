@@ -67,7 +67,9 @@ export const ThemeProvider = memo(({children}: Props) => {
 
   return (
     <ThemeContext.Provider value={theme}>
-      <div className={`theme-${theme.theme} transition-all`}>{children}</div>
+      <div className={`theme-provider theme-${theme.theme} transition-all`}>
+        {children}
+      </div>
     </ThemeContext.Provider>
   );
 });
@@ -104,7 +106,7 @@ function useThemeProvider(): ThemeContextState {
 
     if (newTheme !== "custom") {
       const customThemeElement =
-        document.querySelector<HTMLElement>(".theme-custom");
+        document.querySelector<HTMLElement>(".theme-provider");
 
       if (customThemeElement) {
         customThemeElement.setAttribute("style", "");
@@ -125,7 +127,7 @@ function useThemeProvider(): ThemeContextState {
       const palette = generatePalette(newColor);
 
       const customThemeElement =
-        document.querySelector<HTMLElement>(".theme-custom");
+        document.querySelector<HTMLElement>(".theme-provider");
 
       if (customThemeElement) {
         Object.entries(palette).forEach(([key, value]) => {

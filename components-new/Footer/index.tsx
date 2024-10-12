@@ -1,14 +1,12 @@
 import React, {memo, useCallback, useState} from "react";
 import Link from "next/link";
 import {useTranslation} from "react-i18next";
-import {useRouter} from "next/navigation";
 
 import {useAuth} from "contexts/AuthContext";
 import {LoginModal} from "components-new";
 import {UsernameModal} from "components-new/UsernameModal";
 import {FeedbackModal} from "components-new/FeedbackModal";
 import {ContactModal} from "components-new/ContactModal";
-import {getAnalytics, logEvent} from "firebase/analytics";
 import {useTheme} from "contexts/ThemeContext";
 
 export const Footer = memo(() => {
@@ -20,7 +18,6 @@ export const Footer = memo(() => {
 
   const {user} = useAuth();
   const {t} = useTranslation();
-  const router = useRouter();
   const {cafecitoVariant} = useTheme();
 
   const handleFeedback = () => {
@@ -34,11 +31,6 @@ export const Footer = memo(() => {
   };
 
   const toggleModal = useCallback(() => setShowModal((prev) => !prev), []);
-
-  const handleSwitchOldStyle = () => {
-    logEvent(getAnalytics(), "switch_to_old_style");
-    router.push("/");
-  };
 
   return (
     <>
