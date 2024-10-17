@@ -10,6 +10,9 @@ export const requestPassword = async (
   return await Swal.fire({
     title: t("Enter the password"),
     input: "password",
+    inputAttributes: {
+      autocomplete: "new-password"
+    },
     showCancelButton: true,
     cancelButtonText: t("Cancel"),
     confirmButtonText: t("Enter"),
