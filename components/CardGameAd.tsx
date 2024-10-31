@@ -1,9 +1,9 @@
-import React from "react";
+import React, {memo} from "react";
 import {AdblockDetector} from "adblock-detector";
 
 import GoogleAdUnit from "./GoogleAdUnit";
 
-export const CardGameAd = () => {
+export const CardGameAd = memo(() => {
   const adbDetector = new AdblockDetector();
 
   const userHasAdblock = adbDetector.detect() ?? true;
@@ -26,4 +26,6 @@ export const CardGameAd = () => {
       </div>
     </div>
   );
-};
+});
+
+CardGameAd.displayName = "CardGameAd";

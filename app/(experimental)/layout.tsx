@@ -11,6 +11,7 @@ import {detectLanguage} from "i18n/server";
 import {I18nProvider} from "i18n/i18n-context";
 import {firebaseConfig} from "resources/config";
 import {GameProvider} from "contexts/GameContext";
+import {ThemeProvider} from "contexts/ThemeContext";
 
 if (!getApps.length) {
   initializeApp(firebaseConfig);
@@ -88,11 +89,13 @@ export default async function Layout({children}: Props) {
           />
         </head>
         <body>
-          <AuthProvider>
-            <GameProvider>
-              <Suspense fallback={<Loading />}>{children}</Suspense>
-            </GameProvider>
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <GameProvider>
+                <Suspense fallback={<Loading />}>{children}</Suspense>
+              </GameProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </body>
       </html>
     </I18nProvider>

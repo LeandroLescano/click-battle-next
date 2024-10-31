@@ -53,7 +53,7 @@ const LoginModal = dynamic<LoginModalProps>(
   }
 );
 
-function RoomGame() {
+const RoomGame = () => {
   const [startCountdown, setStartCountdown] = useState(false);
   const [showSideBar, setShowSideBar] = useState(false);
   const roomStats = useRef<RoomStats>({
@@ -97,6 +97,7 @@ function RoomGame() {
   const localUserRef = useRef<GameUser>();
   const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();
+  const {setHasEnteredPassword, hasEnteredPassword} = useGame();
 
   let unsubscribe: Unsubscribe;
 
@@ -206,7 +207,11 @@ function RoomGame() {
                   return;
                 }
 
-                if (game.settings.password && !flagEnter.current) {
+                if (
+                  game.settings.password &&
+                  !hasEnteredPassword &&
+                  !flagEnter.current
+                ) {
                   flagEnter.current = true;
                   if (
                     !query.get("pwd") ||
@@ -214,6 +219,7 @@ function RoomGame() {
                   ) {
                     requestPassword(game.settings.password, t).then((val) => {
                       if (val.isConfirmed) {
+                        setHasEnteredPassword(true);
                         clearPath(gameID);
                         addNewUserToDB(game);
                       } else {
@@ -418,7 +424,7 @@ function RoomGame() {
   };
 
   const clearPath = (id: string) => {
-    router.replace(`/game/${id}`);
+    router.replace(`/new/game/${id}`);
   };
 
   // function for add user to database and update state
@@ -521,6 +527,6 @@ function RoomGame() {
       </div>
     </main>
   );
-}
+};
 
 export default RoomGame;

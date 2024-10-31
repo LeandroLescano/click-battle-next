@@ -14,9 +14,11 @@ interface GameContextState {
   localUser: GameUser;
   setLocalUser: (user: GameUser) => void;
   isHost: boolean;
+  hasEnteredPassword?: boolean;
   setIsHost: (isHost: boolean) => void;
   calculatePosition: VoidFunction;
   resetContext: VoidFunction;
+  setHasEnteredPassword: (hasEnteredPassword: boolean) => void;
 }
 
 const initialGame = {
@@ -34,7 +36,8 @@ const initialGame = {
   },
   timer: 10,
   timeStart: 3,
-  key: ""
+  key: "",
+  hasEnteredPassword: false
 };
 
 const GameContext = createContext<GameContextState>({
@@ -50,7 +53,8 @@ const GameContext = createContext<GameContextState>({
   setLocalUser: () => {},
   setIsHost: () => {},
   calculatePosition: () => {},
-  resetContext: () => {}
+  resetContext: () => {},
+  setHasEnteredPassword: () => {}
 });
 
 interface Props {
@@ -74,6 +78,7 @@ function useGameProvider(): GameContextState {
     clicks: 0
   });
   const [isHost, setIsHost] = useState(false);
+  const [hasEnteredPassword, setHasEnteredPassword] = useState(false);
 
   const {t} = useTranslation();
 
@@ -117,6 +122,8 @@ function useGameProvider(): GameContextState {
     localPosition,
     localUser,
     isHost,
+    hasEnteredPassword,
+    setHasEnteredPassword,
     setGame: setPartialGame,
     setLocalUser,
     resetGame,
