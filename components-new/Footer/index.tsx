@@ -1,16 +1,15 @@
-import React, {useCallback, useState} from "react";
+import React, {memo, useCallback, useState} from "react";
 import Link from "next/link";
 import {useTranslation} from "react-i18next";
-import {useRouter} from "next/navigation";
 
 import {useAuth} from "contexts/AuthContext";
 import {LoginModal} from "components-new";
 import {UsernameModal} from "components-new/UsernameModal";
 import {FeedbackModal} from "components-new/FeedbackModal";
 import {ContactModal} from "components-new/ContactModal";
-import {getAnalytics, logEvent} from "firebase/analytics";
+import {useTheme} from "contexts/ThemeContext";
 
-export const Footer = () => {
+export const Footer = memo(() => {
   const [showModal, setShowModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
@@ -19,7 +18,7 @@ export const Footer = () => {
 
   const {user} = useAuth();
   const {t} = useTranslation();
-  const router = useRouter();
+  const {cafecitoVariant} = useTheme();
 
   const handleFeedback = () => {
     setShowFeedbackModal(true);
@@ -33,11 +32,6 @@ export const Footer = () => {
 
   const toggleModal = useCallback(() => setShowModal((prev) => !prev), []);
 
-  const handleSwitchOldStyle = () => {
-    logEvent(getAnalytics(), "switch_to_old_style");
-    router.push("/");
-  };
-
   return (
     <>
       <footer className="mt-auto flex flex-row text-sm md:text-2xl font-semibold text-primary-700 dark:text-primary-100 justify-center md:justify-between w-full items-center md:pb-2">
@@ -48,8 +42,8 @@ export const Footer = () => {
             target="_blank"
           >
             <img
-              srcSet="https://cdn.cafecito.app/imgs/buttons/button_2.png 1x, https://cdn.cafecito.app/imgs/buttons/button_2_2x.png 2x, https://cdn.cafecito.app/imgs/buttons/button_2_3.75x.png 3.75x"
-              src="https://cdn.cafecito.app/imgs/buttons/button_2.png"
+              srcSet={`https://cdn.cafecito.app/imgs/buttons/button_${cafecitoVariant}.png 1x, https://cdn.cafecito.app/imgs/buttons/button_${cafecitoVariant}_2x.png 2x, https://cdn.cafecito.app/imgs/buttons/button_${cafecitoVariant}_3.75x.png 3.75x`}
+              src={`https://cdn.cafecito.app/imgs/buttons/button_${cafecitoVariant}.png`}
               alt="Invitame un café en cafecito.app"
             />
           </a>
@@ -68,10 +62,6 @@ export const Footer = () => {
             </a>
             <span> | </span>
             <Link href="/new/ranking">{t("Ranking")}</Link>
-            <span> | </span>
-            <span onClick={handleSwitchOldStyle} className="cursor-pointer">
-              {t("Switch to Old Style")}
-            </span>
           </div>
         ) : (
           <div className="flex justify-end self-center gap-2 w-full pb-sm-2 pb-0 uppercase">
@@ -79,10 +69,6 @@ export const Footer = () => {
             <span> | </span>
             <span onClick={toggleModal} className="cursor-pointer">
               {t("Save my data")}
-            </span>
-            <span> | </span>
-            <span onClick={handleSwitchOldStyle} className="cursor-pointer">
-              {t("Switch to Old Style")}
             </span>
           </div>
         )}
@@ -110,4 +96,6 @@ export const Footer = () => {
       />
     </>
   );
-};
+});
+
+Footer.displayName = "Footer";

@@ -43,7 +43,7 @@ const Home = () => {
   const params = useSearchParams();
   const db = getDatabase();
   const {gameUser, user, loading} = useAuth();
-  const {resetGame, setGame} = useGame();
+  const {resetGame, setGame, setHasEnteredPassword} = useGame();
   const {t} = useTranslation();
 
   useEffect(() => {
@@ -122,6 +122,7 @@ const Home = () => {
           if (game.settings.password) {
             requestPassword(game.settings.password, t).then((val) => {
               if (game.key && val.isConfirmed) {
+                setHasEnteredPassword(true);
                 configRoomToEnter(game);
               }
             });

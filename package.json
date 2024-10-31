@@ -40,6 +40,7 @@
     "adblock-detector": "^2.1.0",
     "bootstrap": "^5.3.2",
     "chart.js": "^4.4.2",
+    "chroma-js": "^3.1.1",
     "clsx": "^2.1.1",
     "firebase": "^9.5.0",
     "firebase-admin": "^12.0.0",
@@ -72,6 +73,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.47.1",
+    "@types/chroma-js": "^2.4.4",
     "@types/node": "16.11.10",
     "@types/nodemailer": "^6.4.13",
     "@types/react": "18.2.6",
