@@ -7,26 +7,22 @@ import {getAnalytics, logEvent} from "firebase/analytics";
 import {useRouter, useSearchParams} from "next/navigation";
 import {child, getDatabase, onValue, ref, set} from "@firebase/database";
 import dynamic from "next/dynamic";
-import {Toast, ToastContainer} from "react-bootstrap";
 
 import {Game, GameUser} from "interfaces";
-import {
-  CardGame,
-  Footer,
-  requestPassword,
-  ModalCreateUsername,
-  CardGameAd,
-  Loading
-} from "components";
-import CreateSection from "components/CreateSection/CreateSection";
-import {ModalLoginProps} from "components/ModalLogin/types";
+import {requestPassword} from "components";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
+import {Header, Footer, CardGame, CardGameAd, Loading} from "components-new";
+import {CreateSection} from "components-new/CreateSection";
+import {LoginModalProps} from "components-new/LoginModal/types";
+import {NotificationModal} from "components-new/NotificationModal";
+import {NotificationType} from "components-new/NotificationModal/types";
+import {WelcomeMessage} from "components-new/WelcomeMessage";
 
-const ModalLogin = dynamic<ModalLoginProps>(
+const LoginModal = dynamic<LoginModalProps>(
   () =>
-    import("../../components/ModalLogin").then(
-      (component) => component.ModalLogin
+    import("../components-new/LoginModal").then(
+      (component) => component.LoginModal
     ),
   {
     ssr: false
@@ -35,48 +31,41 @@ const ModalLogin = dynamic<ModalLoginProps>(
 
 const Home = () => {
   const [listGames, setListGames] = useState<Game[]>([]);
-  const [showNewStyleToast, setShowNewStyleToast] = useState(false);
+  const [notificationModal, setNotificationModal] = useState<{
+    show: boolean;
+    type: NotificationType;
+  }>({
+    show: false,
+    type: "fullRoom"
+  });
+
   const router = useRouter();
   const params = useSearchParams();
   const db = getDatabase();
   const {gameUser, user, loading} = useAuth();
-  const {resetGame, setGame} = useGame();
+  const {resetGame, setGame, setHasEnteredPassword} = useGame();
   const {t} = useTranslation();
 
   useEffect(() => {
     //If exist userKey get user from DB
     if (params.get("kickedOut") === "true") {
       router.replace("/");
-      //TODO: Add a global Swal mixin with heightAuto:false
-      Swal.fire({
-        title: t("You were kicked out by the owner"),
-        icon: "error",
-        confirmButtonText: "Ok",
-        heightAuto: false
+      setNotificationModal({
+        show: true,
+        type: "kickedOut"
       });
     } else if (params.get("fullRoom") === "true") {
       router.replace("/");
-      Swal.fire({
-        title: t("Room is full"),
-        icon: "error",
-        confirmButtonText: "Ok",
-        heightAuto: false
+      setNotificationModal({
+        show: true,
+        type: "fullRoom"
       });
     } else if (params.get("suspicionOfHack") === "true") {
       router.replace("/");
-      Swal.fire({
-        title: t("Fair play is important to us"),
-        text: t(
-          "Please refrain from using unauthorized tools or hacks while playing."
-        ),
-        icon: "warning",
-        confirmButtonText: "Ok",
-        heightAuto: false
+      setNotificationModal({
+        show: true,
+        type: "hacks"
       });
-    }
-
-    if (!localStorage.getItem("newStyle")) {
-      setShowNewStyleToast(true);
     }
   }, []);
 
@@ -133,6 +122,7 @@ const Home = () => {
           if (game.settings.password) {
             requestPassword(game.settings.password, t).then((val) => {
               if (game.key && val.isConfirmed) {
+                setHasEnteredPassword(true);
                 configRoomToEnter(game);
               }
             });
@@ -181,95 +171,64 @@ const Home = () => {
           maxUsers: game.settings.maxUsers,
           isRegistered: !user.isAnonymous
         });
-        router.push(`game/${game.key}`);
+        router.push(`/game/${game.key}`);
       } else {
         console.error("Error loading user to game");
       }
     }
   };
 
-  const handleOnConfirmStyling = () => {
-    logEvent(getAnalytics(), "confirm_styling");
-    localStorage.setItem("newStyle", "true");
-    setShowNewStyleToast(false);
-    router.push("/new");
-  };
-
-  const handleOnCancelStyling = () => {
-    logEvent(getAnalytics(), "cancel_styling");
-    localStorage.setItem("newStyle", "false");
-    setShowNewStyleToast(false);
-  };
-
   if (loading) return <Loading />;
 
   return (
-    <>
-      <ToastContainer position="top-center" className="mt-2">
-        <Toast show={showNewStyleToast} animation>
-          <Toast.Body className="d-flex gap-2 align-items-center py-3 bg-white rounded">
-            <>
-              <span className="text-dark">
-                {t("Check out our fresh new look!")}
-              </span>
-              <button
-                className="btn-click small"
-                onClick={handleOnConfirmStyling}
-              >
-                {t("Try it now")}
-              </button>
-              <button
-                className="btn btn-close"
-                onClick={handleOnCancelStyling}
-              />
-            </>
-          </Toast.Body>
-        </Toast>
-      </ToastContainer>
-      <div className="main h-100 d-flex overflow-y-auto">
-        <div className="d-flex flex-md-row flex-column w-100 flex-fill p-md-0 p-4">
-          <div className="col-lg-4 order-md-1 create-section">
+    <main>
+      <div className="text-primary-200 h-dvh flex flex-col gap-4 md:gap-0">
+        <Header />
+        <div className="flex flex-col md:flex-row-reverse w-full md:gap-4 lg:gap-0 flex-1 p-md-0 overflow-hidden">
+          <div className="md:w1/2 lg:w-1/3 flex flex-col md:max-h-[480px] short:overflow-y-auto short:px-3">
+            <div className="md:hidden">
+              <WelcomeMessage />
+            </div>
             <CreateSection />
           </div>
-          <div className="col-lg-8 order-md-0 rooms-section">
-            <h2>{t("Available rooms")}</h2>
-            {listGames.length > 0 ? (
-              <div
-                className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mh-100 align-content-start"
-                style={{minHeight: "90%"}}
-              >
-                {listGames.map((game, i) => (
-                  <Fragment key={i}>
-                    <CardGame
-                      game={game}
-                      roomNumber={i}
-                      handleEnterGame={() => handleEnterGame(game)}
-                    />
-                    {(listGames.length === 1 ||
-                      (i !== 0 &&
-                        (i % 5 === 0 || i === listGames.length - 1))) && (
-                      <CardGameAd />
-                    )}
-                  </Fragment>
-                ))}
-              </div>
-            ) : (
-              gameUser?.username && (
-                <div
-                  className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 mh-100 align-content-start"
-                  style={{minHeight: "90%"}}
-                >
-                  <CardGameAd />
-                </div>
-              )
-            )}
+          <div className="flex flex-col justify-start items-start lg:w-2/3 order-md-0 md:max-w-[73%] md:min-w-[560px] relative pl-1 min-h-0">
+            <div className="hidden md:block">
+              <WelcomeMessage />
+            </div>
+            <h3 className="text-base md:text-4xl font-bold mt-2 md:mt-0 md:mb-8 text-primary-600 dark:text-primary-100">
+              {t("Available rooms")}
+            </h3>
+            <div className="games-container grid grid-cols-2 gap-6 p-2 overflow-y-auto overflow-x-hidden w-full md:w-fit">
+              {listGames.length > 0
+                ? listGames.map((game, i) => (
+                    <Fragment key={i}>
+                      <CardGame
+                        game={game}
+                        roomNumber={i}
+                        handleEnterGame={() => handleEnterGame(game)}
+                      />
+                      {(listGames.length === 1 ||
+                        (i !== 0 &&
+                          (i % 4 === 0 || i === listGames.length - 1))) && (
+                        <CardGameAd />
+                      )}
+                    </Fragment>
+                  ))
+                : gameUser?.username && <CardGameAd />}
+            </div>
           </div>
         </div>
         <Footer />
       </div>
-      <ModalLogin />
-      <ModalCreateUsername />
-    </>
+      <LoginModal />
+      <NotificationModal
+        show={notificationModal.show}
+        onClose={() =>
+          setNotificationModal({...notificationModal, show: false})
+        }
+        type={notificationModal.type}
+      />
+    </main>
   );
 };
 

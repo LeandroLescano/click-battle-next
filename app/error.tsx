@@ -22,7 +22,7 @@ export default function ErrorPage({error}: {error: Error & {digest?: string}}) {
         </Button>
         <Button
           className="p-2 mt-3"
-          onClick={() => (window.location.href = "/new")}
+          onClick={() => (window.location.href = "/")}
         >
           Back to home
         </Button>

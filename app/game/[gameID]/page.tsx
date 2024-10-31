@@ -32,20 +32,20 @@ import {Button, Loading, SettingsSidebar} from "components-new";
 import {GameHeader} from "components-new/GameHeader";
 
 const OpponentSection = dynamic(
-  () => import("../../../../../components-new/OpponentSection")
+  () => import("../../../components-new/OpponentSection")
 );
 const LocalSection = dynamic(
-  () => import("../../../../../components-new/LocalSection")
+  () => import("../../../components-new/LocalSection")
 );
 const CelebrationResult = dynamic(
-  () => import("../../../../../components-new/CelebrationResult")
+  () => import("../../../components-new/CelebrationResult")
 );
 const ResultSection = dynamic(
-  () => import("../../../../../components-new/ResultSection")
+  () => import("../../../components-new/ResultSection")
 );
 const LoginModal = dynamic<LoginModalProps>(
   () =>
-    import("../../../../../components-new/LoginModal").then(
+    import("../../../components-new/LoginModal").then(
       (component) => component.LoginModal
     ),
   {
@@ -185,7 +185,7 @@ const RoomGame = () => {
                   }
                   listUsersToPush.push(objUser);
                 } else if (val.key === gUser?.uid) {
-                  router.push("/new/?kickedOut=true");
+                  router.push("/?kickedOut=true");
                 }
               });
 
@@ -203,7 +203,7 @@ const RoomGame = () => {
                     (u) => u.username !== gameUser?.username
                   ).length === game.settings.maxUsers
                 ) {
-                  router.push("/new/?fullRoom=true");
+                  router.push("/?fullRoom=true");
                   return;
                 }
 
@@ -223,7 +223,7 @@ const RoomGame = () => {
                         clearPath(gameID);
                         addNewUserToDB(game);
                       } else {
-                        router.push("/new");
+                        router.push("/");
                         return;
                       }
                     });
@@ -240,7 +240,7 @@ const RoomGame = () => {
                 }
               }
             } else {
-              router.replace("/new");
+              router.replace("/");
             }
           } catch (error) {
             console.log(
@@ -262,7 +262,7 @@ const RoomGame = () => {
           text: "Sorry, something went wrong. Please try again..",
           heightAuto: false
         }).then(() => {
-          router.push("/new");
+          router.push("/");
         });
       }
     }
@@ -424,7 +424,7 @@ const RoomGame = () => {
   };
 
   const clearPath = (id: string) => {
-    router.replace(`/new/game/${id}`);
+    router.replace(`/game/${id}`);
   };
 
   // function for add user to database and update state
@@ -434,10 +434,10 @@ const RoomGame = () => {
       set(refUser, {clicks: 0, rol: "visitor", username: gameUser?.username});
     } else if (query.get("invite")) {
       if (Date.now() > Number(query.get("invite"))) {
-        router.push("/new");
+        router.push("/");
       }
     } else {
-      router.push("/new");
+      router.push("/");
     }
   };
 
@@ -452,7 +452,7 @@ const RoomGame = () => {
   };
 
   const handleOnBack = useCallback(() => {
-    router.push("/new");
+    router.push("/");
   }, []);
 
   return (
