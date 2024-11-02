@@ -65,11 +65,22 @@ interface Props {
 export const ThemeProvider = memo(({children}: Props) => {
   const theme = useThemeProvider();
 
+  let body: HTMLElement;
+  // Get the root element (HTML tag)
+  if (typeof document !== "undefined") {
+    body = document?.body;
+  }
+
+  useEffect(() => {
+    // Update the class on the root element whenever the theme changes
+    if (theme.theme !== "custom") {
+      body.className = `theme-${theme.theme}`;
+    }
+  }, [theme.theme]);
+
   return (
     <ThemeContext.Provider value={theme}>
-      <div className={`theme-provider theme-${theme.theme} transition-all`}>
-        {children}
-      </div>
+      <div className={`theme-provider transition-all`}>{children}</div>
     </ThemeContext.Provider>
   );
 });
@@ -105,7 +116,7 @@ function useThemeProvider(): ThemeContextState {
     setCafecitoVariant(CAFECITO_VARIANTS[newTheme]);
 
     if (newTheme !== "custom") {
-      const customThemeElement = document.querySelector<HTMLElement>(":root");
+      const customThemeElement = document.querySelector<HTMLElement>("body");
 
       if (customThemeElement) {
         customThemeElement.setAttribute("style", "");
@@ -125,7 +136,7 @@ function useThemeProvider(): ThemeContextState {
       debouncedSetCustomColor(newColor);
       const palette = generatePalette(newColor);
 
-      const customThemeElement = document.querySelector<HTMLElement>(":root");
+      const customThemeElement = document.querySelector<HTMLElement>("body");
 
       if (customThemeElement) {
         Object.entries(palette).forEach(([key, value]) => {
