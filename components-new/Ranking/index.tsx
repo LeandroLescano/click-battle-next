@@ -19,7 +19,7 @@ export const Ranking = ({lastUpdate, usersWithScore}: RankingProps) => {
     <main>
       <div className="text-primary-200 h-dvh flex flex-col gap-3 md:gap-6">
         <div className="flex justify-between items-center gap-9">
-          <Link href="/new" passHref>
+          <Link href="/" passHref>
             <Button
               variant="outlined"
               className="px-2.5 py-0.5 md:px-5 md:py-1 text-sm md:text-2xl flex gap-1 md:gap-2 items-center"

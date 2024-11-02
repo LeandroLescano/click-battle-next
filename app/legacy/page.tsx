@@ -46,7 +46,7 @@ const Home = () => {
   useEffect(() => {
     //If exist userKey get user from DB
     if (params.get("kickedOut") === "true") {
-      router.replace("/");
+      router.replace("/legacy");
       //TODO: Add a global Swal mixin with heightAuto:false
       Swal.fire({
         title: t("You were kicked out by the owner"),
@@ -55,7 +55,7 @@ const Home = () => {
         heightAuto: false
       });
     } else if (params.get("fullRoom") === "true") {
-      router.replace("/");
+      router.replace("/legacy");
       Swal.fire({
         title: t("Room is full"),
         icon: "error",
@@ -63,7 +63,7 @@ const Home = () => {
         heightAuto: false
       });
     } else if (params.get("suspicionOfHack") === "true") {
-      router.replace("/");
+      router.replace("/legacy");
       Swal.fire({
         title: t("Fair play is important to us"),
         text: t(
@@ -192,7 +192,7 @@ const Home = () => {
     logEvent(getAnalytics(), "confirm_styling");
     localStorage.setItem("newStyle", "true");
     setShowNewStyleToast(false);
-    router.push("/new");
+    router.push("/");
   };
 
   const handleOnCancelStyling = () => {

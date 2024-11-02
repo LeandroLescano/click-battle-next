@@ -12,14 +12,18 @@ test.describe("Game", () => {
     await expect(
       hostPage.page.getByRole("button", {name: "Start!"})
     ).toBeDisabled();
-    await expect(hostPage.page.locator(".settings-icon")).toBeVisible();
+    await expect(
+      hostPage.page.getByRole("button", {name: "Settings", exact: true})
+    ).toBeVisible();
 
     /* #region Enter room - User */
     await userPage.getByText("guesthost1's roomOwner: guesthost11/").click();
     await userPage.waitForURL(/\/game\//);
 
     expect(userPage.url().split("/").pop()).toEqual(roomID);
-    await expect(userPage.locator(".settings-icon")).not.toBeVisible();
+    await expect(
+      userPage.getByRole("button", {name: "Settings", exact: true})
+    ).not.toBeVisible();
     /* #endregion */
 
     /* #region Start game - Host */
@@ -41,10 +45,12 @@ test.describe("Game", () => {
         .click({clickCount: 10, delay: 200})
     ]);
 
-    await expect(hostPage.page.getByText("Result - 1st place")).toBeVisible({
+    await expect(hostPage.page.getByText("1st place")).toBeVisible({
       timeout: 10000
     });
-    await expect(userPage.getByText("Result - 2nd place")).toBeVisible({
+    await expect(
+      userPage.getByRole("heading", {name: "2nd place"})
+    ).toBeVisible({
       timeout: 10000
     });
     await expect(hostPage.page.getByText(/remaining/i)).not.toBeVisible();
@@ -95,7 +101,7 @@ test.describe("Game", () => {
       hostPage.page.getByText("Waiting for opponents...")
     ).toBeVisible();
     await expect(
-      userPage.getByText("You were kicked out by the owner")
+      userPage.getByText("You have been removed by the host")
     ).toBeVisible();
     /* #endregion */
   });

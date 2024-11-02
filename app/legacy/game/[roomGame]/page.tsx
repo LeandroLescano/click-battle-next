@@ -191,7 +191,7 @@ function RoomGame() {
                   }
                   listUsersToPush.push(objUser);
                 } else if (val.key === gUser?.uid) {
-                  router.push("/?kickedOut=true");
+                  router.push("/legacy?kickedOut=true");
                 }
               });
 
@@ -209,7 +209,7 @@ function RoomGame() {
                     (u) => u.username !== gameUser?.username
                   ).length === game.settings.maxUsers
                 ) {
-                  router.push("/?fullRoom=true");
+                  router.push("/legacy?fullRoom=true");
                   return;
                 }
 
@@ -224,7 +224,7 @@ function RoomGame() {
                         clearPath(roomID);
                         addNewUserToDB(game);
                       } else {
-                        router.push("/");
+                        router.push("/legacy");
                         return;
                       }
                     });
@@ -241,7 +241,7 @@ function RoomGame() {
                 }
               }
             } else {
-              router.replace("/");
+              router.replace("/legacy");
             }
           } catch (error) {
             console.log(
@@ -263,7 +263,7 @@ function RoomGame() {
           text: "Sorry, something went wrong. Please try again..",
           heightAuto: false
         }).then(() => {
-          router.push("/");
+          router.push("/legacy");
         });
       }
     }
@@ -434,10 +434,10 @@ function RoomGame() {
       set(refUser, {clicks: 0, rol: "visitor", username: gameUser?.username});
     } else if (query.get("invite")) {
       if (Date.now() > Number(query.get("invite"))) {
-        router.push("/");
+        router.push("/legacy");
       }
     } else {
-      router.push("/");
+      router.push("/legacy");
     }
   };
 
@@ -490,7 +490,7 @@ function RoomGame() {
               <div className="header pt-2 pb-5 flex-lg-row">
                 <button
                   className="btn-click p-2 btn-back me-auto mb-4"
-                  onClick={() => router.push("/")}
+                  onClick={() => router.push("/legacy")}
                 >
                   <FontAwesomeIcon
                     icon={faArrowLeft as IconProp}

@@ -72,7 +72,7 @@ const Ranking = async () => {
         <CardHeader>
           <section className="d-flex flex-lg-row align-items-lg-end justify-content-between mb-0 gap-lg-0 gap-2">
             <span className="flex-fill d-flex gap-4 align-items-lg-end align-items-center">
-              <Link href="/" passHref>
+              <Link href="/legacy" passHref>
                 <button className="btn-click small p-2 btn-back mb-2 float-lg-start">
                   <FontAwesomeIcon
                     icon={faArrowLeft as IconProp}

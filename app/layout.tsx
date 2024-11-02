@@ -11,6 +11,7 @@ import {detectLanguage} from "i18n/server";
 import {I18nProvider} from "i18n/i18n-context";
 import {firebaseConfig} from "resources/config";
 import {GameProvider} from "contexts/GameContext";
+import {ThemeProvider} from "contexts/ThemeContext";
 
 if (!getApps.length) {
   initializeApp(firebaseConfig);
@@ -23,11 +24,11 @@ type Props = {
 };
 
 const tinyFont = localFont({
-  src: "../../public/fonts/Tiny5-Regular.ttf",
+  src: "../public/fonts/Tiny5-Regular.ttf",
   variable: "--font-tiny5"
 });
 const handjetFont = localFont({
-  src: "../../public/fonts/Handjet.ttf",
+  src: "../public/fonts/Handjet.ttf",
   variable: "--font-handjet"
 });
 
@@ -88,11 +89,13 @@ export default async function Layout({children}: Props) {
           />
         </head>
         <body>
-          <AuthProvider>
-            <GameProvider>
-              <Suspense fallback={<Loading />}>{children}</Suspense>
-            </GameProvider>
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <GameProvider>
+                <Suspense fallback={<Loading />}>{children}</Suspense>
+              </GameProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </body>
       </html>
     </I18nProvider>

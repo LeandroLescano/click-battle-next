@@ -62,7 +62,7 @@ function LocalSection({
           clickInterval: now - lastClickTime,
           date: new Date()
         });
-        router.push("/new/?suspicionOfHack=true");
+        router.push("/?suspicionOfHack=true");
         return;
       }
     }

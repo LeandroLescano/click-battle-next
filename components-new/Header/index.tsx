@@ -3,6 +3,7 @@ import {useTranslation} from "react-i18next";
 
 import {Button, LanguageDropdown} from "components-new";
 import {useAuth} from "contexts/AuthContext";
+import {ThemeSelector} from "components-new/ThemeSelector";
 
 export const Header = () => {
   const {signOut} = useAuth();
@@ -14,6 +15,7 @@ export const Header = () => {
         Click Battle!
       </h1>
       <div className="flex items-center gap-1 md:gap-9 flex-col-reverse md:flex-row">
+        <ThemeSelector />
         <LanguageDropdown />
         <Button
           onClick={signOut}

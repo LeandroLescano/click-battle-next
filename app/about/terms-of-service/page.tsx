@@ -1,10 +1,11 @@
 import React from "react";
-import {Container} from "react-bootstrap";
+
+import "../styles.scss";
 
 const TermsOfService = () => {
   return (
     <div className="overflow-y-auto h-100 py-4">
-      <Container fluid="lg" className="about-container">
+      <div className="about-container">
         <h1>Terms of Service for Click Battle</h1> Welcome to Click Battle!
         <p>
           These Terms of Service (&quot;Terms&quot;) govern your access and use
@@ -102,7 +103,7 @@ const TermsOfService = () => {
           ensure your Terms of Service are comprehensive and legally sound for
           your specific game.
         </p>
-      </Container>
+      </div>
     </div>
   );
 };

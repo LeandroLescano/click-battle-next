@@ -42,7 +42,7 @@ export const AcceptanceModal = () => {
           animate={{opacity: 1, y: 0}}
           exit={{opacity: 0, y: 50}}
           transition={{duration: 0.3}}
-          className="fixed flex w-full h-full bottom-0 left-0 justify-center lg:justify-start items-end px-3 py-2 z-50"
+          className="fixed flex w-full h-full bottom-0 left-0 justify-center lg:justify-start items-end px-3 py-2 z-40"
         >
           <Card className="w-80 text-primary-400 text-2xl font-bold p-2 text-center">
             <h4>{t("Enjoying the new experience?")}</h4>

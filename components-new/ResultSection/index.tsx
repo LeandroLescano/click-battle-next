@@ -79,7 +79,7 @@ const ResultSection = () => {
         </div>
         {isHost && (
           <Button
-            className="mt-5 w-full md:w-80 px-3.5 py-2.5 md:p-5 text-2xl md:text-3xl self-center"
+            className="mt-5 w-full md:w-80 px-3.5 py-2.5 md:p-5 text-2xl md:text-3xl self-center z-50"
             onClick={handleReset}
           >
             {t("Reset")}

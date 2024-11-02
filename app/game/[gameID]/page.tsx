@@ -32,20 +32,20 @@ import {Button, Loading, SettingsSidebar} from "components-new";
 import {GameHeader} from "components-new/GameHeader";
 
 const OpponentSection = dynamic(
-  () => import("../../../../../components-new/OpponentSection")
+  () => import("../../../components-new/OpponentSection")
 );
 const LocalSection = dynamic(
-  () => import("../../../../../components-new/LocalSection")
+  () => import("../../../components-new/LocalSection")
 );
 const CelebrationResult = dynamic(
-  () => import("../../../../../components-new/CelebrationResult")
+  () => import("../../../components-new/CelebrationResult")
 );
 const ResultSection = dynamic(
-  () => import("../../../../../components-new/ResultSection")
+  () => import("../../../components-new/ResultSection")
 );
 const LoginModal = dynamic<LoginModalProps>(
   () =>
-    import("../../../../../components-new/LoginModal").then(
+    import("../../../components-new/LoginModal").then(
       (component) => component.LoginModal
     ),
   {
@@ -53,7 +53,7 @@ const LoginModal = dynamic<LoginModalProps>(
   }
 );
 
-function RoomGame() {
+const RoomGame = () => {
   const [startCountdown, setStartCountdown] = useState(false);
   const [showSideBar, setShowSideBar] = useState(false);
   const roomStats = useRef<RoomStats>({
@@ -97,6 +97,7 @@ function RoomGame() {
   const localUserRef = useRef<GameUser>();
   const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();
+  const {setHasEnteredPassword, hasEnteredPassword} = useGame();
 
   let unsubscribe: Unsubscribe;
 
@@ -184,7 +185,7 @@ function RoomGame() {
                   }
                   listUsersToPush.push(objUser);
                 } else if (val.key === gUser?.uid) {
-                  router.push("/new/?kickedOut=true");
+                  router.push("/?kickedOut=true");
                 }
               });
 
@@ -202,11 +203,15 @@ function RoomGame() {
                     (u) => u.username !== gameUser?.username
                   ).length === game.settings.maxUsers
                 ) {
-                  router.push("/new/?fullRoom=true");
+                  router.push("/?fullRoom=true");
                   return;
                 }
 
-                if (game.settings.password && !flagEnter.current) {
+                if (
+                  game.settings.password &&
+                  !hasEnteredPassword &&
+                  !flagEnter.current
+                ) {
                   flagEnter.current = true;
                   if (
                     !query.get("pwd") ||
@@ -214,10 +219,11 @@ function RoomGame() {
                   ) {
                     requestPassword(game.settings.password, t).then((val) => {
                       if (val.isConfirmed) {
+                        setHasEnteredPassword(true);
                         clearPath(gameID);
                         addNewUserToDB(game);
                       } else {
-                        router.push("/new");
+                        router.push("/");
                         return;
                       }
                     });
@@ -234,7 +240,7 @@ function RoomGame() {
                 }
               }
             } else {
-              router.replace("/new");
+              router.replace("/");
             }
           } catch (error) {
             console.log(
@@ -256,7 +262,7 @@ function RoomGame() {
           text: "Sorry, something went wrong. Please try again..",
           heightAuto: false
         }).then(() => {
-          router.push("/new");
+          router.push("/");
         });
       }
     }
@@ -428,10 +434,10 @@ function RoomGame() {
       set(refUser, {clicks: 0, rol: "visitor", username: gameUser?.username});
     } else if (query.get("invite")) {
       if (Date.now() > Number(query.get("invite"))) {
-        router.push("/new");
+        router.push("/");
       }
     } else {
-      router.push("/new");
+      router.push("/");
     }
   };
 
@@ -446,7 +452,7 @@ function RoomGame() {
   };
 
   const handleOnBack = useCallback(() => {
-    router.push("/new");
+    router.push("/");
   }, []);
 
   return (
@@ -521,6 +527,6 @@ function RoomGame() {
       </div>
     </main>
   );
-}
+};
 
 export default RoomGame;

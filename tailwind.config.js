@@ -1,7 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./app/(experimental)/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "!./app/legacy/**/*.{ts,tsx}",
     "./components-new/**/*.{ts,tsx}",
     "./icons/*.{ts,tsx}"
   ],
@@ -13,15 +14,15 @@ export default {
       },
       colors: {
         primary: {
-          50: "#F9F9F9",
-          100: "#FAC8DD",
-          200: "#F18CA2",
-          250: "#E08297",
-          300: "#E65654",
-          400: "#BA425A",
-          500: "#8E3058",
-          600: "#602049",
-          700: "#40353E"
+          50: "var(--color-primary-50)",
+          100: "var(--color-primary-100)",
+          200: "var(--color-primary-200)",
+          250: "var(--color-primary-250)",
+          300: "var(--color-primary-300)",
+          400: "var(--color-primary-400)",
+          500: "var(--color-primary-500)",
+          600: "var(--color-primary-600)",
+          700: "var(--color-primary-700)"
         }
       },
       fontFamily: {

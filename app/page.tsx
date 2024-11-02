@@ -21,7 +21,7 @@ import {WelcomeMessage} from "components-new/WelcomeMessage";
 
 const LoginModal = dynamic<LoginModalProps>(
   () =>
-    import("../../../components-new/LoginModal").then(
+    import("../components-new/LoginModal").then(
       (component) => component.LoginModal
     ),
   {
@@ -43,25 +43,25 @@ const Home = () => {
   const params = useSearchParams();
   const db = getDatabase();
   const {gameUser, user, loading} = useAuth();
-  const {resetGame, setGame} = useGame();
+  const {resetGame, setGame, setHasEnteredPassword} = useGame();
   const {t} = useTranslation();
 
   useEffect(() => {
     //If exist userKey get user from DB
     if (params.get("kickedOut") === "true") {
-      router.replace("/new");
+      router.replace("/");
       setNotificationModal({
         show: true,
         type: "kickedOut"
       });
     } else if (params.get("fullRoom") === "true") {
-      router.replace("/new");
+      router.replace("/");
       setNotificationModal({
         show: true,
         type: "fullRoom"
       });
     } else if (params.get("suspicionOfHack") === "true") {
-      router.replace("/new");
+      router.replace("/");
       setNotificationModal({
         show: true,
         type: "hacks"
@@ -122,6 +122,7 @@ const Home = () => {
           if (game.settings.password) {
             requestPassword(game.settings.password, t).then((val) => {
               if (game.key && val.isConfirmed) {
+                setHasEnteredPassword(true);
                 configRoomToEnter(game);
               }
             });
@@ -170,7 +171,7 @@ const Home = () => {
           maxUsers: game.settings.maxUsers,
           isRegistered: !user.isAnonymous
         });
-        router.push(`/new/game/${game.key}`);
+        router.push(`/game/${game.key}`);
       } else {
         console.error("Error loading user to game");
       }
