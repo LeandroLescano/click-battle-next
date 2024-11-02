@@ -424,7 +424,7 @@ const RoomGame = () => {
   };
 
   const clearPath = (id: string) => {
-    router.replace(`/new/game/${id}`);
+    router.replace(`/game/${id}`);
   };
 
   // function for add user to database and update state
