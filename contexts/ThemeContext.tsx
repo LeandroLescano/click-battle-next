@@ -105,8 +105,7 @@ function useThemeProvider(): ThemeContextState {
     setCafecitoVariant(CAFECITO_VARIANTS[newTheme]);
 
     if (newTheme !== "custom") {
-      const customThemeElement =
-        document.querySelector<HTMLElement>(".theme-provider");
+      const customThemeElement = document.querySelector<HTMLElement>(":root");
 
       if (customThemeElement) {
         customThemeElement.setAttribute("style", "");
@@ -126,8 +125,7 @@ function useThemeProvider(): ThemeContextState {
       debouncedSetCustomColor(newColor);
       const palette = generatePalette(newColor);
 
-      const customThemeElement =
-        document.querySelector<HTMLElement>(".theme-provider");
+      const customThemeElement = document.querySelector<HTMLElement>(":root");
 
       if (customThemeElement) {
         Object.entries(palette).forEach(([key, value]) => {
