@@ -6,12 +6,11 @@ const hostFile = "tests/.auth/host.json";
 setup("authenticate as guest host", async ({page}) => {
   // Perform authentication steps. Replace these actions with your own.
   await page.goto("/");
-  await page.getByRole("button", {name: "Login as guest"}).click();
+
+  await page.getByPlaceholder("Username").fill("guesthost1");
+  await page.getByRole("button", {name: "Choose"}).click();
 
   await page.waitForResponse(/identitytoolkit.googleapis/);
-  await page.getByPlaceholder("Username").fill("guesthost1");
-
-  await page.click("text=Choose");
 
   // Alternatively, you can wait until the page reaches a state where all cookies are set.
   await expect(page.getByText("Save my data")).toBeVisible();
@@ -29,12 +28,11 @@ const userFile = "tests/.auth/user.json";
 setup("authenticate as guest user", async ({page}) => {
   // Perform authentication steps. Replace these actions with your own.
   await page.goto("/");
-  await page.getByRole("button", {name: "Login as guest"}).click();
+
+  await page.getByPlaceholder("Username").fill("guestuser1");
+  await page.getByRole("button", {name: "Choose"}).click();
 
   await page.waitForResponse(/identitytoolkit.googleapis/);
-  await page.getByPlaceholder("Username").fill("guestuser1");
-
-  await page.click("text=Choose");
 
   // Alternatively, you can wait until the page reaches a state where all cookies are set.
   await expect(page.getByText("Save my data")).toBeVisible();

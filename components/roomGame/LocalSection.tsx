@@ -56,7 +56,7 @@ function LocalSection({
           clickInterval: now - lastClickTime,
           date: new Date()
         });
-        router.push("/?suspicionOfHack=true");
+        router.push("/legacy?suspicionOfHack=true");
         return;
       }
     }

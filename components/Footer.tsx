@@ -173,7 +173,7 @@ export const Footer = () => {
 
   const handleSwitchNewStyle = () => {
     logEvent(getAnalytics(), "switch_to_new_style");
-    router.push("/new");
+    router.replace("/");
   };
 
   useEffect(() => {
@@ -258,7 +258,7 @@ export const Footer = () => {
                 <Tooltip>{t("Logged as", {name: gameUser.username})}</Tooltip>
               }
             >
-              <img src="/icons/clicky-right.svg" height={35} />
+              <img src="/icons/clicky-right.svg" height={35} width={35} />
             </OverlayTrigger>
             <button className="btn-logout btn-click" onClick={signOut}>
               {t("Log out")}

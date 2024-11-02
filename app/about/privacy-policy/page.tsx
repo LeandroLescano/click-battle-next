@@ -1,10 +1,11 @@
 import React from "react";
-import {Container} from "react-bootstrap";
+
+import "../styles.scss";
 
 const PrivacyPolicy = () => {
   return (
-    <div className="overflow-y-auto h-100 py-4">
-      <Container fluid="lg" className="about-container">
+    <div className="overflow-y-auto h-full py-4">
+      <div className="about-container">
         <h1>Privacy Policy</h1>
         <h4>Effective date:</h4>
         <p>16/03/2024</p>
@@ -100,7 +101,7 @@ const PrivacyPolicy = () => {
           If you have any questions about this Privacy Policy, please contact us
           using the form in our home page.
         </p>
-      </Container>
+      </div>
     </div>
   );
 };

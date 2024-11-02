@@ -61,11 +61,11 @@ export const Footer = memo(() => {
               {t("Contact")}
             </a>
             <span> | </span>
-            <Link href="/new/ranking">{t("Ranking")}</Link>
+            <Link href="/ranking">{t("Ranking")}</Link>
           </div>
         ) : (
           <div className="flex justify-end self-center gap-2 w-full pb-sm-2 pb-0 uppercase">
-            <Link href="/new/ranking">{t("Ranking")}</Link>
+            <Link href="/ranking">{t("Ranking")}</Link>
             <span> | </span>
             <span onClick={toggleModal} className="cursor-pointer">
               {t("Save my data")}

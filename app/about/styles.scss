@@ -1,0 +1,19 @@
+.about-container {
+  @apply p-4 text-xl font-sans container mx-auto text-balance dark:text-white;
+
+  & h1 {
+    @apply text-4xl py-2;
+  }
+
+  & h4 {
+    @apply mt-2 text-3xl py-2;
+  }
+
+  & h5 {
+    @apply text-2xl py-2;
+  }
+
+  & ul {
+    @apply list-disc pl-5;
+  }
+}

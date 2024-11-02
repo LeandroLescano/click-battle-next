@@ -7,7 +7,7 @@ import Link from "next/link";
 import {Button} from "components-new";
 
 const PointerAnimation = dynamic(
-  () => import("../../../../components-new/PointerAnimation")
+  () => import("../components-new/PointerAnimation")
 );
 
 const NotFound = () => {
@@ -24,7 +24,7 @@ const NotFound = () => {
           <h4 className="mt-2 text-primary-400 dark:text-primary-200">
             We can offer you to go back to home :)
           </h4>
-          <Link href={"/new"} passHref>
+          <Link href={"/"} passHref>
             <Button className="p-2 mt-4 text-xl">Back to home</Button>
           </Link>
         </div>

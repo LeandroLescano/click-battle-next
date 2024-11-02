@@ -114,7 +114,7 @@ html {
       left: 0;
       right: 0;
       bottom: 0;
-      background: url("../../public/squares-white.jpg") no-repeat center center
+      background: url("../public/squares-white.jpg") no-repeat center center
         scroll;
       background-blend-mode: color;
       background-size: cover;
@@ -129,7 +129,7 @@ html {
 
 @media (prefers-color-scheme: dark) {
   html {
-    background: url("../../public/squares.png") no-repeat center center scroll
+    background: url("../public/squares.png") no-repeat center center scroll
       #191919;
     background-size: cover;
     -webkit-background-size: cover;

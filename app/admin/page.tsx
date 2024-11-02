@@ -2,7 +2,6 @@
 
 import React, {useEffect, useMemo, useState} from "react";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
-import {Card, CardBody, Col, Row, Table} from "react-bootstrap";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -31,7 +30,7 @@ import {
 import {getDatabase, onValue, ref} from "firebase/database";
 import {_DeepPartialArray} from "chart.js/dist/types/utils";
 
-import {Loading} from "components/Loading";
+import {Loading} from "components-new/Loading";
 import {useAuth} from "contexts/AuthContext";
 import {RoomStats} from "interfaces/RoomStats";
 import {getRoomStats} from "services/rooms";
@@ -338,131 +337,146 @@ const Admin = () => {
   };
 
   return (
-    <div className="h-100 overflow-y-auto p-2">
-      <div className="input-group mb-3" data-bs-theme="dark">
-        <span className="input-group-text">From</span>
+    <div className="h-full overflow-y-auto p-2">
+      <div className="relative mb-4 flex w-full flex-wrap items-stretch dark:bg-primary-700">
+        <span className="flex items-center whitespace-nowrap border rounded-s border-x-0 border-solid border-neutral-200 px-3 py-[0.25rem] text-center text-base font-normal leading-[1.6] text-surface dark:border-white/10 dark:text-white">
+          FROM
+        </span>
         <input
           type="date"
-          className="form-control"
+          className="relative m-0 block flex-auto border border-solid border-neutral-200 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-surface outline-none transition duration-200 ease-in-out placeholder:text-neutral-500 focus:z-[3] focus:border-primary focus:shadow-inset focus:outline-none motion-reduce:transition-none dark:border-white/10 dark:text-white dark:placeholder:text-neutral-200 dark:autofill:shadow-autofill dark:focus:border-primary"
           value={params.get("start") || ""}
           onChange={(e) => handleChangeDate(e.target.value, "start")}
         />
-        <span className="input-group-text">To</span>
+        <span className="flex items-center whitespace-nowrap border border-x-0 border-solid border-neutral-200 px-3 py-[0.25rem] text-center text-base font-normal leading-[1.6] text-surface dark:border-white/10 dark:text-white">
+          TO
+        </span>
         <input
           type="date"
-          className="form-control"
+          className="relative m-0 block flex-auto rounded-e border border-solid border-neutral-200 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-surface outline-none transition duration-200 ease-in-out placeholder:text-neutral-500 focus:z-[3] focus:border-primary focus:shadow-inset focus:outline-none motion-reduce:transition-none dark:border-white/10 dark:text-white dark:placeholder:text-neutral-200 dark:autofill:shadow-autofill dark:focus:border-primary"
           value={params.get("end") || ""}
           onChange={(e) => handleChangeDate(e.target.value, "end")}
         />
       </div>
-      <Row className="mb-3">
-        <Col sm={4}>
-          <Card bg="dark" text="white">
-            <Card.Body className="d-flex justify-content-between align-items-center">
-              <FontAwesomeIcon icon={faDoorOpen} size="3x" />
-              <div className="d-flex align-items-end flex-column">
-                <Card.Text className="mb-0">current rooms</Card.Text>
-                <Card.Text className="mb-0 fs-2">{currentRooms}</Card.Text>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col sm={4}>
-          <Card bg="dark" text="white">
-            <Card.Body className="d-flex justify-content-between align-items-center">
-              <FontAwesomeIcon icon={faDoorClosed} size="3x" />
-              <div className="d-flex align-items-end flex-column">
-                <Card.Text className="mb-0">Rooms created today</Card.Text>
-                <Card.Text className="mb-0 fs-2">{todayRooms.length}</Card.Text>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col sm={4}>
-          <Card bg="dark" text="white">
-            <Card.Body className="d-flex justify-content-between align-items-center">
-              <FontAwesomeIcon icon={faGamepad} size="3x" />
-              <div className="d-flex align-items-end flex-column">
-                <Card.Text className="mb-0">Games played today</Card.Text>
-                <Card.Text className="mb-0 fs-2">
-                  {todayRooms.flatMap((room) => room.gamesPlayed).length}
-                </Card.Text>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-      <Row className="mb-3">
-        <Col sm={6}>
-          <Card bg="dark">
-            <CardBody>
-              <Line
-                options={commonLineOpts("Rooms created vs games played")}
-                data={roomsAndPlayersData}
-              />
-            </CardBody>
-          </Card>
-        </Col>
-        <Col sm={6}>
-          <Card bg="dark">
-            <CardBody>
-              <Bar
-                options={commonBarOpts("Avg players per game")}
-                data={playersPerGameData}
-              />
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-      <Row className="mb-3">
-        <Col sm={6}>
-          <Card bg="dark">
-            <CardBody>
-              <Bar options={commonBarOpts("Game data")} data={gamesData} />
-            </CardBody>
-          </Card>
-        </Col>
-        <Col sm={6}>
-          <Card bg="dark">
-            <CardBody>
-              <Doughnut
-                style={{maxHeight: 450}}
-                options={commonDoughnutOpts("Users likes the new design?")}
-                data={designPreferencesData}
-              />
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
+      <div className="mb-3 flex flex-row gap-4">
+        <div className="w-full rounded-lg bg-primary-200 dark:bg-primary-600">
+          <div className="dark:text-white p-4 rounded shadow-lg flex justify-between items-center">
+            <FontAwesomeIcon icon={faDoorOpen} size="3x" />
+            <div className="flex flex-col items-end">
+              <p className="mb-0 text-3xl">Current rooms</p>
+              <p className="mb-0 text-5xl">{currentRooms}</p>
+            </div>
+          </div>
+        </div>
+        <div className="w-full rounded-lg bg-primary-200 dark:bg-primary-600">
+          <div className="dark:text-white p-4 rounded shadow-lg flex justify-between items-center">
+            <FontAwesomeIcon icon={faDoorClosed} size="3x" />
+            <div className="flex flex-col items-end">
+              <p className="mb-0 text-3xl">Rooms created today</p>
+              <p className="mb-0 text-5xl">{todayRooms.length}</p>
+            </div>
+          </div>
+        </div>
+        <div className="w-full rounded-lg bg-primary-200 dark:bg-primary-600">
+          <div className="dark:text-white p-4 rounded shadow-lg flex justify-between items-center">
+            <FontAwesomeIcon icon={faGamepad} size="3x" />
+            <div className="flex flex-col items-end">
+              <p className="mb-0 text-3xl">Games played today</p>
+              <p className="mb-0 text-5xl">
+                {todayRooms.flatMap((room) => room.gamesPlayed).length}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Table striped bordered hover variant="dark">
-        <thead>
+      <div className="mb-3 flex flex-row gap-4">
+        <div className="w-full">
+          <div className="bg-primary-700 p-4 rounded shadow-lg">
+            <Line
+              options={commonLineOpts("Rooms created vs games played")}
+              data={roomsAndPlayersData}
+            />
+          </div>
+        </div>
+        <div className="w-full">
+          <div className="bg-primary-700 p-4 rounded shadow-lg">
+            <Bar
+              options={commonBarOpts("Avg players per game")}
+              data={playersPerGameData}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-3 flex flex-row gap-4">
+        <div className="w-full">
+          <div className="bg-primary-700 p-4 rounded shadow-lg">
+            <Bar options={commonBarOpts("Game data")} data={gamesData} />
+          </div>
+        </div>
+        <div className="w-full">
+          <div className="bg-primary-700 p-4 rounded shadow-lg">
+            <Doughnut
+              style={{maxHeight: "450px"}}
+              options={commonDoughnutOpts("Users like the new design?")}
+              data={designPreferencesData}
+            />
+          </div>
+        </div>
+      </div>
+
+      <table className="w-full text-2xl text-left rtl:text-right text-gray-800 dark:text-white">
+        <thead className=" text-gray-900 uppercase bg-primary-50 dark:bg-primary-700 dark:text-white border-b">
           <tr>
-            <th>Name</th>
-            <th>Max Players</th>
-            <th>Games played</th>
-            <th>Owner</th>
-            <th>Created</th>
-            <th>Deleted</th>
-            <th>Open</th>
-            <th>Password</th>
+            <th scope="col">Name</th>
+            <th scope="col" className="border-l px-2">
+              Max Players
+            </th>
+            <th scope="col" className="border-l px-2">
+              Games played
+            </th>
+            <th scope="col" className="border-l px-2">
+              Owner
+            </th>
+            <th scope="col" className="border-l px-2">
+              Created
+            </th>
+            <th scope="col" className="border-l px-2">
+              Deleted
+            </th>
+            <th scope="col" className="border-l px-2">
+              Open
+            </th>
+            <th scope="col" className="border-l px-2">
+              Password
+            </th>
           </tr>
         </thead>
         <tbody>
           {rooms.map((room) => (
-            <tr key={room.id}>
+            <tr
+              className="odd:bg-white odd:dark:bg-gray-800 even:bg-primary-50 even:dark:bg-gray-700 border-b dark:border-primary-700"
+              key={room.id}
+            >
               <td>{room.name}</td>
-              <td>{room.maxUsersConnected}</td>
-              <td>{room.gamesPlayed.length}</td>
-              <td>{room.owner}</td>
-              <td>{formatDate(room.created, "es")}</td>
-              <td>{formatDate(room.removed, "es")}</td>
-              <td>{minutesBetween(room.created, room.removed)} min</td>
-              <td>{room.withPassword ? "Si" : "No"}</td>
+              <td className="border-l px-2">{room.maxUsersConnected}</td>
+              <td className="border-l px-2">{room.gamesPlayed.length}</td>
+              <td className="border-l px-2">{room.owner}</td>
+              <td className="border-l px-2">
+                {formatDate(room.created, "es")}
+              </td>
+              <td className="border-l px-2">
+                {formatDate(room.removed, "es")}
+              </td>
+              <td className="border-l px-2">
+                {minutesBetween(room.created, room.removed)} min
+              </td>
+              <td className="border-l">{room.withPassword ? "Si" : "No"}</td>
             </tr>
           ))}
         </tbody>
-      </Table>
+      </table>
     </div>
   );
 };

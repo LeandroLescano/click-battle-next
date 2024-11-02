@@ -24,11 +24,11 @@ type Props = {
 };
 
 const tinyFont = localFont({
-  src: "../../public/fonts/Tiny5-Regular.ttf",
+  src: "../public/fonts/Tiny5-Regular.ttf",
   variable: "--font-tiny5"
 });
 const handjetFont = localFont({
-  src: "../../public/fonts/Handjet.ttf",
+  src: "../public/fonts/Handjet.ttf",
   variable: "--font-handjet"
 });
 
