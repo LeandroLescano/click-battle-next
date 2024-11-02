@@ -52,10 +52,11 @@ function LocalSection({
   const handleClick = () => {
     const now = Date.now();
 
-    // 1000ms / 25 clicks = 40ms
-    if (lastClickTime && now - lastClickTime < 40) {
+    // 1000ms / 20 clicks = 50ms
+    if (lastClickTime && now - lastClickTime < 50) {
       suspicionOfHackCounter.current++;
-      if (suspicionOfHackCounter.current >= 5) {
+
+      if (suspicionOfHackCounter.current >= 10) {
         setDisableUI(true);
         logEvent(getAnalytics(), "kicked_suspicion_hack", {
           action: "kicked_suspicion_hack",
@@ -65,6 +66,11 @@ function LocalSection({
         router.push("/?suspicionOfHack=true");
         return;
       }
+    } else {
+      suspicionOfHackCounter.current = Math.max(
+        suspicionOfHackCounter.current - 1,
+        0
+      );
     }
 
     if (localUser.clicks !== undefined && gUser) {
