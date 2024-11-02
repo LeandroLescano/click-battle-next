@@ -39,7 +39,7 @@ const getRanking = unstable_cache(
 
     const lastUpdate = new Date();
 
-    return {users: usersWithScore, lastUpdate};
+    return {users: JSON.stringify(usersWithScore), lastUpdate};
   },
   undefined,
   {
@@ -50,7 +50,7 @@ const getRanking = unstable_cache(
 const RankingWrapper = async () => {
   const {users, lastUpdate} = await getRanking();
 
-  return <Ranking usersWithScore={users} lastUpdate={lastUpdate} />;
+  return <Ranking usersWithScore={JSON.parse(users)} lastUpdate={lastUpdate} />;
 };
 
 export default RankingWrapper;
