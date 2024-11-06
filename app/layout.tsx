@@ -12,6 +12,7 @@ import {I18nProvider} from "i18n/i18n-context";
 import {firebaseConfig} from "resources/config";
 import {GameProvider} from "contexts/GameContext";
 import {ThemeProvider} from "contexts/ThemeContext";
+import {UsernameModal} from "components-new/UsernameModal";
 
 if (!getApps.length) {
   initializeApp(firebaseConfig);
@@ -92,7 +93,10 @@ export default async function Layout({children}: Props) {
           <ThemeProvider>
             <AuthProvider>
               <GameProvider>
-                <Suspense fallback={<Loading />}>{children}</Suspense>
+                <Suspense fallback={<Loading />}>
+                  {children}
+                  <UsernameModal />
+                </Suspense>
               </GameProvider>
             </AuthProvider>
           </ThemeProvider>

@@ -78,7 +78,6 @@ export const Footer = memo(() => {
         show={showModal}
         onClose={toggleModal}
       />
-      <UsernameModal />
       <FeedbackModal
         show={showFeedbackModal}
         onClose={() => setShowFeedbackModal(false)}
