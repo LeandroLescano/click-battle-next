@@ -1,3 +1,5 @@
+"use client";
+
 import React, {useState} from "react";
 import "firebase/database";
 import {useTranslation} from "react-i18next";

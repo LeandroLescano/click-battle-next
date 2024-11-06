@@ -84,7 +84,7 @@ export const LoginModal = ({
       open={
         allowAnonymous
           ? !user || (user.isAnonymous && !gameUser?.username)
-          : show
+          : !!(show && !user)
       }
       onClose={handleOnClose}
       className="relative z-10 focus:outline-none"
