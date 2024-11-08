@@ -13,7 +13,13 @@ import {Button, Input} from "components-new";
 export const UsernameModal = () => {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const {user, gameUser, createUsername, signOut} = useAuth();
+  const {
+    user,
+    gameUser,
+    createUsername,
+    signOut,
+    loading: loadingAuth
+  } = useAuth();
   const {t} = useTranslation();
 
   const handleChange = (name: string) => {
@@ -49,7 +55,9 @@ export const UsernameModal = () => {
 
   return (
     <Dialog
-      open={!!(user && !user.isAnonymous && !gameUser?.username)}
+      open={
+        !loadingAuth && !!(user && !user.isAnonymous && !gameUser?.username)
+      }
       className="relative z-10 focus:outline-none"
       onClose={signOut}
     >
