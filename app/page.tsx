@@ -161,9 +161,9 @@ const Home = () => {
         if (gameUser.maxScores) {
           userToPush.maxScores = gameUser.maxScores;
         }
-        const refGame = ref(db, `games/${game.key}/listUsers`);
-        const childRef = child(refGame, user.uid);
-        set(childRef, userToPush);
+        // const refGame = ref(db, `games/${game.key}/listUsers`);
+        // const childRef = child(refGame, user.uid);
+        // set(childRef, userToPush);
         logEvent(getAnalytics(), "enter_room", {
           action: "enter_room",
           withCustomName: !!game.roomName,

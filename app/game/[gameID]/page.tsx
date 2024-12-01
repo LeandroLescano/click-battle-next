@@ -10,7 +10,8 @@ import {
   remove,
   set,
   update,
-  Unsubscribe
+  Unsubscribe,
+  get
 } from "@firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import lottie from "lottie-web";
@@ -147,8 +148,10 @@ const RoomGame = () => {
         unsubscribe = onValue(refGame, (snapshot) => {
           const game: Game | null = snapshot.val();
           try {
+            // Validate that game exits
             if (game && game.settings) {
               game.key = snapshot.key;
+              // Assign firebase key as user key
               if (game.listUsers) {
                 game.listUsers = Object.entries(game.listUsers).map((u) => ({
                   key: u[0],
@@ -159,6 +162,7 @@ const RoomGame = () => {
               setGame(game);
               setStartCountdown(game.gameStart);
 
+              // Assign data for roomStats (This maybe be only for the owner user)
               if (!roomStats.current.name) {
                 roomStats.current.name = game.roomName;
                 roomStats.current.owner = game.ownerUser.username;
@@ -169,10 +173,9 @@ const RoomGame = () => {
               }
 
               const listUsersToPush: GameUser[] = [];
-              let listUsersDB: GameUser[] = game.listUsers;
-              if (!listUsersDB) {
-                listUsersDB = [];
-              }
+              const listUsersDB: GameUser[] = game.listUsers ?? [];
+
+              // Iterate database users check kickOut prop and push to listUsersToPush
               listUsersDB.forEach((val) => {
                 if (!val.kickOut) {
                   const objUser: GameUser = {...val};
@@ -183,9 +186,11 @@ const RoomGame = () => {
                       setLocalUser(objUser);
                     }
                   }
+
                   listUsersToPush.push(objUser);
                 } else if (val.key === gUser?.uid) {
                   router.push("/?kickedOut=true");
+                  return;
                 }
               });
 
@@ -236,6 +241,7 @@ const RoomGame = () => {
                 //Add user to DB
                 if (!flagEnter.current) {
                   flagEnter.current = true;
+                  console.log("ADD USER TO DB");
                   addNewUserToDB(game);
                 }
               }
@@ -428,10 +434,21 @@ const RoomGame = () => {
   };
 
   // function for add user to database and update state
-  const addNewUserToDB = (game: Game) => {
+  const addNewUserToDB = async (game: Game) => {
     if (gUser?.uid) {
       const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
-      set(refUser, {clicks: 0, rol: "visitor", username: gameUser?.username});
+      const testU = await get(refUser);
+      console.log({
+        exist: testU.exists(),
+        data: testU.forEach((tu) => console.log(tu.val()))
+      });
+      set(refUser, {
+        clicks: 0,
+        rol: "visitor",
+        username: gameUser?.username
+      }).then((v) => {
+        console.log("VALUE AFTER SET", v);
+      });
     } else if (query.get("invite")) {
       if (Date.now() > Number(query.get("invite"))) {
         router.push("/");
