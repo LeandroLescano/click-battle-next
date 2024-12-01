@@ -204,23 +204,15 @@ const RoomGame = () => {
                 setIsHost(true);
               } else if (gUser?.uid) {
                 if (listUsersToPush.length > game.settings.maxUsers) {
-                  const latestEnterDate = listUsersToPush.sort(
+                  const latestEnterUser = listUsersToPush.sort(
                     (a, b) =>
                       (b.enterDate?.seconds || 0) - (a.enterDate?.seconds || 0)
-                  )[0].enterDate;
-                  console.log(latestEnterDate?.toDate().toDateString());
+                  )[0];
 
                   if (
                     !listUsersToPush.find((u) => u.key === gUser.uid) ||
-                    listUsersToPush.find((u) => u.key === gUser.uid)
-                      ?.enterDate === latestEnterDate
+                    latestEnterUser.key === gUser.uid
                   ) {
-                    console.log(
-                      listUsersToPush
-                        .find((u) => u.key === gUser.uid)
-                        ?.enterDate?.toDate()
-                        .toDateString()
-                    );
                     router.push("/?fullRoom=true");
                     return;
                   }
