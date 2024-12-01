@@ -204,9 +204,8 @@ const RoomGame = () => {
                 setIsHost(true);
               } else if (gUser?.uid) {
                 if (
-                  listUsersToPush.filter(
-                    (u) => u.username !== gameUser?.username
-                  ).length === game.settings.maxUsers
+                  !listUsersToPush.find((u) => u.key === gUser.uid) &&
+                  listUsersToPush.length === game.settings.maxUsers
                 ) {
                   router.push("/?fullRoom=true");
                   return;
@@ -241,7 +240,6 @@ const RoomGame = () => {
                 //Add user to DB
                 if (!flagEnter.current) {
                   flagEnter.current = true;
-                  console.log("ADD USER TO DB");
                   addNewUserToDB(game);
                 }
               }
@@ -437,17 +435,10 @@ const RoomGame = () => {
   const addNewUserToDB = async (game: Game) => {
     if (gUser?.uid) {
       const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
-      const testU = await get(refUser);
-      console.log({
-        exist: testU.exists(),
-        data: testU.forEach((tu) => console.log(tu.val()))
-      });
       set(refUser, {
         clicks: 0,
         rol: "visitor",
         username: gameUser?.username
-      }).then((v) => {
-        console.log("VALUE AFTER SET", v);
       });
     } else if (query.get("invite")) {
       if (Date.now() > Number(query.get("invite"))) {
