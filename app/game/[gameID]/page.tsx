@@ -25,7 +25,7 @@ import {useAuth} from "contexts/AuthContext";
 import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import {updateUser} from "services/user";
 import {addRoomStats} from "services/rooms";
-import {Game, GameUser, MaxScore, RoomStats} from "interfaces";
+import {Game, GameUser, MaxScore, RoomStats, RoomUser} from "interfaces";
 import {useGame} from "contexts/GameContext";
 import {handleInvite} from "utils/invite";
 import {LoginModalProps} from "components-new/LoginModal/types";
@@ -172,8 +172,8 @@ const RoomGame = () => {
                 );
               }
 
-              const listUsersToPush: GameUser[] = [];
-              const listUsersDB: GameUser[] = game.listUsers ?? [];
+              const listUsersToPush: RoomUser[] = [];
+              const listUsersDB: RoomUser[] = game.listUsers ?? [];
 
               // Iterate database users check kickOut prop and push to listUsersToPush
               listUsersDB.forEach((val) => {
@@ -203,12 +203,27 @@ const RoomGame = () => {
               if (game.ownerUser?.key === gUser?.uid) {
                 setIsHost(true);
               } else if (gUser?.uid) {
-                if (
-                  !listUsersToPush.find((u) => u.key === gUser.uid) &&
-                  listUsersToPush.length === game.settings.maxUsers
-                ) {
-                  router.push("/?fullRoom=true");
-                  return;
+                if (listUsersToPush.length > game.settings.maxUsers) {
+                  const latestEnterDate = listUsersToPush.sort(
+                    (a, b) =>
+                      (b.enterDate?.seconds || 0) - (a.enterDate?.seconds || 0)
+                  )[0].enterDate;
+                  console.log(latestEnterDate?.toDate().toDateString());
+
+                  if (
+                    !listUsersToPush.find((u) => u.key === gUser.uid) ||
+                    listUsersToPush.find((u) => u.key === gUser.uid)
+                      ?.enterDate === latestEnterDate
+                  ) {
+                    console.log(
+                      listUsersToPush
+                        .find((u) => u.key === gUser.uid)
+                        ?.enterDate?.toDate()
+                        .toDateString()
+                    );
+                    router.push("/?fullRoom=true");
+                    return;
+                  }
                 }
 
                 if (
@@ -438,7 +453,8 @@ const RoomGame = () => {
       set(refUser, {
         clicks: 0,
         rol: "visitor",
-        username: gameUser?.username
+        username: gameUser?.username,
+        enterDate: Timestamp.now()
       });
     } else if (query.get("invite")) {
       if (Date.now() > Number(query.get("invite"))) {

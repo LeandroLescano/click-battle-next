@@ -1,8 +1,9 @@
+import {Timestamp} from "firebase/firestore";
 import {GameUser} from "./GameUser";
 
 export interface Game {
   key?: string | null;
-  listUsers: Pick<GameUser, "clicks" | "rol" | "username" | "key">[];
+  listUsers: RoomUser[];
   currentGame: boolean;
   gameStart: boolean;
   ownerUser: Pick<GameUser, "username" | "key">;
@@ -18,3 +19,10 @@ export interface GameSettings {
   maxUsers: number;
   password?: string;
 }
+
+export type RoomUser = Pick<
+  GameUser,
+  "clicks" | "rol" | "username" | "key" | "kickOut"
+> & {
+  enterDate?: Timestamp;
+};
