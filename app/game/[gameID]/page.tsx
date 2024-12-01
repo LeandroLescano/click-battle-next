@@ -10,8 +10,7 @@ import {
   remove,
   set,
   update,
-  Unsubscribe,
-  get
+  Unsubscribe
 } from "@firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import lottie from "lottie-web";
@@ -148,10 +147,8 @@ const RoomGame = () => {
         unsubscribe = onValue(refGame, (snapshot) => {
           const game: Game | null = snapshot.val();
           try {
-            // Validate that game exits
             if (game && game.settings) {
               game.key = snapshot.key;
-              // Assign firebase key as user key
               if (game.listUsers) {
                 game.listUsers = Object.entries(game.listUsers).map((u) => ({
                   key: u[0],
@@ -162,7 +159,6 @@ const RoomGame = () => {
               setGame(game);
               setStartCountdown(game.gameStart);
 
-              // Assign data for roomStats (This maybe be only for the owner user)
               if (!roomStats.current.name) {
                 roomStats.current.name = game.roomName;
                 roomStats.current.owner = game.ownerUser.username;
@@ -175,7 +171,6 @@ const RoomGame = () => {
               const listUsersToPush: RoomUser[] = [];
               const listUsersDB: RoomUser[] = game.listUsers ?? [];
 
-              // Iterate database users check kickOut prop and push to listUsersToPush
               listUsersDB.forEach((val) => {
                 if (!val.kickOut) {
                   const objUser: GameUser = {...val};
@@ -439,7 +434,7 @@ const RoomGame = () => {
   };
 
   // function for add user to database and update state
-  const addNewUserToDB = async (game: Game) => {
+  const addNewUserToDB = (game: Game) => {
     if (gUser?.uid) {
       const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
       set(refUser, {

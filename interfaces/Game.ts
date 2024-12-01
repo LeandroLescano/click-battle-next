@@ -1,4 +1,5 @@
 import {Timestamp} from "firebase/firestore";
+
 import {GameUser} from "./GameUser";
 
 export interface Game {
