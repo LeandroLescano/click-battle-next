@@ -171,6 +171,11 @@ function useAuthProvider(): AuthContextState {
                 setGameUser(dbUser);
                 Sentry.setContext("user", dbUser);
                 sessionStorage.setItem("objUser", JSON.stringify(dbUser));
+
+                if (dbUser.key) {
+                  const lastSession = Timestamp.now();
+                  updateUser(dbUser.key, {lastSession});
+                }
               }
             });
           }
