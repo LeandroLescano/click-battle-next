@@ -13,6 +13,7 @@ export interface GameUser {
   created?: Timestamp;
   updated?: Timestamp;
   lastLogin?: Timestamp;
+  lastSession?: Timestamp;
   providers?: string[];
 }
 
