@@ -282,9 +282,9 @@ function useAuthProvider(): AuthContextState {
     }
     clear();
     updateGameUser({});
-    localStorage.removeItem("user");
     sessionStorage.removeItem("userKey");
-    localStorage.removeItem("objUser");
+    sessionStorage.removeItem("objUser");
+    localStorage.removeItem("user");
     localStorage.removeItem("newStyle");
     localStorage.removeItem("feedbackGiven");
   };
