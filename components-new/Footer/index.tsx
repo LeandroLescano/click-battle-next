@@ -3,10 +3,12 @@ import Link from "next/link";
 import {useTranslation} from "react-i18next";
 
 import {useAuth} from "contexts/AuthContext";
-import {LoginModal} from "components-new";
-import {UsernameModal} from "components-new/UsernameModal";
-import {FeedbackModal} from "components-new/FeedbackModal";
-import {ContactModal} from "components-new/ContactModal";
+import {
+  LoginModal,
+  FeedbackModal,
+  ContactModal,
+  AllowContactModal
+} from "components-new";
 import {useTheme} from "contexts/ThemeContext";
 
 export const Footer = memo(() => {
@@ -93,6 +95,7 @@ export const Footer = memo(() => {
         title={contactTitle}
         text={contactPlaceholder}
       />
+      <AllowContactModal />
     </>
   );
 });

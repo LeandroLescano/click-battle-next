@@ -37,12 +37,12 @@ export const LanguageDropdown = () => {
 
   return (
     <div
-      className="relative inline-block md:min-w-28 self-stretch md:self-center"
+      className="relative inline-block md:min-w-28 flex-1 self-stretch md:self-center"
       ref={dropdownRef}
     >
       <button
         type="button"
-        className="language-menu inline-flex justify-between items-center w-full h-full md:h-fit rounded-md shadow-sm uppercase text-xs md:text-2xl leading-none font-bold bg-white dark:bg-primary-400 dark:text-white"
+        className="language-menu inline-flex justify-between items-center w-full h-9 md:h-12 rounded-md shadow-sm uppercase text-xs md:text-2xl leading-none font-bold bg-white dark:bg-primary-400 dark:text-white"
         id="language-menu"
         aria-haspopup="true"
         aria-expanded={isOpen}
@@ -55,17 +55,17 @@ export const LanguageDropdown = () => {
             className="flag-img"
           />
           {i18n.language}
-          <img
-            src="/icons/chevron-down.svg"
-            alt="chevron-down"
-            className="w-3 h-3 md:w-6 md:h-6 object-cover dark:invert"
-          />
         </span>
+        <img
+          src="/icons/chevron-down.svg"
+          alt="chevron-down"
+          className="w-3 h-3 md:w-6 md:h-6 object-cover dark:invert"
+        />
       </button>
 
       {isOpen && (
         <div
-          className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
+          className="origin-top-right absolute right-0 mt-2 w-24 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none z-50"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="language-menu"

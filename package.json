@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "bash ask-update-backup.sh",
-    "dev:start": "concurrently -p \"[{name}]\" -n \"NEXT,FIREBASE\" \"next dev\" \"yarn emulators\"",
+    "dev:start": "concurrently -p \"[{name}]\" -n \"NEXT,FIREBASE\" -c \"bgBlack.bold,#FF8800.bold\" \"next dev\" \"yarn emulators\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
