@@ -199,7 +199,7 @@ function useAuthProvider(): AuthContextState {
               sessionStorage.setItem("objUser", JSON.stringify(obj));
             }
           } else {
-            auth.signOut();
+            signOut();
           }
         }
       }
@@ -282,8 +282,11 @@ function useAuthProvider(): AuthContextState {
     }
     clear();
     updateGameUser({});
-    localStorage.removeItem("user");
     sessionStorage.removeItem("userKey");
+    sessionStorage.removeItem("objUser");
+    localStorage.removeItem("user");
+    localStorage.removeItem("newStyle");
+    localStorage.removeItem("feedbackGiven");
   };
 
   const createUsername = async (username: string, isAnonymously: boolean) => {
@@ -307,7 +310,7 @@ function useAuthProvider(): AuthContextState {
       setGameUser((prev) => prev && {...prev, username});
       localStorage.setItem("user", username);
     } catch (error) {
-      auth.signOut();
+      signOut();
     }
   };
 
