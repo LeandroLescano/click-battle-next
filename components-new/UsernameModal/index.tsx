@@ -53,6 +53,8 @@ export const UsernameModal = () => {
     }
   };
 
+  console.log({loadingAuth, user, gameUser});
+
   return (
     <Dialog
       open={
