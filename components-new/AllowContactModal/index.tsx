@@ -33,12 +33,17 @@ export const AllowContactModal = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated && !gameUser?.userPreferences && !user?.isAnonymous) {
+    if (
+      isAuthenticated &&
+      gameUser?.username &&
+      !gameUser.userPreferences &&
+      !user?.isAnonymous
+    ) {
       setShow(true);
     } else {
       setShow(false);
     }
-  }, [gameUser]);
+  }, [gameUser, user]);
 
   return (
     <AnimatePresence>

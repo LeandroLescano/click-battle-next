@@ -167,7 +167,7 @@ function useAuthProvider(): AuthContextState {
           Sentry.setContext("user", objUser);
           if (key) {
             await getUser(key).then((dbUser) => {
-              if (dbUser !== objUser) {
+              if (dbUser && dbUser !== objUser) {
                 setGameUser(dbUser);
                 Sentry.setContext("user", dbUser);
                 sessionStorage.setItem("objUser", JSON.stringify(dbUser));
@@ -287,24 +287,28 @@ function useAuthProvider(): AuthContextState {
   };
 
   const createUsername = async (username: string, isAnonymously: boolean) => {
-    const key = sessionStorage.getItem("userKey");
-    if (key) {
-      await updateUser(key, {username});
-    }
+    try {
+      const key = sessionStorage.getItem("userKey");
+      if (key) {
+        await updateUser(key, {username});
+      }
 
-    if (isAnonymously) {
-      setGameUser({username});
-    }
-    updateProfile(auth.currentUser!, {displayName: username});
+      if (isAnonymously) {
+        setGameUser({username});
+      }
+      updateProfile(auth.currentUser!, {displayName: username});
 
-    logEvent(getAnalytics(), "login", {
-      action: "login",
-      isAnonymously,
-      username,
-      ...userInfo
-    });
-    setGameUser((prev) => prev && {...prev, username});
-    localStorage.setItem("user", username);
+      logEvent(getAnalytics(), "login", {
+        action: "login",
+        isAnonymously,
+        username,
+        ...userInfo
+      });
+      setGameUser((prev) => prev && {...prev, username});
+      localStorage.setItem("user", username);
+    } catch (error) {
+      auth.signOut();
+    }
   };
 
   //Function for login a Auth Provider account user

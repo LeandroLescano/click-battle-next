@@ -21,11 +21,13 @@ export const ProfileModal = ({show, onClose}: ProfileModalProps) => {
   const [usernameError, setUsernameError] = useState<
     undefined | "length" | "available"
   >();
+  const [loading, setLoading] = useState(false);
 
   const {t} = useTranslation();
   const {gameUser, user, updateGameUser} = useAuth();
 
   const onSave = async () => {
+    setLoading(true);
     if (gameUser?.key) {
       if (
         localData?.username &&
@@ -39,6 +41,7 @@ export const ProfileModal = ({show, onClose}: ProfileModalProps) => {
             dataToUpdate.username = localData.username;
           } else {
             setUsernameError("available");
+            setLoading(false);
             return;
           }
         }
@@ -81,6 +84,7 @@ export const ProfileModal = ({show, onClose}: ProfileModalProps) => {
         setUsernameError("length");
       }
     }
+    setLoading(false);
   };
 
   const handleOnClose = () => {
@@ -160,6 +164,8 @@ export const ProfileModal = ({show, onClose}: ProfileModalProps) => {
             <Button
               className="p-1 md:p-2 text-primary-500 text-sm md:text-2xl font-semibold w-full mt-2"
               onClick={onSave}
+              loading={loading}
+              loadingText={t("Saving...")}
             >
               {t("Save")}
             </Button>
