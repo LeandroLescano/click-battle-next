@@ -509,7 +509,7 @@ const RoomGame = () => {
                 </h1>
               ) : null}
               {currentGame?.timer && currentGame?.timer > 0 ? (
-                <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start">
+                <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start h-full min-h-0">
                   <LocalSection
                     idGame={gameID || ""}
                     localUser={localUser}

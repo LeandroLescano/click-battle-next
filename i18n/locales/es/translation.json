@@ -49,6 +49,7 @@
   "Change password": "Cambiar contraseña",
   "Delete password": "Eliminar contraseña",
   "Save settings": "Guardar",
+  "Save": "Guardar",
   "Settings updated": "Configuración guardada",
   "There was an error": "Hubo un error",
   "Login with": "Ingresar con",
@@ -102,7 +103,12 @@
   "Great": "Genial",
   "Almost Excellent": "Casi excelente",
   "Excellent": "Excelente",
+  "Yes": "Sí",
+  "No": "No",
+  "Allow": "Permitir",
+  "Decline": "Rechazar",
   "Reset": "Reiniciar",
+  "Saving...": "Guardando...",
   "Comments": "Comentarios",
   "Sending message...": "Enviando mensaje...",
   "Disconnected": "Desconectado",
@@ -113,5 +119,9 @@
   "Try new style": "Prueba el nuevo diseño",
   "Enjoying the new experience?": "¿Disfrutando de la nueva experiencia?",
   "Thank you for your feedback!": "¡Gracias por tus comentarios!",
-  "Switch to Old Style": "Cambiar al diseño antiguo"
+  "Switch to Old Style": "Cambiar al diseño antiguo",
+  "Profile": "Perfil",
+  "Allow contact by email": "Permitir contacto por email",
+  "Allow email contact": "Permitir contacto por email",
+  "I’d like to reach out to you occasionally via email for feedback and updates. You can manage this in your profile settings.": "Me gustaría ponerme en contacto ocasionalmente por email para pedir tu opinión y mantenerte actualizado. Puedes cambiar esta preferencia en la configuración de tu perfil."
 }
