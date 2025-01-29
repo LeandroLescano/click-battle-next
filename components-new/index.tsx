@@ -1,5 +1,11 @@
 export * from "./Button";
+export * from "./Card";
 export * from "./LanguageDropdown";
+export * from "./ProfileModal";
+export * from "./AllowContactModal";
+export * from "./FeedbackModal";
+export * from "./ContactModal";
+export * from "./ThemeSelector";
 export * from "./Header";
 export * from "./LoginModal";
 export * from "./Footer";
@@ -9,3 +15,4 @@ export * from "./CardGame";
 export * from "./CardGameAd";
 export * from "./Loading";
 export * from "./SettingsSidebar";
+export * from "./Switch";

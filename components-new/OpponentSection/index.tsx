@@ -54,7 +54,7 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
   );
 
   return (
-    <div className="w-full md:w-1/2 max-h-[275px] md:max-h-full text-sm md:text-3xl px-4 md:px-0 font-medium h-full flex flex-col">
+    <div className="w-full md:w-1/2 max-h-full text-sm md:text-3xl px-4 md:px-0 font-medium h-full flex flex-col min-h-0">
       <h4 className="text-xl md:text-5xl text-center md:text-start font-bold mb-4 md:mb-12 text-primary-600 dark:text-primary-200">
         {game.listUsers.length === 1 && isHost ? (
           t("Waiting for opponents...")
@@ -68,7 +68,7 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
         </div>
         <div className="w-1/6 text-center">Clicks</div>
       </div>
-      <div className="opponents-container flex flex-row min-w-0 overflow-y-auto pl-1 pt-1">
+      <div className="opponents-container flex flex-row min-w-0 overflow-y-auto max-h-full min-h-0 pl-1 pt-1">
         <div className="w-5/6">
           <OpponentList
             countPositions={countPositions}

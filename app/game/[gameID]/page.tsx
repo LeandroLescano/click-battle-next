@@ -24,7 +24,7 @@ import {useAuth} from "contexts/AuthContext";
 import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import {updateUser} from "services/user";
 import {addRoomStats} from "services/rooms";
-import {Game, GameUser, MaxScore, RoomStats} from "interfaces";
+import {Game, GameUser, MaxScore, RoomStats, RoomUser} from "interfaces";
 import {useGame} from "contexts/GameContext";
 import {handleInvite} from "utils/invite";
 import {LoginModalProps} from "components-new/LoginModal/types";
@@ -168,11 +168,9 @@ const RoomGame = () => {
                 );
               }
 
-              const listUsersToPush: GameUser[] = [];
-              let listUsersDB: GameUser[] = game.listUsers;
-              if (!listUsersDB) {
-                listUsersDB = [];
-              }
+              const listUsersToPush: RoomUser[] = [];
+              const listUsersDB: RoomUser[] = game.listUsers ?? [];
+
               listUsersDB.forEach((val) => {
                 if (!val.kickOut) {
                   const objUser: GameUser = {...val};
@@ -183,9 +181,11 @@ const RoomGame = () => {
                       setLocalUser(objUser);
                     }
                   }
+
                   listUsersToPush.push(objUser);
                 } else if (val.key === gUser?.uid) {
                   router.push("/?kickedOut=true");
+                  return;
                 }
               });
 
@@ -198,13 +198,19 @@ const RoomGame = () => {
               if (game.ownerUser?.key === gUser?.uid) {
                 setIsHost(true);
               } else if (gUser?.uid) {
-                if (
-                  listUsersToPush.filter(
-                    (u) => u.username !== gameUser?.username
-                  ).length === game.settings.maxUsers
-                ) {
-                  router.push("/?fullRoom=true");
-                  return;
+                if (listUsersToPush.length > game.settings.maxUsers) {
+                  const latestEnterUser = listUsersToPush.sort(
+                    (a, b) =>
+                      (b.enterDate?.seconds || 0) - (a.enterDate?.seconds || 0)
+                  )[0];
+
+                  if (
+                    !listUsersToPush.find((u) => u.key === gUser.uid) ||
+                    latestEnterUser.key === gUser.uid
+                  ) {
+                    router.push("/?fullRoom=true");
+                    return;
+                  }
                 }
 
                 if (
@@ -431,7 +437,12 @@ const RoomGame = () => {
   const addNewUserToDB = (game: Game) => {
     if (gUser?.uid) {
       const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
-      set(refUser, {clicks: 0, rol: "visitor", username: gameUser?.username});
+      set(refUser, {
+        clicks: 0,
+        rol: "visitor",
+        username: gameUser?.username,
+        enterDate: Timestamp.now()
+      });
     } else if (query.get("invite")) {
       if (Date.now() > Number(query.get("invite"))) {
         router.push("/");
@@ -498,7 +509,7 @@ const RoomGame = () => {
                 </h1>
               ) : null}
               {currentGame?.timer && currentGame?.timer > 0 ? (
-                <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start">
+                <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start h-full min-h-0">
                   <LocalSection
                     idGame={gameID || ""}
                     localUser={localUser}

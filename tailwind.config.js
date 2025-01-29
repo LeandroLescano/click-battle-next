@@ -10,7 +10,7 @@ export default {
     extend: {
       screens: {
         md: "805px",
-        short: {raw: "(max-height: 600px)"}
+        short: {raw: "(max-height: 720px)"}
       },
       colors: {
         primary: {

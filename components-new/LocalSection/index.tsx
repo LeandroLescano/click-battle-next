@@ -139,11 +139,9 @@ function LocalSection({
             {t("Start!")}
           </Button>
         )}
-        {game?.timer !== undefined && game.currentGame && (
-          <h2 className="flex items-center gap-3 md:gap-6 font-semibold text-3xl md:text-6xl mt-10 justify-center md:justify-start">
-            <Watch /> 00:{String(game?.timer).padStart(2, "0")}
-          </h2>
-        )}
+        <h2 className="flex items-center gap-3 md:gap-6 font-semibold text-3xl md:text-6xl mt-5 md:mt-10 justify-center md:justify-start">
+          <Watch /> 00:{String(game?.timer).padStart(2, "0")}
+        </h2>
       </div>
       {width > 768 && (
         <Card className="mt-auto mr-auto">

@@ -41,12 +41,12 @@ export const ThemeSelector = () => {
 
   return (
     <div
-      className="relative inline-block self-stretch md:self-center"
+      className="relative inline-block self-stretch md:self-center flex-1"
       ref={dropdownRef}
     >
       <button
         type="button"
-        className="language-menu inline-flex justify-between gap-1 md:gap-3 items-center w-full h-full md:h-fit rounded-md shadow-sm uppercase text-xs md:text-2xl leading-none font-bold bg-white dark:bg-primary-400 dark:text-white"
+        className="language-menu inline-flex justify-between gap-1 md:gap-3 items-center w-full h-9 md:h-12 rounded-md shadow-sm uppercase text-xs md:text-2xl leading-none font-bold bg-white dark:bg-primary-400 dark:text-white"
         id="language-menu"
         aria-haspopup="true"
         aria-expanded={isOpen}

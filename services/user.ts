@@ -14,12 +14,16 @@ import {GameUser} from "interfaces";
 
 const PATH = "users";
 
-export const getUser = async (key: string): Promise<GameUser> => {
+export const getUser = async (key: string): Promise<GameUser | null> => {
   const userDoc = doc(getFirestore(), PATH, key);
-  return await getDoc(userDoc).then((snapshot) => ({
-    ...(snapshot.data() as GameUser),
-    key: snapshot.id
-  }));
+  return await getDoc(userDoc).then((snapshot) =>
+    snapshot.exists()
+      ? {
+          ...(snapshot.data() as GameUser),
+          key: snapshot.id
+        }
+      : null
+  );
 };
 
 export const getUserByEmail = async (

@@ -1,11 +1,12 @@
-import React from "react";
+import React, {useState} from "react";
 import {useTranslation} from "react-i18next";
 
-import {Button, LanguageDropdown} from "components-new";
+import {Button, ProfileModal} from "components-new";
 import {useAuth} from "contexts/AuthContext";
-import {ThemeSelector} from "components-new/ThemeSelector";
 
 export const Header = () => {
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
   const {signOut} = useAuth();
   const {t} = useTranslation();
 
@@ -15,8 +16,6 @@ export const Header = () => {
         Click Battle!
       </h1>
       <div className="flex items-center gap-1 md:gap-9 flex-col-reverse md:flex-row">
-        <ThemeSelector />
-        <LanguageDropdown />
         <Button
           onClick={signOut}
           variant="outlined"
@@ -24,6 +23,17 @@ export const Header = () => {
         >
           {t("Log out")}
         </Button>
+        <Button
+          variant="outlined"
+          className="px-4 py-0.5 uppercase text-xs md:text-2xl md:min-w-36 w-full md:w-fit bg-primary-300"
+          onClick={() => setShowProfileModal(true)}
+        >
+          {t("Profile")}
+        </Button>
+        <ProfileModal
+          show={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+        />
       </div>
     </header>
   );
