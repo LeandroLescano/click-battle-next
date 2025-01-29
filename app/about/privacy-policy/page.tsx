@@ -30,6 +30,7 @@ const PrivacyPolicy = () => {
         <h5>Registered users (via Firebase Authentication):</h5>
         <ul>
           <li>Email address (if using email/password sign-in)</li>
+          <li>Email preferences (only if the user opts in)</li>
           <li>Device details (limited to what the browser provides)</li>
           <li>Browser data (limited to what the browser provides)</li>
           <li>Username (chosen by the user)</li>
@@ -43,6 +44,10 @@ const PrivacyPolicy = () => {
           <li>To personalize your experience</li>
           <li>To analyze how the Service is used</li>
           <li>To prevent or detect fraud or misuse of the Service</li>
+          <li>
+            To send emails about updates or important notifications, but only if
+            you have opted in. You can opt out at any time.
+          </li>
         </ul>
         <h4>Information sharing</h4>
         <p>
@@ -72,9 +77,9 @@ const PrivacyPolicy = () => {
         </p>
         <h4>Your choices</h4>
         <p>
-          Currently, you cannot choose what data is collected from you. We
-          collect the information described above to provide and improve the
-          Service.
+          You can choose whether to receive emails from us regarding updates and
+          important notifications. You can opt in or out at any time through
+          your account settings.
         </p>
         <h4>Children&apos;s privacy</h4>
         <p>

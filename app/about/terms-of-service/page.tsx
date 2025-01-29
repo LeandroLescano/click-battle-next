@@ -75,12 +75,14 @@ const TermsOfService = () => {
         </p>
         <h4>10. Data Privacy</h4>
         <p>
-          We collect user data through Firebase Authentication and Turdo
-          database. This data may include usernames, login information provided
+          We collect user data through Firebase Authentication. If you opt in to
+          receive emails, we may store your email preferences and use them to
+          send you relevant updates about the Game. You can opt out at any time.
+          The collected data may include usernames, login information provided
           by the chosen authentication service (e.g., email address), and
-          gameplay activity. We use this data to operate and improve the Game.
-          We recommend you review the privacy policies of Firebase
-          Authentication and Turdo database for their data handling practices.
+          gameplay activity. This data is used solely to operate and improve the
+          Game. We recommend reviewing Firebase Authentication&apos;s privacy
+          policy for more details on their data handling practices.
         </p>
         <h4>11. Updates to the Terms</h4>
         <p>
