@@ -127,13 +127,8 @@ function useAuthProvider(): AuthContextState {
     } else if (key !== null) {
       const dbUser = await getUser(key);
       if (dbUser) {
-        const obj = {
-          username: dbUser.username,
-          maxScores: dbUser.maxScores,
-          email: dbUser.email
-        };
-        setGameUser(obj);
-        sessionStorage.setItem("objUser", JSON.stringify(obj));
+        setGameUser(dbUser);
+        sessionStorage.setItem("objUser", JSON.stringify(dbUser));
       }
     } else {
       setGameUser({
@@ -187,16 +182,10 @@ function useAuthProvider(): AuthContextState {
             const findedUser = await getUserByEmail(gUser.email);
 
             if (findedUser && findedUser.key) {
-              const obj = {
-                username: findedUser.username,
-                maxScores: findedUser.maxScores,
-                email: findedUser.email
-              };
-
               localStorage.setItem("user", findedUser.username);
               sessionStorage.setItem("userKey", findedUser.key);
-              setGameUser(obj);
-              sessionStorage.setItem("objUser", JSON.stringify(obj));
+              setGameUser(findedUser);
+              sessionStorage.setItem("objUser", JSON.stringify(findedUser));
             }
           } else {
             signOut();
