@@ -100,10 +100,7 @@ const TermsOfService = () => {
           If you have any questions about these Terms, please contact us using
           the form in our home page. By accessing or using the Game, you
           acknowledge that you have read, understood, and agree to be bound by
-          these Terms. Note: This is a sample Terms of Service and may not
-          address all potential issues. You may want to consult with a lawyer to
-          ensure your Terms of Service are comprehensive and legally sound for
-          your specific game.
+          these Terms.
         </p>
       </div>
     </div>
