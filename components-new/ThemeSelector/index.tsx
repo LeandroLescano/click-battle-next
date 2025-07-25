@@ -4,6 +4,7 @@ import {Input} from "@headlessui/react";
 import {useAuth} from "contexts/AuthContext";
 import {Theme, THEMES, useTheme} from "contexts/ThemeContext";
 import {stopPropagation} from "utils/events";
+import ChevronDown from "icons/ChevronDown";
 
 export const ThemeSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,11 +63,7 @@ export const ThemeSelector = () => {
           />
         )}
         {theme}
-        <img
-          src="/icons/chevron-down.svg"
-          alt="chevron-down"
-          className="w-3 h-3 md:w-6 md:h-6 object-cover dark:invert"
-        />
+        <ChevronDown />
       </button>
 
       {isOpen && (

@@ -28,7 +28,9 @@ export const Ranking = ({lastUpdate, usersWithScore}: RankingProps) => {
               {t("Go Back!")}
             </Button>
           </Link>
-          <LanguageDropdown />
+          <div>
+            <LanguageDropdown />
+          </div>
         </div>
         <h1 className="text-5xl md:text-7xl text-primary-400 dark:text-primary-200 font-bold text-center">
           Click masters

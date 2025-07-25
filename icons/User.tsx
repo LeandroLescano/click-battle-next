@@ -1,207 +1,282 @@
 import React from "react";
 
-export const User = ({width = 15, height = 15}) => {
+export const User = ({width = 25, height = 25}) => {
   return (
     <svg
       width={`${width}`}
       height={`${height}`}
-      viewBox={`0 0 100 110`}
+      viewBox="0 0 19 19"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect y="90" width="10" height="10" fill="var(--color-primary-300)" />
-      <rect y="80" width="10" height="10" fill="var(--color-primary-300)" />
       <rect
-        x="10"
-        y="70"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="9"
+        y="6"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-500)"
       />
       <rect
-        x="20"
-        y="60"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="12"
+        y="2"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-500)"
       />
       <rect
-        x="30"
-        y="60"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="13"
+        y="2"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="40"
-        y="60"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="14"
+        y="3"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="35"
-        y="40"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="14"
+        y="4"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
-      <rect x="35" width="10" height="10" fill="var(--color-primary-300)" />
+      <rect
+        x="14"
+        y="5"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="14"
+        y="6"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="13"
+        y="7"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="12"
+        y="7"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="5"
+        y="7"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="4"
+        y="3"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="4"
+        y="5"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="4"
+        y="4"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="4"
+        y="6"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="5"
+        y="2"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="6"
+        y="2"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="7"
+        y="2"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="8"
+        y="2"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="9"
+        y="3"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="9"
+        y="4"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="9"
+        y="5"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="9"
+        y="6"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="8"
+        y="7"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="7"
+        y="7"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="6"
+        y="7"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
+      <rect
+        x="12"
+        y="12"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
+      />
       <rect
         x="15"
-        y="20"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        y="11"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="75"
-        y="20"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="13"
+        y="13"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="25"
-        y="30"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="13"
+        y="14"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="65"
-        y="30"
+        x="2"
+        y="11"
         width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        height="1"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="25"
-        y="10"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="13"
+        y="15"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="65"
-        y="10"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="16"
+        y="12"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="50"
-        y="60"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="17"
+        y="13"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="45"
-        y="40"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
-      />
-      <rect x="45" width="10" height="10" fill="var(--color-primary-300)" />
-      <rect
-        x="55"
-        y="40"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
-      />
-      <rect x="55" width="10" height="10" fill="var(--color-primary-300)" />
-      <rect
-        x="60"
-        y="60"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="17"
+        y="14"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="70"
-        y="60"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        x="17"
+        y="15"
+        width="1.27273"
+        height="1.27273"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="80"
-        y="70"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        width="1.27273"
+        height="1.27273"
+        transform="matrix(-1 0 0 1 2.27271 12)"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="90"
-        y="80"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        width="1.27273"
+        height="1.27273"
+        transform="matrix(-1 0 0 1 1.27271 13)"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="90"
-        y="90"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        width="1.27273"
+        height="1.27273"
+        transform="matrix(-1 0 0 1 1.27271 14)"
+        fill="var(--color-primary-400)"
       />
       <rect
-        x="80"
-        y="100"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
-      />
-      <rect
-        x="70"
-        y="100"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
-      />
-      <rect
-        x="60"
-        y="100"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
-      />
-      <rect
-        x="50"
-        y="100"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
-      />
-      <rect
-        x="40"
-        y="100"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
-      />
-      <rect
-        x="30"
-        y="100"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
-      />
-      <rect
-        x="20"
-        y="100"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
-      />
-      <rect
-        x="10"
-        y="100"
-        width="10"
-        height="10"
-        fill="var(--color-primary-300)"
+        width="1.27273"
+        height="1.27273"
+        transform="matrix(-1 0 0 1 1.27271 15)"
+        fill="var(--color-primary-400)"
       />
     </svg>
   );

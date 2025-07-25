@@ -494,7 +494,7 @@ const RoomGame = () => {
                   maxUsers: currentGame?.settings.maxUsers || 2,
                   roomName: currentGame?.roomName,
                   password: currentGame?.settings.password,
-                  timer: currentGame?.timer || 10
+                  timer: currentGame?.settings.timer || 10
                 }}
               />
             )}

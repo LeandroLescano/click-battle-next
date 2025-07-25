@@ -13,6 +13,7 @@ import {Button} from "components-new/Button";
 import {Select} from "components-new/Select";
 import {Input} from "components-new/Input";
 import {Cross} from "icons/Cross";
+import {useGame} from "contexts/GameContext";
 
 import {Settings, SettingsSidebarProps} from "./types";
 import "./styles.scss";
@@ -39,6 +40,7 @@ export const SettingsSidebar = ({
   });
   const inputPassword = useRef<HTMLInputElement>(null);
   const db = getDatabase();
+  const {game} = useGame();
   const {t} = useTranslation();
 
   useEffect(() => {
@@ -79,19 +81,22 @@ export const SettingsSidebar = ({
     updateDatabase(updateSettings);
   };
 
-  const updateDatabase = async (settings: Settings) => {
+  const updateDatabase = async (localSettings: Settings) => {
     try {
-      settings = adjustRoomSettings({settings, maxUsers: config.maxUsers});
+      localSettings = adjustRoomSettings({
+        settings: localSettings,
+        maxUsers: config.maxUsers
+      });
 
       const refGame = ref(db, `games/${idGame}`);
 
       await update(refGame, {
-        roomName: settings.roomName,
-        timer: settings.timer,
+        roomName: localSettings.roomName,
+        timer: game.timer && localSettings.timer,
         settings: {
-          maxUsers: settings.maxUsers,
-          timer: settings.timer,
-          password: settings.password || null
+          maxUsers: localSettings.maxUsers,
+          timer: localSettings.timer,
+          password: localSettings.password || null
         }
       } as Partial<Game>);
 

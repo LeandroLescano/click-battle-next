@@ -4,23 +4,189 @@ export const Prohibited = () => {
   return (
     <svg
       className="size-14"
-      viewBox="0 0 57 57"
+      width="154"
+      height="154"
+      viewBox="0 0 154 154"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M28.5 52.2539C41.4657 52.2539 51.9766 41.7431 51.9766 28.7773C51.9766 15.8116 41.4657 5.30078 28.5 5.30078C15.5343 5.30078 5.02344 15.8116 5.02344 28.7773C5.02344 41.7431 15.5343 52.2539 28.5 52.2539Z"
-        stroke="var(--color-primary-200)"
-        strokeWidth="4.69531"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      <rect
+        x="14"
+        y="28"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
       />
-      <path
-        d="M11.9022 12.1797L45.0981 45.3755"
-        stroke="var(--color-primary-200)"
-        strokeWidth="4.69531"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      <rect
+        x="28"
+        y="14"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect x="42" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect x="56" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect x="70" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect x="84" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect x="98" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect
+        x="112"
+        y="14"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="126"
+        y="28"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="140"
+        y="42"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="140"
+        y="56"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="140"
+        y="70"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="140"
+        y="84"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="126"
+        y="112"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="112"
+        y="126"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="98"
+        y="140"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="84"
+        y="140"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="70"
+        y="140"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="56"
+        y="140"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="42"
+        y="140"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="28"
+        y="126"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="14"
+        y="112"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect y="98" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect y="84" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect y="70" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect y="56" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect y="42" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect
+        x="77"
+        y="63"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="91"
+        y="49"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="105"
+        y="35"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="63"
+        y="77"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="49"
+        y="91"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="35"
+        y="105"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="140"
+        y="98"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
       />
     </svg>
   );

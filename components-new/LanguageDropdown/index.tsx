@@ -3,6 +3,7 @@ import {changeLanguage} from "i18next";
 import {useTranslation} from "react-i18next";
 
 import {languages} from "i18n/settings";
+import ChevronDown from "icons/ChevronDown";
 
 import "./styles.scss";
 
@@ -56,11 +57,7 @@ export const LanguageDropdown = () => {
           />
           {i18n.language}
         </span>
-        <img
-          src="/icons/chevron-down.svg"
-          alt="chevron-down"
-          className="w-3 h-3 md:w-6 md:h-6 object-cover dark:invert"
-        />
+        <ChevronDown />
       </button>
 
       {isOpen && (
