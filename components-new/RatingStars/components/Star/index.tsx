@@ -69,7 +69,7 @@ const Star = ({
 
   return (
     <div
-      className="md:min-w-16 transition-all duration-200 md:hover:scale-110"
+      className="transition-all duration-200 md:hover:scale-110"
       style={{color: rating.isSelected ? "var(--color-primary-400)" : "white"}}
       onMouseEnter={() => onHover(position)}
       onMouseMove={(e) =>

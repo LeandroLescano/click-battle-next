@@ -4,7 +4,7 @@ import {StarProps} from "./types";
 export const Empty = ({color}: StarProps) => {
   return (
     <svg
-      className="size-8 md:size-16"
+      className="size-8 md:size-14"
       width="120"
       height="120"
       viewBox="0 0 120 120"
