@@ -58,8 +58,8 @@ export const RatingStars = ({
           </h3>
         </div>
       ) : null}
-      <div className="min-h-10">
-        {[...Array(cant)].map((val, i) => {
+      <div className="min-h-10 flex gap-5">
+        {[...Array(cant)].map((_, i) => {
           return (
             <Star
               key={i}

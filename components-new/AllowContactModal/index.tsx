@@ -6,6 +6,7 @@ import {Timestamp} from "firebase/firestore";
 import {useAuth} from "contexts/AuthContext";
 import {updateUser} from "services/user";
 import {Button, Card} from "components-new";
+import {getAnalytics, logEvent} from "firebase/analytics";
 
 export const AllowContactModal = () => {
   const [show, setShow] = useState(false);
@@ -40,6 +41,7 @@ export const AllowContactModal = () => {
       !user?.isAnonymous
     ) {
       setShow(true);
+      logEvent(getAnalytics(), "show_user_preferences_modal");
     } else {
       setShow(false);
     }

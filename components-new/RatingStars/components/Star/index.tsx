@@ -1,8 +1,8 @@
-import {faStar, faStarHalfAlt} from "@fortawesome/free-solid-svg-icons";
-import {faStar as faStarEmpty} from "@fortawesome/free-regular-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React, {MouseEvent, useEffect, useState} from "react";
-import {IconProp} from "@fortawesome/fontawesome-svg-core";
+
+import {Full} from "icons/Hearts/Full";
+import {Half} from "icons/Hearts/Half";
+import {Empty} from "icons/Hearts/Empty";
 
 interface Props {
   position: number;
@@ -25,9 +25,9 @@ const Star = ({
   useHalves
 }: Props) => {
   const [overHalf, setOverHalf] = useState(false);
-  const [icon, setIcon] = useState<IconProp>(faStarEmpty as IconProp);
+  const [IconComponent, setIconComponent] = useState(() => Empty);
 
-  const handleCoords = (e: MouseEvent<SVGElement, globalThis.MouseEvent>) => {
+  const handleCoords = (e: MouseEvent<HTMLDivElement>) => {
     const currentTarget = e.currentTarget.getBoundingClientRect();
     if (currentTarget.width / 2 < e.clientX - currentTarget.left) {
       setOverHalf(true);
@@ -49,7 +49,7 @@ const Star = ({
     }
 
     if (Math.ceil(positionToUse) > position) {
-      setIcon(faStar as IconProp);
+      setIconComponent(() => Full);
     } else if (
       (Math.ceil(positionToUse) === position || rating.value === position) &&
       useHalves
@@ -58,35 +58,36 @@ const Star = ({
         (hoverPosition > 0 && overHalf) ||
         Math.floor(rating.value) === position
       ) {
-        setIcon(faStar as IconProp);
+        setIconComponent(() => Full);
       } else {
-        setIcon(faStarHalfAlt as IconProp);
+        setIconComponent(() => Half);
       }
     } else {
-      setIcon(faStarEmpty as IconProp);
+      setIconComponent(() => Empty);
     }
   }, [overHalf, hoverPosition, rating.value]);
 
   return (
-    <>
-      <FontAwesomeIcon
-        className="md:min-w-16 transition-all duration-200 md:hover:scale-110 size-9 md:size-16"
-        icon={icon}
-        color={rating.isSelected ? "var(--color-primary-400)" : "default"}
-        onMouseEnter={() => onHover(position)}
-        onMouseMove={(e) =>
-          Math.ceil(
-            rating.isSelected && hoverPosition === 0
-              ? rating.value
-              : hoverPosition
-          ) === position && useHalves
-            ? handleCoords(e)
-            : null
-        }
-        onMouseLeave={() => onHover(0)}
-        onClick={() => onSelected(overHalf ? position : position - 0.5)}
+    <div
+      className="transition-all duration-200 md:hover:scale-110"
+      style={{color: rating.isSelected ? "var(--color-primary-400)" : "white"}}
+      onMouseEnter={() => onHover(position)}
+      onMouseMove={(e) =>
+        Math.ceil(
+          rating.isSelected && hoverPosition === 0
+            ? rating.value
+            : hoverPosition
+        ) === position && useHalves
+          ? handleCoords(e)
+          : null
+      }
+      onMouseLeave={() => onHover(0)}
+      onClick={() => onSelected(overHalf ? position : position - 0.5)}
+    >
+      <IconComponent
+        color={rating.isSelected ? "var(--color-primary-400)" : "white"}
       />
-    </>
+    </div>
   );
 };
 

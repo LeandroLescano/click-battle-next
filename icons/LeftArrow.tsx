@@ -4,23 +4,15 @@ export const LeftArrow = () => {
   return (
     <svg
       className="size-4 md:size-7"
-      viewBox="0 0 29 29"
+      width="92"
+      height="71"
+      viewBox="0 0 92 71"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M22.5624 14.5H5.93744"
-        stroke="var(--color-primary-100)"
-        strokeWidth="3.5625"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M14.2499 22.813L5.93744 14.5005L14.2499 6.18799"
-        stroke="var(--color-primary-100)"
-        strokeWidth="3.5625"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M0.772704 42.4545L0.772703 28.5454L7.72725 28.5454L7.72725 21.5909L14.6818 21.5909L14.6818 14.6363L21.6363 14.6363L21.6363 7.6818L28.5909 7.6818L28.5909 0.727248L42.5 0.727247L42.5 14.6363L35.5454 14.6363L35.5454 21.5909L28.5909 21.5909L28.5909 28.5454L91.1818 28.5454L91.1818 42.4545L28.5909 42.4545L28.5909 49.4091L35.5454 49.4091L35.5454 56.3636L42.5 56.3636L42.5 70.2727L28.5909 70.2727L28.5909 63.3182L21.6363 63.3182L21.6363 56.3636L14.6818 56.3636L14.6818 49.4091L7.72725 49.4091L7.72725 42.4545"
+        fill="var(--color-primary-100)"
       />
     </svg>
   );

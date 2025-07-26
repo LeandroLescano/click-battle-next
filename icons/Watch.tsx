@@ -4,12 +4,181 @@ export const Watch = () => {
   return (
     <svg
       className="size-7 md:size-14"
-      viewBox="0 0 61 61"
+      width="154"
+      height="154"
+      viewBox="0 0 154 154"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M30.4224 0.0703125C47.1859 0.0703125 60.7745 13.6589 60.7745 30.4223C60.7745 47.1857 47.1859 60.7743 30.4224 60.7743C13.659 60.7743 0.0704346 47.1857 0.0704346 30.4223C0.0704346 13.6589 13.659 0.0703125 30.4224 0.0703125ZM30.4224 6.14072C23.9826 6.14072 17.8064 8.69895 13.2528 13.2526C8.69907 17.8063 6.14084 23.9824 6.14084 30.4223C6.14084 36.8622 8.69907 43.0383 13.2528 47.592C17.8064 52.1457 23.9826 54.7039 30.4224 54.7039C36.8623 54.7039 43.0385 52.1457 47.5921 47.592C52.1458 43.0383 54.7041 36.8622 54.7041 30.4223C54.7041 23.9824 52.1458 17.8063 47.5921 13.2526C43.0385 8.69895 36.8623 6.14072 30.4224 6.14072ZM30.4224 12.2111C31.1659 12.2112 31.8834 12.4842 32.439 12.9782C32.9945 13.4722 33.3494 14.1529 33.4364 14.8912L33.4576 15.2463V29.1658L41.6739 37.382C42.2183 37.9282 42.5343 38.6612 42.5579 39.432C42.5814 40.2028 42.3107 40.9536 41.8007 41.532C41.2906 42.1104 40.5796 42.473 39.8119 42.5461C39.0443 42.6193 38.2775 42.3974 37.6675 41.9257L37.3822 41.6738L28.2766 32.5682C27.8048 32.0961 27.5019 31.4816 27.4146 30.8199L27.3872 30.4223V15.2463C27.3872 14.4413 27.707 13.6693 28.2762 13.1001C28.8454 12.5309 29.6175 12.2111 30.4224 12.2111Z"
+      <rect
+        x="14"
+        y="28"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="28"
+        y="14"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect x="42" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect x="56" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect x="70" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect x="84" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect x="98" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect
+        x="112"
+        y="14"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="126"
+        y="28"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="140"
+        y="42"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="140"
+        y="56"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="140"
+        y="70"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="140"
+        y="84"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="126"
+        y="112"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="112"
+        y="126"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="98"
+        y="140"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="84"
+        y="140"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="70"
+        y="140"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="56"
+        y="140"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="42"
+        y="140"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="28"
+        y="126"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="14"
+        y="112"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect y="98" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect y="84" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect y="70" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect y="56" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect y="42" width="14" height="14" fill="var(--color-primary-200)" />
+      <rect
+        x="70"
+        y="60"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="70"
+        y="46"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="70"
+        y="74"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="84"
+        y="88"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="98"
+        y="102"
+        width="14"
+        height="14"
+        fill="var(--color-primary-200)"
+      />
+      <rect
+        x="140"
+        y="98"
+        width="14"
+        height="14"
         fill="var(--color-primary-200)"
       />
     </svg>
