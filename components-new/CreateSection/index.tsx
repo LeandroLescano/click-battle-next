@@ -90,12 +90,9 @@ export const CreateSection = () => {
 
         const objRoom: Game = {
           roomName: newRoomName,
-          currentGame: false,
-          gameStart: false,
+          status: "lobby",
           listUsers: [],
           ownerUser: {...gameUser, key: user?.uid},
-          timeStart: 3,
-          timer,
           created: serverTimestamp(),
           settings
         };

@@ -5,12 +5,10 @@ import {GameUser} from "./GameUser";
 export interface Game {
   key?: string | null;
   listUsers: RoomUser[];
-  currentGame: boolean;
-  gameStart: boolean;
   ownerUser: Pick<GameUser, "username" | "key">;
   roomName: string;
-  timeStart: number;
-  timer: number;
+  startTime?: Date | null;
+  status: "lobby" | "countdown" | "playing" | "ended";
   created?: Date | object;
   settings: GameSettings;
 }
@@ -18,7 +16,7 @@ export interface Game {
 export interface GameSettings {
   timer: number;
   maxUsers: number;
-  password?: string;
+  password?: string | null;
 }
 
 export type RoomUser = Pick<

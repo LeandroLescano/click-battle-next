@@ -21,12 +21,11 @@ function ResultSection({localUser, currentGame}: ResultSectionProps) {
   // function for reset all data
   const handleReset = () => {
     const refGame = ref(db, `games/${currentGame.key}`);
-    update(refGame, {
-      timer: currentGame.settings.timer || 10,
-      gameStart: false,
-      timeStart: 3,
-      currentGame: false
-    });
+    const updateReset: Partial<Game> = {
+      status: "lobby",
+      startTime: null
+    };
+    update(refGame, updateReset);
     const refGameUsers = ref(db, `games/${currentGame.key}/listUsers`);
     get(refGameUsers).then((snapshot) => {
       snapshot.forEach((child) => {

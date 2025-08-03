@@ -7,9 +7,10 @@ import {Button} from "components-new/Button";
 import {Trophy} from "icons/Trophy";
 import {Card} from "components-new/Card";
 import {getSuffixPosition} from "utils/string";
-import {AcceptanceModal} from "components-new/AcceptanceModal";
+// import {AcceptanceModal} from "components-new/AcceptanceModal";
 
 import "./styles.scss";
+import {Game} from "interfaces";
 
 const ResultSection = () => {
   const db = getDatabase();
@@ -19,12 +20,11 @@ const ResultSection = () => {
   // function for reset all data
   const handleReset = () => {
     const refGame = ref(db, `games/${game.key}`);
-    update(refGame, {
-      timer: game.settings.timer || 10,
-      gameStart: false,
-      timeStart: 3,
-      currentGame: false
-    });
+    const resetGame: Partial<Game> = {
+      status: "lobby",
+      startTime: null
+    };
+    update(refGame, resetGame);
     const refGameUsers = ref(db, `games/${game.key}/listUsers`);
     get(refGameUsers).then((snapshot) => {
       snapshot.forEach((child) => {
@@ -86,7 +86,7 @@ const ResultSection = () => {
           </Button>
         )}
       </div>
-      <AcceptanceModal />
+      {/* <AcceptanceModal /> */}
     </>
   );
 };

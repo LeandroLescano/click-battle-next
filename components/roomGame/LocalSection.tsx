@@ -4,7 +4,7 @@ import {getDatabase, ref, update} from "firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {useTranslation} from "react-i18next";
 
-import {GameUser} from "interfaces";
+import {Game, GameUser} from "interfaces";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 
@@ -40,7 +40,8 @@ function LocalSection({
       users: game.listUsers.length,
       date: new Date()
     });
-    update(refGame, {gameStart: true});
+    const updated: Partial<Game> = {status: "countdown"};
+    update(refGame, updated);
   };
 
   const handleClick = () => {

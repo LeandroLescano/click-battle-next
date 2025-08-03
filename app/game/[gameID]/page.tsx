@@ -9,10 +9,8 @@ import {
   ref,
   remove,
   set,
-  update,
   Unsubscribe
 } from "@firebase/database";
-import {getAnalytics, logEvent} from "firebase/analytics";
 import lottie from "lottie-web";
 import Swal from "sweetalert2";
 import {useTranslation} from "react-i18next";
@@ -22,14 +20,14 @@ import celebrationAnim from "lotties/celebrationAnim.json";
 import {requestPassword} from "components";
 import {useAuth} from "contexts/AuthContext";
 import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
-import {updateUser} from "services/user";
 import {addRoomStats} from "services/rooms";
-import {Game, GameUser, MaxScore, RoomStats, RoomUser} from "interfaces";
+import {Game, GameUser, RoomStats, RoomUser} from "interfaces";
 import {useGame} from "contexts/GameContext";
 import {handleInvite} from "utils/invite";
 import {LoginModalProps} from "components-new/LoginModal/types";
 import {Button, Loading, SettingsSidebar} from "components-new";
 import {GameHeader} from "components-new/GameHeader";
+import useGameTimer from "hooks/gameTimer";
 
 const OpponentSection = dynamic(
   () => import("../../../components-new/OpponentSection")
@@ -54,7 +52,6 @@ const LoginModal = dynamic<LoginModalProps>(
 );
 
 const RoomGame = () => {
-  const [startCountdown, setStartCountdown] = useState(false);
   const [showSideBar, setShowSideBar] = useState(false);
   const roomStats = useRef<RoomStats>({
     name: "",
@@ -72,13 +69,7 @@ const RoomGame = () => {
   const query = useSearchParams();
   const {gameID} = useParams<{gameID: string}>();
   const db = getDatabase();
-  const {
-    gameUser,
-    user: gUser,
-    updateGameUser,
-    loading,
-    isAuthenticated
-  } = useAuth();
+  const {gameUser, user: gUser, loading, isAuthenticated} = useAuth();
   const {
     game: currentGame,
     localUser,
@@ -86,7 +77,6 @@ const RoomGame = () => {
     setGame,
     setLocalUser,
     setIsHost,
-    calculatePosition,
     resetContext
   } = useGame();
   const {setNewUser} = useNewPlayerAlert(
@@ -98,6 +88,10 @@ const RoomGame = () => {
   const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();
   const {setHasEnteredPassword, hasEnteredPassword} = useGame();
+  const {remainingTime, countdown} = useGameTimer({
+    roomStats,
+    onLoadCelebration: () => loadCelebrationAnimation()
+  });
 
   let unsubscribe: Unsubscribe;
 
@@ -156,8 +150,7 @@ const RoomGame = () => {
                 }));
               }
 
-              setGame(game);
-              setStartCountdown(game.gameStart);
+              setGame({...game, startTime: game.startTime ?? undefined});
 
               if (!roomStats.current.name) {
                 roomStats.current.name = game.roomName;
@@ -286,82 +279,9 @@ const RoomGame = () => {
     }
   }, [currentGame.listUsers]);
 
-  // useEffect for update timer in state and show result
-  useEffect(() => {
-    if (currentGame?.currentGame) {
-      const userKey = sessionStorage.getItem("userKey");
-
-      if (localUser.rol === "owner") {
-        // localUser is owner
-        if (!currentGame.timer) {
-          if (currentGame.timer === 0) {
-            calculatePosition();
-            logEvent(getAnalytics(), "game_finish", {
-              date: new Date(),
-              users: currentGame.listUsers,
-              maxClicks: Math.max(
-                ...currentGame.listUsers.map((users) => users.clicks || 0)
-              )
-            });
-
-            roomStats.current.gamesPlayed.push({
-              maxClicks: Math.max(
-                ...currentGame.listUsers.map((lu) => lu.clicks || 0)
-              ),
-              numberOfUsers: currentGame.listUsers.length,
-              timer: currentGame.settings.timer
-            });
-
-            const refGame = ref(db, `games/${gameID}`);
-            update(refGame, {timer: null, currentGame: false});
-            updateLocalMaxScore(userKey);
-          }
-
-          loadCelebrationAnimation();
-          return;
-        }
-
-        lottie.destroy();
-        const intervalId = setInterval(() => {
-          if (localUser.rol === "owner") {
-            const refGame = ref(db, `games/${gameID}`);
-            update(refGame, {timer: currentGame?.timer - 1});
-          }
-        }, 1000);
-
-        return () => clearInterval(intervalId);
-      } else if (currentGame.timer === 0) {
-        // localUser is visitor
-        loadCelebrationAnimation();
-        calculatePosition();
-        updateLocalMaxScore(userKey);
-      }
-    } else if (startCountdown && localUser.rol === "owner") {
-      if (!currentGame?.timeStart) {
-        const refGame = ref(db, `games/${gameID}`);
-
-        update(refGame, {
-          gameStart: false,
-          timeStart: null,
-          currentGame: true
-        });
-        return;
-      }
-
-      const intervalIdStart = setInterval(() => {
-        if (currentGame) {
-          const refGame = ref(db, `games/${gameID}`);
-          update(refGame, {timeStart: currentGame.timeStart - 1});
-        }
-      }, 1000);
-      return () => clearInterval(intervalIdStart);
-    }
-  }, [
-    currentGame?.currentGame,
-    currentGame?.timeStart,
-    currentGame?.timer,
-    startCountdown
-  ]);
+  const clearPath = (id: string) => {
+    router.replace(`/game/${id}`);
+  };
 
   const loadCelebrationAnimation = () => {
     if (celebrationContainer?.current?.innerHTML === "") {
@@ -370,67 +290,6 @@ const RoomGame = () => {
         animationData: celebrationAnim
       });
     }
-  };
-
-  const updateLocalMaxScore = (userKey?: string | null) => {
-    if (localUser.clicks && gameUser && currentGame) {
-      const currentMaxScore = gameUser.maxScores?.find(
-        (score) => score.time === currentGame.settings.timer
-      );
-
-      let updatedScores: MaxScore[] | undefined = gameUser.maxScores;
-      if (!currentMaxScore || localUser.clicks > currentMaxScore.clicks) {
-        if (!gameUser.maxScores) {
-          updatedScores = [
-            {
-              clicks: localUser.clicks,
-              time: currentGame.settings.timer,
-              date: Timestamp.now()
-            }
-          ];
-        } else {
-          if (currentMaxScore) {
-            updatedScores = gameUser.maxScores.map((score) =>
-              score.time === currentGame.settings.timer
-                ? {...score, clicks: localUser.clicks!, date: Timestamp.now()}
-                : score
-            );
-          } else {
-            updatedScores = [
-              ...gameUser.maxScores,
-              {
-                time: currentGame.settings.timer,
-                clicks: localUser.clicks,
-                date: Timestamp.now()
-              }
-            ];
-          }
-        }
-      }
-
-      const position =
-        currentGame.listUsers.findIndex(
-          (user) => user.username === localUser.username
-        ) + 1;
-      const pointsEarned = currentGame.listUsers.length - position;
-
-      if (updatedScores || pointsEarned > 0) {
-        if (userKey && gUser && !gUser.isAnonymous) {
-          updateUser(userKey, {
-            maxScores: updatedScores,
-            points: (gameUser.points ?? 0) + pointsEarned
-          });
-        }
-        updateGameUser({
-          maxScores: updatedScores,
-          points: (gameUser.points ?? 0) + pointsEarned
-        });
-      }
-    }
-  };
-
-  const clearPath = (id: string) => {
-    router.replace(`/game/${id}`);
   };
 
   // function for add user to database and update state
@@ -473,16 +332,14 @@ const RoomGame = () => {
           <Loading />
         ) : (
           <>
-            {startCountdown &&
-              currentGame?.timeStart &&
-              currentGame.timeStart >= 0 && (
-                <div className="start-countdown text-8xl md:text-9xl">
-                  {currentGame.timeStart === 0 ? "Go" : currentGame.timeStart}
-                </div>
-              )}
+            {currentGame.status === "countdown" && (
+              <div className="start-countdown text-8xl md:text-9xl">
+                {countdown}
+              </div>
+            )}
             <CelebrationResult
               celebrationContainer={celebrationContainer}
-              timer={currentGame?.timer}
+              timer={remainingTime}
               localUser={localUser}
             />
             {isHost && (
@@ -503,19 +360,14 @@ const RoomGame = () => {
                 onOpenSettings={() => setShowSideBar(true)}
                 onBack={handleOnBack}
               />
-              {currentGame?.timer && currentGame?.timer > 0 ? (
+              {currentGame.status !== "ended" ? (
                 <h1 className="text-2xl md:text-6xl text-center md:text-start font-bold mb-2 text-primary-400 dark:text-primary-100">
                   {currentGame?.roomName || ""}
                 </h1>
               ) : null}
-              {currentGame?.timer && currentGame?.timer > 0 ? (
+              {currentGame.status !== "ended" ? (
                 <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start h-full min-h-0">
-                  <LocalSection
-                    idGame={gameID || ""}
-                    localUser={localUser}
-                    start={currentGame.currentGame}
-                    startCountdown={startCountdown}
-                  />
+                  <LocalSection idGame={gameID || ""} localUser={localUser} />
                   <OpponentSection
                     localUsername={gameUser?.username || ""}
                     maxUsers={currentGame.settings.maxUsers}

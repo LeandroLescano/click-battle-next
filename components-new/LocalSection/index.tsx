@@ -4,7 +4,7 @@ import {getDatabase, ref, update} from "firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {Trans, useTranslation} from "react-i18next";
 
-import {GameUser} from "interfaces";
+import {Game, GameUser} from "interfaces";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {Button} from "components-new/Button";
@@ -12,20 +12,14 @@ import {Watch} from "icons/Watch";
 import {Card} from "components-new/Card";
 import GoogleAdUnit from "components-new/CardGameAd/GoogleAdUnit";
 import {useWindowSize} from "hooks";
+import useGameTimer from "hooks/gameTimer";
 
 interface LocalSectionProps {
   idGame: string;
   localUser: GameUser;
-  start: boolean;
-  startCountdown: boolean;
 }
 
-function LocalSection({
-  idGame,
-  localUser,
-  start,
-  startCountdown
-}: LocalSectionProps) {
+function LocalSection({idGame, localUser}: LocalSectionProps) {
   const [lastClickTime, setLastClickTime] = useState<number>();
   const router = useRouter();
   const db = getDatabase();
@@ -34,8 +28,11 @@ function LocalSection({
   const {t, i18n} = useTranslation();
   const [disableUI, setDisableUI] = useState(false);
   const {game, isHost} = useGame();
+  const {remainingTime} = useGameTimer({});
   const {width} = useWindowSize();
 
+  const showCountdown = game.status === "countdown";
+  const start = game.status === "playing";
   const cantStart = !start && game.listUsers.length < 2;
 
   // function for start game
@@ -46,7 +43,11 @@ function LocalSection({
       users: game.listUsers.length,
       date: new Date()
     });
-    update(refGame, {gameStart: true});
+    const startedGame: Partial<Game> = {
+      status: "countdown",
+      startTime: new Date()
+    };
+    update(refGame, startedGame);
   };
 
   const handleClick = () => {
@@ -86,7 +87,7 @@ function LocalSection({
       text = <Trans i18nKey="twoPlayersRequired" components={{1: <br />}} />;
     }
 
-    if (!isHost && !start && !startCountdown) {
+    if (!isHost && !start && !showCountdown) {
       text = t(
         "The room is complete. All that remains is for the host to start the game - get ready to begin!"
       );
@@ -104,7 +105,7 @@ function LocalSection({
   };
 
   const importantInfo = useMemo<string>(() => {
-    if (!start && !startCountdown) {
+    if (!start && !showCountdown) {
       if (isHost) {
         return t("Press start to play");
       }
@@ -112,7 +113,7 @@ function LocalSection({
     }
 
     return t("You have n clicks", {clicks: localUser.clicks});
-  }, [start, startCountdown, isHost, localUser.clicks, i18n.language]);
+  }, [start, showCountdown, isHost, localUser.clicks, i18n.language]);
 
   return (
     <div className="w-full md:w-1/2 flex flex-col px-4 md:px-0">
@@ -121,7 +122,7 @@ function LocalSection({
       </h4>
       <AdditionalInfo />
       <div>
-        {(!isHost || start || startCountdown) && (
+        {(!isHost || start || showCountdown) && (
           <Button
             className="text-xl md:text-4xl w-full md:w-9/12 px-3.5 md:px-5 py-3 md:py-4"
             disabled={!start || disableUI}
@@ -130,7 +131,7 @@ function LocalSection({
             Click
           </Button>
         )}
-        {isHost && !start && !startCountdown && (
+        {isHost && !start && !showCountdown && (
           <Button
             className="text-xl md:text-4xl w-full md:w-9/12 px-3.5 md:px-5 py-3 md:py-4"
             disabled={cantStart}
@@ -140,7 +141,7 @@ function LocalSection({
           </Button>
         )}
         <h2 className="flex items-center gap-3 md:gap-6 font-semibold text-3xl md:text-6xl mt-5 md:mt-10 justify-center md:justify-start">
-          <Watch /> 00:{String(game?.timer).padStart(2, "0")}
+          <Watch /> 00:{String(remainingTime).padStart(2, "0")}
         </h2>
       </div>
       {width > 768 && (

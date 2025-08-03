@@ -18,7 +18,7 @@ function CelebrationResult({celebrationContainer, timer, localUser}: Props) {
         timer && timer > 0
           ? "d-none"
           : game.listUsers.sort((a, b) => (b.clicks || 0) - (a.clicks || 0))[0]
-              .username === localUser.username
+              ?.username === localUser?.username
           ? "d-block"
           : "d-none"
       } `}

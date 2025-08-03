@@ -90,15 +90,15 @@ export const SettingsSidebar = ({
 
       const refGame = ref(db, `games/${idGame}`);
 
-      await update(refGame, {
+      const updatedGame: Partial<Game> = {
         roomName: localSettings.roomName,
-        timer: game.timer && localSettings.timer,
         settings: {
           maxUsers: localSettings.maxUsers,
           timer: localSettings.timer,
           password: localSettings.password || null
         }
-      } as Partial<Game>);
+      };
+      await update(refGame, updatedGame);
 
       Toast.fire({
         title: t("Settings updated"),

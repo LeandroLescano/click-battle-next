@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 export const handleInvite = (
   isMobile: boolean,
   t: TFunction,
-  password?: string
+  password?: string | null
 ) => {
   let link = window.location.href + `?invite=${Date.now() + 5 * 60 * 1000}`;
   if (password) {
