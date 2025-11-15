@@ -28,7 +28,6 @@ import {
   faGamepad
 } from "@fortawesome/free-solid-svg-icons";
 import {getDatabase, onValue, ref} from "firebase/database";
-import {_DeepPartialArray} from "chart.js/dist/types/utils";
 
 import {Loading} from "components-new/Loading";
 import {useAuth} from "contexts/AuthContext";

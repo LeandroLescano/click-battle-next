@@ -94,7 +94,7 @@ function RoomGame() {
   const {t} = useTranslation();
   const {remainingTime, countdown} = useGameTimer({
     roomStats,
-    onLoadCelebration: () => loadCelebrationAnimation()
+    onFinish: () => loadCelebrationAnimation()
   });
 
   let unsubscribe: Unsubscribe;

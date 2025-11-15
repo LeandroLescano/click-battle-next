@@ -1,22 +1,22 @@
-import {useAuth} from "contexts/AuthContext";
-import {useGame} from "contexts/GameContext";
 import {getAnalytics, logEvent} from "firebase/analytics";
-import {Game, MaxScore, RoomStats} from "interfaces";
+import {getDatabase, ref, update} from "firebase/database";
+import {Timestamp} from "firebase/firestore";
 import moment from "moment";
 import {useEffect, useState} from "react";
-import {updateUser} from "services/user";
 
-import {Timestamp} from "firebase/firestore";
-import {getDatabase, ref, update} from "firebase/database";
+import {useAuth} from "contexts/AuthContext";
+import {useGame} from "contexts/GameContext";
+import {Game, MaxScore, RoomStats} from "interfaces";
+import {updateUser} from "services/user";
 
 const COUNTDOWN = 3;
 
 const useGameTimer = ({
   roomStats,
-  onLoadCelebration
+  onFinish
 }: {
   roomStats?: {current: RoomStats};
-  onLoadCelebration?: VoidFunction;
+  onFinish?: VoidFunction;
 }) => {
   const {user: gUser, gameUser, updateGameUser} = useAuth();
   const {game, calculatePosition, localUser} = useGame();
@@ -80,7 +80,6 @@ const useGameTimer = ({
       if (localUser.rol === "owner") {
         // localUser is owner
         if (remainingTime === 0 && game.status === "playing") {
-          calculatePosition();
           logEvent(getAnalytics(), "game_finish", {
             date: new Date(),
             users: game.listUsers,
@@ -99,14 +98,15 @@ const useGameTimer = ({
           const endedGame: Partial<Game> = {status: "ended"};
 
           update(refGame, endedGame);
+          onFinish?.();
+          calculatePosition();
           updateLocalMaxScore(userKey);
         }
 
-        onLoadCelebration?.();
         return;
-      } else if (remainingTime === 0) {
+      } else if (game.status === "ended" || remainingTime === 0) {
         // localUser is visitor
-        onLoadCelebration?.();
+        onFinish?.();
         calculatePosition();
         updateLocalMaxScore(userKey);
       }

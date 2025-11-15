@@ -1,16 +1,15 @@
-import React from "react";
 import {get, getDatabase, ref, update} from "firebase/database";
+import React from "react";
 import {useTranslation} from "react-i18next";
 
-import {useGame} from "contexts/GameContext";
 import {Button} from "components-new/Button";
-import {Trophy} from "icons/Trophy";
 import {Card} from "components-new/Card";
+import {useGame} from "contexts/GameContext";
+import {Trophy} from "icons/Trophy";
+import {Game} from "interfaces";
 import {getSuffixPosition} from "utils/string";
-// import {AcceptanceModal} from "components-new/AcceptanceModal";
 
 import "./styles.scss";
-import {Game} from "interfaces";
 
 const ResultSection = () => {
   const db = getDatabase();
@@ -86,7 +85,6 @@ const ResultSection = () => {
           </Button>
         )}
       </div>
-      {/* <AcceptanceModal /> */}
     </>
   );
 };
