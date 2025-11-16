@@ -1,4 +1,6 @@
+/* eslint-disable import/export */
 import {test as base, type Page} from "@playwright/test";
+
 import {authenticate} from "./auth.utils";
 
 class GenericPage {

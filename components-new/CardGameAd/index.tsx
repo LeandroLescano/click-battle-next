@@ -1,5 +1,5 @@
-import React from "react";
 import {AdblockDetector} from "adblock-detector";
+import React from "react";
 
 import {Card} from "components-new/Card";
 import {useWindowSize} from "hooks";

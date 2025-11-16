@@ -1,7 +1,4 @@
 "use client";
-import React, {useEffect, useRef, useState} from "react";
-import dynamic from "next/dynamic";
-import {useParams, useRouter, useSearchParams} from "next/navigation";
 import {
   getDatabase,
   onDisconnect,
@@ -11,14 +8,16 @@ import {
   set,
   Unsubscribe
 } from "@firebase/database";
-import lottie from "lottie-web";
-import Swal from "sweetalert2";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import lottie from "lottie-web";
+import dynamic from "next/dynamic";
+import {useParams, useRouter, useSearchParams} from "next/navigation";
+import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
-import celebrationAnim from "lotties/celebrationAnim.json";
 import {
   ModalCreateUsername,
   Loading,
@@ -27,12 +26,13 @@ import {
 } from "components";
 import {ModalLoginProps} from "components/ModalLogin/types";
 import {useAuth} from "contexts/AuthContext";
-import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
-import {addRoomStats} from "services/rooms";
-import {Game, GameUser, RoomStats} from "interfaces";
 import {useGame} from "contexts/GameContext";
-import {handleInvite} from "utils/invite";
+import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import useGameTimer from "hooks/gameTimer";
+import {Game, GameUser, RoomStats} from "interfaces";
+import celebrationAnim from "lotties/celebrationAnim.json";
+import {addRoomStats} from "services/rooms";
+import {handleInvite} from "utils/invite";
 
 const OpponentSection = dynamic(
   () => import("../../../../components/roomGame/OpponentSection")
@@ -94,7 +94,7 @@ function RoomGame() {
   const {t} = useTranslation();
   const {remainingTime, countdown} = useGameTimer({
     roomStats,
-    onLoadCelebration: () => loadCelebrationAnimation()
+    onFinish: () => loadCelebrationAnimation()
   });
 
   let unsubscribe: Unsubscribe;

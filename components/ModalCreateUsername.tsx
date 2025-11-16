@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import "firebase/database";
-import {useTranslation} from "react-i18next";
 import {Modal, Spinner} from "react-bootstrap";
+import {useTranslation} from "react-i18next";
 import Swal from "sweetalert2";
 
 import {useAuth} from "contexts/AuthContext";

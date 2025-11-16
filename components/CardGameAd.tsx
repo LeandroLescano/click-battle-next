@@ -1,5 +1,5 @@
-import React, {memo} from "react";
 import {AdblockDetector} from "adblock-detector";
+import React, {memo} from "react";
 
 import GoogleAdUnit from "./GoogleAdUnit";
 

@@ -65,4 +65,8 @@
       box-shadow: 1.87px 2.5px theme("colors.primary.250");
     }
   }
+
+  &-disabled {
+    cursor: not-allowed;
+  }
 }

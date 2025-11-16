@@ -1,9 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import {NextRequest, NextResponse} from "next/server";
+import {createTransport} from "nodemailer";
 import SendmailTransport from "nodemailer/lib/sendmail-transport";
 
-import nodemailer from "nodemailer";
 import {EmailTemplate} from "components/EmailTemplate";
-import {NextRequest, NextResponse} from "next/server";
 
 export async function POST(req: NextRequest) {
   const {author, message} = await req.json();
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       reject();
     }
 
-    const transporter = nodemailer.createTransport({
+    const transporter = createTransport({
       service: "gmail",
       auth: {
         user: process.env.REACT_APP_EMAIL,

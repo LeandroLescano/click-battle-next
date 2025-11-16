@@ -1,5 +1,7 @@
-import React, {Suspense} from "react";
+import {getApp, getApps, initializeApp} from "firebase/app";
 import Script from "next/script";
+import React, {Suspense} from "react";
+
 import "../../styles/globals.scss";
 import "../../styles/styles.scss";
 import "../../styles/roomGame.scss";
@@ -9,14 +11,12 @@ import "../../styles/footer.scss";
 import "../../styles/about.scss";
 import "../../styles/loginButton.scss";
 
-import {getApp, getApps, initializeApp} from "firebase/app";
-
-import {AuthProvider} from "contexts/AuthContext";
 import {Loading} from "components/Loading";
-import {detectLanguage} from "i18n/server";
-import {I18nProvider} from "i18n/i18n-context";
-import {firebaseConfig} from "resources/config";
+import {AuthProvider} from "contexts/AuthContext";
 import {GameProvider} from "contexts/GameContext";
+import {I18nProvider} from "i18n/i18n-context";
+import {detectLanguage} from "i18n/server";
+import {firebaseConfig} from "resources/config";
 
 if (!getApps.length) {
   initializeApp(firebaseConfig);

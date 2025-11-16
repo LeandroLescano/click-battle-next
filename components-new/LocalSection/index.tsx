@@ -1,18 +1,19 @@
-import React, {useMemo, useRef, useState} from "react";
-import {useRouter} from "next/navigation";
-import {getDatabase, ref, update} from "firebase/database";
+import {AntiClickCheat} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
+import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
+import {useRouter} from "next/navigation";
+import {useMemo, useRef, useState} from "react";
 import {Trans, useTranslation} from "react-i18next";
 
-import {Game, GameUser} from "interfaces";
-import {useAuth} from "contexts/AuthContext";
-import {useGame} from "contexts/GameContext";
 import {Button} from "components-new/Button";
-import {Watch} from "icons/Watch";
 import {Card} from "components-new/Card";
 import GoogleAdUnit from "components-new/CardGameAd/GoogleAdUnit";
+import {useAuth} from "contexts/AuthContext";
+import {useGame} from "contexts/GameContext";
 import {useWindowSize} from "hooks";
 import useGameTimer from "hooks/gameTimer";
+import {Watch} from "icons/Watch";
+import {GameUser} from "interfaces";
 
 interface LocalSectionProps {
   idGame: string;
@@ -20,16 +21,16 @@ interface LocalSectionProps {
 }
 
 function LocalSection({idGame, localUser}: LocalSectionProps) {
-  const [lastClickTime, setLastClickTime] = useState<number>();
   const router = useRouter();
   const db = getDatabase();
   const {user: gUser} = useAuth();
-  const suspicionOfHackCounter = useRef(0);
   const {t, i18n} = useTranslation();
   const [disableUI, setDisableUI] = useState(false);
   const {game, isHost} = useGame();
   const {remainingTime} = useGameTimer({});
   const {width} = useWindowSize();
+  // 1000ms / 20 clicks = 50ms
+  const antiCheat = useRef(new AntiClickCheat(50, 10));
 
   const showCountdown = game.status === "countdown";
   const start = game.status === "playing";
@@ -43,39 +44,31 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
       users: game.listUsers.length,
       date: new Date()
     });
-    const startedGame: Partial<Game> = {
+    const startedGame = {
       status: "countdown",
-      startTime: new Date()
+      startTime: serverTimestamp()
     };
     update(refGame, startedGame);
   };
 
   const handleClick = () => {
-    const now = Date.now();
+    const {shouldKick, interval, suspicionCounter} =
+      antiCheat.current.registerClick();
 
-    // 1000ms / 20 clicks = 50ms
-    if (lastClickTime && now - lastClickTime < 50) {
-      suspicionOfHackCounter.current++;
+    console.log({interval, suspicionCounter});
 
-      if (suspicionOfHackCounter.current >= 10) {
-        setDisableUI(true);
-        logEvent(getAnalytics(), "kicked_suspicion_hack", {
-          action: "kicked_suspicion_hack",
-          clickInterval: now - lastClickTime,
-          date: new Date()
-        });
-        router.push("/?suspicionOfHack=true");
-        return;
-      }
-    } else {
-      suspicionOfHackCounter.current = Math.max(
-        suspicionOfHackCounter.current - 1,
-        0
-      );
+    if (shouldKick) {
+      setDisableUI(true);
+      logEvent(getAnalytics(), "kicked_suspicion_hack", {
+        action: "kicked_suspicion_hack",
+        clickInterval: interval,
+        suspicionCounter,
+        date: new Date()
+      });
+      return router.push("/?suspicionOfHack=true");
     }
 
     if (localUser.clicks !== undefined && gUser) {
-      setLastClickTime(now);
       const refGame = ref(db, `games/${idGame}/listUsers/${gUser.uid}`);
       update(refGame, {clicks: localUser.clicks + 1});
     }

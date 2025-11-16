@@ -1,7 +1,4 @@
 "use client";
-import React, {useCallback, useEffect, useRef, useState} from "react";
-import dynamic from "next/dynamic";
-import {useParams, useRouter, useSearchParams} from "next/navigation";
 import {
   getDatabase,
   onDisconnect,
@@ -11,23 +8,27 @@ import {
   set,
   Unsubscribe
 } from "@firebase/database";
-import lottie from "lottie-web";
-import Swal from "sweetalert2";
-import {useTranslation} from "react-i18next";
+import {parseGameSnapshot} from "@leandrolescano/click-battle-core";
 import {Timestamp} from "firebase/firestore";
+import lottie from "lottie-web";
+import dynamic from "next/dynamic";
+import {useParams, useRouter, useSearchParams} from "next/navigation";
+import {useCallback, useEffect, useRef, useState} from "react";
+import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
-import celebrationAnim from "lotties/celebrationAnim.json";
 import {requestPassword} from "components";
-import {useAuth} from "contexts/AuthContext";
-import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
-import {addRoomStats} from "services/rooms";
-import {Game, GameUser, RoomStats, RoomUser} from "interfaces";
-import {useGame} from "contexts/GameContext";
-import {handleInvite} from "utils/invite";
-import {LoginModalProps} from "components-new/LoginModal/types";
 import {Button, Loading, SettingsSidebar} from "components-new";
 import {GameHeader} from "components-new/GameHeader";
+import {LoginModalProps} from "components-new/LoginModal/types";
+import {useAuth} from "contexts/AuthContext";
+import {useGame} from "contexts/GameContext";
+import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import useGameTimer from "hooks/gameTimer";
+import {Game, RoomStats} from "interfaces";
+import celebrationAnim from "lotties/celebrationAnim.json";
+import {addRoomStats} from "services/rooms";
+import {handleInvite} from "utils/invite";
 
 const OpponentSection = dynamic(
   () => import("../../../components-new/OpponentSection")
@@ -84,13 +85,12 @@ const RoomGame = () => {
     localUser,
     currentGame
   );
-  const localUserRef = useRef<GameUser>();
   const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();
   const {setHasEnteredPassword, hasEnteredPassword} = useGame();
   const {remainingTime, countdown} = useGameTimer({
     roomStats,
-    onLoadCelebration: () => loadCelebrationAnimation()
+    onFinish: () => loadCelebrationAnimation()
   });
 
   let unsubscribe: Unsubscribe;
@@ -139,107 +139,84 @@ const RoomGame = () => {
         const refGame = ref(db, `games/${gameID}/`);
 
         unsubscribe = onValue(refGame, (snapshot) => {
-          const game: Game | null = snapshot.val();
+          const parsedGame = parseGameSnapshot(
+            snapshot.val(),
+            snapshot.key,
+            gUser?.uid
+          );
+
+          if (!parsedGame) return router.replace("/");
+
+          const {
+            game,
+            listUsers,
+            localUser: dbLocalUser,
+            kickedOut,
+            isHost,
+            isRoomFull,
+            requiresPassword
+          } = parsedGame;
+
           try {
-            if (game && game.settings) {
-              game.key = snapshot.key;
-              if (game.listUsers) {
-                game.listUsers = Object.entries(game.listUsers).map((u) => ({
-                  key: u[0],
-                  ...u[1]
-                }));
-              }
+            setGame({...game, listUsers});
+            if (dbLocalUser) {
+              setLocalUser(dbLocalUser);
+            }
+            setIsHost(isHost);
 
-              setGame({...game, startTime: game.startTime ?? undefined});
+            if (!roomStats.current.name) {
+              roomStats.current.name = game.roomName;
+              roomStats.current.owner = game.ownerUser.username;
+              roomStats.current.withPassword = !!game.settings.password;
+              roomStats.current.created = new Date(
+                game.created as unknown as number
+              );
+            }
 
-              if (!roomStats.current.name) {
-                roomStats.current.name = game.roomName;
-                roomStats.current.owner = game.ownerUser.username;
-                roomStats.current.withPassword = !!game.settings.password;
-                roomStats.current.created = new Date(
-                  game.created as unknown as number
-                );
-              }
+            if (kickedOut) return router.push("/?kickedOut=true");
 
-              const listUsersToPush: RoomUser[] = [];
-              const listUsersDB: RoomUser[] = game.listUsers ?? [];
+            if (listUsers.length > currentGame.listUsers.length) {
+              setNewUser(true);
+            }
 
-              listUsersDB.forEach((val) => {
-                if (!val.kickOut) {
-                  const objUser: GameUser = {...val};
+            if (!isHost) {
+              if (isRoomFull) return router.push("/?fullRoom=true");
 
-                  if (val.key === gUser?.uid) {
-                    if (objUser.clicks !== localUserRef.current?.clicks) {
-                      localUserRef.current = objUser;
-                      setLocalUser(objUser);
-                    }
-                  }
-
-                  listUsersToPush.push(objUser);
-                } else if (val.key === gUser?.uid) {
-                  router.push("/?kickedOut=true");
-                  return;
-                }
-              });
-
-              if (listUsersToPush.length > currentGame.listUsers.length) {
-                setNewUser(true);
-              }
-
-              setGame({listUsers: listUsersToPush});
-
-              if (game.ownerUser?.key === gUser?.uid) {
-                setIsHost(true);
-              } else if (gUser?.uid) {
-                if (listUsersToPush.length > game.settings.maxUsers) {
-                  const latestEnterUser = listUsersToPush.sort(
-                    (a, b) =>
-                      (b.enterDate?.seconds || 0) - (a.enterDate?.seconds || 0)
-                  )[0];
-
-                  if (
-                    !listUsersToPush.find((u) => u.key === gUser.uid) ||
-                    latestEnterUser.key === gUser.uid
-                  ) {
-                    router.push("/?fullRoom=true");
-                    return;
-                  }
-                }
-
+              if (
+                requiresPassword &&
+                !hasEnteredPassword &&
+                !flagEnter.current
+              ) {
+                flagEnter.current = true;
                 if (
-                  game.settings.password &&
-                  !hasEnteredPassword &&
-                  !flagEnter.current
+                  !query.get("pwd") ||
+                  query.get("pwd") !== game.settings.password
                 ) {
-                  flagEnter.current = true;
-                  if (
-                    !query.get("pwd") ||
-                    query.get("pwd") !== game.settings.password
-                  ) {
-                    requestPassword(game.settings.password, t).then((val) => {
-                      if (val.isConfirmed) {
-                        setHasEnteredPassword(true);
-                        clearPath(gameID);
-                        addNewUserToDB(game);
-                      } else {
-                        router.push("/");
-                        return;
-                      }
-                    });
-                  } else {
-                    clearPath(gameID);
-                    addNewUserToDB(game);
-                  }
-                }
-
-                //Add user to DB
-                if (!flagEnter.current) {
-                  flagEnter.current = true;
+                  requestPassword(game.settings.password!, t).then((val) => {
+                    if (val.isConfirmed) {
+                      setHasEnteredPassword(true);
+                      clearPath(gameID);
+                      addNewUserToDB(game);
+                    } else {
+                      router.push("/");
+                      return;
+                    }
+                  });
+                } else {
+                  clearPath(gameID);
                   addNewUserToDB(game);
                 }
               }
-            } else {
-              router.replace("/");
+
+              //Add user to DB
+              if (!flagEnter.current) {
+                if (listUsers.length + 1 > game.settings.maxUsers) {
+                  return router.push("/?fullRoom=true");
+                }
+
+                flagEnter.current = true;
+                addNewUserToDB(game);
+              }
             }
           } catch (error) {
             console.log(
@@ -277,7 +254,7 @@ const RoomGame = () => {
     if (roomStats.current.maxUsersConnected < currentGame.listUsers.length) {
       roomStats.current.maxUsersConnected = currentGame.listUsers.length;
     }
-  }, [currentGame.listUsers]);
+  }, [currentGame.listUsers.length]);
 
   const clearPath = (id: string) => {
     router.replace(`/game/${id}`);

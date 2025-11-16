@@ -1,10 +1,10 @@
 "use client";
-import React, {useEffect, useState} from "react";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {faBan} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {motion} from "framer-motion";
 import Image from "next/image";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faBan} from "@fortawesome/free-solid-svg-icons";
-import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import React, {useEffect, useState} from "react";
 
 // Utils
 import {timeout} from "../utils/timeout";
