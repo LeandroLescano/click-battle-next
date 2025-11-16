@@ -1,6 +1,13 @@
 "use client";
 
-import React, {useState, useEffect, useContext, createContext} from "react";
+import * as Sentry from "@sentry/nextjs";
+import {
+  getAnalytics,
+  logEvent,
+  isSupported,
+  setAnalyticsCollectionEnabled
+} from "firebase/analytics";
+import {getApp, getApps, initializeApp} from "firebase/app";
 import {
   GoogleAuthProvider,
   User,
@@ -17,27 +24,20 @@ import {
   connectAuthEmulator,
   updateProfile
 } from "firebase/auth";
-import Swal from "sweetalert2";
-import {
-  getAnalytics,
-  logEvent,
-  isSupported,
-  setAnalyticsCollectionEnabled
-} from "firebase/analytics";
-import * as Sentry from "@sentry/nextjs";
-import {getApp, getApps, initializeApp} from "firebase/app";
 import {connectDatabaseEmulator, getDatabase} from "firebase/database";
 import {
   connectFirestoreEmulator,
   getFirestore,
   Timestamp
 } from "firebase/firestore";
+import React, {useState, useEffect, useContext, createContext} from "react";
+import Swal from "sweetalert2";
 
-import {GameUser, MaxScore} from "interfaces";
-import {addUser, getUser, getUserByEmail, updateUser} from "services/user";
-import {useUserInfo} from "hooks/userInfo";
-import {firebaseConfig} from "resources/config";
 import {useTheme} from "contexts/ThemeContext";
+import {useUserInfo} from "hooks/userInfo";
+import {GameUser, MaxScore} from "interfaces";
+import {firebaseConfig} from "resources/config";
+import {addUser, getUser, getUserByEmail, updateUser} from "services/user";
 
 export type AuthProviders = keyof typeof AUTH_PROVIDERS;
 

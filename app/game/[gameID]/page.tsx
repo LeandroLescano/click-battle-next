@@ -224,7 +224,7 @@ const RoomGame = () => {
                 game,
                 roomStats,
                 username: gameUser?.username,
-                listUsers: currentGame.listUsers,
+                listUsers: listUsers,
                 isLocal: isHost
               })
             );
@@ -247,7 +247,7 @@ const RoomGame = () => {
       unsubscribe?.();
       resetContext();
     };
-  }, [isAuthenticated, gUser?.uid]);
+  }, [isAuthenticated, gUser?.uid, currentGame.listUsers.length]);
 
   // useEffect for update the maxUsersConnected
   useEffect(() => {

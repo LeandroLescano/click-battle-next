@@ -62,7 +62,7 @@ export const useNewPlayerAlert = (
       clearInterval(intervalId);
       document.title = TITLE_DEFAULT;
     };
-  }, [newUser, isFocused, listUsers.length, localUser]);
+  }, [newUser, isFocused, listUsers.length, localUser.rol]);
 
   // useEffect to alert player about the game status and tab is not focused
   useEffect(() => {
@@ -87,7 +87,7 @@ export const useNewPlayerAlert = (
     } else {
       document.title = TITLE_DEFAULT;
     }
-  }, [game, isFocused]);
+  }, [game, isFocused, countdown, remainingTime]);
 
   return {setNewUser};
 };

@@ -55,8 +55,6 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
     const {shouldKick, interval, suspicionCounter} =
       antiCheat.current.registerClick();
 
-    console.log({interval, suspicionCounter});
-
     if (shouldKick) {
       setDisableUI(true);
       logEvent(getAnalytics(), "kicked_suspicion_hack", {
