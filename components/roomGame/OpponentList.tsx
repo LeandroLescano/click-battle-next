@@ -1,12 +1,12 @@
-import React from "react";
 import {getDatabase, ref, update} from "firebase/database";
 import {useParams} from "next/navigation";
+import {memo} from "react";
 import {Flipped, Flipper} from "react-flip-toolkit";
-import Swal from "sweetalert2";
 import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
-import {GameUser} from "interfaces";
 import {useGame} from "contexts/GameContext";
+import {GameUser} from "interfaces";
 
 interface Props {
   countPositions: {
@@ -81,4 +81,4 @@ const OpponentList = ({countPositions, localUsername}: Props) => {
   );
 };
 
-export default React.memo(OpponentList);
+export default memo(OpponentList);

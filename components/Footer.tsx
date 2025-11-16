@@ -1,26 +1,26 @@
-import React, {useEffect, useState} from "react";
-import Link from "next/link";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-import {useTranslation} from "react-i18next";
+import {getAnalytics, logEvent} from "firebase/analytics";
 import {changeLanguage} from "i18next";
+import Link from "next/link";
+import {useRouter} from "next/navigation";
+import React, {useEffect, useState} from "react";
 import {
   Dropdown,
   DropdownButton,
   OverlayTrigger,
   Tooltip
 } from "react-bootstrap";
-import {useRouter} from "next/navigation";
-import {getAnalytics, logEvent} from "firebase/analytics";
+import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
-import {timeout} from "utils/timeout";
-import {updateUser} from "services/user";
 import {useAuth} from "contexts/AuthContext";
-import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
 import {languages} from "i18n/settings";
+import {updateUser} from "services/user";
+import {loadingAlert, loginWithGoogleAlert} from "utils/alerts";
+import {timeout} from "utils/timeout";
 
-import RatingStars from "./RatingStars";
 import {ModalLogin} from "./ModalLogin";
+import RatingStars from "./RatingStars";
 
 interface contactProps {
   title?: string;

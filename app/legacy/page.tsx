@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
-import React, {Fragment, useEffect, useState} from "react";
-import Swal from "sweetalert2";
-import {useTranslation} from "react-i18next";
-import {getAnalytics, logEvent} from "firebase/analytics";
-import {useRouter, useSearchParams} from "next/navigation";
 import {child, getDatabase, onValue, ref, set} from "@firebase/database";
+import {getAnalytics, logEvent} from "firebase/analytics";
 import dynamic from "next/dynamic";
+import {useRouter, useSearchParams} from "next/navigation";
+import React, {Fragment, useEffect, useState} from "react";
 import {Toast, ToastContainer} from "react-bootstrap";
+import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
-import {Game, GameUser} from "interfaces";
 import {
   CardGame,
   Footer,
@@ -22,6 +21,7 @@ import CreateSection from "components/CreateSection/CreateSection";
 import {ModalLoginProps} from "components/ModalLogin/types";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
+import {Game, GameUser} from "interfaces";
 
 const ModalLogin = dynamic<ModalLoginProps>(
   () =>

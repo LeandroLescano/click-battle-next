@@ -1,15 +1,15 @@
-import React, {useEffect, useRef, useState} from "react";
 import {getDatabase, ref, update} from "@firebase/database";
-import Swal from "sweetalert2";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {faCog, faTimes} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
+import {Game} from "interfaces";
+import {AVAILABLE_TIMES} from "resources/constants";
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
-import {AVAILABLE_TIMES} from "resources/constants";
-import {Game} from "interfaces";
 import {adjustRoomSettings} from "utils/room";
 
 const Toast = Swal.mixin({

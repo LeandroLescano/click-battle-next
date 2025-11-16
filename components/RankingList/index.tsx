@@ -1,12 +1,12 @@
 "use client";
 
+import {getAnalytics, logEvent} from "firebase/analytics";
 import React, {useEffect, useState} from "react";
 import {Toast, ToastContainer} from "react-bootstrap";
-import {getAnalytics, logEvent} from "firebase/analytics";
 import {useTranslation} from "react-i18next";
 
-import {useAuth} from "contexts/AuthContext";
 import {ModalLogin} from "components/ModalLogin";
+import {useAuth} from "contexts/AuthContext";
 
 import {RankingListProps} from "./types";
 

@@ -1,6 +1,7 @@
 import React from "react";
-import {GameUser} from "interfaces";
+
 import {useGame} from "contexts/GameContext";
+import {GameUser} from "interfaces";
 
 interface Props {
   celebrationContainer: React.LegacyRef<HTMLDivElement> | undefined;

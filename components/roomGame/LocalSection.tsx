@@ -1,12 +1,12 @@
-import React, {useRef, useState} from "react";
-import {useRouter} from "next/navigation";
-import {getDatabase, ref, update} from "firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
+import {getDatabase, ref, update} from "firebase/database";
+import {useRouter} from "next/navigation";
+import React, {useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 
-import {Game, GameUser} from "interfaces";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
+import {Game, GameUser} from "interfaces";
 
 interface LocalSectionProps {
   idGame: string;

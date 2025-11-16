@@ -1,10 +1,5 @@
 // React
-import React, {useEffect, useRef, useState} from "react";
-import {useRouter} from "next/navigation";
-import {Spinner} from "react-bootstrap";
-import Swal from "sweetalert2";
 import {getAnalytics, logEvent} from "firebase/analytics";
-import lottie from "lottie-web";
 import {
   child,
   get,
@@ -14,15 +9,20 @@ import {
   serverTimestamp,
   set
 } from "firebase/database";
+import lottie from "lottie-web";
+import {useRouter} from "next/navigation";
+import React, {useEffect, useRef, useState} from "react";
+import {Spinner} from "react-bootstrap";
 import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
-import logoAnim from "lotties/logo-animated.json";
-import {Game, GameSettings, GameUser, Room} from "interfaces";
 import {useAuth} from "contexts/AuthContext";
+import {useGame} from "contexts/GameContext";
+import {Game, GameSettings, GameUser, Room} from "interfaces";
+import logoAnim from "lotties/logo-animated.json";
+import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
-import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
-import {useGame} from "contexts/GameContext";
 
 const CreateSection = () => {
   const [creating, setCreating] = useState(false);
