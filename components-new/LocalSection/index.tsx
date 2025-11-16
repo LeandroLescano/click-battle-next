@@ -1,6 +1,6 @@
 import {AntiClickCheat} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
-import {getDatabase, ref, update} from "firebase/database";
+import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
 import {useRouter} from "next/navigation";
 import {useMemo, useRef, useState} from "react";
 import {Trans, useTranslation} from "react-i18next";
@@ -13,7 +13,7 @@ import {useGame} from "contexts/GameContext";
 import {useWindowSize} from "hooks";
 import useGameTimer from "hooks/gameTimer";
 import {Watch} from "icons/Watch";
-import {Game, GameUser} from "interfaces";
+import {GameUser} from "interfaces";
 
 interface LocalSectionProps {
   idGame: string;
@@ -44,9 +44,9 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
       users: game.listUsers.length,
       date: new Date()
     });
-    const startedGame: Partial<Game> = {
+    const startedGame = {
       status: "countdown",
-      startTime: new Date()
+      startTime: serverTimestamp()
     };
     update(refGame, startedGame);
   };

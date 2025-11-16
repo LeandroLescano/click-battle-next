@@ -1,7 +1,9 @@
+import {clsx} from "clsx";
 import React from "react";
 import {useTranslation} from "react-i18next";
 
 import {ButtonProps} from "./types";
+
 import "./styles.scss";
 
 export const Button = ({
@@ -17,7 +19,9 @@ export const Button = ({
 
   return (
     <button
-      className={`button button-${variant} ${className || ""}`}
+      className={clsx(`button button-${variant}`, className, {
+        "button-disabled": rest.disabled
+      })}
       onClick={onClick}
       {...rest}
       disabled={rest.disabled || loading}
