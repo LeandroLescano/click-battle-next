@@ -150,4 +150,33 @@ test.describe("Game", () => {
       userPage.page.getByText("Enter the password")
     ).not.toBeVisible();
   });
+
+  test("Should kick user if clicking too fast", async ({
+    hostPage,
+    userPage: {page: userPage}
+  }) => {
+    await hostPage.createRoom();
+
+    await userPage.getByText("guesthost1's roomOwner: guesthost11/").click();
+    await userPage.waitForURL(/\/game\//);
+
+    await hostPage.page.getByText("Start!").click();
+    await userPage.waitForTimeout(3000);
+    await hostPage.page.waitForTimeout(3000);
+
+    const clickButton = userPage.getByRole("button", {name: "Click"});
+    for (let i = 0; i < 20; i++) {
+      clickButton.click().catch(() => {});
+      await userPage.waitForTimeout(5);
+    }
+
+    await userPage.waitForURL(
+      (url) => url.searchParams.has("suspicionOfHack"),
+      {
+        timeout: 5000
+      }
+    );
+
+    await expect(userPage.getByText(/Misuse detected/i)).toBeVisible();
+  });
 });

@@ -5,7 +5,6 @@ import {useTranslation} from "react-i18next";
 
 import {Game, GameUser} from "interfaces";
 import {getSuffixPosition} from "utils/string";
-
 interface GameContextState {
   game: Game;
   setGame: (game: Partial<Game>) => void;
@@ -21,9 +20,8 @@ interface GameContextState {
   setHasEnteredPassword: (hasEnteredPassword: boolean) => void;
 }
 
-const initialGame = {
-  currentGame: false,
-  gameStart: false,
+const initialGame: Game = {
+  status: "lobby",
   listUsers: [],
   ownerUser: {
     username: ""
@@ -34,10 +32,7 @@ const initialGame = {
     password: "",
     timer: 10
   },
-  timer: 10,
-  timeStart: 3,
-  key: "",
-  hasEnteredPassword: false
+  key: ""
 };
 
 const GameContext = createContext<GameContextState>({

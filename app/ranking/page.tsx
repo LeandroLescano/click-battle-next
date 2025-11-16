@@ -1,11 +1,11 @@
-import React from "react";
-import {customInitApp} from "lib/firebase-admin-config";
 import {getFirestore} from "firebase-admin/firestore";
 import {unstable_cache} from "next/cache";
+import React from "react";
 
-import {GameUser} from "interfaces";
-import {UserWithScore} from "components-new/Ranking/types";
 import {Ranking} from "components-new/Ranking";
+import {UserWithScore} from "components-new/Ranking/types";
+import {GameUser} from "interfaces";
+import {customInitApp} from "lib/firebase-admin-config";
 
 customInitApp();
 

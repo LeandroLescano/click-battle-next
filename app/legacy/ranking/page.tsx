@@ -1,17 +1,17 @@
-import React from "react";
-import {customInitApp} from "lib/firebase-admin-config";
-import {getFirestore} from "firebase-admin/firestore";
-import {Card, CardBody, CardHeader, Container} from "react-bootstrap";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
-import dynamic from "next/dynamic";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {getFirestore} from "firebase-admin/firestore";
 import {unstable_cache} from "next/cache";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import React from "react";
+import {Card, CardBody, CardHeader, Container} from "react-bootstrap";
 
-import {GameUser} from "interfaces";
 import {RankingList} from "components/RankingList";
 import {getServerTranslations} from "i18n/server";
+import {GameUser} from "interfaces";
+import {customInitApp} from "lib/firebase-admin-config";
 
 const UpdatedTime = dynamic(() => import("components/UpdatedTime"), {
   ssr: false

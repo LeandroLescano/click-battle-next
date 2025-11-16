@@ -1,7 +1,7 @@
-import React from "react";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {faLock, faUser} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import React from "react";
 import {useTranslation} from "react-i18next";
 
 import {Game} from "interfaces";

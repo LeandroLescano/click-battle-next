@@ -1,5 +1,5 @@
-import Swal, {SweetAlertResult} from "sweetalert2";
 import {TFunction} from "i18next";
+import Swal, {SweetAlertResult} from "sweetalert2";
 
 import {sha256} from "services/encode";
 

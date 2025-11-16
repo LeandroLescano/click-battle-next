@@ -1,8 +1,9 @@
 "use client";
 
-import React, {useEffect, useRef} from "react";
-import logoAnim from "lotties/logo-animated.json";
 import Lottie from "lottie-web";
+import React, {useEffect, useRef} from "react";
+
+import logoAnim from "lotties/logo-animated.json";
 
 export const Loading = () => {
   const loadingContainer = useRef<HTMLDivElement>(null);

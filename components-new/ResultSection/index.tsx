@@ -1,13 +1,13 @@
-import React from "react";
 import {get, getDatabase, ref, update} from "firebase/database";
+import React from "react";
 import {useTranslation} from "react-i18next";
 
-import {useGame} from "contexts/GameContext";
 import {Button} from "components-new/Button";
-import {Trophy} from "icons/Trophy";
 import {Card} from "components-new/Card";
+import {useGame} from "contexts/GameContext";
+import {Trophy} from "icons/Trophy";
+import {Game} from "interfaces";
 import {getSuffixPosition} from "utils/string";
-import {AcceptanceModal} from "components-new/AcceptanceModal";
 
 import "./styles.scss";
 
@@ -19,12 +19,11 @@ const ResultSection = () => {
   // function for reset all data
   const handleReset = () => {
     const refGame = ref(db, `games/${game.key}`);
-    update(refGame, {
-      timer: game.settings.timer || 10,
-      gameStart: false,
-      timeStart: 3,
-      currentGame: false
-    });
+    const resetGame: Partial<Game> = {
+      status: "lobby",
+      startTime: null
+    };
+    update(refGame, resetGame);
     const refGameUsers = ref(db, `games/${game.key}/listUsers`);
     get(refGameUsers).then((snapshot) => {
       snapshot.forEach((child) => {
@@ -86,7 +85,6 @@ const ResultSection = () => {
           </Button>
         )}
       </div>
-      <AcceptanceModal />
     </>
   );
 };

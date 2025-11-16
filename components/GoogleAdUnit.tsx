@@ -1,6 +1,6 @@
 "use client";
-import React, {Fragment, ReactNode, useEffect} from "react";
 import {usePathname, useSearchParams} from "next/navigation";
+import React, {Fragment, ReactNode, useEffect} from "react";
 
 type Props = {
   children: ReactNode;

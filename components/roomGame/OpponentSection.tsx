@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 
+import {useGame} from "contexts/GameContext";
 import {GameUser} from "interfaces";
 
 import OpponentList from "./OpponentList";
-import {useGame} from "contexts/GameContext";
 interface OpponentSectionProps {
   localUsername: string;
   maxUsers: number;

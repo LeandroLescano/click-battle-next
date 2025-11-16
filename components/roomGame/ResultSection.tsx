@@ -1,12 +1,12 @@
-import React from "react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faTrophy} from "@fortawesome/free-solid-svg-icons";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {faTrophy} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {get, getDatabase, ref, update} from "firebase/database";
+import React from "react";
 import {useTranslation} from "react-i18next";
 
-import {Game, GameUser} from "interfaces";
 import {useGame} from "contexts/GameContext";
+import {Game, GameUser} from "interfaces";
 
 interface ResultSectionProps {
   localUser: GameUser;
@@ -21,12 +21,11 @@ function ResultSection({localUser, currentGame}: ResultSectionProps) {
   // function for reset all data
   const handleReset = () => {
     const refGame = ref(db, `games/${currentGame.key}`);
-    update(refGame, {
-      timer: currentGame.settings.timer || 10,
-      gameStart: false,
-      timeStart: 3,
-      currentGame: false
-    });
+    const updateReset: Partial<Game> = {
+      status: "lobby",
+      startTime: null
+    };
+    update(refGame, updateReset);
     const refGameUsers = ref(db, `games/${currentGame.key}/listUsers`);
     get(refGameUsers).then((snapshot) => {
       snapshot.forEach((child) => {

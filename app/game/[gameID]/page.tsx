@@ -1,7 +1,4 @@
 "use client";
-import React, {useCallback, useEffect, useRef, useState} from "react";
-import dynamic from "next/dynamic";
-import {useParams, useRouter, useSearchParams} from "next/navigation";
 import {
   getDatabase,
   onDisconnect,
@@ -9,27 +6,29 @@ import {
   ref,
   remove,
   set,
-  update,
   Unsubscribe
 } from "@firebase/database";
-import {getAnalytics, logEvent} from "firebase/analytics";
-import lottie from "lottie-web";
-import Swal from "sweetalert2";
-import {useTranslation} from "react-i18next";
+import {parseGameSnapshot} from "@leandrolescano/click-battle-core";
 import {Timestamp} from "firebase/firestore";
+import lottie from "lottie-web";
+import dynamic from "next/dynamic";
+import {useParams, useRouter, useSearchParams} from "next/navigation";
+import {useCallback, useEffect, useRef, useState} from "react";
+import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
-import celebrationAnim from "lotties/celebrationAnim.json";
 import {requestPassword} from "components";
-import {useAuth} from "contexts/AuthContext";
-import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
-import {updateUser} from "services/user";
-import {addRoomStats} from "services/rooms";
-import {Game, GameUser, MaxScore, RoomStats, RoomUser} from "interfaces";
-import {useGame} from "contexts/GameContext";
-import {handleInvite} from "utils/invite";
-import {LoginModalProps} from "components-new/LoginModal/types";
 import {Button, Loading, SettingsSidebar} from "components-new";
 import {GameHeader} from "components-new/GameHeader";
+import {LoginModalProps} from "components-new/LoginModal/types";
+import {useAuth} from "contexts/AuthContext";
+import {useGame} from "contexts/GameContext";
+import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
+import useGameTimer from "hooks/gameTimer";
+import {Game, RoomStats} from "interfaces";
+import celebrationAnim from "lotties/celebrationAnim.json";
+import {addRoomStats} from "services/rooms";
+import {handleInvite} from "utils/invite";
 
 const OpponentSection = dynamic(
   () => import("../../../components-new/OpponentSection")
@@ -54,7 +53,6 @@ const LoginModal = dynamic<LoginModalProps>(
 );
 
 const RoomGame = () => {
-  const [startCountdown, setStartCountdown] = useState(false);
   const [showSideBar, setShowSideBar] = useState(false);
   const roomStats = useRef<RoomStats>({
     name: "",
@@ -72,13 +70,7 @@ const RoomGame = () => {
   const query = useSearchParams();
   const {gameID} = useParams<{gameID: string}>();
   const db = getDatabase();
-  const {
-    gameUser,
-    user: gUser,
-    updateGameUser,
-    loading,
-    isAuthenticated
-  } = useAuth();
+  const {gameUser, user: gUser, loading, isAuthenticated} = useAuth();
   const {
     game: currentGame,
     localUser,
@@ -86,7 +78,6 @@ const RoomGame = () => {
     setGame,
     setLocalUser,
     setIsHost,
-    calculatePosition,
     resetContext
   } = useGame();
   const {setNewUser} = useNewPlayerAlert(
@@ -94,10 +85,13 @@ const RoomGame = () => {
     localUser,
     currentGame
   );
-  const localUserRef = useRef<GameUser>();
   const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();
   const {setHasEnteredPassword, hasEnteredPassword} = useGame();
+  const {remainingTime, countdown} = useGameTimer({
+    roomStats,
+    onFinish: () => loadCelebrationAnimation()
+  });
 
   let unsubscribe: Unsubscribe;
 
@@ -145,108 +139,84 @@ const RoomGame = () => {
         const refGame = ref(db, `games/${gameID}/`);
 
         unsubscribe = onValue(refGame, (snapshot) => {
-          const game: Game | null = snapshot.val();
+          const parsedGame = parseGameSnapshot(
+            snapshot.val(),
+            snapshot.key,
+            gUser?.uid
+          );
+
+          if (!parsedGame) return router.replace("/");
+
+          const {
+            game,
+            listUsers,
+            localUser: dbLocalUser,
+            kickedOut,
+            isHost,
+            isRoomFull,
+            requiresPassword
+          } = parsedGame;
+
           try {
-            if (game && game.settings) {
-              game.key = snapshot.key;
-              if (game.listUsers) {
-                game.listUsers = Object.entries(game.listUsers).map((u) => ({
-                  key: u[0],
-                  ...u[1]
-                }));
-              }
+            setGame({...game, listUsers});
+            if (dbLocalUser) {
+              setLocalUser(dbLocalUser);
+            }
+            setIsHost(isHost);
 
-              setGame(game);
-              setStartCountdown(game.gameStart);
+            if (!roomStats.current.name) {
+              roomStats.current.name = game.roomName;
+              roomStats.current.owner = game.ownerUser.username;
+              roomStats.current.withPassword = !!game.settings.password;
+              roomStats.current.created = new Date(
+                game.created as unknown as number
+              );
+            }
 
-              if (!roomStats.current.name) {
-                roomStats.current.name = game.roomName;
-                roomStats.current.owner = game.ownerUser.username;
-                roomStats.current.withPassword = !!game.settings.password;
-                roomStats.current.created = new Date(
-                  game.created as unknown as number
-                );
-              }
+            if (kickedOut) return router.push("/?kickedOut=true");
 
-              const listUsersToPush: RoomUser[] = [];
-              const listUsersDB: RoomUser[] = game.listUsers ?? [];
+            if (listUsers.length > currentGame.listUsers.length) {
+              setNewUser(true);
+            }
 
-              listUsersDB.forEach((val) => {
-                if (!val.kickOut) {
-                  const objUser: GameUser = {...val};
+            if (!isHost) {
+              if (isRoomFull) return router.push("/?fullRoom=true");
 
-                  if (val.key === gUser?.uid) {
-                    if (objUser.clicks !== localUserRef.current?.clicks) {
-                      localUserRef.current = objUser;
-                      setLocalUser(objUser);
-                    }
-                  }
-
-                  listUsersToPush.push(objUser);
-                } else if (val.key === gUser?.uid) {
-                  router.push("/?kickedOut=true");
-                  return;
-                }
-              });
-
-              if (listUsersToPush.length > currentGame.listUsers.length) {
-                setNewUser(true);
-              }
-
-              setGame({listUsers: listUsersToPush});
-
-              if (game.ownerUser?.key === gUser?.uid) {
-                setIsHost(true);
-              } else if (gUser?.uid) {
-                if (listUsersToPush.length > game.settings.maxUsers) {
-                  const latestEnterUser = listUsersToPush.sort(
-                    (a, b) =>
-                      (b.enterDate?.seconds || 0) - (a.enterDate?.seconds || 0)
-                  )[0];
-
-                  if (
-                    !listUsersToPush.find((u) => u.key === gUser.uid) ||
-                    latestEnterUser.key === gUser.uid
-                  ) {
-                    router.push("/?fullRoom=true");
-                    return;
-                  }
-                }
-
+              if (
+                requiresPassword &&
+                !hasEnteredPassword &&
+                !flagEnter.current
+              ) {
+                flagEnter.current = true;
                 if (
-                  game.settings.password &&
-                  !hasEnteredPassword &&
-                  !flagEnter.current
+                  !query.get("pwd") ||
+                  query.get("pwd") !== game.settings.password
                 ) {
-                  flagEnter.current = true;
-                  if (
-                    !query.get("pwd") ||
-                    query.get("pwd") !== game.settings.password
-                  ) {
-                    requestPassword(game.settings.password, t).then((val) => {
-                      if (val.isConfirmed) {
-                        setHasEnteredPassword(true);
-                        clearPath(gameID);
-                        addNewUserToDB(game);
-                      } else {
-                        router.push("/");
-                        return;
-                      }
-                    });
-                  } else {
-                    clearPath(gameID);
-                    addNewUserToDB(game);
-                  }
-                }
-
-                //Add user to DB
-                if (!flagEnter.current) {
-                  flagEnter.current = true;
+                  requestPassword(game.settings.password!, t).then((val) => {
+                    if (val.isConfirmed) {
+                      setHasEnteredPassword(true);
+                      clearPath(gameID);
+                      addNewUserToDB(game);
+                    } else {
+                      router.push("/");
+                      return;
+                    }
+                  });
+                } else {
+                  clearPath(gameID);
                   addNewUserToDB(game);
                 }
               }
-            } else {
-              router.replace("/");
+
+              //Add user to DB
+              if (!flagEnter.current) {
+                if (listUsers.length + 1 > game.settings.maxUsers) {
+                  return router.push("/?fullRoom=true");
+                }
+
+                flagEnter.current = true;
+                addNewUserToDB(game);
+              }
             }
           } catch (error) {
             console.log(
@@ -284,84 +254,11 @@ const RoomGame = () => {
     if (roomStats.current.maxUsersConnected < currentGame.listUsers.length) {
       roomStats.current.maxUsersConnected = currentGame.listUsers.length;
     }
-  }, [currentGame.listUsers]);
+  }, [currentGame.listUsers.length]);
 
-  // useEffect for update timer in state and show result
-  useEffect(() => {
-    if (currentGame?.currentGame) {
-      const userKey = sessionStorage.getItem("userKey");
-
-      if (localUser.rol === "owner") {
-        // localUser is owner
-        if (!currentGame.timer) {
-          if (currentGame.timer === 0) {
-            calculatePosition();
-            logEvent(getAnalytics(), "game_finish", {
-              date: new Date(),
-              users: currentGame.listUsers,
-              maxClicks: Math.max(
-                ...currentGame.listUsers.map((users) => users.clicks || 0)
-              )
-            });
-
-            roomStats.current.gamesPlayed.push({
-              maxClicks: Math.max(
-                ...currentGame.listUsers.map((lu) => lu.clicks || 0)
-              ),
-              numberOfUsers: currentGame.listUsers.length,
-              timer: currentGame.settings.timer
-            });
-
-            const refGame = ref(db, `games/${gameID}`);
-            update(refGame, {timer: null, currentGame: false});
-            updateLocalMaxScore(userKey);
-          }
-
-          loadCelebrationAnimation();
-          return;
-        }
-
-        lottie.destroy();
-        const intervalId = setInterval(() => {
-          if (localUser.rol === "owner") {
-            const refGame = ref(db, `games/${gameID}`);
-            update(refGame, {timer: currentGame?.timer - 1});
-          }
-        }, 1000);
-
-        return () => clearInterval(intervalId);
-      } else if (currentGame.timer === 0) {
-        // localUser is visitor
-        loadCelebrationAnimation();
-        calculatePosition();
-        updateLocalMaxScore(userKey);
-      }
-    } else if (startCountdown && localUser.rol === "owner") {
-      if (!currentGame?.timeStart) {
-        const refGame = ref(db, `games/${gameID}`);
-
-        update(refGame, {
-          gameStart: false,
-          timeStart: null,
-          currentGame: true
-        });
-        return;
-      }
-
-      const intervalIdStart = setInterval(() => {
-        if (currentGame) {
-          const refGame = ref(db, `games/${gameID}`);
-          update(refGame, {timeStart: currentGame.timeStart - 1});
-        }
-      }, 1000);
-      return () => clearInterval(intervalIdStart);
-    }
-  }, [
-    currentGame?.currentGame,
-    currentGame?.timeStart,
-    currentGame?.timer,
-    startCountdown
-  ]);
+  const clearPath = (id: string) => {
+    router.replace(`/game/${id}`);
+  };
 
   const loadCelebrationAnimation = () => {
     if (celebrationContainer?.current?.innerHTML === "") {
@@ -370,67 +267,6 @@ const RoomGame = () => {
         animationData: celebrationAnim
       });
     }
-  };
-
-  const updateLocalMaxScore = (userKey?: string | null) => {
-    if (localUser.clicks && gameUser && currentGame) {
-      const currentMaxScore = gameUser.maxScores?.find(
-        (score) => score.time === currentGame.settings.timer
-      );
-
-      let updatedScores: MaxScore[] | undefined = gameUser.maxScores;
-      if (!currentMaxScore || localUser.clicks > currentMaxScore.clicks) {
-        if (!gameUser.maxScores) {
-          updatedScores = [
-            {
-              clicks: localUser.clicks,
-              time: currentGame.settings.timer,
-              date: Timestamp.now()
-            }
-          ];
-        } else {
-          if (currentMaxScore) {
-            updatedScores = gameUser.maxScores.map((score) =>
-              score.time === currentGame.settings.timer
-                ? {...score, clicks: localUser.clicks!, date: Timestamp.now()}
-                : score
-            );
-          } else {
-            updatedScores = [
-              ...gameUser.maxScores,
-              {
-                time: currentGame.settings.timer,
-                clicks: localUser.clicks,
-                date: Timestamp.now()
-              }
-            ];
-          }
-        }
-      }
-
-      const position =
-        currentGame.listUsers.findIndex(
-          (user) => user.username === localUser.username
-        ) + 1;
-      const pointsEarned = currentGame.listUsers.length - position;
-
-      if (updatedScores || pointsEarned > 0) {
-        if (userKey && gUser && !gUser.isAnonymous) {
-          updateUser(userKey, {
-            maxScores: updatedScores,
-            points: (gameUser.points ?? 0) + pointsEarned
-          });
-        }
-        updateGameUser({
-          maxScores: updatedScores,
-          points: (gameUser.points ?? 0) + pointsEarned
-        });
-      }
-    }
-  };
-
-  const clearPath = (id: string) => {
-    router.replace(`/game/${id}`);
   };
 
   // function for add user to database and update state
@@ -473,16 +309,14 @@ const RoomGame = () => {
           <Loading />
         ) : (
           <>
-            {startCountdown &&
-              currentGame?.timeStart &&
-              currentGame.timeStart >= 0 && (
-                <div className="start-countdown text-8xl md:text-9xl">
-                  {currentGame.timeStart === 0 ? "Go" : currentGame.timeStart}
-                </div>
-              )}
+            {currentGame.status === "countdown" && (
+              <div className="start-countdown text-8xl md:text-9xl">
+                {countdown}
+              </div>
+            )}
             <CelebrationResult
               celebrationContainer={celebrationContainer}
-              timer={currentGame?.timer}
+              timer={remainingTime}
               localUser={localUser}
             />
             {isHost && (
@@ -503,19 +337,14 @@ const RoomGame = () => {
                 onOpenSettings={() => setShowSideBar(true)}
                 onBack={handleOnBack}
               />
-              {currentGame?.timer && currentGame?.timer > 0 ? (
+              {currentGame.status !== "ended" ? (
                 <h1 className="text-2xl md:text-6xl text-center md:text-start font-bold mb-2 text-primary-400 dark:text-primary-100">
                   {currentGame?.roomName || ""}
                 </h1>
               ) : null}
-              {currentGame?.timer && currentGame?.timer > 0 ? (
+              {currentGame.status !== "ended" ? (
                 <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start h-full min-h-0">
-                  <LocalSection
-                    idGame={gameID || ""}
-                    localUser={localUser}
-                    start={currentGame.currentGame}
-                    startCountdown={startCountdown}
-                  />
+                  <LocalSection idGame={gameID || ""} localUser={localUser} />
                   <OpponentSection
                     localUsername={gameUser?.username || ""}
                     maxUsers={currentGame.settings.maxUsers}

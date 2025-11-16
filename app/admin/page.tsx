@@ -1,7 +1,11 @@
 "use client";
 
-import React, {useEffect, useMemo, useState} from "react";
-import {usePathname, useRouter, useSearchParams} from "next/navigation";
+import {
+  faDoorClosed,
+  faDoorOpen,
+  faGamepad
+} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -19,24 +23,19 @@ import {
   BarElement,
   ArcElement
 } from "chart.js";
-import {Bar, Line, Doughnut} from "react-chartjs-2";
-import moment from "moment";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {
-  faDoorClosed,
-  faDoorOpen,
-  faGamepad
-} from "@fortawesome/free-solid-svg-icons";
 import {getDatabase, onValue, ref} from "firebase/database";
-import {_DeepPartialArray} from "chart.js/dist/types/utils";
+import moment from "moment";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
+import React, {useEffect, useMemo, useState} from "react";
+import {Bar, Line, Doughnut} from "react-chartjs-2";
 
 import {Loading} from "components-new/Loading";
 import {useAuth} from "contexts/AuthContext";
+import {DesignPreference} from "interfaces/DesignPreferences";
 import {RoomStats} from "interfaces/RoomStats";
+import {getDesignPreferences} from "services/experience";
 import {getRoomStats} from "services/rooms";
 import {formatDate, minutesBetween} from "utils/date";
-import {DesignPreference} from "interfaces/DesignPreferences";
-import {getDesignPreferences} from "services/experience";
 
 const ALLOWED_EMAILS = [
   "tatilescano11@gmail.com",

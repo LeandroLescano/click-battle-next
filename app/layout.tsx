@@ -1,18 +1,18 @@
-import React, {Suspense} from "react";
-import Script from "next/script";
-import localFont from "next/font/local";
-import "./tailwind.scss";
-
 import {getApp, getApps, initializeApp} from "firebase/app";
+import localFont from "next/font/local";
+import Script from "next/script";
+import React, {Suspense} from "react";
 
-import {AuthProvider} from "contexts/AuthContext";
 import {Loading} from "components-new/Loading";
-import {detectLanguage} from "i18n/server";
-import {I18nProvider} from "i18n/i18n-context";
-import {firebaseConfig} from "resources/config";
+import {UsernameModal} from "components-new/UsernameModal";
+import {AuthProvider} from "contexts/AuthContext";
 import {GameProvider} from "contexts/GameContext";
 import {ThemeProvider} from "contexts/ThemeContext";
-import {UsernameModal} from "components-new/UsernameModal";
+import {I18nProvider} from "i18n/i18n-context";
+import {detectLanguage} from "i18n/server";
+import {firebaseConfig} from "resources/config";
+
+import "./tailwind.scss";
 
 if (!getApps.length) {
   initializeApp(firebaseConfig);

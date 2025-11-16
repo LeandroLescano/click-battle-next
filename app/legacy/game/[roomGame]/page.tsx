@@ -1,7 +1,4 @@
 "use client";
-import React, {useEffect, useRef, useState} from "react";
-import dynamic from "next/dynamic";
-import {useParams, useRouter, useSearchParams} from "next/navigation";
 import {
   getDatabase,
   onDisconnect,
@@ -9,19 +6,18 @@ import {
   ref,
   remove,
   set,
-  update,
   Unsubscribe
 } from "@firebase/database";
-import {getAnalytics, logEvent} from "firebase/analytics";
-import lottie from "lottie-web";
-import Swal from "sweetalert2";
+import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import lottie from "lottie-web";
+import dynamic from "next/dynamic";
+import {useParams, useRouter, useSearchParams} from "next/navigation";
+import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {Timestamp} from "firebase/firestore";
+import Swal from "sweetalert2";
 
-import celebrationAnim from "lotties/celebrationAnim.json";
 import {
   ModalCreateUsername,
   Loading,
@@ -30,11 +26,12 @@ import {
 } from "components";
 import {ModalLoginProps} from "components/ModalLogin/types";
 import {useAuth} from "contexts/AuthContext";
-import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
-import {updateUser} from "services/user";
-import {addRoomStats} from "services/rooms";
-import {Game, GameUser, MaxScore, RoomStats} from "interfaces";
 import {useGame} from "contexts/GameContext";
+import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
+import useGameTimer from "hooks/gameTimer";
+import {Game, GameUser, RoomStats} from "interfaces";
+import celebrationAnim from "lotties/celebrationAnim.json";
+import {addRoomStats} from "services/rooms";
 import {handleInvite} from "utils/invite";
 
 const OpponentSection = dynamic(
@@ -60,7 +57,6 @@ const ModalLogin = dynamic<ModalLoginProps>(
 );
 
 function RoomGame() {
-  const [startCountdown, setStartCountdown] = useState(false);
   const [showSideBar, setShowSideBar] = useState(false);
   const roomStats = useRef<RoomStats>({
     name: "",
@@ -78,13 +74,7 @@ function RoomGame() {
   const query = useSearchParams();
   const {roomGame: roomID} = useParams<{roomGame: string}>();
   const db = getDatabase();
-  const {
-    gameUser,
-    user: gUser,
-    updateGameUser,
-    loading,
-    isAuthenticated
-  } = useAuth();
+  const {gameUser, user: gUser, loading, isAuthenticated} = useAuth();
   const {
     game: currentGame,
     localUser,
@@ -92,8 +82,7 @@ function RoomGame() {
     setGame: setCurrentGame,
     setGame,
     setLocalUser,
-    setIsHost,
-    calculatePosition
+    setIsHost
   } = useGame();
   const {setNewUser} = useNewPlayerAlert(
     currentGame.listUsers,
@@ -103,6 +92,10 @@ function RoomGame() {
   const localUserRef = useRef<GameUser>();
   const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();
+  const {remainingTime, countdown} = useGameTimer({
+    roomStats,
+    onFinish: () => loadCelebrationAnimation()
+  });
 
   let unsubscribe: Unsubscribe;
 
@@ -162,8 +155,7 @@ function RoomGame() {
                 }));
               }
 
-              setCurrentGame(game);
-              setStartCountdown(game.gameStart);
+              setCurrentGame({...game, startTime: game.startTime ?? undefined});
 
               if (!roomStats.current.name) {
                 roomStats.current.name = game.roomName;
@@ -280,146 +272,12 @@ function RoomGame() {
     }
   }, [currentGame.listUsers]);
 
-  // useEffect for update timer in state and show result
-  useEffect(() => {
-    if (currentGame?.currentGame) {
-      const userKey = sessionStorage.getItem("userKey");
-
-      if (localUser.rol === "owner") {
-        // localUser is owner
-        if (!currentGame.timer) {
-          if (currentGame.timer === 0) {
-            calculatePosition();
-            logEvent(getAnalytics(), "game_finish", {
-              date: new Date(),
-              users: currentGame.listUsers,
-              maxClicks: Math.max(
-                ...currentGame.listUsers.map((users) => users.clicks || 0)
-              )
-            });
-
-            roomStats.current.gamesPlayed.push({
-              maxClicks: Math.max(
-                ...currentGame.listUsers.map((lu) => lu.clicks || 0)
-              ),
-              numberOfUsers: currentGame.listUsers.length,
-              timer: currentGame.settings.timer
-            });
-
-            const refGame = ref(db, `games/${roomID}`);
-            update(refGame, {timer: null, currentGame: false});
-            updateLocalMaxScore(userKey);
-          }
-
-          loadCelebrationAnimation();
-          return;
-        }
-
-        lottie.destroy();
-        const intervalId = setInterval(() => {
-          if (localUser.rol === "owner") {
-            const refGame = ref(db, `games/${roomID}`);
-            update(refGame, {timer: currentGame?.timer - 1});
-          }
-        }, 1000);
-
-        return () => clearInterval(intervalId);
-      } else if (currentGame.timer === 0) {
-        // localUser is visitor
-        loadCelebrationAnimation();
-        calculatePosition();
-        updateLocalMaxScore(userKey);
-      }
-    } else if (startCountdown && localUser.rol === "owner") {
-      if (!currentGame?.timeStart) {
-        const refGame = ref(db, `games/${roomID}`);
-
-        update(refGame, {
-          gameStart: false,
-          timeStart: null,
-          currentGame: true
-        });
-        return;
-      }
-
-      const intervalIdStart = setInterval(() => {
-        if (currentGame) {
-          const refGame = ref(db, `games/${roomID}`);
-          update(refGame, {timeStart: currentGame.timeStart - 1});
-        }
-      }, 1000);
-      return () => clearInterval(intervalIdStart);
-    }
-  }, [
-    currentGame?.currentGame,
-    currentGame?.timeStart,
-    currentGame?.timer,
-    startCountdown
-  ]);
-
   const loadCelebrationAnimation = () => {
     if (celebrationContainer?.current?.innerHTML === "") {
       lottie.loadAnimation({
         container: celebrationContainer.current!,
         animationData: celebrationAnim
       });
-    }
-  };
-
-  const updateLocalMaxScore = (userKey?: string | null) => {
-    if (localUser.clicks && gameUser && currentGame) {
-      const currentMaxScore = gameUser.maxScores?.find(
-        (score) => score.time === currentGame.settings.timer
-      );
-
-      let updatedScores: MaxScore[] | undefined = gameUser.maxScores;
-      if (!currentMaxScore || localUser.clicks > currentMaxScore.clicks) {
-        if (!gameUser.maxScores) {
-          updatedScores = [
-            {
-              clicks: localUser.clicks,
-              time: currentGame.settings.timer,
-              date: Timestamp.now()
-            }
-          ];
-        } else {
-          if (currentMaxScore) {
-            updatedScores = gameUser.maxScores.map((score) =>
-              score.time === currentGame.settings.timer
-                ? {...score, clicks: localUser.clicks!, date: Timestamp.now()}
-                : score
-            );
-          } else {
-            updatedScores = [
-              ...gameUser.maxScores,
-              {
-                time: currentGame.settings.timer,
-                clicks: localUser.clicks,
-                date: Timestamp.now()
-              }
-            ];
-          }
-        }
-      }
-
-      const position =
-        currentGame.listUsers.findIndex(
-          (user) => user.username === localUser.username
-        ) + 1;
-      const pointsEarned = currentGame.listUsers.length - position;
-
-      if (updatedScores || pointsEarned > 0) {
-        if (userKey && gUser && !gUser.isAnonymous) {
-          updateUser(userKey, {
-            maxScores: updatedScores,
-            points: (gameUser.points ?? 0) + pointsEarned
-          });
-        }
-        updateGameUser({
-          maxScores: updatedScores,
-          points: (gameUser.points ?? 0) + pointsEarned
-        });
-      }
     }
   };
 
@@ -457,16 +315,12 @@ function RoomGame() {
         <Loading />
       ) : (
         <>
-          {startCountdown &&
-            currentGame?.timeStart &&
-            currentGame.timeStart >= 0 && (
-              <div className="start-countdown">
-                {currentGame.timeStart === 0 ? "Go" : currentGame.timeStart}
-              </div>
-            )}
+          {currentGame.status === "countdown" && (
+            <div className="start-countdown">{countdown}</div>
+          )}
           <CelebrationResult
             celebrationContainer={celebrationContainer}
-            timer={currentGame?.timer}
+            timer={remainingTime}
             localUser={localUser}
           />
           <div className="container-fluid vh-100">
@@ -479,7 +333,7 @@ function RoomGame() {
                   maxUsers: currentGame?.settings.maxUsers || 2,
                   roomName: currentGame?.roomName,
                   password: currentGame?.settings.password,
-                  timer: currentGame?.timer || 10
+                  timer: currentGame?.settings.timer || 10
                 }}
               />
             )}
@@ -503,7 +357,7 @@ function RoomGame() {
                   {currentGame?.roomName || ""}
                 </span>
               </div>
-              {currentGame?.timer && currentGame?.timer > 0 ? (
+              {currentGame?.status !== "ended" ? (
                 <>
                   <div className="row mb-3 w-100 g-4">
                     <div className="col-md-6 text-center opponents-container">
@@ -516,8 +370,8 @@ function RoomGame() {
                       <LocalSection
                         idGame={roomID || ""}
                         localUser={localUser}
-                        start={currentGame.currentGame}
-                        startCountdown={startCountdown}
+                        start={currentGame.status === "playing"}
+                        startCountdown={currentGame.status == "countdown"}
                       />
                     </div>
                   </div>
@@ -529,12 +383,11 @@ function RoomGame() {
                 />
               )}
               <div className="room-info">
-                {currentGame?.timer !== undefined &&
-                  currentGame.currentGame && (
-                    <h2 className="text-center">
-                      {t("N seconds remaining!", {seconds: currentGame?.timer})}
-                    </h2>
-                  )}
+                {currentGame?.status === "playing" && (
+                  <h2 className="text-center">
+                    {t("N seconds remaining!", {seconds: remainingTime})}
+                  </h2>
+                )}
               </div>
               <button
                 className="btn-click small position-absolute bottom-0 end-0 me-4 mb-4"

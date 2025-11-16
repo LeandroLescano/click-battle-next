@@ -4,11 +4,11 @@ import React, {useEffect} from "react";
 import {Modal} from "react-bootstrap";
 import {useTranslation} from "react-i18next";
 
-import {useIsMobile} from "hooks/mobile";
 import {AuthProviders, useAuth} from "contexts/AuthContext";
+import {useIsMobile} from "hooks/mobile";
 
-import GoogleButton from "./components/GoogleButton";
 import GithubButton from "./components/GithubButton";
+import GoogleButton from "./components/GoogleButton";
 import TwitterButton from "./components/TwitterButton";
 import {ModalLoginProps} from "./types";
 

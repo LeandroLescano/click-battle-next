@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import {useTabFocus} from "./tabFocus";
 import {Game, GameUser} from "interfaces";
+import useGameTimer from "./gameTimer";
 
 const TITLE_NEW_USER = "👋 New opponent!";
 const TITLE_DEFAULT = "Click Battle";
@@ -15,6 +16,7 @@ export const useNewPlayerAlert = (
   const audioPlayer = useRef<HTMLAudioElement>();
   const audioNotif = useRef<HTMLAudioElement>();
   const isFocused = useTabFocus();
+  const {countdown, remainingTime} = useGameTimer({});
 
   // useEffect to alert the owner if a new user enters and tab is not focused
   useEffect(() => {
@@ -68,15 +70,15 @@ export const useNewPlayerAlert = (
     audioNotif.current.volume = 0.2;
 
     if (!isFocused) {
-      if (game?.gameStart) {
+      if (game?.startTime && game.status === "countdown") {
         audioNotif.current.playbackRate = 1;
-        document.title = `⚠️ Game is starting in ${game.timeStart}s ⚠️`;
-        if (game.timeStart === 0) {
+        document.title = `⚠️ Game is starting in ${countdown}s ⚠️`;
+        if (countdown === 0) {
           audioNotif.current.playbackRate = 0.5;
         }
         audioNotif.current.play();
-      } else if (game?.currentGame && game.timer) {
-        document.title = `Current game❗${game.timer}s left`;
+      } else if (game?.startTime && remainingTime) {
+        document.title = `Current game❗${remainingTime}s left`;
       } else {
         document.title = TITLE_DEFAULT;
       }

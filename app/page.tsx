@@ -1,23 +1,23 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
-import React, {Fragment, useEffect, useState} from "react";
-import Swal from "sweetalert2";
-import {useTranslation} from "react-i18next";
+import {getDatabase, onValue, ref} from "@firebase/database";
 import {getAnalytics, logEvent} from "firebase/analytics";
-import {useRouter, useSearchParams} from "next/navigation";
-import {child, getDatabase, onValue, ref, set} from "@firebase/database";
 import dynamic from "next/dynamic";
+import {useRouter, useSearchParams} from "next/navigation";
+import {Fragment, useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
-import {Game, GameUser} from "interfaces";
 import {requestPassword} from "components";
-import {useAuth} from "contexts/AuthContext";
-import {useGame} from "contexts/GameContext";
 import {Header, Footer, CardGame, CardGameAd, Loading} from "components-new";
 import {CreateSection} from "components-new/CreateSection";
 import {LoginModalProps} from "components-new/LoginModal/types";
 import {NotificationModal} from "components-new/NotificationModal";
 import {NotificationType} from "components-new/NotificationModal/types";
 import {WelcomeMessage} from "components-new/WelcomeMessage";
+import {useAuth} from "contexts/AuthContext";
+import {useGame} from "contexts/GameContext";
+import {Game, GameUser} from "interfaces";
 
 const LoginModal = dynamic<LoginModalProps>(
   () =>

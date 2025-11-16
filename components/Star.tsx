@@ -1,8 +1,8 @@
-import {faStar, faStarHalfAlt} from "@fortawesome/free-solid-svg-icons";
-import {faStar as faStarEmpty} from "@fortawesome/free-regular-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import React, {MouseEvent, useEffect, useState} from "react";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
+import {faStar as faStarEmpty} from "@fortawesome/free-regular-svg-icons";
+import {faStar, faStarHalfAlt} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import React, {memo, MouseEvent, useEffect, useState} from "react";
 
 interface Props {
   position: number;
@@ -91,4 +91,4 @@ const Star = ({
   );
 };
 
-export default React.memo(Star);
+export default memo(Star);
