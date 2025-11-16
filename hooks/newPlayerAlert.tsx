@@ -1,7 +1,9 @@
 import {useEffect, useRef, useState} from "react";
-import {useTabFocus} from "./tabFocus";
+
 import {Game, GameUser} from "interfaces";
+
 import useGameTimer from "./gameTimer";
+import {useTabFocus} from "./tabFocus";
 
 const TITLE_NEW_USER = "👋 New opponent!";
 const TITLE_DEFAULT = "Click Battle";
@@ -60,7 +62,7 @@ export const useNewPlayerAlert = (
       clearInterval(intervalId);
       document.title = TITLE_DEFAULT;
     };
-  }, [newUser, isFocused, listUsers, localUser]);
+  }, [newUser, isFocused, listUsers.length, localUser]);
 
   // useEffect to alert player about the game status and tab is not focused
   useEffect(() => {
