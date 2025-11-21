@@ -9,6 +9,7 @@ import {
   Unsubscribe
 } from "@firebase/database";
 import {parseGameSnapshot} from "@leandrolescano/click-battle-core";
+import {captureException} from "@sentry/nextjs";
 import {Timestamp} from "firebase/firestore";
 import lottie from "lottie-web";
 import dynamic from "next/dynamic";
@@ -27,6 +28,15 @@ import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import useGameTimer from "hooks/gameTimer";
 import {Game, RoomStats} from "interfaces";
 import celebrationAnim from "lotties/celebrationAnim.json";
+import {
+  breadcrumb,
+  breadcrumbOnce,
+  withSpan,
+  withSpanMin,
+  metricCounter,
+  metricGauge,
+  metricTiming
+} from "observability/sentry";
 import {addRoomStats} from "services/rooms";
 import {handleInvite} from "utils/invite";
 
@@ -134,18 +144,45 @@ const RoomGame = () => {
 
   // useEffect for update all data in local state
   useEffect(() => {
-    if (isAuthenticated) {
-      try {
-        const refGame = ref(db, `games/${gameID}/`);
+    if (!isAuthenticated) return;
 
-        unsubscribe = onValue(refGame, (snapshot) => {
-          const parsedGame = parseGameSnapshot(
-            snapshot.val(),
-            snapshot.key,
-            gUser?.uid
+    try {
+      const gameRef = ref(db, `games/${gameID}/`);
+
+      unsubscribe = onValue(gameRef, (snapshot) => {
+        withSpan("onValue_snapshot", () => {
+          const raw = snapshot.val();
+          const key = snapshot.key;
+
+          if (raw) {
+            metricGauge(
+              "snapshot_size_bytes",
+              JSON.stringify(raw).length,
+              undefined,
+              0.1
+            );
+          }
+
+          breadcrumbOnce("firebase", "snapshot_received", {
+            gameID,
+            hasData: !!raw
+          });
+
+          const startParse = performance.now();
+          const parsedGame = withSpanMin("parse_snapshot", 8, () =>
+            parseGameSnapshot(raw, key, gUser?.uid)
+          );
+          metricTiming(
+            "snapshot_parse_time_ms",
+            performance.now() - startParse,
+            undefined,
+            0.1
           );
 
-          if (!parsedGame) return router.replace("/");
+          if (!parsedGame) {
+            breadcrumb("navigation", "invalid_game_redirect");
+            return router.replace("/");
+          }
 
           const {
             game,
@@ -157,93 +194,133 @@ const RoomGame = () => {
             requiresPassword
           } = parsedGame;
 
-          try {
-            setGame({...game, listUsers});
-            if (dbLocalUser) {
-              setLocalUser(dbLocalUser);
-            }
-            setIsHost(isHost);
+          metricGauge("snapshot_users_count", listUsers.length, undefined, 0.1);
+          metricGauge("room_users_count", listUsers.length, undefined, 0.1);
 
-            if (!roomStats.current.name) {
-              roomStats.current.name = game.roomName;
-              roomStats.current.owner = game.ownerUser.username;
-              roomStats.current.withPassword = !!game.settings.password;
-              roomStats.current.created = new Date(
-                game.created as unknown as number
-              );
-            }
+          withSpan("apply_local_state", () => {
+            const startApply = performance.now();
+            try {
+              // Main game state
+              setGame({...game, listUsers});
 
-            if (kickedOut) return router.push("/?kickedOut=true");
+              if (dbLocalUser) setLocalUser(dbLocalUser);
 
-            if (listUsers.length > currentGame.listUsers.length) {
-              setNewUser(true);
-            }
+              setIsHost(isHost);
 
-            if (!isHost) {
-              if (isRoomFull) return router.push("/?fullRoom=true");
-
-              if (
-                requiresPassword &&
-                !hasEnteredPassword &&
-                !flagEnter.current
-              ) {
-                flagEnter.current = true;
-                if (
-                  !query.get("pwd") ||
-                  query.get("pwd") !== game.settings.password
-                ) {
-                  requestPassword(game.settings.password!, t).then((val) => {
-                    if (val.isConfirmed) {
-                      setHasEnteredPassword(true);
-                      clearPath(gameID);
-                      addNewUserToDB(game);
-                    } else {
-                      router.push("/");
-                      return;
-                    }
-                  });
-                } else {
-                  clearPath(gameID);
-                  addNewUserToDB(game);
-                }
+              // Initialize room stats once
+              if (!roomStats.current.name) {
+                roomStats.current.name = game.roomName;
+                roomStats.current.owner = game.ownerUser.username;
+                roomStats.current.withPassword = !!game.settings.password;
+                roomStats.current.created = new Date(
+                  game.created as unknown as number
+                );
               }
 
-              //Add user to DB
-              if (!flagEnter.current) {
-                if (listUsers.length + 1 > game.settings.maxUsers) {
+              if (kickedOut) {
+                metricCounter("room_kicked_out");
+                breadcrumb("navigation", "kicked_out_redirect");
+                return router.push("/?kickedOut=true");
+              }
+
+              if (listUsers.length > currentGame.listUsers.length) {
+                breadcrumb("users", "new_user_joined", {
+                  totalUsers: listUsers.length
+                });
+                setNewUser(true);
+              }
+
+              if (!isHost) {
+                if (isRoomFull) {
+                  metricCounter("room_full_redirects");
+                  breadcrumb("navigation", "full_room_redirect");
                   return router.push("/?fullRoom=true");
                 }
 
-                flagEnter.current = true;
-                addNewUserToDB(game);
+                if (
+                  requiresPassword &&
+                  !hasEnteredPassword &&
+                  !flagEnter.current
+                ) {
+                  flagEnter.current = true;
+
+                  breadcrumb("password", "room_requires_password");
+
+                  const urlPassword =
+                    query.get("pwd") === game.settings.password
+                      ? game.settings.password
+                      : null;
+
+                  if (!urlPassword) {
+                    return requestPassword(game.settings.password!, t).then(
+                      (val) => {
+                        if (val.isConfirmed) {
+                          setHasEnteredPassword(true);
+                          clearPath(gameID);
+                          metricCounter("room_join_attempts");
+                          addNewUserToDB(game);
+                        } else {
+                          router.push("/");
+                        }
+                      }
+                    );
+                  }
+
+                  // Correct password from URL
+                  clearPath(gameID);
+                  metricCounter("room_join_attempts");
+                  addNewUserToDB(game);
+                }
+
+                // Add user to room
+                if (!flagEnter.current) {
+                  if (listUsers.length + 1 > game.settings.maxUsers) {
+                    metricCounter("room_full_redirects");
+                    breadcrumb("navigation", "max_users_redirect");
+                    return router.push("/?fullRoom=true");
+                  }
+
+                  flagEnter.current = true;
+                  breadcrumb("users", "adding_new_user");
+                  metricCounter("room_join_attempts");
+                  addNewUserToDB(game);
+                }
               }
-            }
-          } catch (error) {
-            console.log(
-              JSON.stringify({
+            } catch (error) {
+              breadcrumb("error", "snapshot_processing_error", {
                 game,
-                roomStats,
+                listUsers,
                 username: gameUser?.username,
-                listUsers: listUsers,
-                isLocal: isHost
-              })
-            );
-            throw error;
-          }
+                isHost
+              });
+              throw error;
+            } finally {
+              metricTiming(
+                "local_state_apply_ms",
+                performance.now() - startApply,
+                undefined,
+                0.1
+              );
+            }
+          });
         });
-      } catch {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Sorry, something went wrong. Please try again..",
-          heightAuto: false
-        }).then(() => {
-          router.push("/");
-        });
-      }
+      });
+    } catch (error) {
+      // Last-resort fallback
+      captureException(error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Sorry, something went wrong. Please try again.",
+        heightAuto: false
+      }).then(() => {
+        router.push("/");
+      });
     }
 
     return () => {
+      breadcrumb("lifecycle", "unsubscribe_onValue");
       unsubscribe?.();
       resetContext();
     };
