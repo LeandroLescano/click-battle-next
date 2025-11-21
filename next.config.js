@@ -23,7 +23,8 @@ module.exports = {
     PRIVATE_KEY: process.env.PRIVATE_KEY,
     CLIENT_EMAIL: process.env.CLIENT_EMAIL,
     NEXT_PUBLIC_ADSENSE_PUBLISHER_ID:
-      process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID
+      process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID,
+    SENTRY_DSN: process.env.SENTRY_DSN
   }
 };
 

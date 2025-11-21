@@ -2,7 +2,7 @@
 import {metrics} from "@sentry/nextjs";
 import {addBreadcrumb, startInactiveSpan, startSpan} from "@sentry/react";
 
-const DEFAULT_TAGS = {
+const DEFAULT_ATTRIBUTES = {
   platform: "web",
   env: process.env.NODE_ENV
 };
@@ -85,8 +85,8 @@ export function metricCounter(
   value: number = 1,
   tags?: Record<string, string | number | boolean>
 ) {
-  metrics.increment(name, value, {
-    tags: {...DEFAULT_TAGS, ...tags}
+  metrics.count(name, value, {
+    attributes: {...DEFAULT_ATTRIBUTES, ...tags}
   });
 }
 
@@ -98,21 +98,21 @@ export function metricGauge(
 ) {
   if (sampleRate < 1.0 && Math.random() > sampleRate) return;
 
-  metrics.set(name, value, {
-    tags: {...DEFAULT_TAGS, ...tags}
+  metrics.gauge(name, value, {
+    attributes: {...DEFAULT_ATTRIBUTES, ...tags}
   });
 }
 
 export function metricTiming(
   name: string,
   value: number,
-  tags?: Record<string, string | number | boolean>,
+  attributes?: Record<string, string | number | boolean>,
   sampleRate: number = 1.0
 ) {
   if (sampleRate < 1.0 && Math.random() > sampleRate) return;
 
   metrics.distribution(name, value, {
-    tags: {...DEFAULT_TAGS, ...tags},
+    attributes: {...DEFAULT_ATTRIBUTES, ...attributes},
     unit: "millisecond"
   });
 }

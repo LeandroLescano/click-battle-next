@@ -9,11 +9,11 @@ import {
 } from "@sentry/nextjs";
 
 init({
-  dsn: "https://f053161aa27398231a93e423095b01b1@o4506887032143872.ingest.us.sentry.io/4506887122976768",
+  dsn: process.env.SENTRY_DSN,
 
   tracesSampleRate: 0.15,
 
-  debug: false,
+  debug: process.env.NODE_ENV === "development",
 
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
