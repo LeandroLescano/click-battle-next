@@ -1,3 +1,4 @@
+import {Game, MaxScore} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {getDatabase, ref, update} from "firebase/database";
 import {Timestamp} from "firebase/firestore";
@@ -6,7 +7,7 @@ import {useEffect, useState} from "react";
 
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Game, MaxScore, RoomStats} from "interfaces";
+import {RoomStats} from "interfaces";
 import {updateUser} from "services/user";
 
 const COUNTDOWN = 3;
@@ -111,7 +112,7 @@ const useGameTimer = ({
         updateLocalMaxScore(userKey);
       }
     }
-  }, [game, remainingTime]);
+  }, [game.status, remainingTime]);
 
   const updateLocalMaxScore = (userKey?: string | null) => {
     if (localUser.clicks && gameUser && game) {

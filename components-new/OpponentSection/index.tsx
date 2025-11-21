@@ -1,10 +1,11 @@
+import {GameUser} from "@leandrolescano/click-battle-core";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 
-import {GameUser} from "interfaces";
 import {useGame} from "contexts/GameContext";
 
 import OpponentList from "./components/OpponentList";
+
 import "./styles.scss";
 
 interface OpponentSectionProps {

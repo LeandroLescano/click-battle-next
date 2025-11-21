@@ -1,4 +1,4 @@
-import {AntiClickCheat} from "@leandrolescano/click-battle-core";
+import {AntiClickCheat, GameUser} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
 import {useRouter} from "next/navigation";
@@ -13,7 +13,6 @@ import {useGame} from "contexts/GameContext";
 import {useWindowSize} from "hooks";
 import useGameTimer from "hooks/gameTimer";
 import {Watch} from "icons/Watch";
-import {GameUser} from "interfaces";
 
 interface LocalSectionProps {
   idGame: string;

@@ -1,9 +1,9 @@
 "use client";
 
+import {Game, GameUser} from "@leandrolescano/click-battle-core";
 import React, {useState, useContext, createContext, useEffect} from "react";
 import {useTranslation} from "react-i18next";
 
-import {Game, GameUser} from "interfaces";
 import {getSuffixPosition} from "utils/string";
 interface GameContextState {
   game: Game;

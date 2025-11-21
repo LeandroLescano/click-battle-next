@@ -1,7 +1,8 @@
-import React, {useEffect, useState} from "react";
 import {Dialog, DialogBackdrop, DialogPanel} from "@headlessui/react";
-import {useTranslation} from "react-i18next";
+import {GameUser} from "@leandrolescano/click-battle-core";
 import {Timestamp} from "firebase/firestore";
+import React, {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
 
 import {
   Button,
@@ -10,9 +11,8 @@ import {
   ThemeSelector,
   Switch
 } from "components-new";
-import {isUsernameAvailable, updateUser} from "services/user";
 import {useAuth} from "contexts/AuthContext";
-import {GameUser} from "interfaces";
+import {isUsernameAvailable, updateUser} from "services/user";
 
 import {ProfileModalProps} from "./types";
 

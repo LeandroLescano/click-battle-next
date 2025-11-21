@@ -1,19 +1,18 @@
-import React, {useEffect, useRef, useState} from "react";
 import {getDatabase, ref, update} from "@firebase/database";
-import Swal from "sweetalert2";
+import {clsx} from "clsx";
+import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import clsx from "clsx";
+import Swal from "sweetalert2";
 
+import {Button} from "components-new/Button";
+import {Input} from "components-new/Input";
+import {Select} from "components-new/Select";
+import {Cross} from "icons/Cross";
+import {Game} from "interfaces";
+import {AVAILABLE_TIMES} from "resources/constants";
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
-import {AVAILABLE_TIMES} from "resources/constants";
-import {Game} from "interfaces";
 import {adjustRoomSettings} from "utils/room";
-import {Button} from "components-new/Button";
-import {Select} from "components-new/Select";
-import {Input} from "components-new/Input";
-import {Cross} from "icons/Cross";
-import {useGame} from "contexts/GameContext";
 
 import {Settings, SettingsSidebarProps} from "./types";
 import "./styles.scss";
@@ -40,7 +39,6 @@ export const SettingsSidebar = ({
   });
   const inputPassword = useRef<HTMLInputElement>(null);
   const db = getDatabase();
-  const {game} = useGame();
   const {t} = useTranslation();
 
   useEffect(() => {
@@ -95,7 +93,7 @@ export const SettingsSidebar = ({
         settings: {
           maxUsers: localSettings.maxUsers,
           timer: localSettings.timer,
-          password: localSettings.password || null
+          password: localSettings.password || undefined
         }
       };
       await update(refGame, updatedGame);

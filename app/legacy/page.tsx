@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 import {child, getDatabase, onValue, ref, set} from "@firebase/database";
+import {GameUser} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import dynamic from "next/dynamic";
 import {useRouter, useSearchParams} from "next/navigation";
@@ -21,7 +22,7 @@ import CreateSection from "components/CreateSection/CreateSection";
 import {ModalLoginProps} from "components/ModalLogin/types";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Game, GameUser} from "interfaces";
+import {Game} from "interfaces";
 
 const ModalLogin = dynamic<ModalLoginProps>(
   () =>
