@@ -1,5 +1,6 @@
+import {GameUser} from "@leandrolescano/click-battle-core";
 import React from "react";
-import {GameUser} from "interfaces";
+
 import {useGame} from "contexts/GameContext";
 
 interface Props {

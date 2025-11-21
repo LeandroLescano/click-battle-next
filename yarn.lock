@@ -2217,10 +2217,10 @@
   resolved "https://registry.npmjs.org/@kurkle/color/-/color-0.3.2.tgz"
   integrity sha512-fuscdXJ9G1qb7W8VdHi+IwRqij3lBkosAm4ydQtEmbY58OzHXqQhvlxqEkoz0yssNVn38bcpRWgA9PP+OGoisw==
 
-"@leandrolescano/click-battle-core@^1.0.0":
-  version "1.0.0"
-  resolved "https://npm.pkg.github.com/download/@leandrolescano/click-battle-core/1.0.0/71a6180621ed4dcddd63f851e7585e116bc298c3"
-  integrity sha512-eGewz7SsZ1PNb80WecMUcGe3VNN1muEFvxFl44G56QFuZW/o/HNwaOie9IXncIH9I9xEf4iKoM8cCk8cSCGW+w==
+"@leandrolescano/click-battle-core@^1.2.0":
+  version "1.2.0"
+  resolved "https://npm.pkg.github.com/download/@leandrolescano/click-battle-core/1.2.0/2116f1878aa6246f8b93f0603f6a5b23090bc707"
+  integrity sha512-QD8vRWlzIwRG4msL5rxZhXvbI9o/k6OvL/QkKKomSuj8KUisCEWrHsXi4k6aPU/8wmcvut29MIvEeASVnUxOAA==
 
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"

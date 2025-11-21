@@ -1,6 +1,5 @@
+import {Game, GameUser} from "@leandrolescano/click-battle-core";
 import {useEffect, useRef, useState} from "react";
-
-import {Game, GameUser} from "interfaces";
 
 import useGameTimer from "./gameTimer";
 import {useTabFocus} from "./tabFocus";

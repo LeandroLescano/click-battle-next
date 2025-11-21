@@ -1,4 +1,4 @@
-// React
+import {GameSettings, GameUser} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {
   child,
@@ -18,7 +18,7 @@ import Swal from "sweetalert2";
 
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Game, GameSettings, GameUser, Room} from "interfaces";
+import {Game, Room} from "interfaces";
 import logoAnim from "lotties/logo-animated.json";
 import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
 import {sha256} from "services/encode";

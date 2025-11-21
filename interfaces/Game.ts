@@ -1,23 +1,10 @@
+import {
+  Game as ExternalGame,
+  GameUser
+} from "@leandrolescano/click-battle-core";
 import {Timestamp} from "firebase/firestore";
 
-import {GameUser} from "./GameUser";
-
-export interface Game {
-  key?: string | null;
-  listUsers: RoomUser[];
-  ownerUser: Pick<GameUser, "username" | "key">;
-  roomName: string;
-  startTime?: Date | null;
-  status: "lobby" | "countdown" | "playing" | "ended";
-  created?: Date | object;
-  settings: GameSettings;
-}
-
-export interface GameSettings {
-  timer: number;
-  maxUsers: number;
-  password?: string | null;
-}
+export type Game = ExternalGame;
 
 export type RoomUser = Pick<
   GameUser,

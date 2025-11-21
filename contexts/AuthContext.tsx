@@ -1,5 +1,6 @@
 "use client";
 
+import {GameUser, MaxScore} from "@leandrolescano/click-battle-core";
 import * as Sentry from "@sentry/nextjs";
 import {
   getAnalytics,
@@ -35,7 +36,6 @@ import Swal from "sweetalert2";
 
 import {useTheme} from "contexts/ThemeContext";
 import {useUserInfo} from "hooks/userInfo";
-import {GameUser, MaxScore} from "interfaces";
 import {firebaseConfig} from "resources/config";
 import {addUser, getUser, getUserByEmail, updateUser} from "services/user";
 
