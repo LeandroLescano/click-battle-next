@@ -1,3 +1,4 @@
+import {GameUser} from "@leandrolescano/click-battle-core";
 import {
   addDoc,
   collection,
@@ -9,8 +10,6 @@ import {
   updateDoc,
   where
 } from "firebase/firestore";
-
-import {GameUser} from "interfaces";
 
 const PATH = "users";
 

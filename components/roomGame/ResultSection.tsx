@@ -1,12 +1,13 @@
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {faTrophy} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {GameUser} from "@leandrolescano/click-battle-core";
 import {get, getDatabase, ref, update} from "firebase/database";
 import React from "react";
 import {useTranslation} from "react-i18next";
 
 import {useGame} from "contexts/GameContext";
-import {Game, GameUser} from "interfaces";
+import {Game} from "interfaces";
 
 interface ResultSectionProps {
   localUser: GameUser;

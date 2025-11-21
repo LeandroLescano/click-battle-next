@@ -1,10 +1,10 @@
+import {calculateRanking, GameUser} from "@leandrolescano/click-battle-core";
 import {getFirestore} from "firebase-admin/firestore";
 import {unstable_cache} from "next/cache";
 import React from "react";
 
 import {Ranking} from "components-new/Ranking";
 import {customInitApp} from "lib/firebase-admin-config";
-import {calculateRanking, GameUser} from "@leandrolescano/click-battle-core";
 
 customInitApp();
 

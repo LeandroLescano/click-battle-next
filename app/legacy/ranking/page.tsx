@@ -1,6 +1,7 @@
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {GameUser} from "@leandrolescano/click-battle-core";
 import {getFirestore} from "firebase-admin/firestore";
 import {unstable_cache} from "next/cache";
 import dynamic from "next/dynamic";
@@ -10,7 +11,6 @@ import {Card, CardBody, CardHeader, Container} from "react-bootstrap";
 
 import {RankingList} from "components/RankingList";
 import {getServerTranslations} from "i18n/server";
-import {GameUser} from "interfaces";
 import {customInitApp} from "lib/firebase-admin-config";
 
 const UpdatedTime = dynamic(() => import("components/UpdatedTime"), {
