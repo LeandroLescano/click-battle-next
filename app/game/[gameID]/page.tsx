@@ -99,7 +99,7 @@ const RoomGame = () => {
   const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();
   const {setHasEnteredPassword, hasEnteredPassword} = useGame();
-  const {remainingTime, countdown} = useGameTimer({
+  const {countdown} = useGameTimer({
     roomStats,
     onFinish: () => loadCelebrationAnimation()
   });
@@ -396,11 +396,7 @@ const RoomGame = () => {
                 {countdown}
               </div>
             )}
-            <CelebrationResult
-              celebrationContainer={celebrationContainer}
-              timer={remainingTime}
-              localUser={localUser}
-            />
+            <CelebrationResult celebrationContainer={celebrationContainer} />
             {isHost && (
               <SettingsSidebar
                 showSideBar={showSideBar}

@@ -49,7 +49,7 @@ const ResultSection = () => {
             id="result"
             className="no-select uppercase text-6xl md:text-9xl font-extrabold"
           >
-            {t("resultPosition", {position: finalResults?.localPosition})}
+            {t("resultPosition", {position: finalResults?.localPositionSuffix})}
           </h1>
           <h3 className="text-2xl md:text-6xl flex gap-1.5 md:gap-3 justify-center items-center">
             <Trophy />

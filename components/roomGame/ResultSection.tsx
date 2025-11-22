@@ -17,7 +17,7 @@ interface ResultSectionProps {
 function ResultSection({localUser, currentGame}: ResultSectionProps) {
   const db = getDatabase();
   const {t} = useTranslation();
-  const {game, localPosition, isHost} = useGame();
+  const {game, finalResults, isHost} = useGame();
 
   // function for reset all data
   const handleReset = () => {
@@ -42,7 +42,7 @@ function ResultSection({localUser, currentGame}: ResultSectionProps) {
     >
       <div>
         <h1 id="result" className="no-select">
-          {t("Result position", {position: localPosition})}
+          {t("Result position", {position: finalResults?.localPosition})}
         </h1>
         {game.listUsers
           .sort((a, b) => ((a.clicks || 0) < (b.clicks || 0) ? 1 : -1))

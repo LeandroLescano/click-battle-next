@@ -14,6 +14,7 @@ export type RoomUser = Pick<
 };
 
 export type FinalResults = {
-  localPosition: string;
+  localPosition: number;
+  localPositionSuffix: string;
   results: GameUser[];
 };

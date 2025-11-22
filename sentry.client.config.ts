@@ -13,7 +13,7 @@ init({
 
   tracesSampleRate: 0.15,
 
-  debug: process.env.NODE_ENV === "development",
+  debug: false,
 
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,

@@ -6,10 +6,10 @@ import {useTranslation} from "react-i18next";
 
 import {FinalResults} from "interfaces";
 import {getSuffixPosition} from "utils/string";
+
 interface GameContextState {
   game: Game;
   setGame: (game: Partial<Game>) => void;
-  localPosition?: string;
   resetGame: VoidFunction;
   localUser: GameUser;
   setLocalUser: (user: GameUser) => void;
@@ -40,7 +40,6 @@ const initialGame: Game = {
 const GameContext = createContext<GameContextState>({
   game: initialGame,
   isHost: false,
-  localPosition: undefined,
   localUser: {
     username: "",
     clicks: 0
@@ -70,7 +69,6 @@ export const useGame = () => {
 
 function useGameProvider(): GameContextState {
   const [game, setGame] = useState<Game>(initialGame);
-  const [localPosition, setLocalPosition] = useState<string>();
   const [finalResults, setFinalResults] = useState<FinalResults>();
   const [localUser, setLocalUser] = useState<GameUser>({
     username: "",
@@ -93,16 +91,16 @@ function useGameProvider(): GameContextState {
   }, [game]);
 
   const calculatePosition = () => {
-    for (const i in game.listUsers) {
-      if (game.listUsers[i].username === localUser.username) {
-        const position = Number(i) + 1;
-        setLocalPosition(getSuffixPosition(position, t));
-        setFinalResults({
-          localPosition: getSuffixPosition(position, t),
-          results: game.listUsers
-        });
-      }
-    }
+    const position =
+      game.listUsers
+        .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
+        .findIndex((user) => user.key === localUser.key) + 1;
+
+    setFinalResults({
+      localPosition: position,
+      localPositionSuffix: getSuffixPosition(position, t),
+      results: game.listUsers
+    });
   };
 
   const setPartialGame = (partialGame: Partial<Game>) => {
@@ -115,7 +113,6 @@ function useGameProvider(): GameContextState {
 
   const resetContext = () => {
     setGame(initialGame);
-    setLocalPosition(undefined);
     setFinalResults(undefined);
     setLocalUser({username: "", clicks: 0});
     setIsHost(false);
@@ -123,7 +120,6 @@ function useGameProvider(): GameContextState {
 
   return {
     game,
-    localPosition,
     localUser,
     isHost,
     hasEnteredPassword,

@@ -72,7 +72,7 @@ const useGameTimer = ({
   // useEffect for update timer in state and show result
   useEffect(() => {
     if (game) {
-      if (!game.startTime) {
+      if (!game.startTime && game.settings.timer !== remainingTime) {
         setRemainingTime(game.settings.timer);
       }
 
@@ -105,14 +105,14 @@ const useGameTimer = ({
         }
 
         return;
-      } else if (game.status === "ended" || remainingTime === 0) {
+      } else if (game.status === "ended") {
         // localUser is visitor
         onFinish?.();
         calculatePosition();
         updateLocalMaxScore(userKey);
       }
     }
-  }, [game.status, remainingTime]);
+  }, [game.status, game.settings.timer, remainingTime]);
 
   const updateLocalMaxScore = (userKey?: string | null) => {
     if (localUser.clicks && gameUser && game) {
