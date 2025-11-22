@@ -12,3 +12,8 @@ export type RoomUser = Pick<
 > & {
   enterDate?: Timestamp;
 };
+
+export type FinalResults = {
+  localPosition: string;
+  results: GameUser[];
+};

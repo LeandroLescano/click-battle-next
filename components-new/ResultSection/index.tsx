@@ -14,7 +14,7 @@ import "./styles.scss";
 const ResultSection = () => {
   const db = getDatabase();
   const {t} = useTranslation();
-  const {game, localPosition, isHost} = useGame();
+  const {game, isHost, finalResults} = useGame();
 
   // function for reset all data
   const handleReset = () => {
@@ -23,6 +23,7 @@ const ResultSection = () => {
       status: "lobby",
       startTime: null
     };
+
     update(refGame, resetGame);
     const refGameUsers = ref(db, `games/${game.key}/listUsers`);
     get(refGameUsers).then((snapshot) => {
@@ -32,7 +33,9 @@ const ResultSection = () => {
     });
   };
 
-  game.listUsers.sort((a, b) => ((a.clicks || 0) < (b.clicks || 0) ? 1 : -1));
+  finalResults?.results.sort((a, b) =>
+    (a.clicks || 0) < (b.clicks || 0) ? 1 : -1
+  );
 
   return (
     <>
@@ -46,15 +49,19 @@ const ResultSection = () => {
             id="result"
             className="no-select uppercase text-6xl md:text-9xl font-extrabold"
           >
-            {t("resultPosition", {position: localPosition})}
+            {t("resultPosition", {position: finalResults?.localPosition})}
           </h1>
           <h3 className="text-2xl md:text-6xl flex gap-1.5 md:gap-3 justify-center items-center">
             <Trophy />
-            <b className="text-primary-300">{game.listUsers[0].username} </b>
-            {t("with n clicks!", {clicks: game.listUsers[0].clicks})}
+            <b className="text-primary-300">
+              {finalResults?.results[0].username}{" "}
+            </b>
+            {t("with n clicks!", {
+              clicks: finalResults?.results[0].clicks
+            })}
           </h3>
           <div className="result-list flex flex-col gap-6 items-center pt-1 min-h-0 overflow-y-auto pl-1 md:pl-0">
-            {game.listUsers.map((user, i) => {
+            {finalResults?.results.map((user, i) => {
               if (i === 0) return null;
 
               return (

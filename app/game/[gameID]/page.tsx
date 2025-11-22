@@ -90,6 +90,7 @@ const RoomGame = () => {
     setIsHost,
     resetContext
   } = useGame();
+  const latestGameRef = useRef(currentGame);
   const {setNewUser} = useNewPlayerAlert(
     currentGame.listUsers,
     localUser,
@@ -141,6 +142,10 @@ const RoomGame = () => {
       }
     }
   }, [isAuthenticated, gUser?.uid]);
+
+  useEffect(() => {
+    latestGameRef.current = currentGame;
+  }, [currentGame]);
 
   // useEffect for update all data in local state
   useEffect(() => {
@@ -223,7 +228,7 @@ const RoomGame = () => {
                 return router.push("/?kickedOut=true");
               }
 
-              if (listUsers.length > currentGame.listUsers.length) {
+              if (listUsers.length > latestGameRef.current.listUsers.length) {
                 breadcrumb("users", "new_user_joined", {
                   totalUsers: listUsers.length
                 });
@@ -324,7 +329,7 @@ const RoomGame = () => {
       unsubscribe?.();
       resetContext();
     };
-  }, [isAuthenticated, gUser?.uid, currentGame.listUsers.length]);
+  }, [isAuthenticated, gUser?.uid]);
 
   // useEffect for update the maxUsersConnected
   useEffect(() => {
