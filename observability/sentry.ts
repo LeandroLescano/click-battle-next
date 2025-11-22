@@ -2,9 +2,17 @@
 import {metrics} from "@sentry/nextjs";
 import {addBreadcrumb, startInactiveSpan, startSpan} from "@sentry/react";
 
+const detectPlatformWeb = () => {
+  if (typeof window === "undefined") return "server";
+
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+  return isMobile ? "web_mobile" : "web_desktop";
+};
+
 const DEFAULT_ATTRIBUTES = {
-  platform: "web",
-  env: process.env.NODE_ENV
+  platform: detectPlatformWeb(),
+  env: process.env.NODE_ENV ?? "unknown",
+  version: process.env.NEXT_PUBLIC_APP_VERSION ?? "unknown"
 };
 
 export function withSpan<T>(name: string, fn: () => T) {
@@ -83,8 +91,11 @@ export function breadcrumbOnce(
 export function metricCounter(
   name: string,
   value: number = 1,
-  tags?: Record<string, string | number | boolean>
+  tags?: Record<string, string | number | boolean>,
+  sampleRate: number = 1.0
 ) {
+  if (sampleRate < 1.0 && Math.random() > sampleRate) return;
+
   metrics.count(name, value, {
     attributes: {...DEFAULT_ATTRIBUTES, ...tags}
   });
@@ -115,4 +126,29 @@ export function metricTiming(
     attributes: {...DEFAULT_ATTRIBUTES, ...attributes},
     unit: "millisecond"
   });
+}
+
+const lastMetricValues = new Map<string, unknown>();
+
+export function metricGaugeOnce(
+  name: string,
+  value: number,
+  tags?: Record<string, string | number | boolean>,
+  sampleRate?: number
+) {
+  const last = lastMetricValues.get(name);
+  if (last === value) return; // no cambió → no mandar
+  lastMetricValues.set(name, value);
+  metricGauge(name, value, tags, sampleRate);
+}
+
+export function metricCounterOnce(
+  name: string,
+  tags?: Record<string, string | number | boolean>,
+  sampleRate?: number
+) {
+  const key = `${name}_counter_once`;
+  if (lastMetricValues.has(key)) return; // sólo se envía 1 vez
+  lastMetricValues.set(key, true);
+  metricCounter(name, 1, tags, sampleRate);
 }

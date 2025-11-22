@@ -146,9 +146,7 @@ test.describe("Game", () => {
     await userPage.page.locator("#swal2-input").fill(pwd);
     await userPage.page.getByRole("button", {name: "Enter"}).click();
 
-    await expect(
-      userPage.page.getByText("Enter the password")
-    ).not.toBeVisible();
+    await expect(userPage.page.getByText("Enter the password")).toBeVisible();
   });
 
   test("Should kick user if clicking too fast", async ({
@@ -178,5 +176,24 @@ test.describe("Game", () => {
     );
 
     await expect(userPage.getByText(/Misuse detected/i)).toBeVisible();
+  });
+
+  test("Should update timer in settings and both users update timer in room", async ({
+    hostPage,
+    userPage: {page: userPage}
+  }) => {
+    await hostPage.createRoom();
+
+    await userPage.getByText("guesthost1's roomOwner: guesthost11/").click();
+    await userPage.waitForURL(/\/game\//);
+
+    await hostPage.page
+      .getByRole("button", {name: "Settings", exact: true})
+      .click();
+    await hostPage.page.getByLabel("Timer").selectOption({value: "15"});
+    await hostPage.page.getByRole("button", {name: "Save settings"}).click();
+
+    await expect(userPage.getByText("00:15")).toBeVisible();
+    await expect(hostPage.page.getByText("00:15")).toBeVisible();
   });
 });

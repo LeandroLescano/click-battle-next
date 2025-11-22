@@ -1,44 +1,17 @@
 "use client";
-import {
-  getDatabase,
-  onDisconnect,
-  onValue,
-  ref,
-  remove,
-  set,
-  Unsubscribe
-} from "@firebase/database";
-import {parseGameSnapshot} from "@leandrolescano/click-battle-core";
-import {captureException} from "@sentry/nextjs";
-import {Timestamp} from "firebase/firestore";
+
 import lottie from "lottie-web";
 import dynamic from "next/dynamic";
-import {useParams, useRouter, useSearchParams} from "next/navigation";
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import Swal from "sweetalert2";
 
-import {requestPassword} from "components";
 import {Button, Loading, SettingsSidebar} from "components-new";
 import {GameHeader} from "components-new/GameHeader";
 import {LoginModalProps} from "components-new/LoginModal/types";
 import {useAuth} from "contexts/AuthContext";
-import {useGame} from "contexts/GameContext";
-import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import useGameTimer from "hooks/gameTimer";
-import {Game, RoomStats} from "interfaces";
+import {useRoomGame} from "hooks/useRoomGame";
 import celebrationAnim from "lotties/celebrationAnim.json";
-import {
-  breadcrumb,
-  breadcrumbOnce,
-  withSpan,
-  withSpanMin,
-  metricCounter,
-  metricGauge,
-  metricTiming
-} from "observability/sentry";
-import {addRoomStats} from "services/rooms";
-import {handleInvite} from "utils/invite";
 
 const OpponentSection = dynamic(
   () => import("../../../components-new/OpponentSection")
@@ -64,311 +37,30 @@ const LoginModal = dynamic<LoginModalProps>(
 
 const RoomGame = () => {
   const [showSideBar, setShowSideBar] = useState(false);
-  const roomStats = useRef<RoomStats>({
-    name: "",
-    gamesPlayed: [],
-    maxUsersConnected: 1,
-    owner: "",
-    created: new Date(),
-    removed: new Date(),
-    withPassword: false
-  });
-  const flagEnter = useRef(false);
   const celebrationContainer = useRef<HTMLDivElement>(null);
+  const {t} = useTranslation();
+  const {isAuthenticated, loading: authLoading} = useAuth();
 
-  const router = useRouter();
-  const query = useSearchParams();
-  const {gameID} = useParams<{gameID: string}>();
-  const db = getDatabase();
-  const {gameUser, user: gUser, loading, isAuthenticated} = useAuth();
   const {
-    game: currentGame,
+    currentGame,
     localUser,
     isHost,
-    setGame,
-    setLocalUser,
-    setIsHost,
-    resetContext
-  } = useGame();
-  const latestGameRef = useRef(currentGame);
-  const {setNewUser} = useNewPlayerAlert(
-    currentGame.listUsers,
-    localUser,
-    currentGame
-  );
-  const isMobileDevice = useIsMobileDevice();
-  const {t} = useTranslation();
-  const {setHasEnteredPassword, hasEnteredPassword} = useGame();
+    roomStats,
+    handleBackNavigation,
+    handleInvite
+  } = useRoomGame();
+
   const {countdown} = useGameTimer({
     roomStats,
-    onFinish: () => loadCelebrationAnimation()
-  });
-
-  let unsubscribe: Unsubscribe;
-
-  // useEffect for remove user or remove room if host disconnects
-  useEffect(() => {
-    if (isAuthenticated && gUser?.uid) {
-      const gamePath = `games/${currentGame.key}`;
-
-      if (gameUser?.username === currentGame.ownerUser.username) {
-        onDisconnect(ref(db, gamePath))
-          .remove()
-          .catch((e) => console.error(e));
-        return () => {
-          if (
-            roomStats.current &&
-            Date.now() - roomStats.current.created.getTime() > 30 * 1000
-          ) {
-            addRoomStats({
-              ...roomStats.current,
-              removed: new Date()
-            });
-          }
-          const refGame = ref(db, gamePath);
-          remove(refGame);
-        };
-      } else {
-        onDisconnect(ref(db, `games/${currentGame.key}/listUsers/${gUser.uid}`))
-          .remove()
-          .catch((e) => console.error(e));
-        return () => {
-          const refGame = ref(
-            db,
-            `games/${currentGame.key}/listUsers/${gUser.uid}`
-          );
-          remove(refGame);
-        };
-      }
-    }
-  }, [isAuthenticated, gUser?.uid]);
-
-  useEffect(() => {
-    latestGameRef.current = currentGame;
-  }, [currentGame]);
-
-  // useEffect for update all data in local state
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    try {
-      const gameRef = ref(db, `games/${gameID}/`);
-
-      unsubscribe = onValue(gameRef, (snapshot) => {
-        withSpan("onValue_snapshot", () => {
-          const raw = snapshot.val();
-          const key = snapshot.key;
-
-          if (raw) {
-            metricGauge(
-              "snapshot_size_bytes",
-              JSON.stringify(raw).length,
-              undefined,
-              0.1
-            );
-          }
-
-          breadcrumbOnce("firebase", "snapshot_received", {
-            gameID,
-            hasData: !!raw
-          });
-
-          const startParse = performance.now();
-          const parsedGame = withSpanMin("parse_snapshot", 8, () =>
-            parseGameSnapshot(raw, key, gUser?.uid)
-          );
-          metricTiming(
-            "snapshot_parse_time_ms",
-            performance.now() - startParse,
-            undefined,
-            0.1
-          );
-
-          if (!parsedGame) {
-            breadcrumb("navigation", "invalid_game_redirect");
-            return router.replace("/");
-          }
-
-          const {
-            game,
-            listUsers,
-            localUser: dbLocalUser,
-            kickedOut,
-            isHost,
-            isRoomFull,
-            requiresPassword
-          } = parsedGame;
-
-          metricGauge("snapshot_users_count", listUsers.length, undefined, 0.1);
-          metricGauge("room_users_count", listUsers.length, undefined, 0.1);
-
-          withSpan("apply_local_state", () => {
-            const startApply = performance.now();
-            try {
-              // Main game state
-              setGame({...game, listUsers});
-
-              if (dbLocalUser) setLocalUser(dbLocalUser);
-
-              setIsHost(isHost);
-
-              // Initialize room stats once
-              if (!roomStats.current.name) {
-                roomStats.current.name = game.roomName;
-                roomStats.current.owner = game.ownerUser.username;
-                roomStats.current.withPassword = !!game.settings.password;
-                roomStats.current.created = new Date(
-                  game.created as unknown as number
-                );
-              }
-
-              if (kickedOut) {
-                metricCounter("room_kicked_out");
-                breadcrumb("navigation", "kicked_out_redirect");
-                return router.push("/?kickedOut=true");
-              }
-
-              if (listUsers.length > latestGameRef.current.listUsers.length) {
-                breadcrumb("users", "new_user_joined", {
-                  totalUsers: listUsers.length
-                });
-                setNewUser(true);
-              }
-
-              if (!isHost) {
-                if (isRoomFull) {
-                  metricCounter("room_full_redirects");
-                  breadcrumb("navigation", "full_room_redirect");
-                  return router.push("/?fullRoom=true");
-                }
-
-                if (
-                  requiresPassword &&
-                  !hasEnteredPassword &&
-                  !flagEnter.current
-                ) {
-                  flagEnter.current = true;
-
-                  breadcrumb("password", "room_requires_password");
-
-                  const urlPassword =
-                    query.get("pwd") === game.settings.password
-                      ? game.settings.password
-                      : null;
-
-                  if (!urlPassword) {
-                    return requestPassword(game.settings.password!, t).then(
-                      (val) => {
-                        if (val.isConfirmed) {
-                          setHasEnteredPassword(true);
-                          clearPath(gameID);
-                          metricCounter("room_join_attempts");
-                          addNewUserToDB(game);
-                        } else {
-                          router.push("/");
-                        }
-                      }
-                    );
-                  }
-
-                  // Correct password from URL
-                  clearPath(gameID);
-                  metricCounter("room_join_attempts");
-                  addNewUserToDB(game);
-                }
-
-                // Add user to room
-                if (!flagEnter.current) {
-                  if (listUsers.length + 1 > game.settings.maxUsers) {
-                    metricCounter("room_full_redirects");
-                    breadcrumb("navigation", "max_users_redirect");
-                    return router.push("/?fullRoom=true");
-                  }
-
-                  flagEnter.current = true;
-                  breadcrumb("users", "adding_new_user");
-                  metricCounter("room_join_attempts");
-                  addNewUserToDB(game);
-                }
-              }
-            } catch (error) {
-              breadcrumb("error", "snapshot_processing_error", {
-                game,
-                listUsers,
-                username: gameUser?.username,
-                isHost
-              });
-              throw error;
-            } finally {
-              metricTiming(
-                "local_state_apply_ms",
-                performance.now() - startApply,
-                undefined,
-                0.1
-              );
-            }
-          });
+    onFinish: () => {
+      if (celebrationContainer?.current?.innerHTML === "") {
+        lottie.loadAnimation({
+          container: celebrationContainer.current!,
+          animationData: celebrationAnim
         });
-      });
-    } catch (error) {
-      // Last-resort fallback
-      captureException(error);
-
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Sorry, something went wrong. Please try again.",
-        heightAuto: false
-      }).then(() => {
-        router.push("/");
-      });
-    }
-
-    return () => {
-      breadcrumb("lifecycle", "unsubscribe_onValue");
-      unsubscribe?.();
-      resetContext();
-    };
-  }, [isAuthenticated, gUser?.uid]);
-
-  // useEffect for update the maxUsersConnected
-  useEffect(() => {
-    if (roomStats.current.maxUsersConnected < currentGame.listUsers.length) {
-      roomStats.current.maxUsersConnected = currentGame.listUsers.length;
-    }
-  }, [currentGame.listUsers.length]);
-
-  const clearPath = (id: string) => {
-    router.replace(`/game/${id}`);
-  };
-
-  const loadCelebrationAnimation = () => {
-    if (celebrationContainer?.current?.innerHTML === "") {
-      lottie.loadAnimation({
-        container: celebrationContainer.current!,
-        animationData: celebrationAnim
-      });
-    }
-  };
-
-  // function for add user to database and update state
-  const addNewUserToDB = (game: Game) => {
-    if (gUser?.uid) {
-      const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
-      set(refUser, {
-        clicks: 0,
-        rol: "visitor",
-        username: gameUser?.username,
-        enterDate: Timestamp.now()
-      });
-    } else if (query.get("invite")) {
-      if (Date.now() > Number(query.get("invite"))) {
-        router.push("/");
       }
-    } else {
-      router.push("/");
     }
-  };
+  });
 
   const closeSideBar = () => {
     if (showSideBar) {
@@ -376,18 +68,10 @@ const RoomGame = () => {
     }
   };
 
-  const handleOnInvite = () => {
-    handleInvite(isMobileDevice, t, currentGame?.settings.password);
-  };
-
-  const handleOnBack = useCallback(() => {
-    router.push("/");
-  }, []);
-
   return (
     <main>
       <div className="dark:text-primary-200 h-dvh flex flex-col overflow-hidden relative">
-        {loading || !currentGame ? (
+        {authLoading || !currentGame ? (
           <Loading />
         ) : (
           <>
@@ -401,7 +85,7 @@ const RoomGame = () => {
               <SettingsSidebar
                 showSideBar={showSideBar}
                 handleSideBar={(val: boolean) => setShowSideBar(val)}
-                idGame={gameID}
+                idGame={currentGame.key || ""}
                 options={{
                   maxUsers: currentGame?.settings.maxUsers || 2,
                   roomName: currentGame?.roomName,
@@ -413,7 +97,7 @@ const RoomGame = () => {
             <div onClick={closeSideBar} className="flex flex-col gap-4 h-full">
               <GameHeader
                 onOpenSettings={() => setShowSideBar(true)}
-                onBack={handleOnBack}
+                onBack={handleBackNavigation}
               />
               {currentGame.status !== "ended" ? (
                 <h1 className="text-2xl md:text-6xl text-center md:text-start font-bold mb-2 text-primary-400 dark:text-primary-100">
@@ -422,9 +106,12 @@ const RoomGame = () => {
               ) : null}
               {currentGame.status !== "ended" ? (
                 <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start h-full min-h-0">
-                  <LocalSection idGame={gameID || ""} localUser={localUser} />
+                  <LocalSection
+                    idGame={currentGame.key || ""}
+                    localUser={localUser}
+                  />
                   <OpponentSection
-                    localUsername={gameUser?.username || ""}
+                    localUsername={localUser?.username || ""}
                     maxUsers={currentGame.settings.maxUsers}
                   />
                 </div>
@@ -434,7 +121,7 @@ const RoomGame = () => {
               <Button
                 variant="outlined"
                 className="text-xl md:text-2xl py-0.5 px-3 md:py-1 md:px-6 self-center md:self-end z-10"
-                onClick={handleOnInvite}
+                onClick={handleInvite}
               >
                 {t("Invite friends")}
               </Button>
