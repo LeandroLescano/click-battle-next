@@ -1,7 +1,7 @@
 "use client";
 
 import {GameUser, MaxScore} from "@leandrolescano/click-battle-core";
-import * as Sentry from "@sentry/nextjs";
+import {setContext} from "@sentry/nextjs";
 import {
   getAnalytics,
   logEvent,
@@ -159,12 +159,12 @@ function useAuthProvider(): AuthContextState {
           }
 
           setGameUser(objUser);
-          Sentry.setContext("user", objUser);
+          setContext("user", objUser);
           if (key) {
             await getUser(key).then((dbUser) => {
               if (dbUser && dbUser !== objUser) {
                 setGameUser(dbUser);
-                Sentry.setContext("user", dbUser);
+                setContext("user", {dbUser: dbUser});
                 sessionStorage.setItem("objUser", JSON.stringify(dbUser));
 
                 if (dbUser.key) {
@@ -298,7 +298,7 @@ function useAuthProvider(): AuthContextState {
       });
       setGameUser((prev) => prev && {...prev, username});
       localStorage.setItem("user", username);
-    } catch (error) {
+    } catch {
       signOut();
     }
   };

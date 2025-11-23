@@ -93,7 +93,7 @@ export const SettingsSidebar = ({
         settings: {
           maxUsers: localSettings.maxUsers,
           timer: localSettings.timer,
-          password: localSettings.password || undefined
+          password: localSettings.password || null
         }
       };
       await update(refGame, updatedGame);

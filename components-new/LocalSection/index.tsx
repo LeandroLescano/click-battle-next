@@ -1,4 +1,5 @@
 import {AntiClickCheat, GameUser} from "@leandrolescano/click-battle-core";
+import {captureMessage} from "@sentry/nextjs";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
 import {useRouter} from "next/navigation";
@@ -13,6 +14,12 @@ import {useGame} from "contexts/GameContext";
 import {useWindowSize} from "hooks";
 import useGameTimer from "hooks/gameTimer";
 import {Watch} from "icons/Watch";
+import {
+  breadcrumb,
+  metricCounter,
+  metricTiming,
+  withSpan
+} from "observability/sentry";
 
 interface LocalSectionProps {
   idGame: string;
@@ -51,24 +58,59 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
   };
 
   const handleClick = () => {
-    const {shouldKick, interval, suspicionCounter} =
-      antiCheat.current.registerClick();
+    withSpan("handle_click", () => {
+      const {shouldKick, interval, suspicionCounter} =
+        antiCheat.current.registerClick();
 
-    if (shouldKick) {
-      setDisableUI(true);
-      logEvent(getAnalytics(), "kicked_suspicion_hack", {
-        action: "kicked_suspicion_hack",
-        clickInterval: interval,
-        suspicionCounter,
-        date: new Date()
+      breadcrumb("click", "user_clicked", {
+        interval,
+        suspicionCounter
       });
-      return router.push("/?suspicionOfHack=true");
-    }
 
-    if (localUser.clicks !== undefined && gUser) {
-      const refGame = ref(db, `games/${idGame}/listUsers/${gUser.uid}`);
-      update(refGame, {clicks: localUser.clicks + 1});
-    }
+      if (interval !== null) {
+        metricTiming("click_interval_ms", interval, undefined, 0.1);
+      }
+
+      if (shouldKick) {
+        metricCounter("fast_click_detected");
+        breadcrumb("anti-cheat", "user_kicked_for_suspicion", {
+          interval,
+          suspicionCounter
+        });
+
+        captureMessage("click_suspicious_kick", {
+          level: "warning",
+          extra: {interval, suspicionCounter}
+        });
+
+        setDisableUI(true);
+
+        logEvent(getAnalytics(), "kicked_suspicion_hack", {
+          action: "kicked_suspicion_hack",
+          clickInterval: interval,
+          suspicionCounter,
+          date: new Date()
+        });
+
+        return router.push("/?suspicionOfHack=true");
+      }
+
+      return withSpan("firebase_update_click", async () => {
+        if (localUser.clicks !== undefined && gUser) {
+          const refGame = ref(db, `games/${idGame}/listUsers/${gUser.uid}`);
+
+          breadcrumb("firebase", "update_click_request", {
+            clicksBefore: localUser.clicks
+          });
+
+          await update(refGame, {clicks: localUser.clicks + 1});
+
+          breadcrumb("firebase", "update_click_success", {
+            clicksAfter: localUser.clicks + 1
+          });
+        }
+      });
+    });
   };
 
   const AdditionalInfo = () => {
