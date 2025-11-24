@@ -170,6 +170,7 @@ export const useRoomGame = (): UseRoomGameReturn => {
             if (action.showPasswordPrompt) {
               requestPassword(game.settings.password!, t).then((val) => {
                 if (val.isConfirmed) {
+                  flagEnter.current = true;
                   setHasEnteredPassword(true);
                   router.replace(`/game/${gameID}`); // Clear path
                   metricCounter("room_join_attempts", undefined, {

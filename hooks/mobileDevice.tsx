@@ -4,26 +4,21 @@ export const useIsMobileDevice = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    let hasTouchScreen = false;
+    const check = () => {
+      // Primary pointer is coarse → mobile/tablet UI
+      const coarse = window.matchMedia("(pointer: coarse)").matches;
 
-    if (navigator.maxTouchPoints) {
-      hasTouchScreen = navigator.maxTouchPoints > 0;
-    } else {
-      const mQ = window.matchMedia("(pointer:coarse)");
-      if (mQ && mQ.media === "(pointer:coarse)") {
-        hasTouchScreen = !!mQ.matches;
-      } else if ("orientation" in window) {
-        hasTouchScreen = true; // deprecated, but good fallback
-      } else {
-        // Only as a last resort, fall back to user agent sniffing
-        const UA = navigator.userAgent;
-        hasTouchScreen =
-          /\b(BlackBerry|webOS|iPhone|IEMobile)\b/i.test(UA) ||
-          /\b(Android|Windows Phone|iPad|iPod)\b/i.test(UA);
-      }
-    }
+      // Optional safeguard: extremely large screens are almost never mobile
+      const smallScreen = window.innerWidth < 1024;
 
-    setIsMobile(hasTouchScreen);
+      setIsMobile(coarse && smallScreen);
+    };
+
+    check();
+
+    // Update if the user resizes (e.g. rotate a tablet)
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   return isMobile;
