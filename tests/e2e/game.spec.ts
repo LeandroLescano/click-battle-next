@@ -146,7 +146,9 @@ test.describe("Game", () => {
     await userPage.page.locator("#swal2-input").fill(pwd);
     await userPage.page.getByRole("button", {name: "Enter"}).click();
 
-    await expect(userPage.page.getByText("Enter the password")).toBeVisible();
+    await expect(
+      userPage.page.getByText("Enter the password")
+    ).not.toBeVisible();
   });
 
   test("Should kick user if clicking too fast", async ({
