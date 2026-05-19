@@ -1,4 +1,7 @@
-import {GameSettings, GameUser} from "@leandrolescano/click-battle-core";
+import {
+  GameUser,
+  normalizeRoomCreation
+} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {
   child,
@@ -51,8 +54,6 @@ export const CreateSection = () => {
     try {
       if (gameUser && room) {
         setCreating(true);
-        const newRoomName =
-          room.name || t("Name's room", {name: gameUser.username});
         const newGameRef = ref(db, "games/");
 
         const userToPush: GameUser = {
@@ -65,37 +66,37 @@ export const CreateSection = () => {
           userToPush.maxScores = gameUser.maxScores;
         }
 
-        if (room.timer) {
-          if (room.timer < DEFAULT_VALUES.MIN_TIMER)
-            room.timer = DEFAULT_VALUES.MIN_TIMER;
-          if (room.timer > DEFAULT_VALUES.MAX_TIMER)
-            room.timer = DEFAULT_VALUES.MAX_TIMER;
-        }
-
-        if (room.maxUsers) {
-          if (room.maxUsers > config.maxUsers) room.maxUsers = config.maxUsers;
-          if (room.maxUsers < DEFAULT_VALUES.MIN_USERS)
-            room.maxUsers = DEFAULT_VALUES.MIN_USERS;
-        }
-
-        const timer = room.timer || DEFAULT_VALUES.DEFAULT_TIMER;
-
-        const settings: GameSettings = {
-          timer,
-          maxUsers: room.maxUsers || DEFAULT_VALUES.MIN_USERS
-        };
-
-        if (room.password) {
-          settings.password = await sha256(room.password);
-        }
+        const hashedPassword = room.password
+          ? await sha256(room.password)
+          : null;
+        const normalizedRoom = normalizeRoomCreation(
+          {
+            roomName: room.name || t("Name's room", {name: gameUser.username}),
+            password: room.password,
+            timer: room.timer,
+            maxUsers: room.maxUsers
+          },
+          {username: gameUser.username, key: user?.uid},
+          {
+            defaultTimer: DEFAULT_VALUES.DEFAULT_TIMER,
+            minTimer: DEFAULT_VALUES.MIN_TIMER,
+            maxTimer: DEFAULT_VALUES.MAX_TIMER,
+            minUsers: DEFAULT_VALUES.MIN_USERS,
+            maxUsers: config.maxUsers
+          },
+          {
+            created: serverTimestamp(),
+            storedPassword: hashedPassword
+          }
+        ).room;
 
         const objRoom: Game = {
-          roomName: newRoomName,
-          status: "lobby",
+          roomName: normalizedRoom.roomName,
+          status: normalizedRoom.status,
           listUsers: [],
           ownerUser: {...gameUser, key: user?.uid},
-          created: serverTimestamp(),
-          settings
+          created: normalizedRoom.created,
+          settings: normalizedRoom.settings
         };
 
         objRoom.key = push(newGameRef, objRoom).key;
@@ -111,7 +112,7 @@ export const CreateSection = () => {
             action: "create_room",
             withCustomName: !!room.name,
             withPassword: !!room.password,
-            maxUsers: room.maxUsers,
+            maxUsers: objRoom.settings.maxUsers,
             isRegistered: !user?.isAnonymous
           });
 
