@@ -14,7 +14,7 @@ import {firebaseConfig} from "resources/config";
 
 import "./tailwind.scss";
 
-if (!getApps.length) {
+if (!getApps().length) {
   initializeApp(firebaseConfig);
 } else {
   getApp(); // if already initialized, use that one

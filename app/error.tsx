@@ -1,14 +1,12 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import React, {useEffect} from "react";
 
 import {Button} from "components-new";
 
 export default function ErrorPage({error}: {error: Error & {digest?: string}}) {
   useEffect(() => {
-    // Log the error to Sentry
-    Sentry.captureException(error);
+    console.error(error);
   }, [error]);
 
   return (

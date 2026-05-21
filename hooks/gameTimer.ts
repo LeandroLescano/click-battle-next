@@ -92,7 +92,8 @@ const useGameTimer = ({
           roomStats?.current.gamesPlayed.push({
             maxClicks: Math.max(...game.listUsers.map((lu) => lu.clicks || 0)),
             numberOfUsers: game.listUsers.length,
-            timer: game.settings.timer
+            timer: game.settings.timer,
+            gameMode: game.gameMode ?? "classic-speed"
           });
 
           const refGame = ref(db, `games/${game.key}`);

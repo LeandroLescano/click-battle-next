@@ -77,22 +77,32 @@ const Home = () => {
       resetGame();
       const refGames = ref(db, `games`);
       onValue(refGames, (snapshot) => {
-        const list: {[key: string]: Game} | null = snapshot.val();
+        const list: Record<string, Partial<Game>> | null = snapshot.val();
         if (list) {
           if (mounted) {
-            const games = Object.entries(list).map((game) => ({
-              key: game[0],
-              ...game[1]
-            }));
+            const games = Object.entries(list)
+              .map(([key, rawGame]) => {
+                const parsed = assessRoomJoin(
+                  {
+                    key,
+                    ...rawGame
+                  },
+                  {
+                    snapshotKey: key
+                  }
+                );
 
-            for (const g of games) {
-              if (g.listUsers) {
-                g.listUsers = Object.entries(g.listUsers).map((u) => ({
-                  key: u[0],
-                  ...u[1]
-                }));
-              }
-            }
+                if (!parsed) {
+                  return null;
+                }
+
+                return {
+                  ...parsed.game,
+                  key,
+                  listUsers: parsed.listUsers
+                } as Game;
+              })
+              .filter(Boolean) as Game[];
 
             setListGames(games);
           }

@@ -1,5 +1,4 @@
 import {AntiClickCheat, GameUser} from "@leandrolescano/click-battle-core";
-import {captureMessage} from "@sentry/nextjs";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
 import {useRouter} from "next/navigation";
@@ -78,9 +77,9 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
           suspicionCounter
         });
 
-        captureMessage("click_suspicious_kick", {
-          level: "warning",
-          extra: {interval, suspicionCounter}
+        console.warn("click_suspicious_kick", {
+          interval,
+          suspicionCounter
         });
 
         setDisableUI(true);

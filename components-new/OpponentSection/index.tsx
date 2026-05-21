@@ -1,10 +1,12 @@
 import {GameUser} from "@leandrolescano/click-battle-core";
+import {getDatabase, ref, update} from "firebase/database";
+import {useParams} from "next/navigation";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
+import {RoomLeaderboard} from "components-new/RoomLeaderboard";
 import {useGame} from "contexts/GameContext";
-
-import OpponentList from "./components/OpponentList";
 
 import "./styles.scss";
 
@@ -23,6 +25,8 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
   });
   const {t} = useTranslation();
   const {game, isHost} = useGame();
+  const db = getDatabase();
+  const {gameID} = useParams();
 
   useEffect(() => {
     if (
@@ -48,47 +52,50 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
     return true;
   };
 
-  const OpponentsText = () => (
-    <span>
-      {t("Opponents")} ({game.listUsers.length - 1}/{maxUsers - 1})
-    </span>
-  );
+  const kickUser = (userKey: string | null) => {
+    if (userKey) {
+      const userRef = ref(db, `games/${gameID}/listUsers/${userKey}`);
+      update(userRef, {kickOut: true}).then(() => {
+        Swal.fire({
+          title: "The user has been kicked.",
+          icon: "success",
+          toast: true,
+          showConfirmButton: false,
+          position: "bottom-end",
+          timer: 2500
+        });
+      });
+    }
+  };
+
+  const leaderboardRows = countPositions.list.map((user, index) => ({
+    key: user.key || `${user.username}-${index}`,
+    primary: user.username,
+    value: String(user.clicks || 0),
+    highlighted: localUsername === user.username,
+    action:
+      isHost && localUsername !== user.username
+        ? {
+            label: t("Kick"),
+            onClick: () => {
+              kickUser(user.key || null);
+            }
+          }
+        : undefined
+  }));
 
   return (
     <div className="w-full md:w-1/2 max-h-full text-sm md:text-3xl px-4 md:px-0 font-medium h-full flex flex-col min-h-0">
-      <h4 className="text-xl md:text-5xl text-center md:text-start font-bold mb-4 md:mb-12 text-primary-600 dark:text-primary-200">
-        {game.listUsers.length === 1 && isHost ? (
-          t("Waiting for opponents...")
-        ) : (
-          <OpponentsText />
-        )}
-      </h4>
-      <div className="flex flex-row mb-2 md:mb-5 text-primary-600 dark:text-primary-200">
-        <div className="w-5/6">
-          <p className="mb-2">{t("Name")}</p>
-        </div>
-        <div className="w-1/6 text-center">Clicks</div>
-      </div>
-      <div className="opponents-container flex flex-row min-w-0 overflow-y-auto max-h-full min-h-0 pl-1 pt-1">
-        <div className="w-5/6">
-          <OpponentList
-            countPositions={countPositions}
-            localUsername={localUsername}
-            isHost={isHost}
-          />
-        </div>
-        <div className="w-1/6 text-center ">
-          {game.listUsers
-            .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
-            .map((user, i) => {
-              return (
-                <div key={i} className="h-12 md:h-20 mb-3 content-center">
-                  {user.clicks}
-                </div>
-              );
-            })}
-        </div>
-      </div>
+      <RoomLeaderboard
+        title={
+          game.listUsers.length === 1 && isHost
+            ? t("Waiting for opponents...")
+            : t("Opponents") + ` (${game.listUsers.length - 1}/${maxUsers - 1})`
+        }
+        leftLabel={t("Name")}
+        rightLabel={t("Clicks")}
+        rows={leaderboardRows}
+      />
     </div>
   );
 }

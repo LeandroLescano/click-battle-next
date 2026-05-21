@@ -14,5 +14,7 @@ export * from "./Input";
 export * from "./CardGame";
 export * from "./CardGameAd";
 export * from "./Loading";
+export * from "./RoomLeaderboard";
+export * from "./ReactionBattle";
 export * from "./SettingsSidebar";
 export * from "./Switch";

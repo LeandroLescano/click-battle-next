@@ -7,7 +7,6 @@ import {
   set,
   Unsubscribe
 } from "@firebase/database";
-import {captureException} from "@sentry/nextjs";
 import {Timestamp} from "firebase/firestore";
 import {useParams, useRouter, useSearchParams} from "next/navigation";
 import {useCallback, useEffect, useRef, useState} from "react";
@@ -149,7 +148,7 @@ export const useRoomGame = (): UseRoomGameReturn => {
               return;
             }
 
-            setGame({...game, listUsers});
+            setGame({...game, listUsers} as Game);
             if (dbLocalUser) setLocalUser(dbLocalUser);
             setIsHost(parsedIsHost);
             if (newUserJoined) setNewUser(true);
@@ -215,7 +214,7 @@ export const useRoomGame = (): UseRoomGameReturn => {
         });
       });
     } catch (err) {
-      captureException(err);
+      console.error(err);
       setError(err as Error);
       Swal.fire({
         icon: "error",

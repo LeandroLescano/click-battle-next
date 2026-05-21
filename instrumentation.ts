@@ -1,15 +1,21 @@
-import {init} from "@sentry/nextjs";
+import * as Sentry from "@sentry/nextjs";
 
-export function register() {
-  init({
+const sentryEnabled = process.env.SENTRY_ENABLED === "true";
+
+export async function register() {
+  if (!sentryEnabled) {
+    return;
+  }
+
+  Sentry.init({
     dsn: process.env.SENTRY_DSN,
-
     tracesSampleRate: 0.5,
-
     profilesSampleRate: 0.3,
-
     debug: false,
-
-    enabled: process.env.NODE_ENV !== "development"
+    enabled: true
   });
 }
+
+export const onRequestError = sentryEnabled
+  ? Sentry.captureRequestError
+  : undefined;

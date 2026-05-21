@@ -11,6 +11,7 @@ import {LoginModalProps} from "components-new/LoginModal/types";
 import {useAuth} from "contexts/AuthContext";
 import useGameTimer from "hooks/gameTimer";
 import {useRoomGame} from "hooks/useRoomGame";
+import {isReactionMode} from "lib/game/gameModes";
 import celebrationAnim from "lotties/celebrationAnim.json";
 
 const OpponentSection = dynamic(
@@ -24,6 +25,9 @@ const CelebrationResult = dynamic(
 );
 const ResultSection = dynamic(
   () => import("../../../components-new/ResultSection")
+);
+const ReactionBattle = dynamic(
+  () => import("../../../components-new/ReactionBattle")
 );
 const LoginModal = dynamic<LoginModalProps>(
   () =>
@@ -49,6 +53,7 @@ const RoomGame = () => {
     handleBackNavigation,
     handleInvite
   } = useRoomGame();
+  const isReactionRoom = isReactionMode(currentGame?.gameMode);
 
   const {countdown} = useGameTimer({
     roomStats,
@@ -99,12 +104,17 @@ const RoomGame = () => {
                 onOpenSettings={() => setShowSideBar(true)}
                 onBack={handleBackNavigation}
               />
-              {currentGame.status !== "ended" ? (
+              {currentGame.status !== "ended" || isReactionRoom ? (
                 <h1 className="text-2xl md:text-6xl text-center md:text-start font-bold mb-2 text-primary-400 dark:text-primary-100">
                   {currentGame?.roomName || ""}
                 </h1>
               ) : null}
-              {currentGame.status !== "ended" ? (
+              {isReactionRoom ? (
+                <ReactionBattle
+                  idGame={currentGame.key || ""}
+                  localUser={localUser}
+                />
+              ) : currentGame.status !== "ended" ? (
                 <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start h-full min-h-0">
                   <LocalSection
                     idGame={currentGame.key || ""}

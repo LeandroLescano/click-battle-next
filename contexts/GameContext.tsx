@@ -1,10 +1,10 @@
 "use client";
 
-import {Game, GameUser} from "@leandrolescano/click-battle-core";
+import {GameUser} from "@leandrolescano/click-battle-core";
 import React, {useState, useContext, createContext, useEffect} from "react";
 import {useTranslation} from "react-i18next";
 
-import {FinalResults} from "interfaces";
+import {FinalResults, Game} from "interfaces";
 import {getSuffixPosition} from "utils/string";
 
 interface GameContextState {
@@ -29,6 +29,11 @@ const initialGame: Game = {
     username: ""
   },
   roomName: "",
+  gameMode: "classic-speed",
+  modeSettings: {
+    gameMode: "classic-speed",
+    config: {}
+  },
   settings: {
     maxUsers: 2,
     password: "",

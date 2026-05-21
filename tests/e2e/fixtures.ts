@@ -1,7 +1,36 @@
 /* eslint-disable import/export */
 import {test as base, type Page} from "@playwright/test";
+import {getApp, getApps, initializeApp} from "firebase/app";
+import {
+  connectDatabaseEmulator,
+  get,
+  getDatabase,
+  ref,
+  set
+} from "firebase/database";
+
+import {firebaseConfig} from "resources/config";
 
 import {authenticate} from "./auth.utils";
+
+const TEST_DATABASE_URL =
+  process.env.databaseURL ||
+  process.env.DATABASE_URL ||
+  "https://click-battle-mp-default-rtdb.firebaseio.com";
+
+const getTestDatabase = () => {
+  const app =
+    getApps().length === 0
+      ? initializeApp({...firebaseConfig, databaseURL: TEST_DATABASE_URL})
+      : getApp();
+  const db = getDatabase(app, TEST_DATABASE_URL);
+
+  try {
+    connectDatabaseEmulator(db, "localhost", 9000);
+  } catch {}
+
+  return db;
+};
 
 class GenericPage {
   page: Page;
@@ -10,10 +39,29 @@ class GenericPage {
     this.page = page;
   }
 
-  async createRoom(password?: string): Promise<string> {
-    if (password) {
-      await this.page.getByRole("textbox", {name: "Password"}).fill(password);
+  async createRoom(options?: {
+    password?: string;
+    gameMode?: "classic-speed" | "reaction";
+    roomName?: string;
+  }): Promise<string> {
+    if (options?.roomName) {
+      await this.page.getByRole("textbox", {name: "Room name"}).fill(
+        options.roomName
+      );
     }
+
+    if (options?.password) {
+      await this.page.getByRole("textbox", {name: "Password"}).fill(
+        options.password
+      );
+    }
+
+    if (options?.gameMode) {
+      await this.page
+        .getByRole("combobox", {name: "Game mode"})
+        .selectOption(options.gameMode);
+    }
+
     await this.page.getByText("Create game").click();
     await this.page.waitForURL(/\/game\//);
 
@@ -21,17 +69,30 @@ class GenericPage {
 
     return roomID || "";
   }
+
+  async openRoomByName(roomName: string) {
+    await this.page.getByRole("button", {name: new RegExp(roomName, "i")}).click();
+  }
+
+  async makeRoomLegacy(roomID: string) {
+    const db = getTestDatabase();
+    const roomRef = ref(db, `games/${roomID}`);
+    const snapshot = await get(roomRef);
+    const room = snapshot.val();
+
+    if (!room) {
+      throw new Error(`Room ${roomID} not found`);
+    }
+
+    const {gameMode: _gameMode, modeSettings: _modeSettings, ...legacyRoom} = room;
+    await set(roomRef, legacyRoom);
+  }
 }
 
-// Page Object Model for the "admin" page.
-// Here you can add locators and helper methods specific to the admin page.
 class HostPage extends GenericPage {}
 
-// Page Object Model for the "user" page.
-// Here you can add locators and helper methods specific to the user page.
 class UserPage extends GenericPage {}
 
-// Declare the types of your fixtures.
 type MyFixtures = {
   hostPage: HostPage;
   userPage: UserPage;
