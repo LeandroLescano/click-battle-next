@@ -1,7 +1,7 @@
 import {getApp, getApps, initializeApp} from "firebase/app";
 import localFont from "next/font/local";
 import Script from "next/script";
-import React, {Suspense} from "react";
+import React, {ReactNode, Suspense} from "react";
 
 import {Loading} from "components-new/Loading";
 import {UsernameModal} from "components-new/UsernameModal";
@@ -21,7 +21,7 @@ if (!getApps().length) {
 }
 
 type Props = {
-  children: JSX.Element;
+  children: ReactNode;
 };
 
 const tinyFont = localFont({

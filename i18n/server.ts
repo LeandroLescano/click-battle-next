@@ -1,8 +1,8 @@
-import {cache} from "react";
 import acceptLanguage from "accept-language";
 import {createInstance} from "i18next";
 import resourcesToBackend from "i18next-resources-to-backend";
 import {cookies as getCookies, headers as getHeaders} from "next/headers";
+import {cache} from "react";
 import {initReactI18next} from "react-i18next/initReactI18next";
 import "server-only";
 
@@ -27,8 +27,8 @@ acceptLanguage.languages(languages);
 const cookieName = "i18next";
 
 export async function detectLanguage() {
-  const cookies = getCookies();
-  const headers = getHeaders();
+  const cookies = await getCookies();
+  const headers = await getHeaders();
 
   // here we can read the session data
   // const session = await getSession();

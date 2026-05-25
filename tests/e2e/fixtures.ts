@@ -1,5 +1,5 @@
 /* eslint-disable import/export */
-import {test as base, type Page} from "@playwright/test";
+import {expect, test as base, type Page} from "@playwright/test";
 import {getApp, getApps, initializeApp} from "firebase/app";
 import {
   connectDatabaseEmulator,
@@ -27,7 +27,9 @@ const getTestDatabase = () => {
 
   try {
     connectDatabaseEmulator(db, "localhost", 9000);
-  } catch {}
+  } catch {
+    // Firebase only allows connecting each app instance to the emulator once.
+  }
 
   return db;
 };
@@ -45,15 +47,15 @@ class GenericPage {
     roomName?: string;
   }): Promise<string> {
     if (options?.roomName) {
-      await this.page.getByRole("textbox", {name: "Room name"}).fill(
-        options.roomName
-      );
+      await this.page
+        .getByRole("textbox", {name: "Room name"})
+        .fill(options.roomName);
     }
 
     if (options?.password) {
-      await this.page.getByRole("textbox", {name: "Password"}).fill(
-        options.password
-      );
+      await this.page
+        .getByRole("textbox", {name: "Password"})
+        .fill(options.password);
     }
 
     if (options?.gameMode) {
@@ -62,8 +64,9 @@ class GenericPage {
         .selectOption(options.gameMode);
     }
 
-    await this.page.getByText("Create game").click();
-    await this.page.waitForURL(/\/game\//);
+    const createButton = this.page.getByRole("button", {name: "Create game"});
+    await expect(createButton).toBeVisible();
+    await Promise.all([this.page.waitForURL(/\/game\//), createButton.click()]);
 
     const roomID = this.page.url().split("/").pop();
 
@@ -71,7 +74,9 @@ class GenericPage {
   }
 
   async openRoomByName(roomName: string) {
-    await this.page.getByRole("button", {name: new RegExp(roomName, "i")}).click();
+    await this.page
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
   }
 
   async makeRoomLegacy(roomID: string) {
@@ -84,7 +89,11 @@ class GenericPage {
       throw new Error(`Room ${roomID} not found`);
     }
 
-    const {gameMode: _gameMode, modeSettings: _modeSettings, ...legacyRoom} = room;
+    const {
+      gameMode: _gameMode,
+      modeSettings: _modeSettings,
+      ...legacyRoom
+    } = room;
     await set(roomRef, legacyRoom);
   }
 }

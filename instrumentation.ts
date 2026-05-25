@@ -1,9 +1,20 @@
-import * as Sentry from "@sentry/nextjs";
+import type {Instrumentation} from "next";
 
 const sentryEnabled = process.env.SENTRY_ENABLED === "true";
+let sentryImport: Promise<typeof import("@sentry/nextjs")> | null = null;
+
+const loadSentry = () => {
+  sentryImport ??= import("@sentry/nextjs");
+  return sentryImport;
+};
 
 export async function register() {
-  if (!sentryEnabled || Sentry.isInitialized()) {
+  if (!sentryEnabled) {
+    return;
+  }
+
+  const Sentry = await loadSentry();
+  if (Sentry.isInitialized()) {
     return;
   }
 
@@ -16,6 +27,13 @@ export async function register() {
   });
 }
 
-export const onRequestError = sentryEnabled
-  ? Sentry.captureRequestError
-  : () => {};
+export const onRequestError: Instrumentation.onRequestError = async (
+  ...args
+) => {
+  if (!sentryEnabled) {
+    return;
+  }
+
+  const Sentry = await loadSentry();
+  Sentry.captureRequestError(...args);
+};

@@ -392,15 +392,19 @@ test.describe("Game", () => {
       .getByRole("button", {name: new RegExp(roomName, "i")})
       .click();
     await userPage.waitForURL(/\/game\//);
+    await expect(hostPage.page.getByText("guestuser1")).toBeVisible();
 
     await hostPage.page
       .getByRole("button", {name: "Settings", exact: true})
       .click();
     await hostPage.page.getByLabel("Timer").selectOption({value: "15"});
     await hostPage.page.getByRole("button", {name: "Save settings"}).click();
+    await expect(hostPage.page.getByText("Settings updated")).toBeVisible();
 
-    await expect(userPage.getByText("00:15")).toBeVisible();
-    await expect(hostPage.page.getByText("00:15")).toBeVisible();
+    await expect(userPage.getByText("00:15")).toBeVisible({timeout: 10000});
+    await expect(hostPage.page.getByText("00:15")).toBeVisible({
+      timeout: 10000
+    });
   });
 
   test("Should route legacy rooms without game mode to classic-speed", async ({

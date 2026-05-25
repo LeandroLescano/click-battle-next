@@ -26,6 +26,18 @@ const nextConfig = {
     NEXT_PUBLIC_ADSENSE_PUBLISHER_ID:
       process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID,
     SENTRY_DSN: process.env.SENTRY_DSN
+  },
+  webpack(config) {
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        module: /@prisma\/instrumentation/,
+        message:
+          /Critical dependency: the request of a dependency is an expression/
+      }
+    ];
+
+    return config;
   }
 };
 
