@@ -2,7 +2,7 @@
 
 import {GameUser} from "@leandrolescano/click-battle-core";
 import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {Button} from "components-new/Button";
@@ -49,6 +49,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
   const session = currentGame.reactionSession;
   const localPlayerKey = user?.uid || localUser?.key || "";
   const signalShownAtRef = useRef<number | null>(null);
+  const signalShownAtPerformanceRef = useRef<number | null>(null);
   const promotedSignalAtRef = useRef<number | null>(null);
   const finalizedSignalAtRef = useRef<number | null>(null);
   const [localSignalVisible, setLocalSignalVisible] = useState(false);
@@ -130,25 +131,21 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
       session?.status === "waiting"
     ) {
       signalShownAtRef.current = null;
+      signalShownAtPerformanceRef.current = null;
       setLocalSignalVisible(false);
       return;
     }
 
     if (signalReached) {
-      if (!signalShownAtRef.current) {
-        signalShownAtRef.current = Date.now();
-      }
       setLocalSignalVisible(true);
       return;
     }
 
     setLocalSignalVisible(false);
     signalShownAtRef.current = null;
+    signalShownAtPerformanceRef.current = null;
     const timeoutId = window.setTimeout(
       () => {
-        if (!signalShownAtRef.current) {
-          signalShownAtRef.current = Date.now();
-        }
         setLocalSignalVisible(true);
       },
       Math.max(0, signalAt - estimatedNow)
@@ -156,6 +153,22 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
 
     return () => window.clearTimeout(timeoutId);
   }, [estimatedNow, signalAt, signalReached, session?.status]);
+
+  useLayoutEffect(() => {
+    if (!localSignalVisible || localResult || session?.status === "ended") {
+      return;
+    }
+
+    if (
+      signalShownAtRef.current !== null &&
+      signalShownAtPerformanceRef.current !== null
+    ) {
+      return;
+    }
+
+    signalShownAtRef.current = Date.now();
+    signalShownAtPerformanceRef.current = performance.now();
+  }, [localSignalVisible, localResult, session?.status, signalAt]);
 
   useEffect(() => {
     if (
@@ -282,6 +295,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     promotedSignalAtRef.current = null;
     finalizedSignalAtRef.current = null;
     signalShownAtRef.current = null;
+    signalShownAtPerformanceRef.current = null;
     setLocalSignalVisible(false);
 
     await updateReactionSession(
@@ -301,6 +315,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     promotedSignalAtRef.current = null;
     finalizedSignalAtRef.current = null;
     signalShownAtRef.current = null;
+    signalShownAtPerformanceRef.current = null;
     setLocalSignalVisible(false);
 
     await update(ref(db, `games/${idGame}`), {
@@ -353,7 +368,9 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     setSubmitting(true);
     try {
       const clickedAt = Date.now();
-      if (!localSignalVisible || !signalShownAtRef.current) {
+      const clickedAtPerformance = performance.now();
+
+      if (!localSignalVisible) {
         await persistResult({
           playerKey: localPlayerKey,
           username: gameUser.username,
@@ -363,13 +380,26 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
         return;
       }
 
+      if (
+        signalShownAtRef.current === null ||
+        signalShownAtPerformanceRef.current === null
+      ) {
+        signalShownAtRef.current = clickedAt;
+        signalShownAtPerformanceRef.current = clickedAtPerformance;
+      }
+
       await persistResult({
         playerKey: localPlayerKey,
         username: gameUser.username,
         status: "valid",
         clickedAt,
         signalShownAt: signalShownAtRef.current,
-        reactionMs: Math.max(0, clickedAt - signalShownAtRef.current)
+        reactionMs: Math.round(
+          Math.max(
+            0,
+            clickedAtPerformance - signalShownAtPerformanceRef.current
+          )
+        )
       });
     } finally {
       setSubmitting(false);
