@@ -85,11 +85,7 @@ function RoomGame() {
     setLocalUser,
     setIsHost
   } = useGame();
-  const {setNewUser} = useNewPlayerAlert(
-    currentGame.listUsers,
-    localUser,
-    currentGame
-  );
+  const {setNewUser} = useNewPlayerAlert(currentGame.listUsers, localUser);
   const localUserRef = useRef<GameUser>();
   const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();

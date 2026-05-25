@@ -1,4 +1,8 @@
-export type ReactionSessionStatus = "waiting" | "scheduled" | "signal" | "ended";
+export type ReactionSessionStatus =
+  | "waiting"
+  | "scheduled"
+  | "signal"
+  | "ended";
 
 export type ReactionResultStatus =
   | "waiting"

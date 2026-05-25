@@ -1,8 +1,8 @@
 "use client";
 
-import lottie from "lottie-web";
+import {GameMode, GameUser} from "@leandrolescano/click-battle-core";
 import dynamic from "next/dynamic";
-import {useRef, useState} from "react";
+import {ReactNode, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {Button, Loading, SettingsSidebar} from "components-new";
@@ -11,8 +11,9 @@ import {LoginModalProps} from "components-new/LoginModal/types";
 import {useAuth} from "contexts/AuthContext";
 import useGameTimer from "hooks/gameTimer";
 import {useRoomGame} from "hooks/useRoomGame";
-import {isReactionMode} from "lib/game/gameModes";
-import celebrationAnim from "lotties/celebrationAnim.json";
+import {Game} from "interfaces";
+import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
+import {getReactionWinner} from "lib/game/reactionBattle";
 
 const OpponentSection = dynamic(
   () => import("../../../components-new/OpponentSection")
@@ -39,9 +40,63 @@ const LoginModal = dynamic<LoginModalProps>(
   }
 );
 
+type ModeViewContext = {
+  currentGame: Game;
+  localUser: GameUser;
+};
+
+type ModeView = {
+  renderContent: (context: ModeViewContext) => ReactNode;
+  shouldShowRoomTitle: (game: Game) => boolean;
+  usesClassicTimer: boolean;
+  getShouldCelebrate: (context: ModeViewContext) => boolean | undefined;
+};
+
+const modeViews: Partial<Record<GameMode, ModeView>> = {
+  "classic-speed": {
+    usesClassicTimer: true,
+    shouldShowRoomTitle: (game) => game.status !== "ended",
+    getShouldCelebrate: () => undefined,
+    renderContent: ({currentGame, localUser}) =>
+      currentGame.status !== "ended" ? (
+        <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start h-full min-h-0">
+          <LocalSection idGame={currentGame.key || ""} localUser={localUser} />
+          <OpponentSection
+            localUsername={localUser?.username || ""}
+            maxUsers={currentGame.settings.maxUsers}
+          />
+        </div>
+      ) : (
+        <ResultSection />
+      )
+  },
+  reaction: {
+    usesClassicTimer: false,
+    shouldShowRoomTitle: () => true,
+    getShouldCelebrate: ({currentGame, localUser}) => {
+      const reactionWinner = getReactionWinner(
+        currentGame.listUsers,
+        currentGame.reactionSession?.results
+      );
+
+      return (
+        currentGame.reactionSession?.status === "ended" &&
+        Boolean(reactionWinner) &&
+        (reactionWinner?.playerKey === localUser.key ||
+          reactionWinner?.playerKey === localUser.username)
+      );
+    },
+    renderContent: ({currentGame, localUser}) => (
+      <ReactionBattle idGame={currentGame.key || ""} localUser={localUser} />
+    )
+  }
+};
+
+const getModeView = (mode?: GameMode | null) =>
+  modeViews[mode || DEFAULT_GAME_MODE] || modeViews[DEFAULT_GAME_MODE]!;
+
 const RoomGame = () => {
   const [showSideBar, setShowSideBar] = useState(false);
-  const celebrationContainer = useRef<HTMLDivElement>(null);
   const {t} = useTranslation();
   const {isAuthenticated, loading: authLoading} = useAuth();
 
@@ -53,18 +108,15 @@ const RoomGame = () => {
     handleBackNavigation,
     handleInvite
   } = useRoomGame();
-  const isReactionRoom = isReactionMode(currentGame?.gameMode);
+  const modeView = getModeView(currentGame?.gameMode);
+  const shouldCelebrate = modeView.getShouldCelebrate({
+    currentGame,
+    localUser
+  });
 
   const {countdown} = useGameTimer({
-    roomStats,
-    onFinish: () => {
-      if (celebrationContainer?.current?.innerHTML === "") {
-        lottie.loadAnimation({
-          container: celebrationContainer.current!,
-          animationData: celebrationAnim
-        });
-      }
-    }
+    disabled: !modeView.usesClassicTimer,
+    roomStats
   });
 
   const closeSideBar = () => {
@@ -85,7 +137,7 @@ const RoomGame = () => {
                 {countdown}
               </div>
             )}
-            <CelebrationResult celebrationContainer={celebrationContainer} />
+            <CelebrationResult shouldCelebrate={shouldCelebrate} />
             {isHost && (
               <SettingsSidebar
                 showSideBar={showSideBar}
@@ -104,30 +156,12 @@ const RoomGame = () => {
                 onOpenSettings={() => setShowSideBar(true)}
                 onBack={handleBackNavigation}
               />
-              {currentGame.status !== "ended" || isReactionRoom ? (
-                <h1 className="text-2xl md:text-6xl text-center md:text-start font-bold mb-2 text-primary-400 dark:text-primary-100">
+              {modeView.shouldShowRoomTitle(currentGame) ? (
+                <h1 className="game-room-title text-2xl md:text-6xl text-center md:text-start font-bold mb-2 text-primary-400 dark:text-primary-100">
                   {currentGame?.roomName || ""}
                 </h1>
               ) : null}
-              {isReactionRoom ? (
-                <ReactionBattle
-                  idGame={currentGame.key || ""}
-                  localUser={localUser}
-                />
-              ) : currentGame.status !== "ended" ? (
-                <div className="flex min-w-0 flex-1 flex-col-reverse md:flex-row gap-4 md:gap-0 justify-end md:justify-start h-full min-h-0">
-                  <LocalSection
-                    idGame={currentGame.key || ""}
-                    localUser={localUser}
-                  />
-                  <OpponentSection
-                    localUsername={localUser?.username || ""}
-                    maxUsers={currentGame.settings.maxUsers}
-                  />
-                </div>
-              ) : (
-                <ResultSection />
-              )}
+              {modeView.renderContent({currentGame, localUser})}
               <Button
                 variant="outlined"
                 className="text-xl md:text-2xl py-0.5 px-3 md:py-1 md:px-6 self-center md:self-end z-10"

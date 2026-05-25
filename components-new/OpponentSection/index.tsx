@@ -1,7 +1,7 @@
 import {GameUser} from "@leandrolescano/click-battle-core";
 import {getDatabase, ref, update} from "firebase/database";
 import {useParams} from "next/navigation";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 import Swal from "sweetalert2";
 
@@ -28,29 +28,26 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
   const db = getDatabase();
   const {gameID} = useParams();
 
+  const sortedUsers = useMemo(
+    () => [...game.listUsers].sort((a, b) => (b.clicks || 0) - (a.clicks || 0)),
+    [game.listUsers]
+  );
+  const latestUsersByKey = useMemo(
+    () =>
+      new Map(
+        game.listUsers.map((user, index) => [getUserKey(user, index), user])
+      ),
+    [game.listUsers]
+  );
+
   useEffect(() => {
-    if (
-      !checkOrderArray(
-        countPositions.list,
-        game.listUsers.sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
-      )
-    ) {
+    if (!checkOrderArray(countPositions.list, sortedUsers)) {
       setCountPositions((prev) => ({
-        list: game.listUsers.sort((a, b) => (b.clicks || 0) - (a.clicks || 0)),
+        list: sortedUsers,
         count: prev.count + 1
       }));
     }
-  }, [game.listUsers]);
-
-  const checkOrderArray = (arr1: GameUser[], arr2: GameUser[]) => {
-    if (arr1.length !== arr2.length) return false;
-    for (let x = 0; x < arr1.length; x++) {
-      if (arr1[x].key !== arr2[x].key) {
-        return false;
-      }
-    }
-    return true;
-  };
+  }, [countPositions.list, sortedUsers]);
 
   const kickUser = (userKey: string | null) => {
     if (userKey) {
@@ -68,21 +65,30 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
     }
   };
 
-  const leaderboardRows = countPositions.list.map((user, index) => ({
-    key: user.key || `${user.username}-${index}`,
-    primary: user.username,
-    value: String(user.clicks || 0),
-    highlighted: localUsername === user.username,
-    action:
-      isHost && localUsername !== user.username
-        ? {
-            label: t("Kick"),
-            onClick: () => {
-              kickUser(user.key || null);
+  const orderedUsers = countPositions.list.length
+    ? countPositions.list
+    : sortedUsers;
+
+  const leaderboardRows = orderedUsers.map((orderedUser, index) => {
+    const rowKey = getUserKey(orderedUser, index);
+    const user = latestUsersByKey.get(rowKey) ?? orderedUser;
+
+    return {
+      key: rowKey,
+      primary: user.username,
+      value: String(user.clicks || 0),
+      highlighted: localUsername === user.username,
+      action:
+        isHost && localUsername !== user.username
+          ? {
+              label: t("Kick"),
+              onClick: () => {
+                kickUser(user.key || null);
+              }
             }
-          }
-        : undefined
-  }));
+          : undefined
+    };
+  });
 
   return (
     <div className="w-full md:w-1/2 max-h-full text-sm md:text-3xl px-4 md:px-0 font-medium h-full flex flex-col min-h-0">
@@ -95,9 +101,23 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
         leftLabel={t("Name")}
         rightLabel={t("Clicks")}
         rows={leaderboardRows}
+        flipKey={countPositions.count}
       />
     </div>
   );
 }
+
+const getUserKey = (user: GameUser, index: number) =>
+  user.key || user.username || `user-${index}`;
+
+const checkOrderArray = (arr1: GameUser[], arr2: GameUser[]) => {
+  if (arr1.length !== arr2.length) return false;
+  for (let index = 0; index < arr1.length; index++) {
+    if (getUserKey(arr1[index], index) !== getUserKey(arr2[index], index)) {
+      return false;
+    }
+  }
+  return true;
+};
 
 export default OpponentSection;

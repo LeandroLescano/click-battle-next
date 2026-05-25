@@ -1,4 +1,46 @@
-import {expect, test} from "./fixtures";
+import {expect, test, type Page} from "./fixtures";
+
+const uniqueRoomName = (prefix: string) =>
+  `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
+const getButtonBox = async (page: Page, name: string) => {
+  const button = page.getByRole("button", {name});
+  const box = await button.boundingBox();
+
+  expect(box).not.toBeNull();
+
+  return box!;
+};
+
+const expectStableBox = (
+  before: {x: number; y: number; width: number; height: number},
+  after: {x: number; y: number; width: number; height: number}
+) => {
+  expect(Math.abs(after.x - before.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(1);
+  expect(Math.abs(after.width - before.width)).toBeLessThanOrEqual(1);
+  expect(Math.abs(after.height - before.height)).toBeLessThanOrEqual(1);
+};
+
+const finishReactionRoundWithHostWinner = async (
+  hostPage: Page,
+  userPage: Page
+) => {
+  await expect(hostPage.getByRole("button", {name: "Click!"})).toBeVisible({
+    timeout: 7000
+  });
+  await expect(userPage.getByRole("button", {name: "Click!"})).toBeVisible({
+    timeout: 7000
+  });
+
+  await hostPage.getByRole("button", {name: "Click!"}).click();
+  await userPage.waitForTimeout(120);
+  await userPage.getByRole("button", {name: "Click!"}).click();
+
+  await expect(hostPage.getByText(/Winner: guesthost1/i)).toBeVisible({
+    timeout: 7000
+  });
+};
 
 test.describe("Game", () => {
   test.describe.configure({mode: "serial"});
@@ -7,8 +49,8 @@ test.describe("Game", () => {
     hostPage,
     userPage: {page: userPage}
   }) => {
-    const classicRoomName = "classic-mode-room";
-    const reactionRoomName = "reaction-mode-room";
+    const classicRoomName = uniqueRoomName("classic-mode-room");
+    const reactionRoomName = uniqueRoomName("reaction-mode-room");
 
     await hostPage.createRoom({roomName: classicRoomName});
     await userPage.goto("/");
@@ -35,7 +77,8 @@ test.describe("Game", () => {
     hostPage,
     userPage: {page: userPage}
   }) => {
-    const roomID = await hostPage.createRoom();
+    const roomName = uniqueRoomName("classic-round");
+    const roomID = await hostPage.createRoom({roomName});
     await expect(hostPage.page.getByText("Press start to play")).toBeVisible();
     await expect(
       hostPage.page.getByRole("button", {name: "Start!"})
@@ -44,7 +87,9 @@ test.describe("Game", () => {
       hostPage.page.getByRole("button", {name: "Settings", exact: true})
     ).toBeVisible();
 
-    await userPage.getByRole("button", {name: /guesthost1's room/i}).click();
+    await userPage
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
     await userPage.waitForURL(/\/game\//);
 
     expect(userPage.url().split("/").pop()).toEqual(roomID);
@@ -85,18 +130,21 @@ test.describe("Game", () => {
     hostPage,
     userPage: {page: userPage}
   }) => {
-    const roomID = await hostPage.createRoom({gameMode: "reaction"});
+    const roomName = uniqueRoomName("reaction-false-start");
+    const roomID = await hostPage.createRoom({gameMode: "reaction", roomName});
 
     await expect(hostPage.page.getByText("Reaction Battle")).toBeVisible();
 
-    await userPage.getByRole("button", {name: /guesthost1's room/i}).click();
+    await userPage
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
     await userPage.waitForURL(/\/game\//);
     expect(userPage.url().split("/").pop()).toEqual(roomID);
 
     await hostPage.page
       .getByRole("button", {name: "Start reaction round"})
       .click();
-    await hostPage.page.getByRole("button", {name: "Wait..."}).click();
+    await hostPage.page.getByRole("button", {name: "Stay ready..."}).click();
 
     await expect(
       hostPage.page.getByRole("heading", {name: "False start"})
@@ -113,14 +161,113 @@ test.describe("Game", () => {
     await expect(userPage.getByText(/Your reaction was .* ms/i)).toBeVisible();
   });
 
+  test("Should keep reaction action stable and return to lobby after result", async ({
+    hostPage,
+    userPage: {page: userPage}
+  }) => {
+    const roomName = uniqueRoomName("reaction-lobby-reset");
+    const roomID = await hostPage.createRoom({
+      gameMode: "reaction",
+      roomName
+    });
+
+    await userPage
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
+    await userPage.waitForURL(/\/game\//);
+    expect(userPage.url().split("/").pop()).toEqual(roomID);
+
+    await hostPage.page
+      .getByRole("button", {name: "Start reaction round"})
+      .click();
+    await expect(
+      userPage.getByRole("button", {name: "Stay ready..."})
+    ).toBeVisible();
+    const armedBox = await getButtonBox(userPage, "Stay ready...");
+
+    await expect(userPage.getByRole("button", {name: "Click!"})).toBeVisible({
+      timeout: 7000
+    });
+    const signalBox = await getButtonBox(userPage, "Click!");
+    expectStableBox(armedBox, signalBox);
+
+    await finishReactionRoundWithHostWinner(hostPage.page, userPage);
+
+    await expect(
+      hostPage.page.getByRole("button", {name: "Start next round"})
+    ).toBeVisible();
+    await expect(
+      hostPage.page.getByRole("button", {name: "Back to lobby"})
+    ).toBeVisible();
+
+    const celebration = hostPage.page.locator("#celebration");
+    await expect(celebration).toBeVisible();
+    const celebrationBox = await celebration.boundingBox();
+    const viewport = hostPage.page.viewportSize();
+
+    expect(celebrationBox).not.toBeNull();
+    expect(viewport).not.toBeNull();
+    expect(Math.round(celebrationBox!.width)).toEqual(viewport!.width);
+    expect(Math.round(celebrationBox!.height)).toEqual(viewport!.height);
+
+    await hostPage.page.getByRole("button", {name: "Back to lobby"}).click();
+
+    await expect(
+      hostPage.page.getByRole("button", {name: "Start reaction round"})
+    ).toBeVisible();
+    await expect(hostPage.page.getByText("Opponents (1/1)")).toBeVisible();
+    await expect(
+      hostPage.page.getByRole("button", {name: "Back to lobby"})
+    ).not.toBeVisible();
+    await expect(hostPage.page.getByText(/Winner:/i)).not.toBeVisible();
+    await expect(celebration).toBeHidden();
+  });
+
+  test("Should start next reaction round without stale results", async ({
+    hostPage,
+    userPage: {page: userPage}
+  }) => {
+    const roomName = uniqueRoomName("reaction-next-round");
+    const roomID = await hostPage.createRoom({
+      gameMode: "reaction",
+      roomName
+    });
+
+    await userPage
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
+    await userPage.waitForURL(/\/game\//);
+    expect(userPage.url().split("/").pop()).toEqual(roomID);
+
+    await hostPage.page
+      .getByRole("button", {name: "Start reaction round"})
+      .click();
+    await finishReactionRoundWithHostWinner(hostPage.page, userPage);
+
+    await hostPage.page.getByRole("button", {name: "Start next round"}).click();
+
+    await expect(
+      hostPage.page.getByRole("button", {name: "Stay ready..."})
+    ).toBeVisible();
+    await expect(hostPage.page.getByText("Opponents (1/1)")).toBeVisible();
+    await expect(
+      hostPage.page.getByRole("button", {name: "Back to lobby"})
+    ).not.toBeVisible();
+    await expect(hostPage.page.getByText(/Winner:/i)).not.toBeVisible();
+    await expect(hostPage.page.locator("#celebration")).toBeHidden();
+  });
+
   test("Should create a room with password", async ({
     hostPage,
     userPage: {page: userPage}
   }) => {
     const pwd = "123456";
-    const roomID = await hostPage.createRoom({password: pwd});
+    const roomName = uniqueRoomName("password-room");
+    const roomID = await hostPage.createRoom({password: pwd, roomName});
 
-    await userPage.getByRole("button", {name: /guesthost1's room/i}).click();
+    await userPage
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
     await userPage.locator("#swal2-input").fill(pwd);
     await userPage.getByRole("button", {name: "Enter"}).click();
     await userPage.waitForURL(/\/game\//);
@@ -132,17 +279,22 @@ test.describe("Game", () => {
     hostPage,
     userPage: {page: userPage}
   }) => {
-    const roomID = await hostPage.createRoom();
+    const roomName = uniqueRoomName("remove-player-room");
+    const roomID = await hostPage.createRoom({roomName});
 
     await expect(hostPage.page.getByText("Press start to play")).toBeVisible();
 
-    await userPage.getByRole("button", {name: /guesthost1's room/i}).click();
+    await userPage
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
     await userPage.waitForURL(/\/game\//);
 
     expect(userPage.url().split("/").pop()).toEqual(roomID);
-    await expect(userPage.getByText("Kick")).not.toBeVisible();
+    await expect(
+      userPage.getByRole("button", {name: "Kick"})
+    ).not.toBeVisible();
 
-    await hostPage.page.getByText("Kick").click();
+    await hostPage.page.getByRole("button", {name: "Kick"}).click();
 
     await expect(
       hostPage.page.getByText("Waiting for opponents...")
@@ -201,9 +353,12 @@ test.describe("Game", () => {
     hostPage,
     userPage: {page: userPage}
   }) => {
-    await hostPage.createRoom();
+    const roomName = uniqueRoomName("fast-click-room");
+    await hostPage.createRoom({roomName});
 
-    await userPage.getByRole("button", {name: /guesthost1's room/i}).click();
+    await userPage
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
     await userPage.waitForURL(/\/game\//);
 
     await hostPage.page.getByText("Start!").click();
@@ -230,9 +385,12 @@ test.describe("Game", () => {
     hostPage,
     userPage: {page: userPage}
   }) => {
-    await hostPage.createRoom();
+    const roomName = uniqueRoomName("timer-room");
+    await hostPage.createRoom({roomName});
 
-    await userPage.getByRole("button", {name: /guesthost1's room/i}).click();
+    await userPage
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
     await userPage.waitForURL(/\/game\//);
 
     await hostPage.page

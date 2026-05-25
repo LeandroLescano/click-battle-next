@@ -4,8 +4,10 @@ import {
   onValue,
   ref,
   remove,
+  serverTimestamp,
   set,
-  Unsubscribe
+  Unsubscribe,
+  update
 } from "@firebase/database";
 import {Timestamp} from "firebase/firestore";
 import {useParams, useRouter, useSearchParams} from "next/navigation";
@@ -25,6 +27,7 @@ import {addRoomStats} from "services/rooms";
 import {handleInvite as handleInviteUtil} from "utils/invite";
 
 import {applyState} from "../lib/game/applyState";
+import {getHostDisconnectRemovalDelay} from "../lib/game/hostPresence";
 import {determineJoinAction} from "../lib/game/joinFlow";
 import {reportApplyStateTime} from "../lib/game/metrics";
 import {processSnapshot} from "../lib/game/processSnapshot";
@@ -58,13 +61,11 @@ export const useRoomGame = (): UseRoomGameReturn => {
     withPassword: false
   });
   const flagEnter = useRef(false);
+  const hostPresenceIdRef = useRef<string>("");
+  const staleHostRemovalTimeoutRef = useRef<number | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  const {setNewUser} = useNewPlayerAlert(
-    currentGame.listUsers,
-    localUser,
-    currentGame
-  );
+  const {setNewUser} = useNewPlayerAlert(currentGame.listUsers, localUser);
   const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();
 
@@ -80,16 +81,29 @@ export const useRoomGame = (): UseRoomGameReturn => {
       const userPath = `games/${currentGame.key}/listUsers/${gUser.uid}`;
 
       if (gameUser?.username === currentGame.ownerUser.username) {
-        onDisconnect(ref(db, gamePath)).remove().catch(console.error);
-        return () => {
-          if (
-            roomStats.current &&
-            Date.now() - roomStats.current.created.getTime() > 30 * 1000
-          ) {
-            addRoomStats({...roomStats.current, removed: new Date()});
-          }
-          remove(ref(db, gamePath));
-        };
+        if (!hostPresenceIdRef.current) {
+          hostPresenceIdRef.current = `${gUser.uid}-${Date.now()}`;
+        }
+
+        const gameRef = ref(db, gamePath);
+        const disconnect = onDisconnect(gameRef);
+
+        update(gameRef, {
+          hostConnectionId: hostPresenceIdRef.current,
+          hostDisconnectedAt: null
+        }).catch(console.error);
+
+        disconnect
+          .cancel()
+          .then(() =>
+            disconnect.update({
+              hostConnectionId: hostPresenceIdRef.current,
+              hostDisconnectedAt: serverTimestamp()
+            })
+          )
+          .catch(console.error);
+
+        return;
       } else {
         onDisconnect(ref(db, userPath)).remove().catch(console.error);
         return () => {
@@ -111,6 +125,13 @@ export const useRoomGame = (): UseRoomGameReturn => {
     if (!isAuthenticated || !gameID) return;
 
     let unsubscribe: Unsubscribe;
+
+    const clearStaleHostRemoval = () => {
+      if (staleHostRemovalTimeoutRef.current) {
+        window.clearTimeout(staleHostRemovalTimeoutRef.current);
+        staleHostRemovalTimeoutRef.current = null;
+      }
+    };
 
     try {
       const gameRef = ref(db, `games/${gameID}/`);
@@ -136,6 +157,18 @@ export const useRoomGame = (): UseRoomGameReturn => {
 
           const startApply = performance.now();
           try {
+            clearStaleHostRemoval();
+
+            const staleHostRemovalDelay = getHostDisconnectRemovalDelay(
+              raw?.hostDisconnectedAt
+            );
+
+            if (!parsedIsHost && staleHostRemovalDelay !== null) {
+              staleHostRemovalTimeoutRef.current = window.setTimeout(() => {
+                remove(gameRef).catch(console.error);
+              }, staleHostRemovalDelay);
+            }
+
             const {shouldRedirect, newUserJoined} = applyState(
               parsed,
               latestGameRef.current.listUsers.length,
@@ -227,6 +260,7 @@ export const useRoomGame = (): UseRoomGameReturn => {
     }
 
     return () => {
+      clearStaleHostRemoval();
       breadcrumb("lifecycle", "unsubscribe_onValue");
       if (unsubscribe) unsubscribe();
       resetContext();
@@ -258,8 +292,44 @@ export const useRoomGame = (): UseRoomGameReturn => {
   };
 
   const handleBackNavigation = useCallback(() => {
-    router.push("/");
-  }, [router]);
+    const gameKey = latestGameRef.current.key || currentGame.key;
+
+    if (!gameKey) {
+      router.push("/");
+      return;
+    }
+
+    const localIsHost =
+      isHost || gameUser?.username === latestGameRef.current.ownerUser.username;
+    const roomPath = localIsHost
+      ? `games/${gameKey}`
+      : gUser?.uid
+      ? `games/${gameKey}/listUsers/${gUser.uid}`
+      : null;
+
+    if (!roomPath) {
+      router.push("/");
+      return;
+    }
+
+    if (
+      roomStats.current &&
+      Date.now() - roomStats.current.created.getTime() > 30 * 1000
+    ) {
+      addRoomStats({...roomStats.current, removed: new Date()});
+    }
+
+    const roomRef = ref(db, roomPath);
+    const removeRoom = localIsHost
+      ? onDisconnect(roomRef)
+          .cancel()
+          .then(() => remove(roomRef))
+      : remove(roomRef);
+
+    removeRoom.catch(console.error).finally(() => {
+      router.push("/");
+    });
+  }, [currentGame.key, db, gameUser?.username, gUser?.uid, isHost, router]);
 
   const handleInvite = () => {
     handleInviteUtil(isMobileDevice, t, currentGame?.settings.password);

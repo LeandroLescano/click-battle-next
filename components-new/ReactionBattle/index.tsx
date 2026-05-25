@@ -6,11 +6,9 @@ import {useEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {Button} from "components-new/Button";
-import {Card} from "components-new/Card";
 import {RoomLeaderboard} from "components-new/RoomLeaderboard";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Trophy} from "icons/Trophy";
 import {ReactionResult, ReactionSession} from "interfaces";
 import {
   DEFAULT_REACTION_SYNC_BUFFER_MS,
@@ -27,6 +25,8 @@ import {
   useServerTimeOffset
 } from "lib/game/serverTimeOffset";
 import {getSuffixPosition} from "utils/string";
+
+import "./styles.scss";
 
 type ReactionBattleProps = {
   idGame: string;
@@ -45,7 +45,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
   const serverTimeOffset = useServerTimeOffset();
   const {t} = useTranslation();
   const {user, gameUser} = useAuth();
-  const {game: currentGame, isHost} = useGame();
+  const {game: currentGame, isHost, setGame} = useGame();
   const session = currentGame.reactionSession;
   const localPlayerKey = user?.uid || localUser?.key || "";
   const signalShownAtRef = useRef<number | null>(null);
@@ -99,12 +99,23 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     [currentGame.listUsers, session?.results]
   );
   const winnerReactionMs = winner?.reactionMs ?? null;
+  const isLocalWinner = winner?.playerKey === localPlayerKey;
+  const validResults = participantResults.filter(
+    (player) =>
+      player.status === "valid" && typeof player.reactionMs === "number"
+  );
+  const nextValidResult = isLocalWinner ? validResults[1] : null;
+  const localWinnerGapMs =
+    isLocalWinner &&
+    typeof winnerReactionMs === "number" &&
+    typeof nextValidResult?.reactionMs === "number"
+      ? Math.max(0, nextValidResult.reactionMs - winnerReactionMs)
+      : null;
   const localPlacement = participantResults.findIndex(
     (player) => player.playerKey === localPlayerKey
   );
   const localPlacementLabel =
     localPlacement >= 0 ? getSuffixPosition(localPlacement + 1, t) : null;
-  const isLocalWinner = winner?.playerKey === localPlayerKey;
   const localGapMs =
     !isLocalWinner &&
     localResult?.status === "valid" &&
@@ -112,10 +123,6 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     typeof winnerReactionMs === "number"
       ? Math.max(0, localResult.reactionMs - winnerReactionMs)
       : null;
-  const endedRows = participantResults.filter(
-    (player) => player.status !== "waiting"
-  );
-
   useEffect(() => {
     if (
       !signalAt ||
@@ -290,6 +297,22 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     );
   };
 
+  const handleReturnToLobby = async () => {
+    promotedSignalAtRef.current = null;
+    finalizedSignalAtRef.current = null;
+    signalShownAtRef.current = null;
+    setLocalSignalVisible(false);
+
+    await update(ref(db, `games/${idGame}`), {
+      reactionSession: null,
+      status: "lobby"
+    });
+    setGame({
+      reactionSession: null,
+      status: "lobby"
+    });
+  };
+
   const handleKickUser = async (playerKey: string) => {
     await update(ref(db, `games/${idGame}/listUsers/${playerKey}`), {
       kickOut: true
@@ -353,30 +376,6 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     }
   };
 
-  const title = (() => {
-    if (!session) {
-      return isWaitingForOpponent
-        ? t("Waiting for opponents...")
-        : t("Press start to play");
-    }
-
-    if (session.status === "ended") {
-      return winner
-        ? t("Reaction winner", {name: winner.username})
-        : t("No winner this round");
-    }
-
-    if (localResult?.status === "false-start") {
-      return t("False start");
-    }
-
-    if (localResult?.status === "valid") {
-      return t("Reaction registered");
-    }
-
-    return t("Wait for the signal");
-  })();
-
   const resultSummary = (() => {
     if (session?.status === "ended") {
       if (localResult?.status === "false-start") {
@@ -389,16 +388,28 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
         });
       }
 
+      if (!localResult) {
+        return t("No reaction this round");
+      }
+
       if (typeof winnerReactionMs === "number") {
         return t("Winning reaction was n ms", {ms: winnerReactionMs});
       }
 
-      return t("No winner this round");
+      return t("No valid reaction");
     }
   })();
 
   const subtitle = (() => {
     if (session?.status === "ended") {
+      if (typeof localWinnerGapMs === "number") {
+        return t("You won by n ms", {ms: localWinnerGapMs});
+      }
+
+      if (isLocalWinner && typeof winnerReactionMs === "number") {
+        return t("Only valid reaction");
+      }
+
       if (typeof localGapMs === "number") {
         return t("You were n ms slower", {ms: localGapMs});
       }
@@ -407,7 +418,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
         return t("Winning reaction was n ms", {ms: winnerReactionMs});
       }
 
-      return t("The fastest valid reaction wins");
+      return t("Fastest click after the signal wins");
     }
 
     if (localResult?.status === "valid") {
@@ -421,34 +432,156 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     }
 
     if (isWaitingForOpponent) {
-      return t("The fastest valid reaction wins");
+      return t("Fastest click after the signal wins");
     }
 
     if (session?.status === "scheduled" || session?.status === "signal") {
-      return t("Tap before the signal and you lose the round");
+      return t("Click early and this round is lost");
     }
 
-    return t("The fastest valid reaction wins");
+    return t("Fastest click after the signal wins");
   })();
 
   const canStart = isHost && currentGame.listUsers.length >= 2;
-  const showStartButton =
-    canStart &&
-    (!session || session.status === "waiting" || session.status === "ended");
-  const actionDisabled =
-    submitting ||
-    Boolean(localResult) ||
-    !localPlayerKey ||
-    !session ||
-    session.status === "ended";
-
-  const actionLabel = (() => {
-    if (!session) {
-      return isHost ? t("Start reaction round") : t("Waiting for host");
+  const primaryActionClasses =
+    "h-full w-full px-6 py-5 text-2xl md:px-8 md:py-6 md:text-4xl";
+  const signalActionTone =
+    "!bg-primary-300 !border-primary-200 !text-primary-100 dark:!bg-primary-300 dark:!border-primary-100 dark:!text-primary-100";
+  const idleActionTone =
+    "!bg-primary-100 !border-primary-300 !text-primary-500 dark:!bg-primary-700 dark:!border-primary-300 dark:!text-primary-100";
+  const falseStartActionTone =
+    "!bg-primary-100 !border-rose-300 !text-rose-700 dark:!bg-primary-700 dark:!border-rose-400 dark:!text-rose-100";
+  const actionState = (() => {
+    if (isRoundFinished && isHost) {
+      return {
+        className:
+          "h-full w-full px-4 py-3 text-xl md:px-6 md:py-4 md:text-3xl",
+        disabled: false,
+        label: t("Start next round"),
+        onClick: handleStartRound,
+        secondaryAction: {
+          className:
+            "reaction-battle-secondary-action h-full w-full px-4 py-3 text-lg md:px-5 md:py-4 md:text-2xl",
+          label: t("Back to lobby"),
+          onClick: handleReturnToLobby
+        }
+      };
     }
 
-    if (session.status === "ended") {
-      return isHost ? t("Start reaction round") : t("Waiting for host");
+    if (isRoundFinished) {
+      return {
+        className: primaryActionClasses,
+        disabled: true,
+        label: t("Host starts the next round")
+      };
+    }
+
+    if (!session) {
+      return {
+        className: primaryActionClasses,
+        disabled: !canStart,
+        label: isHost ? t("Start reaction round") : t("Waiting for host"),
+        onClick: isHost && canStart ? handleStartRound : undefined
+      };
+    }
+
+    if (localResult?.status === "false-start") {
+      return {
+        className: `${primaryActionClasses} ${falseStartActionTone}`,
+        disabled: true,
+        label: t("False start")
+      };
+    }
+
+    if (localResult?.status === "valid") {
+      return {
+        className: primaryActionClasses,
+        disabled: true,
+        label: t("Locked in")
+      };
+    }
+
+    return {
+      className: `${primaryActionClasses} ${
+        localSignalVisible ? signalActionTone : idleActionTone
+      } ${
+        localSignalVisible
+          ? "reaction-battle-action--signal"
+          : "reaction-battle-action--armed"
+      }`,
+      disabled:
+        submitting || !localPlayerKey || !session || session.status === "ended",
+      label: localSignalVisible ? t("Click!") : t("Stay ready..."),
+      loading: submitting,
+      onClick: handleReactionClick
+    };
+  })();
+
+  const stageFrameTone = (() => {
+    return "border-primary-300 bg-primary-100 text-primary-500 dark:bg-primary-700 dark:text-primary-100";
+  })();
+
+  const stageMotionClass = (() => {
+    if (isRoundFinished) {
+      return "reaction-battle-stage--result";
+    }
+
+    if (localResult?.status === "false-start") {
+      return "reaction-battle-stage--false";
+    }
+
+    if (localSignalVisible) {
+      return "reaction-battle-stage--signal";
+    }
+
+    if (localResult?.status === "valid") {
+      return "reaction-battle-stage--locked";
+    }
+
+    return "reaction-battle-stage--idle";
+  })();
+
+  const arenaPhase = (() => {
+    if (isRoundFinished) return "result";
+    if (!session) return "lobby";
+    if (localSignalVisible && !localResult) return "signal";
+    if (localResult) return "submitted";
+    return "ready";
+  })();
+  const phaseSteps = [
+    {key: "lobby", label: t("Lobby")},
+    {key: "ready", label: t("Get ready")},
+    {key: "signal", label: t("Signal")},
+    {key: "result", label: t("Result")}
+  ];
+  const reactionWindowSecondsLabel = `${Number(
+    (reactionWindowMs / 1000).toFixed(1)
+  )} s`;
+  const activeStepIndex =
+    arenaPhase === "lobby"
+      ? 0
+      : arenaPhase === "ready"
+      ? 1
+      : arenaPhase === "signal"
+      ? 2
+      : 3;
+  const arenaEyebrow = (() => {
+    if (session?.status === "ended") return t("Result");
+    if (!session) return isHost ? t("Round setup") : t("Game lobby");
+    if (localResult?.status === "false-start") return t("False start");
+    if (localResult?.status === "valid") return t("You're locked in");
+    if (localSignalVisible) return t("Click now");
+    return t("Get ready");
+  })();
+  const arenaMessage = (() => {
+    if (session?.status === "ended") {
+      if (winner) return winner.username;
+      return t("No valid reaction");
+    }
+
+    if (!session) {
+      if (isWaitingForOpponent) return t("Waiting for opponents...");
+      return isHost ? t("Reaction Battle ready") : t("Stay ready");
     }
 
     if (localResult?.status === "false-start") {
@@ -459,26 +592,54 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
       return t("Locked in");
     }
 
-    return localSignalVisible ? t("Click!") : t("Wait...");
+    return localSignalVisible ? t("Click!") : t("Do not click yet");
   })();
-  const actionTone =
-    localResult?.status === "false-start"
-      ? "!bg-rose-200 !border-rose-300 !text-rose-700"
-      : localSignalVisible
-      ? "!bg-primary-300 !border-primary-300 !text-primary-100"
-      : "!bg-primary-100 !border-primary-300 !text-primary-500";
+  const arenaDetail = (() => {
+    if (session?.status === "ended") {
+      return (
+        resultSummary ?? subtitle ?? t("Fastest click after the signal wins")
+      );
+    }
+
+    if (!session) {
+      if (isWaitingForOpponent) return t("Fastest click after the signal wins");
+      return isHost
+        ? t("Trigger the countdown when everyone is ready")
+        : t("Host starts the round");
+    }
+
+    if (localResult?.status === "false-start") {
+      return t("You clicked too early");
+    }
+
+    if (localResult?.status === "valid") {
+      return t("Your reaction was n ms", {ms: localResult.reactionMs ?? 0});
+    }
+
+    if (localSignalVisible) return t("Fastest valid click wins");
+    return t("Click after the signal");
+  })();
+
   const overlayTag = (() => {
     if (!session || session.status !== "ended") return null;
     if (localResult?.status === "false-start") return t("False start");
-    if (isLocalWinner) return t("Winner");
+    if (isLocalWinner && winner) {
+      return t("Reaction winner", {name: winner.username});
+    }
     if (localPlacementLabel) {
       return t("resultPosition", {position: localPlacementLabel});
     }
     if (winner) {
       return t("Reaction winner", {name: winner.username});
     }
-    return t("No winner this round");
+    return t("No valid reaction");
   })();
+  const localReactionSummary =
+    isRoundFinished &&
+    localResult?.status === "valid" &&
+    typeof localResult.reactionMs === "number"
+      ? t("Your reaction was n ms", {ms: localResult.reactionMs})
+      : null;
 
   const leaderboardRows = participantResults.map((player, index) => {
     const isLocal = player.playerKey === localPlayerKey;
@@ -486,7 +647,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     return {
       key: player.playerKey,
       primary: `${index + 1}. ${player.username}`,
-      secondary: getResultStatus(player, t),
+      secondary: getResultStatus(player, t, isRoundFinished),
       value: getResultMsLabel(player, t),
       highlighted: isLocal,
       muted: player.status === "waiting",
@@ -501,142 +662,121 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
           : undefined
     };
   });
+  const opponentCount = Math.max(0, currentGame.listUsers.length - 1);
+  const opponentCapacity = Math.max(0, currentGame.settings.maxUsers - 1);
+  const leaderboardTitle = isRoundFinished
+    ? t("Reaction results count", {count: currentGame.listUsers.length})
+    : `${t("Opponents")} (${opponentCount}/${opponentCapacity})`;
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-4 h-full min-h-0 px-4 md:px-0">
+    <div className="reaction-battle-root flex min-w-0 flex-1 flex-col gap-4 h-full min-h-0 px-4 md:px-0">
       <div className="flex min-w-0 flex-1 flex-col md:flex-row gap-4 md:gap-0 h-full min-h-0">
-        <div className="w-full md:w-1/2 flex flex-col px-0 md:pr-6 gap-6">
-          <div>
-            <span className="inline-flex rounded-full border border-primary-300 px-3 py-1 text-[11px] md:text-xs font-bold uppercase tracking-[0.18em] text-primary-500 dark:border-primary-300 dark:bg-primary-500/10 dark:text-primary-100">
-              {t("Reaction Battle")}
-            </span>
-            <h2 className="mt-3 text-2xl md:text-4xl font-bold text-primary-500 dark:text-primary-100">
-              {title}
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm md:text-lg text-primary-400 dark:text-primary-200">
-              {subtitle}
-            </p>
+        <div className="reaction-battle-main w-full md:w-1/2 flex flex-col px-0 md:pr-6 gap-5 md:gap-7">
+          <div className="reaction-battle-status-copy flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex rounded-full border border-primary-300 px-3 py-1 text-[11px] md:text-xs font-bold uppercase text-primary-500 dark:border-primary-300 dark:bg-primary-500/10 dark:text-primary-100">
+                {t("Reaction Battle")}
+              </span>
+              <span className="reaction-battle-limit-chip">
+                {t("Reaction limit n s", {
+                  seconds: reactionWindowSecondsLabel
+                })}
+              </span>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-4">
-            {isRoundFinished ? (
-              <Card className="relative w-full max-w-2xl overflow-hidden px-5 py-5 md:px-7 md:py-7 text-primary-500">
-                {isLocalWinner && (
+          <div className="flex flex-1 flex-col gap-4">
+            <div
+              className={`reaction-battle-stage reaction-battle-arena w-full max-w-2xl rounded-md border-2 px-4 py-4 md:px-6 md:py-6 ${stageFrameTone} ${stageMotionClass}`}
+            >
+              <div className="reaction-battle-phase-track grid grid-cols-4 gap-1 md:gap-2">
+                {phaseSteps.map((step, index) => (
                   <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-0 top-0 h-16 opacity-90"
+                    className={`reaction-battle-phase-step ${
+                      index <= activeStepIndex
+                        ? "reaction-battle-phase-step--active"
+                        : ""
+                    }`}
+                    key={step.key}
                   >
-                    <span className="absolute left-[8%] top-3 h-2.5 w-2.5 rounded-full bg-primary-300" />
-                    <span className="absolute left-[18%] top-8 h-2 w-6 rotate-12 bg-primary-500" />
-                    <span className="absolute left-[34%] top-2 h-3 w-3 rounded-full bg-primary-200" />
-                    <span className="absolute left-[52%] top-6 h-2 w-5 -rotate-12 bg-primary-400" />
-                    <span className="absolute left-[70%] top-3 h-3 w-3 rounded-full bg-primary-300" />
-                    <span className="absolute left-[86%] top-7 h-2 w-6 rotate-[20deg] bg-primary-500" />
+                    {step.label}
                   </div>
+                ))}
+              </div>
+
+              <div className="reaction-battle-cue">
+                <p className="text-[11px] md:text-xs font-bold uppercase text-primary-400 dark:text-primary-200">
+                  {arenaEyebrow}
+                </p>
+                <h2 className="text-2xl md:text-4xl font-bold leading-tight">
+                  {arenaMessage}
+                </h2>
+                <p className="text-sm md:text-base text-primary-400 dark:text-primary-200">
+                  {arenaDetail}
+                </p>
+                {overlayTag && (
+                  <p className="inline-flex w-fit rounded-full border border-primary-300 px-3 py-1 text-xs font-bold uppercase text-primary-500 dark:border-primary-200 dark:text-primary-100">
+                    {overlayTag}
+                  </p>
                 )}
-
-                <div className="relative flex flex-col gap-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {overlayTag && (
-                      <span className="inline-flex rounded-full border border-primary-300 bg-primary-200 px-3 py-1 text-[11px] md:text-xs font-bold uppercase tracking-[0.12em] text-primary-600">
-                        {overlayTag}
-                      </span>
-                    )}
-                    {typeof localGapMs === "number" && (
-                      <span className="inline-flex rounded-full border border-primary-300 px-3 py-1 text-[11px] md:text-xs font-bold uppercase tracking-[0.12em] text-primary-500">
-                        {t("n ms slower", {ms: localGapMs})}
-                      </span>
-                    )}
-                    {localResult?.status === "valid" &&
-                      typeof localResult.reactionMs === "number" && (
-                        <span className="inline-flex rounded-full border border-primary-300 px-3 py-1 text-[11px] md:text-xs font-bold uppercase tracking-[0.12em] text-primary-500">
-                          {t("Reaction time n ms", {
-                            ms: localResult.reactionMs
-                          })}
-                        </span>
-                      )}
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1 shrink-0 text-primary-300">
-                      <Trophy />
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="text-3xl md:text-5xl font-bold leading-none">
-                        {winner ? winner.username : t("No winner this round")}
-                      </h3>
-                      <p className="mt-2 text-sm md:text-lg text-primary-400">
-                        {resultSummary}
-                      </p>
-                    </div>
-                  </div>
-
-                  {endedRows.length > 1 && (
-                    <div className="flex flex-col gap-2">
-                      {endedRows.slice(0, 3).map((player, index) => (
-                        <div
-                          key={`${player.playerKey}-summary`}
-                          className="flex items-center justify-between gap-3 rounded-md border border-primary-300/70 px-3 py-2"
-                        >
-                          <div className="min-w-0">
-                            <p className="truncate text-sm md:text-lg font-bold">
-                              {getSuffixPosition(index + 1, t)}{" "}
-                              {player.username}
-                            </p>
-                            {player.status === "false-start" && (
-                              <p className="text-xs md:text-sm text-primary-400">
-                                {t("False start")}
-                              </p>
-                            )}
-                          </div>
-                          <p className="shrink-0 text-sm md:text-xl font-bold">
-                            {getResultMsLabel(player, t)}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                {isRoundFinished && subtitle && subtitle !== resultSummary && (
+                  <p className="text-xs md:text-sm text-primary-400 dark:text-primary-200">
+                    {subtitle}
+                  </p>
+                )}
+                {localReactionSummary &&
+                  localReactionSummary !== resultSummary &&
+                  localReactionSummary !== subtitle && (
+                    <p className="text-xs md:text-sm text-primary-400 dark:text-primary-200">
+                      {localReactionSummary}
+                    </p>
                   )}
+              </div>
 
-                  <div className="pt-1">
-                    {isHost ? (
-                      <Button
-                        className="w-full md:w-80 px-4 py-4 md:px-6 md:py-5 text-xl md:text-3xl"
-                        onClick={handleStartRound}
-                      >
-                        {t("Start next round")}
-                      </Button>
-                    ) : (
-                      <p className="text-sm md:text-lg text-primary-400">
-                        {t("Waiting for host")}
-                      </p>
-                    )}
+              <div className="reaction-battle-hit-zone">
+                {actionState.secondaryAction ? (
+                  <div className="reaction-battle-result-actions">
+                    <Button
+                      className={actionState.className}
+                      disabled={actionState.disabled}
+                      loading={actionState.loading}
+                      onClick={actionState.onClick}
+                    >
+                      <span className="reaction-battle-action-label">
+                        {actionState.label}
+                      </span>
+                    </Button>
+                    <Button
+                      className={actionState.secondaryAction.className}
+                      onClick={actionState.secondaryAction.onClick}
+                      variant="outlined"
+                    >
+                      <span className="reaction-battle-action-label">
+                        {actionState.secondaryAction.label}
+                      </span>
+                    </Button>
                   </div>
-                </div>
-              </Card>
-            ) : showStartButton ? (
-              <Button
-                className="w-full max-w-2xl px-6 py-5 md:px-8 md:py-6 text-2xl md:text-4xl min-h-[72px]"
-                onClick={handleStartRound}
-              >
-                {t("Start reaction round")}
-              </Button>
-            ) : (
-              <Button
-                className={`w-full max-w-2xl px-6 py-5 md:px-8 md:py-6 text-2xl md:text-4xl min-h-[72px] ${actionTone}`}
-                disabled={actionDisabled}
-                loading={submitting}
-                onClick={handleReactionClick}
-              >
-                {actionLabel}
-              </Button>
-            )}
+                ) : (
+                  <Button
+                    className={actionState.className}
+                    disabled={actionState.disabled}
+                    loading={actionState.loading}
+                    onClick={actionState.onClick}
+                  >
+                    <span className="reaction-battle-action-label">
+                      {actionState.label}
+                    </span>
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="w-full md:w-1/2 flex flex-col px-0 md:pl-6 min-h-0 gap-4">
+        <div className="reaction-battle-leaderboard w-full md:w-1/2 flex flex-col px-0 md:pl-6 min-h-0 gap-4">
           <RoomLeaderboard
-            title={isRoundFinished ? t("Reaction results") : "Room leaderboard"}
-            leftLabel="Name"
+            title={leaderboardTitle}
+            leftLabel={t("Name")}
             rightLabel="Ms"
             rows={leaderboardRows}
           />
@@ -654,7 +794,8 @@ function getStatusPriority(status: ReactionResult["status"]) {
 
 function getResultStatus(
   player: StagePlayer,
-  t: (key: string, options?: Record<string, unknown>) => string
+  t: (key: string, options?: Record<string, unknown>) => string,
+  isRoundFinished = false
 ) {
   if (player.status === "false-start") {
     return t("False start");
@@ -662,6 +803,10 @@ function getResultStatus(
 
   if (player.status === "valid") {
     return t("Locked in");
+  }
+
+  if (isRoundFinished) {
+    return t("No reaction");
   }
 }
 

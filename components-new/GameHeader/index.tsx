@@ -2,9 +2,9 @@ import React from "react";
 import {useTranslation} from "react-i18next";
 
 import {Button, LanguageDropdown} from "components-new";
-import {LeftArrow} from "icons/LeftArrow";
-import {Gear} from "icons/Gear";
 import {useGame} from "contexts/GameContext";
+import {Gear} from "icons/Gear";
+import {LeftArrow} from "icons/LeftArrow";
 
 import {GameHeaderProps} from "./types";
 
