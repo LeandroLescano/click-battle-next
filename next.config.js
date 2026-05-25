@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires, no-undef
 const {withSentryConfig} = require("@sentry/nextjs");
 
 /* eslint-disable no-undef */
@@ -20,6 +20,7 @@ const nextConfig = {
     REACT_APP_EMAIL: process.env.REACT_APP_EMAIL,
     REACT_APP_PASSWORD: process.env.REACT_APP_PASSWORD,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+    SENTRY_ENABLED: process.env.SENTRY_ENABLED,
     PRIVATE_KEY: process.env.PRIVATE_KEY,
     CLIENT_EMAIL: process.env.CLIENT_EMAIL,
     NEXT_PUBLIC_ADSENSE_PUBLISHER_ID:

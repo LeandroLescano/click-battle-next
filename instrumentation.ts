@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 const sentryEnabled = process.env.SENTRY_ENABLED === "true";
 
 export async function register() {
-  if (!sentryEnabled) {
+  if (!sentryEnabled || Sentry.isInitialized()) {
     return;
   }
 
@@ -18,4 +18,4 @@ export async function register() {
 
 export const onRequestError = sentryEnabled
   ? Sentry.captureRequestError
-  : undefined;
+  : () => {};

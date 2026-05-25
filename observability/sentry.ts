@@ -1,6 +1,10 @@
 // observability/sentry.ts
-import {metrics} from "@sentry/nextjs";
-import {addBreadcrumb, startInactiveSpan, startSpan} from "@sentry/react";
+import {
+  addBreadcrumb,
+  metrics,
+  startInactiveSpan,
+  startSpan
+} from "@sentry/react";
 
 const detectPlatformWeb = () => {
   if (typeof window === "undefined") return "server";
