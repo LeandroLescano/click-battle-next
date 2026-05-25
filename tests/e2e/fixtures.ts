@@ -9,6 +9,7 @@ import {
   set
 } from "firebase/database";
 
+import type {Game} from "interfaces";
 import {firebaseConfig} from "resources/config";
 
 import {authenticate} from "./auth.utils";
@@ -95,6 +96,13 @@ class GenericPage {
       ...legacyRoom
     } = room;
     await set(roomRef, legacyRoom);
+  }
+
+  async getRoom(roomID: string): Promise<Game | null> {
+    const db = getTestDatabase();
+    const snapshot = await get(ref(db, `games/${roomID}`));
+
+    return snapshot.val() as Game | null;
   }
 }
 

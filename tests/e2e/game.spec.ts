@@ -223,6 +223,67 @@ test.describe("Game", () => {
     await expect(celebration).toBeHidden();
   });
 
+  test("Should preserve both reaction results when players click together", async ({
+    hostPage,
+    userPage: {page: userPage}
+  }) => {
+    const roomName = uniqueRoomName("reaction-simultaneous");
+    const roomID = await hostPage.createRoom({
+      gameMode: "reaction",
+      roomName
+    });
+
+    await userPage
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
+    await userPage.waitForURL(/\/game\//);
+    expect(userPage.url().split("/").pop()).toEqual(roomID);
+
+    await hostPage.page
+      .getByRole("button", {name: "Start reaction round"})
+      .click();
+
+    const hostClickButton = hostPage.page.getByRole("button", {
+      name: "Click!"
+    });
+    const userClickButton = userPage.getByRole("button", {name: "Click!"});
+
+    await expect(hostClickButton).toBeVisible({timeout: 7000});
+    await expect(userClickButton).toBeVisible({timeout: 7000});
+
+    await Promise.all([hostClickButton.click(), userClickButton.click()]);
+
+    await expect
+      .poll(
+        async () => {
+          const room = await hostPage.getRoom(roomID);
+          const results = room?.reactionSession?.results ?? {};
+
+          return Object.values(results).filter(
+            (result) => result.status === "valid"
+          ).length;
+        },
+        {timeout: 7000}
+      )
+      .toBe(2);
+
+    await expect
+      .poll(
+        async () => {
+          const room = await hostPage.getRoom(roomID);
+
+          return room?.reactionSession?.status;
+        },
+        {timeout: 7000}
+      )
+      .toBe("ended");
+
+    await expect(
+      hostPage.page.getByText(/Your reaction was .* ms/i)
+    ).toBeVisible();
+    await expect(userPage.getByText(/Your reaction was .* ms/i)).toBeVisible();
+  });
+
   test("Should start next reaction round without stale results", async ({
     hostPage,
     userPage: {page: userPage}

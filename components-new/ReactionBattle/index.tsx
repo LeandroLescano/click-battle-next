@@ -186,12 +186,9 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
 
     promotedSignalAtRef.current = signalAt;
     update(ref(db, `games/${idGame}`), {
-      reactionSession: {
-        ...session,
-        status: "signal"
-      }
+      "reactionSession/status": "signal"
     });
-  }, [db, idGame, isHost, session, signalAt, signalReached]);
+  }, [db, idGame, isHost, session?.status, signalAt, signalReached]);
 
   useEffect(() => {
     if (!isHost || !session || !signalAt || session.status === "ended") {
@@ -209,11 +206,8 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     finalizedSignalAtRef.current = signalAt;
     update(ref(db, `games/${idGame}`), {
       status: "ended",
-      reactionSession: {
-        ...session,
-        status: "ended",
-        winnerKey: winner?.playerKey ?? null
-      }
+      "reactionSession/status": "ended",
+      "reactionSession/winnerKey": winner?.playerKey ?? null
     });
   }, [
     currentGame.listUsers,
@@ -245,11 +239,8 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
         finalizedSignalAtRef.current = signalAt;
         update(ref(db, `games/${idGame}`), {
           status: "ended",
-          reactionSession: {
-            ...session,
-            status: "ended",
-            winnerKey: winner?.playerKey ?? null
-          }
+          "reactionSession/status": "ended",
+          "reactionSession/winnerKey": winner?.playerKey ?? null
         });
       },
       Math.max(
@@ -337,27 +328,9 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
   const persistResult = async (result: ReactionResult) => {
     if (!session || !localPlayerKey) return;
 
-    const nextResults = {
-      ...(session.results || {}),
-      [localPlayerKey]: result
-    };
-    const everyoneResponded = haveAllPlayersReacted(
-      currentGame.listUsers,
-      nextResults
-    );
-    const nextWinner = getReactionWinner(currentGame.listUsers, nextResults);
-
-    await updateReactionSession(
-      {
-        ...session,
-        results: nextResults,
-        status: everyoneResponded ? "ended" : session.status,
-        winnerKey: everyoneResponded
-          ? nextWinner?.playerKey ?? null
-          : session.winnerKey ?? null
-      },
-      everyoneResponded ? "ended" : currentGame.status
-    );
+    await update(ref(db, `games/${idGame}`), {
+      [`reactionSession/results/${localPlayerKey}`]: result
+    });
   };
 
   const handleReactionClick = async () => {
