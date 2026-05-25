@@ -14,7 +14,7 @@
     "lint:es": "eslint --ext .ts,.tsx .",
     "lint:fix": "eslint --fix --ext .ts,.tsx .",
     "lint:quiet": "next lint --quiet src",
-    "check:tsc": "tsc --noEmit -p . --pretty",
+    "check:tsc": "next typegen && tsc --noEmit -p . --pretty",
     "check:i18n": "node check-translations.js",
     "export": "yarn build && next export",
     "clear-all": "rm -rf .next _static node_modules",
@@ -44,8 +44,8 @@
     "chart.js": "^4.4.2",
     "chroma-js": "^3.1.1",
     "clsx": "^2.1.1",
-    "firebase": "^9.5.0",
-    "firebase-admin": "^12.0.0",
+    "firebase": "12.13.0",
+    "firebase-admin": "13.10.0",
     "framer-motion": "^7.2.0",
     "fs": "^0.0.1-security",
     "i18next": "^23.11.4",
@@ -54,7 +54,7 @@
     "lottie-web": "^5.8.1",
     "moment": "^2.30.1",
     "next": "15.5.18",
-    "nodemailer": "^6.9.12",
+    "nodemailer": "8.0.8",
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.1",
     "react-chartjs-2": "^5.2.0",
@@ -63,23 +63,21 @@
     "react-flip-toolkit": "^7.2.4",
     "react-i18next": "^14.1.1",
     "react-rating-stars-component": "^2.2.0",
-    "react-router-dom": "^6.0.2",
-    "react-scripts": "^5.0.1",
     "sass": "^1.43.5",
     "sass-loader": "^12.3.0",
     "server-only": "0.0.1",
-    "sweetalert2": "^11.10.6",
-    "sweetalert2-react-content": "^5.0.3",
+    "sweetalert2": "^11.26.25",
+    "sweetalert2-react-content": "^5.1.2",
     "tailwind-merge": "^2.5.2",
     "web-vitals": "^2.1.2",
-    "webpack": "^5.64.4"
+    "webpack": "^5.107.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.1",
     "@types/canvas-confetti": "^1.9.0",
     "@types/chroma-js": "^2.4.4",
     "@types/node": "^20",
-    "@types/nodemailer": "^6.4.13",
+    "@types/nodemailer": "8.0.0",
     "@types/react": "^18.3.4",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
@@ -98,16 +96,42 @@
     "tailwindcss": "^3.4.11",
     "typescript": "^5.9.3"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
   "overrides": {
-    "postcss": "^8.5.15"
+    "@babel/helpers": "^7.29.7",
+    "@babel/runtime": "^7.29.7",
+    "anymatch": {
+      "picomatch": "2.3.2"
+    },
+    "immutable": "4.3.8",
+    "jsonwebtoken": {
+      "jws": "3.2.3"
+    },
+    "lodash": "^4.18.1",
+    "micromatch": {
+      "picomatch": "2.3.2"
+    },
+    "postcss": "^8.5.15",
+    "readdirp": {
+      "picomatch": "2.3.2"
+    },
+    "schema-utils": {
+      "ajv": "^8.20.0"
+    },
+    "uuid": "^11.1.1",
+    "ws": "^7.5.11"
   },
   "resolutions": {
-    "postcss": "^8.5.15"
+    "@babel/helpers": "^7.29.7",
+    "@babel/runtime": "^7.29.7",
+    "**/anymatch/picomatch": "2.3.2",
+    "immutable": "4.3.8",
+    "**/jsonwebtoken/jws": "3.2.3",
+    "lodash": "^4.18.1",
+    "**/micromatch/picomatch": "2.3.2",
+    "postcss": "^8.5.15",
+    "**/readdirp/picomatch": "2.3.2",
+    "**/schema-utils/ajv": "^8.20.0",
+    "uuid": "^11.1.1",
+    "ws": "^7.5.11"
   }
 }

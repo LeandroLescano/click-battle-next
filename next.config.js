@@ -31,7 +31,8 @@ const nextConfig = {
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       {
-        module: /@prisma\/instrumentation/,
+        module:
+          /(@prisma[\\/]instrumentation|@fastify[\\/]otel|@opentelemetry[\\/]instrumentation)/,
         message:
           /Critical dependency: the request of a dependency is an expression/
       }
