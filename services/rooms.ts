@@ -11,7 +11,7 @@ import {
   where
 } from "firebase/firestore";
 
-import {GamePlayed, RoomStats} from "interfaces/RoomStats";
+import {RoomStats} from "interfaces/RoomStats";
 import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 
 const PATH = "rooms";
@@ -83,17 +83,6 @@ export const addRoomStats = async (roomStats: RoomStats) => {
       merge: true
     }
   );
-};
-
-export const addRoomGamePlayed = async (
-  roomStats: RoomStats,
-  gamePlayed: GamePlayed
-) => {
-  await addRoomStats({
-    ...roomStats,
-    gamesPlayed: [gamePlayed],
-    removed: new Date()
-  });
 };
 
 export const getRoomStats = async (

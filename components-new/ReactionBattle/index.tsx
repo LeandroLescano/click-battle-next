@@ -39,7 +39,6 @@ import {
   useServerTimeOffset
 } from "lib/game/serverTimeOffset";
 import {metricCounter} from "observability/sentry";
-import {addRoomGamePlayed} from "services/rooms";
 import {getSuffixPosition} from "utils/string";
 
 import "./styles.scss";
@@ -221,14 +220,8 @@ const ReactionBattle = ({
     };
 
     roomStats?.current.gamesPlayed.push(gamePlayed);
-    if (roomStats?.current) {
-      addRoomGamePlayed({...roomStats.current, id: idGame}, gamePlayed).catch(
-        console.error
-      );
-    }
   }, [
     currentGame.listUsers,
-    idGame,
     isHost,
     reactionWindowMs,
     roomStats,

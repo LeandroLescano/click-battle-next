@@ -10,7 +10,6 @@ import {useGame} from "contexts/GameContext";
 import {RoomStats} from "interfaces";
 import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 import {metricCounter} from "observability/sentry";
-import {addRoomGamePlayed} from "services/rooms";
 import {updateUser} from "services/user";
 
 const COUNTDOWN = 3;
@@ -121,12 +120,6 @@ const useGameTimer = ({
           };
 
           roomStats?.current.gamesPlayed.push(gamePlayed);
-          if (roomStats?.current && game.key) {
-            addRoomGamePlayed(
-              {...roomStats.current, id: game.key},
-              gamePlayed
-            ).catch(console.error);
-          }
 
           const refGame = ref(db, `games/${game.key}`);
           const endedGame: Partial<Game> = {status: "ended"};

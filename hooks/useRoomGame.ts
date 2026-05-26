@@ -320,10 +320,13 @@ export const useRoomGame = (): UseRoomGameReturn => {
       return;
     }
 
-    if (
+    const shouldSaveRoomStats =
+      localIsHost &&
       roomStats.current &&
-      Date.now() - roomStats.current.created.getTime() > 30 * 1000
-    ) {
+      (Date.now() - roomStats.current.created.getTime() > 30 * 1000 ||
+        roomStats.current.gamesPlayed.length > 0);
+
+    if (shouldSaveRoomStats) {
       addRoomStats({...roomStats.current, id: gameKey, removed: new Date()});
     }
 
