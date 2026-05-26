@@ -13,6 +13,12 @@ import {useGame} from "contexts/GameContext";
 import {useWindowSize} from "hooks";
 import useGameTimer from "hooks/gameTimer";
 import {Watch} from "icons/Watch";
+import {
+  AD_LABEL,
+  AD_PLACEMENTS,
+  ADS_ENABLED,
+  ADSENSE_PUBLISHER_ID
+} from "lib/ads/placements";
 import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 import {
   breadcrumb,
@@ -41,6 +47,8 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
   const showCountdown = game.status === "countdown";
   const start = game.status === "playing";
   const cantStart = !start && game.listUsers.length < 2;
+  const classicAdPlacement = AD_PLACEMENTS.classicLocalDesktop;
+  const showGameplayAd = ADS_ENABLED && width > 768 && !start && !showCountdown;
 
   // function for start game
   const handleStart = () => {
@@ -188,14 +196,21 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
           <Watch /> 00:{String(remainingTime).padStart(2, "0")}
         </h2>
       </div>
-      {width > 768 && (
-        <Card className="mt-auto mr-auto">
-          <GoogleAdUnit>
+      {showGameplayAd && (
+        <Card className="relative mt-auto mr-auto overflow-hidden p-0 pt-5">
+          <span className="absolute left-2 top-1 text-[10px] font-bold uppercase leading-none text-primary-400/80">
+            {AD_LABEL}
+          </span>
+          <GoogleAdUnit placement={classicAdPlacement}>
             <ins
               className="adsbygoogle"
-              style={{display: "inline-block", width: "384px", height: "125px"}}
-              data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
-              data-ad-slot="6440984608"
+              style={{
+                display: "inline-block",
+                width: classicAdPlacement.width,
+                height: classicAdPlacement.height
+              }}
+              data-ad-client={ADSENSE_PUBLISHER_ID}
+              data-ad-slot={classicAdPlacement.slot}
             ></ins>
           </GoogleAdUnit>
         </Card>

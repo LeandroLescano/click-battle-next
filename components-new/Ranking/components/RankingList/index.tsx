@@ -1,13 +1,13 @@
 "use client";
 
-import React, {useEffect, useState} from "react";
+import classNames from "clsx";
 import {getAnalytics, logEvent} from "firebase/analytics";
+import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
-import clsx from "clsx";
 
-import {useAuth} from "contexts/AuthContext";
 import {LoginModal} from "components-new";
 import {Card} from "components-new/Card";
+import {useAuth} from "contexts/AuthContext";
 
 import {RankingListProps} from "./types";
 import "./styles.scss";
@@ -72,7 +72,7 @@ export const RankingList = ({users}: RankingListProps) => {
 
   return (
     <>
-      <div className="click-master-list flex flex-col gap-6 min-h-0 overflow-auto pt-1">
+      <div className="click-master-list flex min-h-0 flex-1 flex-col gap-6 overflow-auto pt-1">
         {usersList
           .sort((a, b) => b.cps - a.cps)
           .map((user, i) => {
@@ -86,7 +86,7 @@ export const RankingList = ({users}: RankingListProps) => {
                   {i + 1}.
                 </span>
                 <Card
-                  className={clsx(
+                  className={classNames(
                     "flex w-11/12 justify-between p-2.5 md:px-5 md:py-6 mb-0 text-sm md:text-3xl font-bold text-primary-500",
                     gameUser?.username === user.username && ownClasses
                   )}

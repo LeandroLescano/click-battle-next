@@ -1,7 +1,10 @@
+"use client";
+
 import {AdblockDetector} from "adblock-detector";
 import React from "react";
 
 import {Card} from "components-new/Card";
+import GoogleAdUnit from "components-new/CardGameAd/GoogleAdUnit";
 import {useWindowSize} from "hooks";
 import {
   AD_LABEL,
@@ -10,22 +13,20 @@ import {
   ADSENSE_PUBLISHER_ID
 } from "lib/ads/placements";
 
-import GoogleAdUnit from "./GoogleAdUnit";
-
-export const CardGameAd = () => {
+export const RankingAd = () => {
   const {width} = useWindowSize();
   const adbDetector = new AdblockDetector();
   const placement =
     width > 768
-      ? AD_PLACEMENTS.homeRoomsDesktop
-      : AD_PLACEMENTS.homeRoomsMobile;
+      ? AD_PLACEMENTS.rankingBottomDesktop
+      : AD_PLACEMENTS.rankingBottomMobile;
 
   const userHasAdblock = adbDetector.detect() ?? true;
 
-  if (!ADS_ENABLED || userHasAdblock) return <></>;
+  if (!ADS_ENABLED || userHasAdblock) return null;
 
   return (
-    <Card className="relative flex min-h-[96px] w-full items-center justify-center overflow-hidden border-primary-300/70 bg-primary-50/80 p-0 pt-4 md:min-h-[124px] md:w-64">
+    <Card className="relative mx-auto mt-1 flex min-h-[96px] w-[180px] shrink-0 items-center justify-center overflow-hidden border-primary-300/70 bg-primary-50/80 p-0 pt-4 md:mt-0 md:min-h-[132px] md:w-[420px] md:pt-5">
       <span className="absolute left-2 top-1 text-[9px] font-bold uppercase leading-none text-primary-400/80 md:text-[10px]">
         {AD_LABEL}
       </span>

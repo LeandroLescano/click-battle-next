@@ -9,6 +9,7 @@ import {GameProvider} from "contexts/GameContext";
 import {ThemeProvider} from "contexts/ThemeContext";
 import {I18nProvider} from "i18n/i18n-context";
 import {detectLanguage} from "i18n/server";
+import {ADS_ENABLED, ADSENSE_PUBLISHER_ID} from "lib/ads/placements";
 import {firebaseConfig} from "resources/config";
 
 import "./tailwind.scss";
@@ -34,7 +35,6 @@ const handjetFont = localFont({
 
 export default async function Layout({children}: Props) {
   const lng = await detectLanguage();
-  const adsensePublisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID;
 
   return (
     <I18nProvider language={lng}>
@@ -44,10 +44,10 @@ export default async function Layout({children}: Props) {
         className={`${tinyFont.variable} ${handjetFont.className}`}
       >
         <head>
-          {adsensePublisherId ? (
+          {ADS_ENABLED ? (
             <script
               async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsensePublisherId}`}
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_PUBLISHER_ID}`}
               crossOrigin="anonymous"
             />
           ) : null}

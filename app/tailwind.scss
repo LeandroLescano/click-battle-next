@@ -82,7 +82,8 @@ main > div {
 html {
   min-height: 100vh;
 
-  div:has(> ins[data-ad-status="unfilled"]) {
+  div:has(> ins[data-ad-status="unfilled"]),
+  .card:has(.google-ad-unit ins[data-ad-status="unfilled"]) {
     @apply hidden;
   }
 

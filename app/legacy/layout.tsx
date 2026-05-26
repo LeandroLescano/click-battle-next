@@ -15,6 +15,7 @@ import {AuthProvider} from "contexts/AuthContext";
 import {GameProvider} from "contexts/GameContext";
 import {I18nProvider} from "i18n/i18n-context";
 import {detectLanguage} from "i18n/server";
+import {ADS_ENABLED, ADSENSE_PUBLISHER_ID} from "lib/ads/placements";
 import {firebaseConfig} from "resources/config";
 
 if (!getApps.length) {
@@ -29,16 +30,15 @@ type Props = {
 
 export default async function Layout({children}: Props) {
   const lng = await detectLanguage();
-  const adsensePublisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID;
 
   return (
     <I18nProvider language={lng}>
       <html lang={lng} dir={lng}>
         <head>
-          {adsensePublisherId ? (
+          {ADS_ENABLED ? (
             <script
               async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsensePublisherId}`}
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_PUBLISHER_ID}`}
               crossOrigin="anonymous"
             />
           ) : null}

@@ -1,16 +1,17 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
 import moment from "moment";
+import Link from "next/link";
+import React from "react";
 import {useTranslation} from "react-i18next";
 
-import {LeftArrow} from "icons/LeftArrow";
 import {Button} from "components-new/Button";
 import {LanguageDropdown} from "components-new/LanguageDropdown";
+import {LeftArrow} from "icons/LeftArrow";
 
-import {RankingProps} from "./types";
+import {RankingAd} from "./components/RankingAd";
 import {RankingList} from "./components/RankingList";
+import {RankingProps} from "./types";
 
 export const Ranking = ({lastUpdate, usersWithScore}: RankingProps) => {
   const {t} = useTranslation();
@@ -39,6 +40,7 @@ export const Ranking = ({lastUpdate, usersWithScore}: RankingProps) => {
           {t("Last update")}: {moment(lastUpdate).format("DD/MM/YYYY HH:mm:ss")}
         </h3>
         <RankingList users={usersWithScore} />
+        <RankingAd />
       </div>
     </main>
   );
