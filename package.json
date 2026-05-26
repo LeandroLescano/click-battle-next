@@ -47,7 +47,6 @@
     "firebase": "12.13.0",
     "firebase-admin": "13.10.0",
     "framer-motion": "^7.2.0",
-    "fs": "^0.0.1-security",
     "i18next": "^23.11.4",
     "i18next-browser-languagedetector": "^7.2.1",
     "i18next-resources-to-backend": "^1.2.1",
