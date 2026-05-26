@@ -6,7 +6,8 @@ export type AdPlacement = {
     | "home_rooms_desktop"
     | "home_rooms_mobile"
     | "ranking_bottom_desktop"
-    | "ranking_bottom_mobile";
+    | "ranking_bottom_mobile"
+    | "reaction_action_desktop";
   layoutKey?: string;
   minWidth: number;
   slot: string;
@@ -62,5 +63,13 @@ export const AD_PLACEMENTS = {
     minWidth: 149,
     width: 149,
     height: 63
+  },
+  reactionActionDesktop: {
+    id: "reaction_action_desktop",
+    format: "fixed",
+    slot: "6440984608",
+    minWidth: 384,
+    width: 384,
+    height: 125
   }
 } satisfies Record<string, AdPlacement>;

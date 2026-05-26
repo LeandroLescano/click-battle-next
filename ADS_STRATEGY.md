@@ -46,8 +46,9 @@ References:
 
 ### Reaction Battle
 
-- No ad during get-ready, signal, click, or false-start moments.
-- Possible future placement: result/lobby-only small footer tile, below the primary next-round/back-to-lobby actions.
+- Desktop-only ad below the action panel is allowed when viewport height is at least 820px.
+- No mobile ad for now.
+- The ad must never overlay, shift, or sit inside the action button area.
 
 ### Ranking
 
@@ -68,12 +69,12 @@ Reference:
 ## Implementation Plan
 
 1. Review the home placement after a few days of fill/unfilled data.
-2. Decide whether Reaction Battle should stay ad-free or get a result-only placement.
+2. Review whether the Reaction Battle desktop-only ad feels safe during live play.
 3. Add an admin panel section later for ad performance by page/mode once enough data exists.
 
 ## Open Questions
 
-- Should Reaction Battle get a result-only ad, or stay ad-free because the mode is intentionally intense and short?
 - Should home ads stay inside the room grid, or become a small separate row under available rooms?
 - Should ranking get dedicated AdSense slots later to separate AdSense-side reporting from home placements?
+- Should Reaction Battle get dedicated AdSense slots later if the desktop-only placement stays?
 - Do we want a feature flag/env toggle for ads on dev and preview deployments?

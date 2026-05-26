@@ -39,8 +39,10 @@ export const Ranking = ({lastUpdate, usersWithScore}: RankingProps) => {
         <h3 className="text-xl md:text-3xl text-primary-600 dark:text-primary-100 font-semibold text-center">
           {t("Last update")}: {moment(lastUpdate).format("DD/MM/YYYY HH:mm:ss")}
         </h3>
-        <RankingList users={usersWithScore} />
-        <RankingAd />
+        <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row xl:items-start xl:justify-center">
+          <RankingList users={usersWithScore} />
+          <RankingAd />
+        </div>
       </div>
     </main>
   );

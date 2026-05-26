@@ -198,7 +198,7 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
       </div>
       {showGameplayAd && (
         <Card className="relative mt-auto mr-auto overflow-hidden p-0 pt-5">
-          <span className="absolute left-2 top-1 text-[10px] font-bold uppercase leading-none text-primary-400/80">
+          <span className="absolute left-2 top-1 text-[10px] font-bold uppercase leading-none text-primary-600">
             {AD_LABEL}
           </span>
           <GoogleAdUnit placement={classicAdPlacement}>

@@ -25,8 +25,8 @@ export const CardGameAd = () => {
   if (!ADS_ENABLED || userHasAdblock) return <></>;
 
   return (
-    <Card className="relative flex min-h-[96px] w-full items-center justify-center overflow-hidden border-primary-300/70 bg-primary-50/80 p-0 pt-4 md:min-h-[124px] md:w-64">
-      <span className="absolute left-2 top-1 text-[9px] font-bold uppercase leading-none text-primary-400/80 md:text-[10px]">
+    <Card className="relative flex min-h-[96px] w-full items-center justify-center overflow-hidden border-primary-300/70 bg-primary-100 p-0 pt-4 md:min-h-[124px] md:w-64">
+      <span className="absolute left-2 top-1 text-[9px] font-bold uppercase leading-none text-primary-600 md:text-[10px]">
         {AD_LABEL}
       </span>
       <GoogleAdUnit placement={placement}>

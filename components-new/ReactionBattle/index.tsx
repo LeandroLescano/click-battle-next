@@ -1,6 +1,7 @@
 "use client";
 
 import {GameUser} from "@leandrolescano/click-battle-core";
+import {AdblockDetector} from "adblock-detector";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
 import {
@@ -15,15 +16,24 @@ import {
 import {useTranslation} from "react-i18next";
 
 import {Button} from "components-new/Button";
+import {Card} from "components-new/Card";
+import GoogleAdUnit from "components-new/CardGameAd/GoogleAdUnit";
 import {RoomLeaderboard} from "components-new/RoomLeaderboard";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
+import {useWindowSize} from "hooks";
 import {
   ReactionInputType,
   ReactionResult,
   ReactionSession,
   RoomStats
 } from "interfaces";
+import {
+  AD_LABEL,
+  AD_PLACEMENTS,
+  ADS_ENABLED,
+  ADSENSE_PUBLISHER_ID
+} from "lib/ads/placements";
 import {
   DEFAULT_REACTION_SYNC_BUFFER_MS,
   MAX_REACTION_DELAY_MS,
@@ -81,6 +91,7 @@ const ReactionBattle = ({
   const {t} = useTranslation();
   const {user, gameUser} = useAuth();
   const {game: currentGame, isHost, setGame} = useGame();
+  const {height, width} = useWindowSize();
   const session = currentGame.reactionSession;
   const localPlayerKey = user?.uid || localUser?.key || "";
   const signalShownAtRef = useRef<number | null>(null);
@@ -98,6 +109,13 @@ const ReactionBattle = ({
   const signalAt = session?.signalAt ?? null;
   const signalReached = Boolean(signalAt && estimatedNow >= signalAt);
   const isWaitingForOpponent = currentGame.listUsers.length < 2;
+  const userHasAdblock = useMemo(() => {
+    const adbDetector = new AdblockDetector();
+    return adbDetector.detect() ?? true;
+  }, []);
+  const reactionAdPlacement = AD_PLACEMENTS.reactionActionDesktop;
+  const showReactionAd =
+    ADS_ENABLED && !userHasAdblock && width >= 1024 && height >= 820;
   const telemetryTags = useMemo(
     () => ({
       room_id: idGame,
@@ -1007,6 +1025,26 @@ const ReactionBattle = ({
                 )}
               </div>
             </div>
+
+            {showReactionAd && (
+              <Card className="reaction-battle-ad relative mx-auto mt-auto hidden w-[384px] max-w-full overflow-hidden border-primary-300/70 bg-primary-100 p-0 pt-5 lg:flex">
+                <span className="absolute left-2 top-1 text-[10px] font-bold uppercase leading-none text-primary-600">
+                  {AD_LABEL}
+                </span>
+                <GoogleAdUnit placement={reactionAdPlacement}>
+                  <ins
+                    className="adsbygoogle"
+                    style={{
+                      display: "inline-block",
+                      width: reactionAdPlacement.width,
+                      height: reactionAdPlacement.height
+                    }}
+                    data-ad-client={ADSENSE_PUBLISHER_ID}
+                    data-ad-slot={reactionAdPlacement.slot}
+                  ></ins>
+                </GoogleAdUnit>
+              </Card>
+            )}
           </div>
         </div>
 

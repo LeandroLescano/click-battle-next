@@ -26,8 +26,8 @@ export const RankingAd = () => {
   if (!ADS_ENABLED || userHasAdblock) return null;
 
   return (
-    <Card className="relative mx-auto mt-1 flex min-h-[96px] w-[180px] shrink-0 items-center justify-center overflow-hidden border-primary-300/70 bg-primary-50/80 p-0 pt-4 md:mt-0 md:min-h-[132px] md:w-[420px] md:pt-5">
-      <span className="absolute left-2 top-1 text-[9px] font-bold uppercase leading-none text-primary-400/80 md:text-[10px]">
+    <Card className="relative mx-auto mt-1 flex min-h-[96px] w-[180px] shrink-0 items-center justify-center overflow-hidden border-primary-300/70 bg-primary-100 p-0 pt-4 md:mt-0 md:min-h-[132px] md:w-[420px] md:pt-5 xl:mx-0 xl:mt-14 xl:w-72">
+      <span className="absolute left-2 top-1 text-[9px] font-bold uppercase leading-none text-primary-600 md:text-[10px]">
         {AD_LABEL}
       </span>
       <GoogleAdUnit placement={placement}>

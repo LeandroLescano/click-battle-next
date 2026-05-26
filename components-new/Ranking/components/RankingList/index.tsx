@@ -71,7 +71,7 @@ export const RankingList = ({users}: RankingListProps) => {
   };
 
   return (
-    <>
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       <div className="click-master-list flex min-h-0 flex-1 flex-col gap-6 overflow-auto pt-1">
         {usersList
           .sort((a, b) => b.cps - a.cps)
@@ -136,6 +136,6 @@ export const RankingList = ({users}: RankingListProps) => {
         show={showModal}
         onClose={toggleModal}
       />
-    </>
+    </div>
   );
 };
