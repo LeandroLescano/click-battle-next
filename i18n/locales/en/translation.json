@@ -1,5 +1,6 @@
 {
   "Name's room": "{{name}}'s room",
+  "Clicks": "Clicks",
   "Logged as": "Logged as {{name}}",
   "Room N°": "Room N°{{roomName}}",
   "N seconds remaining!": "{{seconds}} seconds remaining!",
@@ -10,5 +11,18 @@
   "Wow! You're at position N on the leaderboard! Want to claim your spot and keep playing?": "Wow! You're at position {{position}} on the leaderboard! Want to claim your spot and keep playing?",
   "inviteText": "Hey!\n\nJoin me in a click battle! Let's see who can click the fastest. Click here to join: {{- link}}.\n\nSee you there! 📱",
   "twoPlayersRequired": "This game requires at least 2 players.<1/><strong>Grab a friend!</strong>",
-  "rateUs": "How was your experience?<1/>Rate us with stars"
+  "rateUs": "How was your experience?<1/>Rate us with stars",
+  "Reaction winner": "Winner: {{name}}",
+  "Reaction results count": "Reaction results ({{count}})",
+  "Step n": "Step {{step}}",
+  "Reaction time n ms": "{{ms}} ms",
+  "Your reaction was n ms": "Your reaction was {{ms}} ms",
+  "Your reaction was n ms via input": "Your reaction was {{ms}} ms - {{input}}",
+  "You won with n ms": "You won with {{ms}} ms",
+  "You won by n ms": "You won by {{ms}} ms",
+  "You were n ms slower": "{{ms}} ms behind the winner",
+  "Winning reaction was n ms": "Winning time: {{ms}} ms",
+  "n ms slower": "+{{ms}} ms slower",
+  "Reaction window n ms": "Window: {{ms}} ms",
+  "Reaction limit n s": "Limit: {{seconds}}"
 }

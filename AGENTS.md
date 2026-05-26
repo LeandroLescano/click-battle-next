@@ -19,5 +19,5 @@ This repository is the active production web app for Click Battle.
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
+shell commands, and other important information, read specs/001-reaction-battle-web-mode/plan.md
 <!-- SPECKIT END -->

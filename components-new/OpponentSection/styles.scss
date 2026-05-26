@@ -16,7 +16,7 @@
   box-shadow: 3px 4px theme("colors.primary.250");
 
   &.local {
-    @apply bg-primary-300 text-primary-100;
+    @apply bg-primary-300 text-primary-100 dark:bg-primary-300 dark:text-primary-100;
   }
 }
 

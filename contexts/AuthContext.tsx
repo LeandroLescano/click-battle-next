@@ -1,7 +1,6 @@
 "use client";
 
 import {GameUser, MaxScore} from "@leandrolescano/click-battle-core";
-import {setContext} from "@sentry/nextjs";
 import {
   getAnalytics,
   logEvent,
@@ -159,12 +158,10 @@ function useAuthProvider(): AuthContextState {
           }
 
           setGameUser(objUser);
-          setContext("user", objUser);
           if (key) {
             await getUser(key).then((dbUser) => {
               if (dbUser && dbUser !== objUser) {
                 setGameUser(dbUser);
-                setContext("user", {dbUser: dbUser});
                 sessionStorage.setItem("objUser", JSON.stringify(dbUser));
 
                 if (dbUser.key) {

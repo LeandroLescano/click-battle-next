@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
-import {getDatabase, onValue, ref} from "@firebase/database";
+import {getDatabase, onValue, ref, remove} from "@firebase/database";
 import {assessRoomJoin, GameUser} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import dynamic from "next/dynamic";
@@ -19,6 +19,11 @@ import {WelcomeMessage} from "components-new/WelcomeMessage";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {Game} from "interfaces";
+import {isHostDisconnectStale} from "lib/game/hostPresence";
+
+type ListedGameSnapshot = Partial<Game> & {
+  hostDisconnectedAt?: number;
+};
 
 const LoginModal = dynamic<LoginModalProps>(
   () =>
@@ -72,37 +77,69 @@ const Home = () => {
 
   useEffect(() => {
     let mounted = true;
+
     //Get rooms of games from DB
     if (gameUser?.username) {
       resetGame();
-      const refGames = ref(db, `games`);
-      onValue(refGames, (snapshot) => {
-        const list: {[key: string]: Game} | null = snapshot.val();
-        if (list) {
-          if (mounted) {
-            const games = Object.entries(list).map((game) => ({
-              key: game[0],
-              ...game[1]
-            }));
-
-            for (const g of games) {
-              if (g.listUsers) {
-                g.listUsers = Object.entries(g.listUsers).map((u) => ({
-                  key: u[0],
-                  ...u[1]
-                }));
-              }
-            }
-
-            setListGames(games);
-          }
-        } else {
-          setListGames([]);
-        }
-      });
     }
+
+    const refGames = ref(db, `games`);
+    const unsubscribe = onValue(refGames, (snapshot) => {
+      const list: Record<string, ListedGameSnapshot> | null = snapshot.val();
+
+      if (!list) {
+        setListGames([]);
+        return;
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      const now = Date.now();
+      const staleRoomKeys: string[] = [];
+      const games = Object.entries(list)
+        .map(([key, rawGame]) => {
+          if (isHostDisconnectStale(rawGame.hostDisconnectedAt, now)) {
+            staleRoomKeys.push(key);
+            return null;
+          }
+
+          if (!gameUser?.username) {
+            return null;
+          }
+
+          const parsed = assessRoomJoin(
+            {
+              key,
+              ...rawGame
+            },
+            {
+              snapshotKey: key
+            }
+          );
+
+          if (!parsed) {
+            return null;
+          }
+
+          return {
+            ...parsed.game,
+            key,
+            listUsers: parsed.listUsers
+          } as Game;
+        })
+        .filter(Boolean) as Game[];
+
+      setListGames(games);
+      staleRoomKeys.forEach((key) => {
+        remove(ref(db, `games/${key}`)).catch(console.error);
+      });
+    });
+
     return () => {
       mounted = false;
+      unsubscribe();
     };
   }, [gameUser?.username]);
 

@@ -2,13 +2,17 @@ import React from "react";
 import {useTranslation} from "react-i18next";
 
 import {Button, LanguageDropdown} from "components-new";
-import {LeftArrow} from "icons/LeftArrow";
-import {Gear} from "icons/Gear";
 import {useGame} from "contexts/GameContext";
+import {Gear} from "icons/Gear";
+import {LeftArrow} from "icons/LeftArrow";
 
 import {GameHeaderProps} from "./types";
 
-export const GameHeader = ({onOpenSettings, onBack}: GameHeaderProps) => {
+export const GameHeader = ({
+  onOpenSettings,
+  onBack,
+  showSettings = true
+}: GameHeaderProps) => {
   const {t} = useTranslation();
   const {isHost} = useGame();
 
@@ -24,7 +28,7 @@ export const GameHeader = ({onOpenSettings, onBack}: GameHeaderProps) => {
       </Button>
       <div className="flex items-center gap-4 md:gap-9">
         <LanguageDropdown />
-        {isHost && (
+        {isHost && showSettings && (
           <Button
             variant="outlined"
             className="px-2.5 py-0.5 md:px-5 md:py-1 text-sm md:text-2xl flex gap-1 md:gap-2 items-center"

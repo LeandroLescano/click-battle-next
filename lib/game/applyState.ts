@@ -30,6 +30,7 @@ export const applyState = (
     roomStats.owner = game.ownerUser.username;
     roomStats.withPassword = !!game.settings.password;
     roomStats.created = new Date(game.created as unknown as number);
+    roomStats.gameMode = game.gameMode;
   }
 
   if (roomStats.maxUsersConnected < listUsers.length) {

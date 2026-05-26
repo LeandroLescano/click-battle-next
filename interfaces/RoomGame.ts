@@ -1,6 +1,6 @@
-import {Game, GameUser} from "@leandrolescano/click-battle-core";
-
+import {Game} from "./Game";
 import {RoomStats} from "./RoomStats";
+import {GameUser} from "@leandrolescano/click-battle-core";
 
 export interface RoomGameMetrics {
   snapshotSizeBytes: number;

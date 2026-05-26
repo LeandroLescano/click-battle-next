@@ -1,6 +1,6 @@
 import {getApp, getApps, initializeApp} from "firebase/app";
 import Script from "next/script";
-import React, {Suspense} from "react";
+import React, {ReactNode, Suspense} from "react";
 
 import "../../styles/globals.scss";
 import "../../styles/styles.scss";
@@ -25,7 +25,7 @@ if (!getApps.length) {
 }
 
 type Props = {
-  children: JSX.Element;
+  children: ReactNode;
 };
 
 export default async function Layout({children}: Props) {

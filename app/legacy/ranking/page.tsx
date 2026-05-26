@@ -4,7 +4,6 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {GameUser} from "@leandrolescano/click-battle-core";
 import {getFirestore} from "firebase-admin/firestore";
 import {unstable_cache} from "next/cache";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import React from "react";
 import {Card, CardBody, CardHeader, Container} from "react-bootstrap";
@@ -13,9 +12,7 @@ import {RankingList} from "components/RankingList";
 import {getServerTranslations} from "i18n/server";
 import {customInitApp} from "lib/firebase-admin-config";
 
-const UpdatedTime = dynamic(() => import("components/UpdatedTime"), {
-  ssr: false
-});
+import UpdatedTime from "./UpdatedTimeNoSsr";
 
 customInitApp();
 

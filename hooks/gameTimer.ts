@@ -3,7 +3,7 @@ import {getAnalytics, logEvent} from "firebase/analytics";
 import {getDatabase, ref, update} from "firebase/database";
 import {Timestamp} from "firebase/firestore";
 import moment from "moment";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
@@ -13,9 +13,11 @@ import {updateUser} from "services/user";
 const COUNTDOWN = 3;
 
 const useGameTimer = ({
+  disabled = false,
   roomStats,
   onFinish
 }: {
+  disabled?: boolean;
   roomStats?: {current: RoomStats};
   onFinish?: VoidFunction;
 }) => {
@@ -23,9 +25,11 @@ const useGameTimer = ({
   const {game, calculatePosition, localUser} = useGame();
   const [remainingTime, setRemainingTime] = useState(game.settings.timer);
   const [countdown, setCountdown] = useState(COUNTDOWN);
+  const handledFinishRef = useRef<string | null>(null);
   const db = getDatabase();
 
   useEffect(() => {
+    if (disabled) return;
     if (!game?.startTime) return;
 
     if (game.status === "countdown" && countdown > 0) {
@@ -44,9 +48,10 @@ const useGameTimer = ({
       }
       setCountdown(COUNTDOWN);
     }
-  }, [game?.startTime, countdown, localUser.rol, game.status]);
+  }, [countdown, db, disabled, game, localUser.rol]);
 
   useEffect(() => {
+    if (disabled) return;
     if (game.status !== "playing") return;
 
     const endTime = moment(game.startTime).add(
@@ -67,11 +72,16 @@ const useGameTimer = ({
     }, 1000);
 
     return () => clearInterval(timerInterval);
-  }, [game?.status]);
+  }, [disabled, game?.status, game.settings.timer, game.startTime]);
 
   // useEffect for update timer in state and show result
   useEffect(() => {
+    if (disabled) return;
     if (game) {
+      if (game.status !== "ended" && game.status !== "playing") {
+        handledFinishRef.current = null;
+      }
+
       if (!game.startTime && game.settings.timer !== remainingTime) {
         setRemainingTime(game.settings.timer);
       }
@@ -81,6 +91,10 @@ const useGameTimer = ({
       if (localUser.rol === "owner") {
         // localUser is owner
         if (remainingTime === 0 && game.status === "playing") {
+          const finishKey = `${game.key}:${game.startTime ?? "no-start"}:owner`;
+          if (handledFinishRef.current === finishKey) return;
+          handledFinishRef.current = finishKey;
+
           logEvent(getAnalytics(), "game_finish", {
             date: new Date(),
             users: game.listUsers,
@@ -92,7 +106,8 @@ const useGameTimer = ({
           roomStats?.current.gamesPlayed.push({
             maxClicks: Math.max(...game.listUsers.map((lu) => lu.clicks || 0)),
             numberOfUsers: game.listUsers.length,
-            timer: game.settings.timer
+            timer: game.settings.timer,
+            gameMode: game.gameMode ?? "classic-speed"
           });
 
           const refGame = ref(db, `games/${game.key}`);
@@ -107,12 +122,28 @@ const useGameTimer = ({
         return;
       } else if (game.status === "ended") {
         // localUser is visitor
+        const finishKey = `${game.key}:${game.startTime ?? "no-start"}:${
+          localUser.key ?? localUser.username
+        }:visitor`;
+        if (handledFinishRef.current === finishKey) return;
+        handledFinishRef.current = finishKey;
+
         onFinish?.();
         calculatePosition();
         updateLocalMaxScore(userKey);
       }
     }
-  }, [game.status, game.settings.timer, remainingTime]);
+  }, [
+    calculatePosition,
+    db,
+    disabled,
+    game,
+    gameUser,
+    localUser,
+    onFinish,
+    remainingTime,
+    roomStats
+  ]);
 
   const updateLocalMaxScore = (userKey?: string | null) => {
     if (localUser.clicks && gameUser && game) {

@@ -4,7 +4,11 @@ import {
 } from "@leandrolescano/click-battle-core";
 import {Timestamp} from "firebase/firestore";
 
-export type Game = ExternalGame;
+import {ReactionSession} from "./ReactionBattle";
+
+export type Game = ExternalGame & {
+  reactionSession?: ReactionSession | null;
+};
 
 export type RoomUser = Pick<
   GameUser,
