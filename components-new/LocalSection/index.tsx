@@ -123,7 +123,12 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
   const AdditionalInfo = () => {
     let text: string | React.ReactNode;
     if (cantStart) {
-      text = <Trans i18nKey="twoPlayersRequired" components={{1: <br />}} />;
+      text = (
+        <Trans
+          i18nKey="twoPlayersRequired"
+          components={{1: <br key="two-players-required-break" />}}
+        />
+      );
     }
 
     if (!isHost && !start && !showCountdown) {

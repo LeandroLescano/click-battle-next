@@ -37,6 +37,8 @@ export const applyState = (
     roomStats.gameMode = gameMode;
   }
 
+  roomStats.maxUsersConfigured = game.settings.maxUsers;
+
   if (roomStats.maxUsersConnected < listUsers.length) {
     roomStats.maxUsersConnected = listUsers.length;
   }

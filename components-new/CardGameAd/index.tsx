@@ -15,7 +15,7 @@ export const CardGameAd = () => {
   if (userHasAdblock) return <></>;
 
   return (
-    <Card className="w-full md:w-64 p-0">
+    <Card className="flex min-h-[96px] w-full items-center justify-center overflow-hidden p-0 md:min-h-[124px] md:w-64">
       <GoogleAdUnit>
         {width > 768 ? (
           <ins

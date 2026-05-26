@@ -52,6 +52,29 @@ body {
   padding: 0 !important;
 }
 
+.admin-grid-background {
+  min-height: 100vh;
+  background: #f9f9f9;
+}
+
+@media (prefers-color-scheme: light) {
+  .admin-grid-background {
+    background:
+      linear-gradient(rgba(249, 249, 249, 0.9), rgba(249, 249, 249, 0.86)),
+      url("../public/squares-white.jpg") no-repeat center center fixed #f9f9f9;
+    background-size: cover;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .admin-grid-background {
+    background:
+      linear-gradient(rgba(25, 25, 25, 0.08), rgba(25, 25, 25, 0.08)),
+      url("../public/squares.png") no-repeat center center fixed #191919;
+    background-size: cover;
+  }
+}
+
 main > div {
   @apply px-5 py-6 xl:px-32 xl:py-14 short:py-1;
 }

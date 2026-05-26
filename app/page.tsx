@@ -274,7 +274,7 @@ const Home = () => {
             <h3 className="text-base md:text-4xl font-bold mt-2 md:mt-0 md:mb-8 text-primary-600 dark:text-primary-100">
               {t("Available rooms")}
             </h3>
-            <div className="games-container grid grid-cols-2 gap-6 p-2 overflow-y-auto overflow-x-hidden w-full md:w-fit">
+            <div className="games-container grid w-full grid-cols-[repeat(auto-fit,minmax(149px,1fr))] gap-3 overflow-y-auto overflow-x-hidden p-1.5 md:w-fit md:grid-cols-2 md:gap-6 md:p-2">
               {listGames.length > 0
                 ? listGames.map((game, i) => (
                     <Fragment key={i}>

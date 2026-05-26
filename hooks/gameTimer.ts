@@ -14,6 +14,17 @@ import {updateUser} from "services/user";
 
 const COUNTDOWN = 3;
 
+const toGameDate = (value: unknown) => {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value;
+  }
+
+  if (typeof value === "number" || typeof value === "string") {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? undefined : date;
+  }
+};
+
 const useGameTimer = ({
   disabled = false,
   roomStats,
@@ -112,11 +123,22 @@ const useGameTimer = ({
             is_host: "1"
           });
 
+          const winner = [...game.listUsers].sort(
+            (left, right) => (right.clicks || 0) - (left.clicks || 0)
+          )[0];
+          const maxClicks = winner?.clicks ?? 0;
+          const startedAt = toGameDate(game.startTime);
           const gamePlayed = {
-            maxClicks: Math.max(...game.listUsers.map((lu) => lu.clicks || 0)),
+            durationSeconds: game.settings.timer,
+            finishedAt: new Date(),
+            maxClicks,
             numberOfUsers: game.listUsers.length,
             timer: game.settings.timer,
-            gameMode
+            gameMode,
+            ...(startedAt ? {startedAt} : {}),
+            winnerMetric: "clicks" as const,
+            winnerScore: maxClicks,
+            ...(winner?.username ? {winnerUsername: winner.username} : {})
           };
 
           roomStats?.current.gamesPlayed.push(gamePlayed);

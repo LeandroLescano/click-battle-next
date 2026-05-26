@@ -327,7 +327,12 @@ export const useRoomGame = (): UseRoomGameReturn => {
         roomStats.current.gamesPlayed.length > 0);
 
     if (shouldSaveRoomStats) {
-      addRoomStats({...roomStats.current, id: gameKey, removed: new Date()});
+      addRoomStats({
+        ...roomStats.current,
+        closedReason: "host-left",
+        id: gameKey,
+        removed: new Date()
+      });
     }
 
     const roomRef = ref(db, roomPath);

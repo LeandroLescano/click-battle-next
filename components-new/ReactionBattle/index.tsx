@@ -188,6 +188,9 @@ const ReactionBattle = ({
     const falseStarts = finalResults.filter(
       (result) => result.status === "false-start"
     );
+    const noReactions = finalResults.filter(
+      (result) => result.status === "waiting" || result.status === "unavailable"
+    );
     const fastestReactionMs = winner?.reactionMs ?? null;
 
     logEvent(getAnalytics(), "game_finish", {
@@ -208,15 +211,34 @@ const ReactionBattle = ({
       return;
     }
 
+    const startedAtMs =
+      signalAt - (session?.syncBufferMs ?? 0) - (session?.signalDelayMs ?? 0);
+    const startedAt =
+      startedAtMs > 0 && Number.isFinite(startedAtMs)
+        ? new Date(startedAtMs)
+        : undefined;
     const gamePlayed = {
+      clickInputs: finalResults.filter((result) => result.inputType === "click")
+        .length,
+      durationSeconds: reactionWindowMs / 1000,
       falseStarts: falseStarts.length,
+      finishedAt: new Date(),
       fastestReactionMs,
       gameMode: "reaction" as const,
+      keyInputs: finalResults.filter((result) => result.inputType === "key")
+        .length,
       maxClicks: 0,
+      noReactions: noReactions.length,
       numberOfUsers: currentGame.listUsers.length,
       reactionWindowMs,
+      ...(startedAt ? {startedAt} : {}),
+      tapInputs: finalResults.filter((result) => result.inputType === "tap")
+        .length,
       timer: reactionWindowMs / 1000,
-      validReactions: validResults.length
+      validReactions: validResults.length,
+      winnerMetric: "reactionMs" as const,
+      winnerScore: fastestReactionMs,
+      ...(winner?.username ? {winnerUsername: winner.username} : {})
     };
 
     roomStats?.current.gamesPlayed.push(gamePlayed);
