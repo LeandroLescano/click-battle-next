@@ -181,7 +181,13 @@ export const useRoomGame = (): UseRoomGameReturn => {
               return;
             }
 
-            setGame({...game, listUsers} as Game);
+            const nextGame = game as Game;
+
+            setGame({
+              ...nextGame,
+              listUsers,
+              reactionSession: nextGame.reactionSession ?? null
+            });
             if (dbLocalUser) setLocalUser(dbLocalUser);
             setIsHost(parsedIsHost);
             if (newUserJoined) setNewUser(true);

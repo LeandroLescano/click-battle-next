@@ -221,6 +221,13 @@ test.describe("Game", () => {
     ).not.toBeVisible();
     await expect(hostPage.page.getByText(/Winner:/i)).not.toBeVisible();
     await expect(celebration).toBeHidden();
+
+    await expect(
+      userPage.getByRole("button", {name: "Waiting for host"})
+    ).toBeVisible();
+    await expect(userPage.getByText("Opponents (1/1)")).toBeVisible();
+    await expect(userPage.getByText("Reaction results (2)")).not.toBeVisible();
+    await expect(userPage.getByText(/Winner:/i)).not.toBeVisible();
   });
 
   test("Should preserve both reaction results when players click together", async ({
