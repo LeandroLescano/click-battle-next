@@ -20,7 +20,7 @@ export const CardGameAd = () => {
         {width > 768 ? (
           <ins
             className="adsbygoogle"
-            style={{display: "block", height: "120px"}}
+            style={{display: "block", width: "100%", height: "120px"}}
             data-ad-format="fluid"
             data-ad-layout-key="-gv-9+1i-2s+2u"
             data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
@@ -30,7 +30,12 @@ export const CardGameAd = () => {
           <ins
             className="adsbygoogle"
             data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
-            style={{display: "inline-block", width: "149px", height: "63px"}}
+            style={{
+              display: "block",
+              width: "149px",
+              height: "63px",
+              margin: "0 auto"
+            }}
             data-ad-slot="4369393021"
           ></ins>
         )}

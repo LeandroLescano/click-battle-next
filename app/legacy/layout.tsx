@@ -1,5 +1,4 @@
 import {getApp, getApps, initializeApp} from "firebase/app";
-import Script from "next/script";
 import React, {ReactNode, Suspense} from "react";
 
 import "../../styles/globals.scss";
@@ -30,16 +29,19 @@ type Props = {
 
 export default async function Layout({children}: Props) {
   const lng = await detectLanguage();
+  const adsensePublisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID;
 
   return (
     <I18nProvider language={lng}>
       <html lang={lng} dir={lng}>
         <head>
-          <Script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}`}
-            crossOrigin="anonymous"
-          ></Script>
+          {adsensePublisherId ? (
+            <script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsensePublisherId}`}
+              crossOrigin="anonymous"
+            />
+          ) : null}
           <title>Click Battle</title>
           <meta name="viewport" content="width=device-width, minimum-scale=1" />
           <meta
