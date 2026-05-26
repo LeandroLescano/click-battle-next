@@ -12,6 +12,7 @@ import {useAuth} from "contexts/AuthContext";
 import useGameTimer from "hooks/gameTimer";
 import {useRoomGame} from "hooks/useRoomGame";
 import {Game} from "interfaces";
+import {RoomStats} from "interfaces/RoomStats";
 import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 import {getReactionWinner} from "lib/game/reactionBattle";
 
@@ -43,6 +44,7 @@ const LoginModal = dynamic<LoginModalProps>(
 type ModeViewContext = {
   currentGame: Game;
   localUser: GameUser;
+  roomStats: {current: RoomStats};
 };
 
 type ModeView = {
@@ -86,8 +88,12 @@ const modeViews: Partial<Record<GameMode, ModeView>> = {
           reactionWinner?.playerKey === localUser.username)
       );
     },
-    renderContent: ({currentGame, localUser}) => (
-      <ReactionBattle idGame={currentGame.key || ""} localUser={localUser} />
+    renderContent: ({currentGame, localUser, roomStats}) => (
+      <ReactionBattle
+        idGame={currentGame.key || ""}
+        localUser={localUser}
+        roomStats={roomStats}
+      />
     )
   }
 };
@@ -111,7 +117,8 @@ const RoomGame = () => {
   const modeView = getModeView(currentGame?.gameMode);
   const shouldCelebrate = modeView.getShouldCelebrate({
     currentGame,
-    localUser
+    localUser,
+    roomStats
   });
 
   const {countdown} = useGameTimer({
@@ -161,7 +168,7 @@ const RoomGame = () => {
                   {currentGame?.roomName || ""}
                 </h1>
               ) : null}
-              {modeView.renderContent({currentGame, localUser})}
+              {modeView.renderContent({currentGame, localUser, roomStats})}
               <Button
                 variant="outlined"
                 className="text-xl md:text-2xl py-0.5 px-3 md:py-1 md:px-6 self-center md:self-end z-10"

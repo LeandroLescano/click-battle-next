@@ -1,6 +1,7 @@
 import {ParsedGameSnapshot} from "@leandrolescano/click-battle-core";
 
 import {RoomStats} from "interfaces/RoomStats";
+import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 import {breadcrumb, metricCounter} from "observability/sentry";
 
 import {reportHostMetrics} from "./metrics";
@@ -17,20 +18,23 @@ export const applyState = (
   gameID: string
 ): ApplyStateResult => {
   const {game, listUsers, kickedOut, isHost} = parsed;
+  const gameMode = game.gameMode ?? DEFAULT_GAME_MODE;
 
   const roomTags = {
     room_id: gameID,
+    game_mode: gameMode,
     is_host: isHost ? "1" : "0"
   };
 
-  reportHostMetrics(listUsers.length, gameID, isHost);
+  reportHostMetrics(listUsers.length, gameID, isHost, gameMode);
 
   if (!roomStats.name) {
+    roomStats.id = gameID;
     roomStats.name = game.roomName;
     roomStats.owner = game.ownerUser.username;
     roomStats.withPassword = !!game.settings.password;
     roomStats.created = new Date(game.created as unknown as number);
-    roomStats.gameMode = game.gameMode;
+    roomStats.gameMode = gameMode;
   }
 
   if (roomStats.maxUsersConnected < listUsers.length) {

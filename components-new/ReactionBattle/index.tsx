@@ -1,6 +1,7 @@
 "use client";
 
 import {GameUser} from "@leandrolescano/click-battle-core";
+import {getAnalytics, logEvent} from "firebase/analytics";
 import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
 import {
   useCallback,
@@ -17,7 +18,12 @@ import {Button} from "components-new/Button";
 import {RoomLeaderboard} from "components-new/RoomLeaderboard";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {ReactionInputType, ReactionResult, ReactionSession} from "interfaces";
+import {
+  ReactionInputType,
+  ReactionResult,
+  ReactionSession,
+  RoomStats
+} from "interfaces";
 import {
   DEFAULT_REACTION_SYNC_BUFFER_MS,
   MAX_REACTION_DELAY_MS,
@@ -32,6 +38,8 @@ import {
   estimateServerNow,
   useServerTimeOffset
 } from "lib/game/serverTimeOffset";
+import {metricCounter} from "observability/sentry";
+import {addRoomGamePlayed} from "services/rooms";
 import {getSuffixPosition} from "utils/string";
 
 import "./styles.scss";
@@ -39,6 +47,7 @@ import "./styles.scss";
 type ReactionBattleProps = {
   idGame: string;
   localUser: GameUser;
+  roomStats?: {current: RoomStats};
 };
 
 type StagePlayer = {
@@ -63,7 +72,11 @@ type ReactionActionState = {
   };
 };
 
-const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
+const ReactionBattle = ({
+  idGame,
+  localUser,
+  roomStats
+}: ReactionBattleProps) => {
   const db = getDatabase();
   const serverTimeOffset = useServerTimeOffset();
   const {t} = useTranslation();
@@ -75,6 +88,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
   const signalShownAtPerformanceRef = useRef<number | null>(null);
   const promotedSignalAtRef = useRef<number | null>(null);
   const finalizedSignalAtRef = useRef<number | null>(null);
+  const recordedRoundStatsSignalAtRef = useRef<number | null>(null);
   const submittingRef = useRef(false);
   const [localSignalVisible, setLocalSignalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -85,6 +99,14 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
   const signalAt = session?.signalAt ?? null;
   const signalReached = Boolean(signalAt && estimatedNow >= signalAt);
   const isWaitingForOpponent = currentGame.listUsers.length < 2;
+  const telemetryTags = useMemo(
+    () => ({
+      room_id: idGame,
+      game_mode: "reaction",
+      is_host: isHost ? "1" : "0"
+    }),
+    [idGame, isHost]
+  );
 
   const participantResults = useMemo(
     () =>
@@ -148,6 +170,91 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     typeof winnerReactionMs === "number"
       ? Math.max(0, localResult.reactionMs - winnerReactionMs)
       : null;
+
+  const recordRoundFinished = useCallback(() => {
+    if (!signalAt || recordedRoundStatsSignalAtRef.current === signalAt) {
+      return;
+    }
+
+    recordedRoundStatsSignalAtRef.current = signalAt;
+
+    const finalResults = buildReactionResultList(
+      currentGame.listUsers,
+      session?.results
+    );
+    const validResults = finalResults.filter(
+      (result) =>
+        result.status === "valid" && typeof result.reactionMs === "number"
+    );
+    const falseStarts = finalResults.filter(
+      (result) => result.status === "false-start"
+    );
+    const fastestReactionMs = winner?.reactionMs ?? null;
+
+    logEvent(getAnalytics(), "game_finish", {
+      date: new Date(),
+      falseStarts: falseStarts.length,
+      fastestReactionMs,
+      gameMode: "reaction",
+      reactionWindowMs,
+      users: currentGame.listUsers.length,
+      validReactions: validResults.length
+    });
+    metricCounter("game_finished", undefined, {
+      ...telemetryTags,
+      has_winner: Boolean(winner)
+    });
+
+    if (!isHost) {
+      return;
+    }
+
+    const gamePlayed = {
+      falseStarts: falseStarts.length,
+      fastestReactionMs,
+      gameMode: "reaction" as const,
+      maxClicks: 0,
+      numberOfUsers: currentGame.listUsers.length,
+      reactionWindowMs,
+      timer: reactionWindowMs / 1000,
+      validReactions: validResults.length
+    };
+
+    roomStats?.current.gamesPlayed.push(gamePlayed);
+    if (roomStats?.current) {
+      addRoomGamePlayed({...roomStats.current, id: idGame}, gamePlayed).catch(
+        console.error
+      );
+    }
+  }, [
+    currentGame.listUsers,
+    idGame,
+    isHost,
+    reactionWindowMs,
+    roomStats,
+    session?.results,
+    signalAt,
+    telemetryTags,
+    winner
+  ]);
+
+  const logReactionInput = useCallback(
+    (result: ReactionResult) => {
+      logEvent(getAnalytics(), "reaction_input", {
+        gameMode: "reaction",
+        inputType: result.inputType,
+        reactionMs: result.reactionMs ?? null,
+        resultStatus: result.status
+      });
+      metricCounter("reaction_input", undefined, {
+        ...telemetryTags,
+        input_type: result.inputType ?? "unknown",
+        result_status: result.status
+      });
+    },
+    [telemetryTags]
+  );
+
   useEffect(() => {
     if (
       !signalAt ||
@@ -235,6 +342,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     }
 
     finalizedSignalAtRef.current = signalAt;
+    recordRoundFinished();
     update(ref(db, `games/${idGame}`), {
       status: "ended",
       "reactionSession/status": "ended",
@@ -247,6 +355,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     idGame,
     isHost,
     reactionWindowMs,
+    recordRoundFinished,
     session,
     signalAt,
     winner?.playerKey
@@ -268,6 +377,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
         }
 
         finalizedSignalAtRef.current = signalAt;
+        recordRoundFinished();
         update(ref(db, `games/${idGame}`), {
           status: "ended",
           "reactionSession/status": "ended",
@@ -287,6 +397,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     idGame,
     isHost,
     reactionWindowMs,
+    recordRoundFinished,
     serverTimeOffset,
     session,
     signalAt,
@@ -319,6 +430,16 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     signalShownAtRef.current = null;
     signalShownAtPerformanceRef.current = null;
     setLocalSignalVisible(false);
+    recordedRoundStatsSignalAtRef.current = null;
+
+    logEvent(getAnalytics(), "start_game", {
+      action: "start_game",
+      date: new Date(),
+      gameMode: "reaction",
+      reactionWindowMs,
+      users: currentGame.listUsers.length
+    });
+    metricCounter("game_started", undefined, telemetryTags);
 
     await updateReactionSession(
       {
@@ -385,15 +506,18 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
       try {
         const clickedAt = Date.now();
         const clickedAtPerformance = performance.now();
+        let result: ReactionResult;
 
         if (!localSignalVisible) {
-          await persistResult({
+          result = {
             playerKey: localPlayerKey,
             username: gameUser.username,
             status: "false-start",
             clickedAt,
             inputType
-          });
+          };
+          await persistResult(result);
+          logReactionInput(result);
           resultPersisted = true;
           return;
         }
@@ -406,7 +530,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
           signalShownAtPerformanceRef.current = clickedAtPerformance;
         }
 
-        await persistResult({
+        result = {
           playerKey: localPlayerKey,
           username: gameUser.username,
           status: "valid",
@@ -419,7 +543,9 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
             )
           ),
           inputType
-        });
+        };
+        await persistResult(result);
+        logReactionInput(result);
         resultPersisted = true;
       } finally {
         if (!resultPersisted) {
@@ -433,6 +559,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
       localPlayerKey,
       localResult,
       localSignalVisible,
+      logReactionInput,
       persistResult
     ]
   );

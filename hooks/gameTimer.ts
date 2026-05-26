@@ -8,6 +8,9 @@ import {useEffect, useRef, useState} from "react";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {RoomStats} from "interfaces";
+import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
+import {metricCounter} from "observability/sentry";
+import {addRoomGamePlayed} from "services/rooms";
 import {updateUser} from "services/user";
 
 const COUNTDOWN = 3;
@@ -94,21 +97,36 @@ const useGameTimer = ({
           const finishKey = `${game.key}:${game.startTime ?? "no-start"}:owner`;
           if (handledFinishRef.current === finishKey) return;
           handledFinishRef.current = finishKey;
+          const gameMode = game.gameMode ?? DEFAULT_GAME_MODE;
 
           logEvent(getAnalytics(), "game_finish", {
             date: new Date(),
+            gameMode,
             users: game.listUsers,
             maxClicks: Math.max(
               ...game.listUsers.map((users) => users.clicks || 0)
             )
           });
+          metricCounter("game_finished", undefined, {
+            room_id: game.key ?? "",
+            game_mode: gameMode,
+            is_host: "1"
+          });
 
-          roomStats?.current.gamesPlayed.push({
+          const gamePlayed = {
             maxClicks: Math.max(...game.listUsers.map((lu) => lu.clicks || 0)),
             numberOfUsers: game.listUsers.length,
             timer: game.settings.timer,
-            gameMode: game.gameMode ?? "classic-speed"
-          });
+            gameMode
+          };
+
+          roomStats?.current.gamesPlayed.push(gamePlayed);
+          if (roomStats?.current && game.key) {
+            addRoomGamePlayed(
+              {...roomStats.current, id: game.key},
+              gamePlayed
+            ).catch(console.error);
+          }
 
           const refGame = ref(db, `games/${game.key}`);
           const endedGame: Partial<Game> = {status: "ended"};

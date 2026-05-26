@@ -1,3 +1,5 @@
+import {GameMode} from "@leandrolescano/click-battle-core";
+
 export interface RoomStats {
   id?: string;
   name: string;
@@ -7,12 +9,16 @@ export interface RoomStats {
   owner: string;
   gamesPlayed: GamePlayed[];
   withPassword: boolean;
-  gameMode?: string;
+  gameMode?: GameMode;
 }
 
-interface GamePlayed {
+export interface GamePlayed {
   numberOfUsers: number;
   maxClicks: number;
   timer: number;
-  gameMode?: string;
+  gameMode?: GameMode;
+  fastestReactionMs?: number | null;
+  falseStarts?: number;
+  reactionWindowMs?: number;
+  validReactions?: number;
 }

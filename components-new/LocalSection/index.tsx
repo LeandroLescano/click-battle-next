@@ -13,6 +13,7 @@ import {useGame} from "contexts/GameContext";
 import {useWindowSize} from "hooks";
 import useGameTimer from "hooks/gameTimer";
 import {Watch} from "icons/Watch";
+import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 import {
   breadcrumb,
   metricCounter,
@@ -44,10 +45,17 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
   // function for start game
   const handleStart = () => {
     const refGame = ref(db, `games/${idGame}`);
+    const gameMode = game.gameMode ?? DEFAULT_GAME_MODE;
     logEvent(getAnalytics(), "start_game", {
       action: "start_game",
+      gameMode,
       users: game.listUsers.length,
       date: new Date()
+    });
+    metricCounter("game_started", undefined, {
+      room_id: idGame,
+      game_mode: gameMode,
+      is_host: isHost ? "1" : "0"
     });
     const startedGame = {
       status: "countdown",

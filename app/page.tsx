@@ -241,6 +241,7 @@ const Home = () => {
         }
         logEvent(getAnalytics(), "enter_room", {
           action: "enter_room",
+          gameMode: game.gameMode ?? "classic-speed",
           withCustomName: !!game.roomName,
           withPassword: !!game.settings.password,
           maxUsers: game.settings.maxUsers,

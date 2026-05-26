@@ -33,6 +33,7 @@ import {Loading} from "components-new/Loading";
 import {useAuth} from "contexts/AuthContext";
 import {DesignPreference} from "interfaces/DesignPreferences";
 import {RoomStats} from "interfaces/RoomStats";
+import {DEFAULT_GAME_MODE, getGameModeLabelKey} from "lib/game/gameModes";
 import {getDesignPreferences} from "services/experience";
 import {getRoomStats} from "services/rooms";
 import {formatDate, minutesBetween} from "utils/date";
@@ -130,6 +131,11 @@ const commonDoughnutOpts = (title?: string): ChartOptions<"doughnut"> => ({
   }
 });
 
+const getModeLabel = (mode?: string) =>
+  getGameModeLabelKey(
+    mode === "reaction" || mode === "classic-speed" ? mode : DEFAULT_GAME_MODE
+  );
+
 const Admin = () => {
   const [rooms, setRooms] = useState<RoomStats[]>([]);
   const [currentRooms, setCurrentRooms] = useState(0);
@@ -138,26 +144,36 @@ const Admin = () => {
   >([]);
   const {user, loading} = useAuth();
   const router = useRouter();
-  const db = getDatabase();
   const params = useSearchParams();
   const pathname = usePathname();
+  const startDate = params.get("start");
+  const endDate = params.get("end");
+  const isAuthorized = Boolean(
+    user?.email && ALLOWED_EMAILS.includes(user.email)
+  );
 
   useEffect(() => {
-    if (!loading && user?.email) {
-      getRoomStats(params.get("start"), params.get("end")).then((rooms) =>
-        setRooms(rooms)
-      );
-      const refGames = ref(db, `games`);
-      const unsubscribe = onValue(refGames, (snapshot) => {
-        setCurrentRooms(snapshot.size);
-      });
-      getDesignPreferences().then((designPreferences) =>
-        setDesignPreferences(designPreferences ?? [])
-      );
-
-      return unsubscribe;
+    if (!loading && !isAuthorized) {
+      router.replace("/");
     }
-  }, [loading, params]);
+  }, [isAuthorized, loading, router]);
+
+  useEffect(() => {
+    if (loading || !isAuthorized) {
+      return;
+    }
+
+    getRoomStats(startDate, endDate).then((rooms) => setRooms(rooms));
+    const refGames = ref(getDatabase(), `games`);
+    const unsubscribe = onValue(refGames, (snapshot) => {
+      setCurrentRooms(snapshot.size);
+    });
+    getDesignPreferences().then((designPreferences) =>
+      setDesignPreferences(designPreferences ?? [])
+    );
+
+    return unsubscribe;
+  }, [endDate, isAuthorized, loading, startDate]);
 
   const todayRooms = rooms.filter((room) =>
     moment().isSame(room.created, "day")
@@ -266,7 +282,7 @@ const Admin = () => {
     const timers = [];
 
     for (const game of sortedRooms.flatMap((room) => room.gamesPlayed)) {
-      clicks.push(game.maxClicks / game.timer);
+      clicks.push(game.timer > 0 ? game.maxClicks / game.timer : 0);
       numberOfUsers.push(game.numberOfUsers);
       timers.push(game.timer);
     }
@@ -288,6 +304,34 @@ const Admin = () => {
     });
 
     return {labels, datasets};
+  }, [rooms]);
+
+  const gamesByModeData = useMemo(() => {
+    const counts = rooms
+      .flatMap((room) =>
+        room.gamesPlayed.map((game) => game.gameMode ?? room.gameMode)
+      )
+      .reduce<Record<string, number>>((acc, mode) => {
+        const normalizedMode = getModeLabel(mode);
+        acc[normalizedMode] = (acc[normalizedMode] ?? 0) + 1;
+        return acc;
+      }, {});
+
+    return {
+      labels: Object.keys(counts),
+      datasets: [
+        {
+          label: "Games",
+          data: Object.values(counts),
+          backgroundColor: [
+            "rgba(89, 67, 255, 0.35)",
+            "rgba(0, 255, 187, 0.35)"
+          ],
+          borderColor: ["rgb(89, 67, 255)", "rgb(0, 255, 187)"],
+          borderWidth: 1
+        }
+      ]
+    };
   }, [rooms]);
 
   const designPreferencesData = useMemo(() => {
@@ -313,9 +357,7 @@ const Admin = () => {
     return {labels, datasets};
   }, [designPreferences]);
 
-  if (loading) return <Loading />;
-
-  if (!user?.email || !ALLOWED_EMAILS.includes(user.email)) router.push("/");
+  if (loading || !isAuthorized) return <Loading />;
 
   const handleChangeDate = (value: string, field: "start" | "end") => {
     const search = new URLSearchParams(params);
@@ -360,7 +402,7 @@ const Admin = () => {
       <div className="mb-3 flex flex-row gap-4">
         <div className="w-full rounded-lg bg-primary-200 dark:bg-primary-600">
           <div className="dark:text-white p-4 rounded shadow-lg flex justify-between items-center">
-            <FontAwesomeIcon icon={faDoorOpen} size="3x" />
+            <FontAwesomeIcon className="shrink-0" icon={faDoorOpen} size="3x" />
             <div className="flex flex-col items-end">
               <p className="mb-0 text-3xl">Current rooms</p>
               <p className="mb-0 text-5xl">{currentRooms}</p>
@@ -369,7 +411,11 @@ const Admin = () => {
         </div>
         <div className="w-full rounded-lg bg-primary-200 dark:bg-primary-600">
           <div className="dark:text-white p-4 rounded shadow-lg flex justify-between items-center">
-            <FontAwesomeIcon icon={faDoorClosed} size="3x" />
+            <FontAwesomeIcon
+              className="shrink-0"
+              icon={faDoorClosed}
+              size="3x"
+            />
             <div className="flex flex-col items-end">
               <p className="mb-0 text-3xl">Rooms created today</p>
               <p className="mb-0 text-5xl">{todayRooms.length}</p>
@@ -378,7 +424,7 @@ const Admin = () => {
         </div>
         <div className="w-full rounded-lg bg-primary-200 dark:bg-primary-600">
           <div className="dark:text-white p-4 rounded shadow-lg flex justify-between items-center">
-            <FontAwesomeIcon icon={faGamepad} size="3x" />
+            <FontAwesomeIcon className="shrink-0" icon={faGamepad} size="3x" />
             <div className="flex flex-col items-end">
               <p className="mb-0 text-3xl">Games played today</p>
               <p className="mb-0 text-5xl">
@@ -423,6 +469,15 @@ const Admin = () => {
             />
           </div>
         </div>
+        <div className="w-full">
+          <div className="bg-primary-700 p-4 rounded shadow-lg">
+            <Doughnut
+              style={{maxHeight: "450px"}}
+              options={commonDoughnutOpts("Games by mode")}
+              data={gamesByModeData}
+            />
+          </div>
+        </div>
       </div>
 
       <table className="w-full text-2xl text-left rtl:text-right text-gray-800 dark:text-white">
@@ -434,6 +489,9 @@ const Admin = () => {
             </th>
             <th scope="col" className="border-l px-2">
               Games played
+            </th>
+            <th scope="col" className="border-l px-2">
+              Mode
             </th>
             <th scope="col" className="border-l px-2">
               Owner
@@ -461,6 +519,7 @@ const Admin = () => {
               <td>{room.name}</td>
               <td className="border-l px-2">{room.maxUsersConnected}</td>
               <td className="border-l px-2">{room.gamesPlayed.length}</td>
+              <td className="border-l px-2">{getModeLabel(room.gameMode)}</td>
               <td className="border-l px-2">{room.owner}</td>
               <td className="border-l px-2">
                 {formatDate(room.created, "es")}
