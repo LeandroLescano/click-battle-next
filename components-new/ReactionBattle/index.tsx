@@ -2,14 +2,22 @@
 
 import {GameUser} from "@leandrolescano/click-battle-core";
 import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
-import {useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent
+} from "react";
 import {useTranslation} from "react-i18next";
 
 import {Button} from "components-new/Button";
 import {RoomLeaderboard} from "components-new/RoomLeaderboard";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {ReactionResult, ReactionSession} from "interfaces";
+import {ReactionInputType, ReactionResult, ReactionSession} from "interfaces";
 import {
   DEFAULT_REACTION_SYNC_BUFFER_MS,
   MAX_REACTION_DELAY_MS,
@@ -38,6 +46,21 @@ type StagePlayer = {
   username: string;
   status: ReactionResult["status"];
   reactionMs?: number;
+  inputType?: ReactionInputType;
+};
+
+type ReactionActionState = {
+  className: string;
+  disabled?: boolean;
+  label: string;
+  loading?: boolean;
+  onClick?: () => void;
+  onPointerDown?: (event: ReactPointerEvent<HTMLButtonElement>) => void;
+  secondaryAction?: {
+    className: string;
+    label: string;
+    onClick: () => void;
+  };
 };
 
 const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
@@ -52,6 +75,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
   const signalShownAtPerformanceRef = useRef<number | null>(null);
   const promotedSignalAtRef = useRef<number | null>(null);
   const finalizedSignalAtRef = useRef<number | null>(null);
+  const submittingRef = useRef(false);
   const [localSignalVisible, setLocalSignalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const isRoundFinished = session?.status === "ended";
@@ -169,6 +193,13 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     signalShownAtRef.current = Date.now();
     signalShownAtPerformanceRef.current = performance.now();
   }, [localSignalVisible, localResult, session?.status, signalAt]);
+
+  useEffect(() => {
+    if (localResult || !session || session.status === "ended") {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
+  }, [localResult, session]);
 
   useEffect(() => {
     if (
@@ -325,59 +356,122 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     });
   };
 
-  const persistResult = async (result: ReactionResult) => {
-    if (!session || !localPlayerKey) return;
+  const persistResult = useCallback(
+    async (result: ReactionResult) => {
+      if (!session || !localPlayerKey) return;
 
-    await update(ref(db, `games/${idGame}`), {
-      [`reactionSession/results/${localPlayerKey}`]: result
-    });
-  };
+      await update(ref(db, `games/${idGame}`), {
+        [`reactionSession/results/${localPlayerKey}`]: result
+      });
+    },
+    [db, idGame, localPlayerKey, session]
+  );
 
-  const handleReactionClick = async () => {
-    if (!localPlayerKey || !gameUser?.username || localResult || submitting) {
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const clickedAt = Date.now();
-      const clickedAtPerformance = performance.now();
-
-      if (!localSignalVisible) {
-        await persistResult({
-          playerKey: localPlayerKey,
-          username: gameUser.username,
-          status: "false-start",
-          clickedAt
-        });
+  const handleReactionInput = useCallback(
+    async (inputType: ReactionInputType) => {
+      if (
+        !localPlayerKey ||
+        !gameUser?.username ||
+        localResult ||
+        submittingRef.current
+      ) {
         return;
       }
 
+      let resultPersisted = false;
+
+      submittingRef.current = true;
+      setSubmitting(true);
+      try {
+        const clickedAt = Date.now();
+        const clickedAtPerformance = performance.now();
+
+        if (!localSignalVisible) {
+          await persistResult({
+            playerKey: localPlayerKey,
+            username: gameUser.username,
+            status: "false-start",
+            clickedAt,
+            inputType
+          });
+          resultPersisted = true;
+          return;
+        }
+
+        if (
+          signalShownAtRef.current === null ||
+          signalShownAtPerformanceRef.current === null
+        ) {
+          signalShownAtRef.current = clickedAt;
+          signalShownAtPerformanceRef.current = clickedAtPerformance;
+        }
+
+        await persistResult({
+          playerKey: localPlayerKey,
+          username: gameUser.username,
+          status: "valid",
+          clickedAt,
+          signalShownAt: signalShownAtRef.current,
+          reactionMs: Math.round(
+            Math.max(
+              0,
+              clickedAtPerformance - signalShownAtPerformanceRef.current
+            )
+          ),
+          inputType
+        });
+        resultPersisted = true;
+      } finally {
+        if (!resultPersisted) {
+          submittingRef.current = false;
+          setSubmitting(false);
+        }
+      }
+    },
+    [
+      gameUser?.username,
+      localPlayerKey,
+      localResult,
+      localSignalVisible,
+      persistResult
+    ]
+  );
+
+  const handleReactionPointerDown = (
+    event: ReactPointerEvent<HTMLButtonElement>
+  ) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    void handleReactionInput(event.pointerType === "mouse" ? "click" : "tap");
+  };
+
+  useEffect(() => {
+    if (!session || localResult || isRoundFinished) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (
-        signalShownAtRef.current === null ||
-        signalShownAtPerformanceRef.current === null
+        event.repeat ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        !isReactionKey(event) ||
+        isEditableTarget(event.target)
       ) {
-        signalShownAtRef.current = clickedAt;
-        signalShownAtPerformanceRef.current = clickedAtPerformance;
+        return;
       }
 
-      await persistResult({
-        playerKey: localPlayerKey,
-        username: gameUser.username,
-        status: "valid",
-        clickedAt,
-        signalShownAt: signalShownAtRef.current,
-        reactionMs: Math.round(
-          Math.max(
-            0,
-            clickedAtPerformance - signalShownAtPerformanceRef.current
-          )
-        )
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
+      event.preventDefault();
+      void handleReactionInput("key");
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleReactionInput, isRoundFinished, localResult, session]);
 
   const resultSummary = (() => {
     if (session?.status === "ended") {
@@ -386,9 +480,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
       }
 
       if (localResult?.status === "valid") {
-        return t("Your reaction was n ms", {
-          ms: localResult.reactionMs ?? 0
-        });
+        return getReactionSummary(localResult, t);
       }
 
       if (!localResult) {
@@ -425,9 +517,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     }
 
     if (localResult?.status === "valid") {
-      return t("Your reaction was n ms", {
-        ms: localResult.reactionMs ?? 0
-      });
+      return getReactionSummary(localResult, t);
     }
 
     if (localResult?.status === "false-start") {
@@ -454,7 +544,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     "!bg-primary-100 !border-primary-300 !text-primary-500 dark:!bg-primary-700 dark:!border-primary-300 dark:!text-primary-100";
   const falseStartActionTone =
     "!bg-primary-100 !border-rose-300 !text-rose-700 dark:!bg-primary-700 dark:!border-rose-400 dark:!text-rose-100";
-  const actionState = (() => {
+  const actionState: ReactionActionState = (() => {
     if (isRoundFinished && isHost) {
       return {
         className:
@@ -516,7 +606,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
         submitting || !localPlayerKey || !session || session.status === "ended",
       label: localSignalVisible ? t("Click!") : t("Stay ready..."),
       loading: submitting,
-      onClick: handleReactionClick
+      onPointerDown: handleReactionPointerDown
     };
   })();
 
@@ -616,11 +706,11 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     }
 
     if (localResult?.status === "valid") {
-      return t("Your reaction was n ms", {ms: localResult.reactionMs ?? 0});
+      return getReactionSummary(localResult, t);
     }
 
-    if (localSignalVisible) return t("Fastest valid click wins");
-    return t("Click after the signal");
+    if (localSignalVisible) return t("React with click, tap, or Space");
+    return t("Click, tap, or press Space after the signal");
   })();
 
   const overlayTag = (() => {
@@ -641,7 +731,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     isRoundFinished &&
     localResult?.status === "valid" &&
     typeof localResult.reactionMs === "number"
-      ? t("Your reaction was n ms", {ms: localResult.reactionMs})
+      ? getReactionSummary(localResult, t)
       : null;
 
   const leaderboardRows = participantResults.map((player, index) => {
@@ -744,6 +834,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
                       disabled={actionState.disabled}
                       loading={actionState.loading}
                       onClick={actionState.onClick}
+                      onPointerDown={actionState.onPointerDown}
                     >
                       <span className="reaction-battle-action-label">
                         {actionState.label}
@@ -765,6 +856,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
                     disabled={actionState.disabled}
                     loading={actionState.loading}
                     onClick={actionState.onClick}
+                    onPointerDown={actionState.onPointerDown}
                   >
                     <span className="reaction-battle-action-label">
                       {actionState.label}
@@ -800,12 +892,16 @@ function getResultStatus(
   t: (key: string, options?: Record<string, unknown>) => string,
   isRoundFinished = false
 ) {
+  const inputLabel = getReactionInputLabel(player.inputType);
+
   if (player.status === "false-start") {
-    return t("False start");
+    return inputLabel
+      ? `${t("False start")} - ${inputLabel}`
+      : t("False start");
   }
 
   if (player.status === "valid") {
-    return t("Locked in");
+    return inputLabel ? `${t("Locked in")} - ${inputLabel}` : t("Locked in");
   }
 
   if (isRoundFinished) {
@@ -826,6 +922,40 @@ function getResultMsLabel(
   }
 
   return "--";
+}
+
+function getReactionInputLabel(inputType?: ReactionInputType) {
+  if (inputType === "key") return "key";
+  if (inputType === "tap") return "tap";
+  if (inputType === "click") return "click";
+}
+
+function getReactionSummary(
+  result: ReactionResult,
+  t: (key: string, options?: Record<string, unknown>) => string
+) {
+  if (!result.inputType) {
+    return t("Your reaction was n ms", {ms: result.reactionMs ?? 0});
+  }
+
+  return t("Your reaction was n ms via input", {
+    ms: result.reactionMs ?? 0,
+    input: getReactionInputLabel(result.inputType)
+  });
+}
+
+function isReactionKey(event: KeyboardEvent) {
+  return event.code === "Space" || event.key === " " || event.key === "Enter";
+}
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  return Boolean(
+    target.closest("input, textarea, select, [contenteditable='true']")
+  );
 }
 
 export default ReactionBattle;

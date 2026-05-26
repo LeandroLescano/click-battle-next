@@ -10,6 +10,8 @@ export type ReactionResultStatus =
   | "valid"
   | "unavailable";
 
+export type ReactionInputType = "click" | "tap" | "key";
+
 export interface ReactionResult {
   playerKey: string;
   username: string;
@@ -17,6 +19,7 @@ export interface ReactionResult {
   clickedAt?: number;
   signalShownAt?: number;
   reactionMs?: number;
+  inputType?: ReactionInputType;
 }
 
 export interface ReactionSession {

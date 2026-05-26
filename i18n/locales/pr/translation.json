@@ -171,8 +171,10 @@
   "Step n": "Passo {{step}}",
   "Do not click yet": "Nao clique ainda",
   "Click after the signal": "Clique depois do sinal",
+  "Click, tap, or press Space after the signal": "Clique, toque ou aperte Space depois do sinal",
   "Reaction time n ms": "{{ms}} ms",
   "Your reaction was n ms": "Voce reagiu em {{ms}} ms",
+  "Your reaction was n ms via input": "Voce reagiu em {{ms}} ms - {{input}}",
   "You won with n ms": "Voce venceu com {{ms}} ms",
   "You won by n ms": "Voce venceu por {{ms}} ms",
   "Only valid reaction": "Unica reacao valida",
@@ -190,5 +192,6 @@
   "You're locked in": "Resultado enviado",
   "Click now": "Clique agora",
   "Winner": "Vencedor",
-  "The fastest valid reaction wins": "Vence o clique mais rapido depois do sinal"
+  "The fastest valid reaction wins": "Vence o clique mais rapido depois do sinal",
+  "React with click, tap, or Space": "Reaja com clique, toque ou Space"
 }

@@ -271,6 +271,21 @@ test.describe("Game", () => {
       .poll(
         async () => {
           const room = await hostPage.getRoom(roomID);
+          const results = room?.reactionSession?.results ?? {};
+
+          return Object.values(results)
+            .map((result) => result.inputType)
+            .sort()
+            .join(",");
+        },
+        {timeout: 7000}
+      )
+      .toBe("click,click");
+
+    await expect
+      .poll(
+        async () => {
+          const room = await hostPage.getRoom(roomID);
 
           return room?.reactionSession?.status;
         },
@@ -282,6 +297,63 @@ test.describe("Game", () => {
       hostPage.page.getByText(/Your reaction was .* ms/i)
     ).toBeVisible();
     await expect(userPage.getByText(/Your reaction was .* ms/i)).toBeVisible();
+  });
+
+  test("Should record keyboard and tap reaction inputs", async ({
+    hostPage,
+    userPage: {page: userPage}
+  }) => {
+    const roomName = uniqueRoomName("reaction-input-types");
+    const roomID = await hostPage.createRoom({
+      gameMode: "reaction",
+      roomName
+    });
+
+    await userPage
+      .getByRole("button", {name: new RegExp(roomName, "i")})
+      .click();
+    await userPage.waitForURL(/\/game\//);
+    expect(userPage.url().split("/").pop()).toEqual(roomID);
+
+    await hostPage.page
+      .getByRole("button", {name: "Start reaction round"})
+      .click();
+
+    const hostClickButton = hostPage.page.getByRole("button", {
+      name: "Click!"
+    });
+    await expect(hostClickButton).toBeVisible({timeout: 7000});
+    await expect(userPage.getByRole("button", {name: "Click!"})).toBeVisible({
+      timeout: 7000
+    });
+
+    await userPage.keyboard.press("Space");
+    await hostClickButton.dispatchEvent("pointerdown", {
+      button: 0,
+      pointerType: "touch"
+    });
+
+    await expect
+      .poll(
+        async () => {
+          const room = await hostPage.getRoom(roomID);
+          const results = Object.values(room?.reactionSession?.results ?? {});
+
+          return results
+            .map((result) => `${result.username}:${result.inputType}`)
+            .sort()
+            .join(",");
+        },
+        {timeout: 7000}
+      )
+      .toBe("guesthost1:tap,guestuser1:key");
+
+    await expect(
+      userPage.getByText(/Your reaction was .* - key/i)
+    ).toBeVisible();
+    await expect(
+      hostPage.page.getByText(/Your reaction was .* - tap/i)
+    ).toBeVisible();
   });
 
   test("Should start next reaction round without stale results", async ({

@@ -17,6 +17,7 @@
   "Step n": "Step {{step}}",
   "Reaction time n ms": "{{ms}} ms",
   "Your reaction was n ms": "Your reaction was {{ms}} ms",
+  "Your reaction was n ms via input": "Your reaction was {{ms}} ms - {{input}}",
   "You won with n ms": "You won with {{ms}} ms",
   "You won by n ms": "You won by {{ms}} ms",
   "You were n ms slower": "{{ms}} ms behind the winner",
