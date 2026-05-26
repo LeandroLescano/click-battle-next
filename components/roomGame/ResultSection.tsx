@@ -1,12 +1,13 @@
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {faTrophy} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {GameUser} from "@leandrolescano/click-battle-core";
 import {get, getDatabase, ref, update} from "firebase/database";
 import React from "react";
 import {useTranslation} from "react-i18next";
 
 import {useGame} from "contexts/GameContext";
-import {Game, GameUser} from "interfaces";
+import {Game} from "interfaces";
 
 interface ResultSectionProps {
   localUser: GameUser;
@@ -16,7 +17,7 @@ interface ResultSectionProps {
 function ResultSection({localUser, currentGame}: ResultSectionProps) {
   const db = getDatabase();
   const {t} = useTranslation();
-  const {game, localPosition, isHost} = useGame();
+  const {game, finalResults, isHost} = useGame();
 
   // function for reset all data
   const handleReset = () => {
@@ -41,7 +42,7 @@ function ResultSection({localUser, currentGame}: ResultSectionProps) {
     >
       <div>
         <h1 id="result" className="no-select">
-          {t("Result position", {position: localPosition})}
+          {t("Result position", {position: finalResults?.localPosition})}
         </h1>
         {game.listUsers
           .sort((a, b) => ((a.clicks || 0) < (b.clicks || 0) ? 1 : -1))

@@ -1,3 +1,4 @@
+import {GameUser} from "@leandrolescano/click-battle-core";
 import {getDatabase, ref, update} from "firebase/database";
 import {useParams} from "next/navigation";
 import {memo} from "react";
@@ -6,7 +7,6 @@ import {useTranslation} from "react-i18next";
 import Swal from "sweetalert2";
 
 import {useGame} from "contexts/GameContext";
-import {GameUser} from "interfaces";
 
 interface Props {
   countPositions: {

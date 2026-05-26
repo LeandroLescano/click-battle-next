@@ -1,10 +1,13 @@
-import React, {useEffect, useState} from "react";
+import {GameUser} from "@leandrolescano/click-battle-core";
+import {getDatabase, ref, update} from "firebase/database";
+import {useParams} from "next/navigation";
+import React, {useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
-import {GameUser} from "interfaces";
+import {RoomLeaderboard} from "components-new/RoomLeaderboard";
 import {useGame} from "contexts/GameContext";
 
-import OpponentList from "./components/OpponentList";
 import "./styles.scss";
 
 interface OpponentSectionProps {
@@ -22,74 +25,99 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
   });
   const {t} = useTranslation();
   const {game, isHost} = useGame();
+  const db = getDatabase();
+  const {gameID} = useParams();
+
+  const sortedUsers = useMemo(
+    () => [...game.listUsers].sort((a, b) => (b.clicks || 0) - (a.clicks || 0)),
+    [game.listUsers]
+  );
+  const latestUsersByKey = useMemo(
+    () =>
+      new Map(
+        game.listUsers.map((user, index) => [getUserKey(user, index), user])
+      ),
+    [game.listUsers]
+  );
 
   useEffect(() => {
-    if (
-      !checkOrderArray(
-        countPositions.list,
-        game.listUsers.sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
-      )
-    ) {
+    if (!checkOrderArray(countPositions.list, sortedUsers)) {
       setCountPositions((prev) => ({
-        list: game.listUsers.sort((a, b) => (b.clicks || 0) - (a.clicks || 0)),
+        list: sortedUsers,
         count: prev.count + 1
       }));
     }
-  }, [game.listUsers]);
+  }, [countPositions.list, sortedUsers]);
 
-  const checkOrderArray = (arr1: GameUser[], arr2: GameUser[]) => {
-    if (arr1.length !== arr2.length) return false;
-    for (let x = 0; x < arr1.length; x++) {
-      if (arr1[x].key !== arr2[x].key) {
-        return false;
-      }
+  const kickUser = (userKey: string | null) => {
+    if (userKey) {
+      const userRef = ref(db, `games/${gameID}/listUsers/${userKey}`);
+      update(userRef, {kickOut: true}).then(() => {
+        Swal.fire({
+          title: "The user has been kicked.",
+          icon: "success",
+          toast: true,
+          showConfirmButton: false,
+          position: "bottom-end",
+          timer: 2500
+        });
+      });
     }
-    return true;
   };
 
-  const OpponentsText = () => (
-    <span>
-      {t("Opponents")} ({game.listUsers.length - 1}/{maxUsers - 1})
-    </span>
-  );
+  const orderedUsers = countPositions.list.length
+    ? countPositions.list
+    : sortedUsers;
+
+  const leaderboardRows = orderedUsers.map((orderedUser, index) => {
+    const rowKey = getUserKey(orderedUser, index);
+    const user = latestUsersByKey.get(rowKey) ?? orderedUser;
+
+    return {
+      key: rowKey,
+      primary: user.username,
+      value: String(user.clicks || 0),
+      highlighted: localUsername === user.username,
+      action:
+        isHost && localUsername !== user.username
+          ? {
+              label: t("Kick"),
+              onClick: () => {
+                kickUser(user.key || null);
+              }
+            }
+          : undefined
+    };
+  });
 
   return (
     <div className="w-full md:w-1/2 max-h-full text-sm md:text-3xl px-4 md:px-0 font-medium h-full flex flex-col min-h-0">
-      <h4 className="text-xl md:text-5xl text-center md:text-start font-bold mb-4 md:mb-12 text-primary-600 dark:text-primary-200">
-        {game.listUsers.length === 1 && isHost ? (
-          t("Waiting for opponents...")
-        ) : (
-          <OpponentsText />
-        )}
-      </h4>
-      <div className="flex flex-row mb-2 md:mb-5 text-primary-600 dark:text-primary-200">
-        <div className="w-5/6">
-          <p className="mb-2">{t("Name")}</p>
-        </div>
-        <div className="w-1/6 text-center">Clicks</div>
-      </div>
-      <div className="opponents-container flex flex-row min-w-0 overflow-y-auto max-h-full min-h-0 pl-1 pt-1">
-        <div className="w-5/6">
-          <OpponentList
-            countPositions={countPositions}
-            localUsername={localUsername}
-            isHost={isHost}
-          />
-        </div>
-        <div className="w-1/6 text-center ">
-          {game.listUsers
-            .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
-            .map((user, i) => {
-              return (
-                <div key={i} className="h-12 md:h-20 mb-3 content-center">
-                  {user.clicks}
-                </div>
-              );
-            })}
-        </div>
-      </div>
+      <RoomLeaderboard
+        title={
+          game.listUsers.length === 1 && isHost
+            ? t("Waiting for opponents...")
+            : t("Opponents") + ` (${game.listUsers.length - 1}/${maxUsers - 1})`
+        }
+        leftLabel={t("Name")}
+        rightLabel={t("Clicks")}
+        rows={leaderboardRows}
+        flipKey={countPositions.count}
+      />
     </div>
   );
 }
+
+const getUserKey = (user: GameUser, index: number) =>
+  user.key || user.username || `user-${index}`;
+
+const checkOrderArray = (arr1: GameUser[], arr2: GameUser[]) => {
+  if (arr1.length !== arr2.length) return false;
+  for (let index = 0; index < arr1.length; index++) {
+    if (getUserKey(arr1[index], index) !== getUserKey(arr2[index], index)) {
+      return false;
+    }
+  }
+  return true;
+};
 
 export default OpponentSection;

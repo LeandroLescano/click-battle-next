@@ -1,9 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires, no-undef
 const {withSentryConfig} = require("@sentry/nextjs");
 
 /* eslint-disable no-undef */
 /** @type {import('next').NextConfig} */
-module.exports = {
+const nextConfig = {
   reactStrictMode: false,
   images: {
     unoptimized: true
@@ -20,49 +20,45 @@ module.exports = {
     REACT_APP_EMAIL: process.env.REACT_APP_EMAIL,
     REACT_APP_PASSWORD: process.env.REACT_APP_PASSWORD,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+    SENTRY_ENABLED: process.env.SENTRY_ENABLED,
     PRIVATE_KEY: process.env.PRIVATE_KEY,
     CLIENT_EMAIL: process.env.CLIENT_EMAIL,
     NEXT_PUBLIC_ADSENSE_PUBLISHER_ID:
-      process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID
+      process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID,
+    SENTRY_DSN: process.env.SENTRY_DSN
+  },
+  webpack(config) {
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        module:
+          /(@prisma[\\/]instrumentation|@fastify[\\/]otel|@opentelemetry[\\/]instrumentation)/,
+        message:
+          /Critical dependency: the request of a dependency is an expression/
+      }
+    ];
+
+    return config;
   }
 };
 
-// Injected content via Sentry wizard below
+const sentryEnabled = process.env.SENTRY_ENABLED === "true";
 
-module.exports = withSentryConfig(
-  module.exports,
-  {
-    // For all available options, see:
-    // https://github.com/getsentry/sentry-webpack-plugin#options
-
-    // Suppresses source map uploading logs during build
-    silent: true,
-    org: "leandro-lescano",
-    project: "click-battle"
-  },
-  {
-    // For all available options, see:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
-    widenClientFileUpload: true,
-
-    // Transpiles SDK to be compatible with IE11 (increases bundle size)
-    transpileClientSDK: true,
-
-    // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers (increases server load)
-    tunnelRoute: "/monitoring",
-
-    // Hides source maps from generated client bundles
-    hideSourceMaps: true,
-
-    // Automatically tree-shake Sentry logger statements to reduce bundle size
-    disableLogger: true,
-
-    // Enables automatic instrumentation of Vercel Cron Monitors.
-    // See the following for more information:
-    // https://docs.sentry.io/product/crons/
-    // https://vercel.com/docs/cron-jobs
-    automaticVercelMonitors: true
-  }
-);
+module.exports = sentryEnabled
+  ? withSentryConfig(
+      nextConfig,
+      {
+        silent: true,
+        org: "leandro-lescano",
+        project: "click-battle"
+      },
+      {
+        widenClientFileUpload: true,
+        transpileClientSDK: true,
+        tunnelRoute: "/monitoring",
+        hideSourceMaps: true,
+        disableLogger: true,
+        automaticVercelMonitors: true
+      }
+    )
+  : nextConfig;

@@ -1,3 +1,4 @@
+import {Game, GameUser} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {getDatabase, ref, update} from "firebase/database";
 import {useRouter} from "next/navigation";
@@ -6,7 +7,6 @@ import {useTranslation} from "react-i18next";
 
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Game, GameUser} from "interfaces";
 
 interface LocalSectionProps {
   idGame: string;

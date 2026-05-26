@@ -1,3 +1,8 @@
+import {
+  GameMode,
+  GameUser,
+  normalizeRoomCreation
+} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {
   child,
@@ -19,7 +24,12 @@ import {Input} from "components-new/Input";
 import {Select} from "components-new/Select";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Game, GameSettings, GameUser, Room} from "interfaces";
+import {Game, Room} from "interfaces";
+import {
+  DEFAULT_GAME_MODE,
+  getGameModeLabelKey,
+  SUPPORTED_WEB_GAME_MODES
+} from "lib/game/gameModes";
 import logoAnim from "lotties/logo-animated.json";
 import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
 import {sha256} from "services/encode";
@@ -29,6 +39,7 @@ export const CreateSection = () => {
   const [creating, setCreating] = useState(false);
   const {user, gameUser} = useAuth();
   const [room, setRoom] = useState<Partial<Room>>({
+    gameMode: DEFAULT_GAME_MODE,
     maxUsers: DEFAULT_VALUES.MIN_USERS,
     timer: DEFAULT_VALUES.DEFAULT_TIMER
   });
@@ -45,13 +56,25 @@ export const CreateSection = () => {
     setRoom((prev) => ({...prev, ...data}));
   };
 
+  const getModeSettings = (gameMode: GameMode) => {
+    if (gameMode === "reaction") {
+      return {
+        gameMode,
+        config: {}
+      };
+    }
+
+    return {
+      gameMode: "classic-speed" as const,
+      config: {}
+    };
+  };
+
   //Function for create room
   const handleCreate = async () => {
     try {
       if (gameUser && room) {
         setCreating(true);
-        const newRoomName =
-          room.name || t("Name's room", {name: gameUser.username});
         const newGameRef = ref(db, "games/");
 
         const userToPush: GameUser = {
@@ -64,37 +87,42 @@ export const CreateSection = () => {
           userToPush.maxScores = gameUser.maxScores;
         }
 
-        if (room.timer) {
-          if (room.timer < DEFAULT_VALUES.MIN_TIMER)
-            room.timer = DEFAULT_VALUES.MIN_TIMER;
-          if (room.timer > DEFAULT_VALUES.MAX_TIMER)
-            room.timer = DEFAULT_VALUES.MAX_TIMER;
-        }
-
-        if (room.maxUsers) {
-          if (room.maxUsers > config.maxUsers) room.maxUsers = config.maxUsers;
-          if (room.maxUsers < DEFAULT_VALUES.MIN_USERS)
-            room.maxUsers = DEFAULT_VALUES.MIN_USERS;
-        }
-
-        const timer = room.timer || DEFAULT_VALUES.DEFAULT_TIMER;
-
-        const settings: GameSettings = {
-          timer,
-          maxUsers: room.maxUsers || DEFAULT_VALUES.MIN_USERS
-        };
-
-        if (room.password) {
-          settings.password = await sha256(room.password);
-        }
+        const hashedPassword = room.password
+          ? await sha256(room.password)
+          : null;
+        const normalizedRoom = normalizeRoomCreation(
+          {
+            roomName: room.name || t("Name's room", {name: gameUser.username}),
+            password: room.password,
+            timer: room.timer,
+            maxUsers: room.maxUsers,
+            gameMode: room.gameMode,
+            modeSettings: getModeSettings(room.gameMode || DEFAULT_GAME_MODE)
+          },
+          {username: gameUser.username, key: user?.uid},
+          {
+            defaultTimer: DEFAULT_VALUES.DEFAULT_TIMER,
+            minTimer: DEFAULT_VALUES.MIN_TIMER,
+            maxTimer: DEFAULT_VALUES.MAX_TIMER,
+            minUsers: DEFAULT_VALUES.MIN_USERS,
+            maxUsers: config.maxUsers
+          },
+          {
+            created: serverTimestamp(),
+            storedPassword: hashedPassword
+          }
+        ).room;
 
         const objRoom: Game = {
-          roomName: newRoomName,
-          status: "lobby",
+          roomName: normalizedRoom.roomName,
+          status: normalizedRoom.status,
           listUsers: [],
           ownerUser: {...gameUser, key: user?.uid},
-          created: serverTimestamp(),
-          settings
+          created: normalizedRoom.created,
+          settings: normalizedRoom.settings,
+          gameMode: normalizedRoom.gameMode,
+          modeSettings: normalizedRoom.modeSettings,
+          reactionSession: null
         };
 
         objRoom.key = push(newGameRef, objRoom).key;
@@ -110,7 +138,8 @@ export const CreateSection = () => {
             action: "create_room",
             withCustomName: !!room.name,
             withPassword: !!room.password,
-            maxUsers: room.maxUsers,
+            maxUsers: objRoom.settings.maxUsers,
+            gameMode: objRoom.gameMode,
             isRegistered: !user?.isAnonymous
           });
 
@@ -133,6 +162,8 @@ export const CreateSection = () => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -192,6 +223,23 @@ export const CreateSection = () => {
           />
         </div>
         <div className="flex justify-between items-center gap-x-9 w-full flex-1 flex-wrap">
+          <Select
+            label={t("Game mode")}
+            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+            className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
+            containerClassName="flex-1"
+            data-label="Game mode"
+            value={room?.gameMode}
+            onChange={(ref) =>
+              handleUpdateRoom({gameMode: ref.target.value as GameMode})
+            }
+          >
+            {SUPPORTED_WEB_GAME_MODES.map((mode) => (
+              <option key={mode} value={mode}>
+                {t(getGameModeLabelKey(mode))}
+              </option>
+            ))}
+          </Select>
           <Select
             label={t("Max number of users")}
             labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"

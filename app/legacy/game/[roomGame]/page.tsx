@@ -11,6 +11,7 @@ import {
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {GameUser} from "@leandrolescano/click-battle-core";
 import lottie from "lottie-web";
 import dynamic from "next/dynamic";
 import {useParams, useRouter, useSearchParams} from "next/navigation";
@@ -29,7 +30,7 @@ import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import useGameTimer from "hooks/gameTimer";
-import {Game, GameUser, RoomStats} from "interfaces";
+import {Game, RoomStats} from "interfaces";
 import celebrationAnim from "lotties/celebrationAnim.json";
 import {addRoomStats} from "services/rooms";
 import {handleInvite} from "utils/invite";
@@ -84,11 +85,7 @@ function RoomGame() {
     setLocalUser,
     setIsHost
   } = useGame();
-  const {setNewUser} = useNewPlayerAlert(
-    currentGame.listUsers,
-    localUser,
-    currentGame
-  );
+  const {setNewUser} = useNewPlayerAlert(currentGame.listUsers, localUser);
   const localUserRef = useRef<GameUser>();
   const isMobileDevice = useIsMobileDevice();
   const {t} = useTranslation();

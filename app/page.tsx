@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
-import {getDatabase, onValue, ref} from "@firebase/database";
+import {getDatabase, onValue, ref, remove} from "@firebase/database";
+import {assessRoomJoin, GameUser} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import dynamic from "next/dynamic";
 import {useRouter, useSearchParams} from "next/navigation";
@@ -17,7 +18,12 @@ import {NotificationType} from "components-new/NotificationModal/types";
 import {WelcomeMessage} from "components-new/WelcomeMessage";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Game, GameUser} from "interfaces";
+import {Game} from "interfaces";
+import {isHostDisconnectStale} from "lib/game/hostPresence";
+
+type ListedGameSnapshot = Partial<Game> & {
+  hostDisconnectedAt?: number;
+};
 
 const LoginModal = dynamic<LoginModalProps>(
   () =>
@@ -71,66 +77,138 @@ const Home = () => {
 
   useEffect(() => {
     let mounted = true;
+
     //Get rooms of games from DB
     if (gameUser?.username) {
       resetGame();
-      const refGames = ref(db, `games`);
-      onValue(refGames, (snapshot) => {
-        const list: {[key: string]: Game} | null = snapshot.val();
-        if (list) {
-          if (mounted) {
-            const games = Object.entries(list).map((game) => ({
-              key: game[0],
-              ...game[1]
-            }));
-
-            for (const g of games) {
-              if (g.listUsers) {
-                g.listUsers = Object.entries(g.listUsers).map((u) => ({
-                  key: u[0],
-                  ...u[1]
-                }));
-              }
-            }
-
-            setListGames(games);
-          }
-        } else {
-          setListGames([]);
-        }
-      });
     }
+
+    const refGames = ref(db, `games`);
+    const unsubscribe = onValue(refGames, (snapshot) => {
+      const list: Record<string, ListedGameSnapshot> | null = snapshot.val();
+
+      if (!list) {
+        setListGames([]);
+        return;
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      const now = Date.now();
+      const staleRoomKeys: string[] = [];
+      const games = Object.entries(list)
+        .map(([key, rawGame]) => {
+          if (isHostDisconnectStale(rawGame.hostDisconnectedAt, now)) {
+            staleRoomKeys.push(key);
+            return null;
+          }
+
+          if (!gameUser?.username) {
+            return null;
+          }
+
+          const parsed = assessRoomJoin(
+            {
+              key,
+              ...rawGame
+            },
+            {
+              snapshotKey: key
+            }
+          );
+
+          if (!parsed) {
+            return null;
+          }
+
+          return {
+            ...parsed.game,
+            key,
+            listUsers: parsed.listUsers
+          } as Game;
+        })
+        .filter(Boolean) as Game[];
+
+      setListGames(games);
+      staleRoomKeys.forEach((key) => {
+        remove(ref(db, `games/${key}`)).catch(console.error);
+      });
+    });
+
     return () => {
       mounted = false;
+      unsubscribe();
     };
   }, [gameUser?.username]);
 
   //Function for enter room
   const handleEnterGame = (game: Game) => {
     try {
-      if (game.key) {
-        if (Object.keys(game.listUsers).length === game.settings.maxUsers) {
-          Swal.fire({
-            icon: "warning",
-            title: t("Room is full"),
-            toast: true,
-            showConfirmButton: false,
-            position: "bottom-end",
-            timer: 3000
-          });
-        } else {
-          if (game.settings.password) {
-            requestPassword(game.settings.password, t).then((val) => {
-              if (game.key && val.isConfirmed) {
-                setHasEnteredPassword(true);
-                configRoomToEnter(game);
-              }
-            });
-          } else {
-            configRoomToEnter(game);
-          }
-        }
+      const parsedGame = assessRoomJoin(game, {
+        snapshotKey: game.key,
+        localUID: user?.uid,
+        hasPasswordAccess: false
+      });
+
+      if (!parsedGame) {
+        throw new Error("Invalid room snapshot");
       }
+
+      const appGame = {
+        ...parsedGame.game,
+        listUsers: parsedGame.listUsers
+      } as unknown as Game;
+
+      if (parsedGame.kickedOut) {
+        router.push("/?kickedOut=true");
+        return;
+      }
+
+      if (parsedGame.isRoomFull) {
+        Swal.fire({
+          icon: "warning",
+          title: t("Room is full"),
+          toast: true,
+          showConfirmButton: false,
+          position: "bottom-end",
+          timer: 3000
+        });
+        return;
+      }
+
+      if (parsedGame.requiresPassword && game.settings.password) {
+        requestPassword(game.settings.password, t).then((val) => {
+          if (!val.isConfirmed) {
+            return;
+          }
+
+          const unlockedGame = assessRoomJoin(game, {
+            snapshotKey: game.key,
+            localUID: user?.uid,
+            hasPasswordAccess: true
+          });
+
+          if (!unlockedGame) {
+            return;
+          }
+
+          if (unlockedGame.isRoomFull) {
+            router.push("/?fullRoom=true");
+            return;
+          }
+
+          setHasEnteredPassword(true);
+          configRoomToEnter({
+            ...unlockedGame.game,
+            listUsers: unlockedGame.listUsers
+          } as unknown as Game);
+        });
+        return;
+      }
+
+      configRoomToEnter(appGame);
     } catch (error) {
       console.error(error);
       Swal.fire({

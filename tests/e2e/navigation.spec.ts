@@ -1,11 +1,12 @@
 import {test, expect} from "./fixtures";
 
 test("Should navigate to ranking page", async ({userPage: {page}}) => {
-  await page.click("text=Ranking");
+  await page.getByRole("link", {name: "Ranking"}).click();
+  await page.waitForURL(/\/ranking/);
 
-  await expect(
-    page.getByRole("heading", {name: "Click masters"})
-  ).toBeVisible();
+  await expect(page.getByRole("heading", {name: "Click masters"})).toBeVisible({
+    timeout: 15000
+  });
 });
 
 test("Should go to 404 page on missing route and back to home", async ({

@@ -1,6 +1,6 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
+import {GameUser, MaxScore} from "@leandrolescano/click-battle-core";
 import {
   getAnalytics,
   logEvent,
@@ -35,7 +35,6 @@ import Swal from "sweetalert2";
 
 import {useTheme} from "contexts/ThemeContext";
 import {useUserInfo} from "hooks/userInfo";
-import {GameUser, MaxScore} from "interfaces";
 import {firebaseConfig} from "resources/config";
 import {addUser, getUser, getUserByEmail, updateUser} from "services/user";
 
@@ -159,12 +158,10 @@ function useAuthProvider(): AuthContextState {
           }
 
           setGameUser(objUser);
-          Sentry.setContext("user", objUser);
           if (key) {
             await getUser(key).then((dbUser) => {
               if (dbUser && dbUser !== objUser) {
                 setGameUser(dbUser);
-                Sentry.setContext("user", dbUser);
                 sessionStorage.setItem("objUser", JSON.stringify(dbUser));
 
                 if (dbUser.key) {
@@ -298,7 +295,7 @@ function useAuthProvider(): AuthContextState {
       });
       setGameUser((prev) => prev && {...prev, username});
       localStorage.setItem("user", username);
-    } catch (error) {
+    } catch {
       signOut();
     }
   };

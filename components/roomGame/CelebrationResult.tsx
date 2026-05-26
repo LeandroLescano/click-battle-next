@@ -1,7 +1,7 @@
+import {GameUser} from "@leandrolescano/click-battle-core";
 import React from "react";
 
 import {useGame} from "contexts/GameContext";
-import {GameUser} from "interfaces";
 
 interface Props {
   celebrationContainer: React.LegacyRef<HTMLDivElement> | undefined;

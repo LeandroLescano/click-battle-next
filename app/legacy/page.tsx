@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 import {child, getDatabase, onValue, ref, set} from "@firebase/database";
+import {assessRoomJoin, GameUser} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import dynamic from "next/dynamic";
 import {useRouter, useSearchParams} from "next/navigation";
@@ -21,7 +22,7 @@ import CreateSection from "components/CreateSection/CreateSection";
 import {ModalLoginProps} from "components/ModalLogin/types";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Game, GameUser} from "interfaces";
+import {Game} from "interfaces";
 
 const ModalLogin = dynamic<ModalLoginProps>(
   () =>
@@ -119,28 +120,68 @@ const Home = () => {
   //Function for enter room
   const handleEnterGame = (game: Game) => {
     try {
-      if (game.key) {
-        if (Object.keys(game.listUsers).length === game.settings.maxUsers) {
-          Swal.fire({
-            icon: "warning",
-            title: t("Room is full"),
-            toast: true,
-            showConfirmButton: false,
-            position: "bottom-end",
-            timer: 3000
-          });
-        } else {
-          if (game.settings.password) {
-            requestPassword(game.settings.password, t).then((val) => {
-              if (game.key && val.isConfirmed) {
-                configRoomToEnter(game);
-              }
-            });
-          } else {
-            configRoomToEnter(game);
-          }
-        }
+      const parsedGame = assessRoomJoin(game, {
+        snapshotKey: game.key,
+        localUID: user?.uid,
+        hasPasswordAccess: false
+      });
+
+      if (!parsedGame) {
+        throw new Error("Invalid room snapshot");
       }
+
+      const appGame = {
+        ...parsedGame.game,
+        listUsers: parsedGame.listUsers
+      } as unknown as Game;
+
+      if (parsedGame.kickedOut) {
+        router.push("/legacy?kickedOut=true");
+        return;
+      }
+
+      if (parsedGame.isRoomFull) {
+        Swal.fire({
+          icon: "warning",
+          title: t("Room is full"),
+          toast: true,
+          showConfirmButton: false,
+          position: "bottom-end",
+          timer: 3000
+        });
+        return;
+      }
+
+      if (parsedGame.requiresPassword && game.settings.password) {
+        requestPassword(game.settings.password, t).then((val) => {
+          if (!val.isConfirmed) {
+            return;
+          }
+
+          const unlockedGame = assessRoomJoin(game, {
+            snapshotKey: game.key,
+            localUID: user?.uid,
+            hasPasswordAccess: true
+          });
+
+          if (!unlockedGame) {
+            return;
+          }
+
+          if (unlockedGame.isRoomFull) {
+            router.push("/legacy?fullRoom=true");
+            return;
+          }
+
+          configRoomToEnter({
+            ...unlockedGame.game,
+            listUsers: unlockedGame.listUsers
+          } as unknown as Game);
+        });
+        return;
+      }
+
+      configRoomToEnter(appGame);
     } catch (error) {
       console.error(error);
       Swal.fire({

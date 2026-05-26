@@ -1,8 +1,8 @@
+import {GameUser} from "@leandrolescano/click-battle-core";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {useGame} from "contexts/GameContext";
-import {GameUser} from "interfaces";
 
 import OpponentList from "./OpponentList";
 interface OpponentSectionProps {

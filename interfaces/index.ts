@@ -1,4 +1,4 @@
 export * from "./Game";
-export * from "./GameUser";
+export * from "./ReactionBattle";
 export * from "./Room";
 export * from "./RoomStats";
