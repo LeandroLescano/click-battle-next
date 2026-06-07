@@ -166,7 +166,7 @@ export const RankingList = ({mode, users}: RankingListProps) => {
                   <span className="flex shrink-0 flex-col items-end text-right leading-none">
                     <span className="text-lowercase">{scoreLabel}</span>
                     {metaLabel && (
-                      <span className="mt-1 text-sm uppercase text-primary-400 md:text-xl">
+                      <span className="mt-1 text-sm uppercase md:text-xl">
                         {metaLabel}
                       </span>
                     )}
