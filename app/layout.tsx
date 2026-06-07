@@ -1,6 +1,5 @@
 import {getApp, getApps, initializeApp} from "firebase/app";
 import localFont from "next/font/local";
-import Script from "next/script";
 import React, {ReactNode, Suspense} from "react";
 
 import {Loading} from "components-new/Loading";
@@ -10,6 +9,7 @@ import {GameProvider} from "contexts/GameContext";
 import {ThemeProvider} from "contexts/ThemeContext";
 import {I18nProvider} from "i18n/i18n-context";
 import {detectLanguage} from "i18n/server";
+import {ADS_ENABLED, ADSENSE_PUBLISHER_ID} from "lib/ads/placements";
 import {firebaseConfig} from "resources/config";
 
 import "./tailwind.scss";
@@ -44,11 +44,13 @@ export default async function Layout({children}: Props) {
         className={`${tinyFont.variable} ${handjetFont.className}`}
       >
         <head>
-          <Script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}`}
-            crossOrigin="anonymous"
-          ></Script>
+          {ADS_ENABLED ? (
+            <script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_PUBLISHER_ID}`}
+              crossOrigin="anonymous"
+            />
+          ) : null}
           <title>Click Battle</title>
           <meta name="viewport" content="width=device-width, minimum-scale=1" />
           <meta

@@ -1,5 +1,5 @@
-import React, {useEffect, useRef, useState} from "react";
 import {changeLanguage} from "i18next";
+import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {languages} from "i18n/settings";
@@ -37,10 +37,7 @@ export const LanguageDropdown = () => {
   }, []);
 
   return (
-    <div
-      className="relative inline-block md:min-w-28 flex-1 self-stretch md:self-center"
-      ref={dropdownRef}
-    >
+    <div className="relative inline-block w-fit md:min-w-28" ref={dropdownRef}>
       <button
         type="button"
         className="language-menu inline-flex justify-between items-center w-full h-9 md:h-12 rounded-md shadow-sm uppercase text-xs md:text-2xl leading-none font-bold bg-white dark:bg-primary-400 dark:text-white"

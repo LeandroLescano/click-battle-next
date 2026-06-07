@@ -1,6 +1,8 @@
 "use client";
 
 import {GameUser} from "@leandrolescano/click-battle-core";
+import {AdblockDetector} from "adblock-detector";
+import {getAnalytics, logEvent} from "firebase/analytics";
 import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
 import {
   useCallback,
@@ -14,10 +16,24 @@ import {
 import {useTranslation} from "react-i18next";
 
 import {Button} from "components-new/Button";
+import {Card} from "components-new/Card";
+import GoogleAdUnit from "components-new/CardGameAd/GoogleAdUnit";
 import {RoomLeaderboard} from "components-new/RoomLeaderboard";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {ReactionInputType, ReactionResult, ReactionSession} from "interfaces";
+import {useWindowSize} from "hooks";
+import {
+  ReactionInputType,
+  ReactionResult,
+  ReactionSession,
+  RoomStats
+} from "interfaces";
+import {
+  AD_LABEL,
+  AD_PLACEMENTS,
+  ADS_ENABLED,
+  ADSENSE_PUBLISHER_ID
+} from "lib/ads/placements";
 import {
   DEFAULT_REACTION_SYNC_BUFFER_MS,
   MAX_REACTION_DELAY_MS,
@@ -32,6 +48,7 @@ import {
   estimateServerNow,
   useServerTimeOffset
 } from "lib/game/serverTimeOffset";
+import {metricCounter} from "observability/sentry";
 import {getSuffixPosition} from "utils/string";
 
 import "./styles.scss";
@@ -39,6 +56,7 @@ import "./styles.scss";
 type ReactionBattleProps = {
   idGame: string;
   localUser: GameUser;
+  roomStats?: {current: RoomStats};
 };
 
 type StagePlayer = {
@@ -63,18 +81,24 @@ type ReactionActionState = {
   };
 };
 
-const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
+const ReactionBattle = ({
+  idGame,
+  localUser,
+  roomStats
+}: ReactionBattleProps) => {
   const db = getDatabase();
   const serverTimeOffset = useServerTimeOffset();
   const {t} = useTranslation();
   const {user, gameUser} = useAuth();
   const {game: currentGame, isHost, setGame} = useGame();
+  const {height, width} = useWindowSize();
   const session = currentGame.reactionSession;
   const localPlayerKey = user?.uid || localUser?.key || "";
   const signalShownAtRef = useRef<number | null>(null);
   const signalShownAtPerformanceRef = useRef<number | null>(null);
   const promotedSignalAtRef = useRef<number | null>(null);
   const finalizedSignalAtRef = useRef<number | null>(null);
+  const recordedRoundStatsSignalAtRef = useRef<number | null>(null);
   const submittingRef = useRef(false);
   const [localSignalVisible, setLocalSignalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -85,6 +109,21 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
   const signalAt = session?.signalAt ?? null;
   const signalReached = Boolean(signalAt && estimatedNow >= signalAt);
   const isWaitingForOpponent = currentGame.listUsers.length < 2;
+  const userHasAdblock = useMemo(() => {
+    const adbDetector = new AdblockDetector();
+    return adbDetector.detect() ?? true;
+  }, []);
+  const reactionAdPlacement = AD_PLACEMENTS.reactionActionDesktop;
+  const showReactionAd =
+    ADS_ENABLED && !userHasAdblock && width >= 1024 && height >= 820;
+  const telemetryTags = useMemo(
+    () => ({
+      room_id: idGame,
+      game_mode: "reaction",
+      is_host: isHost ? "1" : "0"
+    }),
+    [idGame, isHost]
+  );
 
   const participantResults = useMemo(
     () =>
@@ -148,6 +187,107 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     typeof winnerReactionMs === "number"
       ? Math.max(0, localResult.reactionMs - winnerReactionMs)
       : null;
+
+  const recordRoundFinished = useCallback(() => {
+    if (!signalAt || recordedRoundStatsSignalAtRef.current === signalAt) {
+      return;
+    }
+
+    recordedRoundStatsSignalAtRef.current = signalAt;
+
+    const finalResults = buildReactionResultList(
+      currentGame.listUsers,
+      session?.results
+    );
+    const validResults = finalResults.filter(
+      (result) =>
+        result.status === "valid" && typeof result.reactionMs === "number"
+    );
+    const falseStarts = finalResults.filter(
+      (result) => result.status === "false-start"
+    );
+    const noReactions = finalResults.filter(
+      (result) => result.status === "waiting" || result.status === "unavailable"
+    );
+    const fastestReactionMs = winner?.reactionMs ?? null;
+
+    logEvent(getAnalytics(), "game_finish", {
+      date: new Date(),
+      falseStarts: falseStarts.length,
+      fastestReactionMs,
+      gameMode: "reaction",
+      reactionWindowMs,
+      users: currentGame.listUsers.length,
+      validReactions: validResults.length
+    });
+    metricCounter("game_finished", undefined, {
+      ...telemetryTags,
+      has_winner: Boolean(winner)
+    });
+
+    if (!isHost) {
+      return;
+    }
+
+    const startedAtMs =
+      signalAt - (session?.syncBufferMs ?? 0) - (session?.signalDelayMs ?? 0);
+    const startedAt =
+      startedAtMs > 0 && Number.isFinite(startedAtMs)
+        ? new Date(startedAtMs)
+        : undefined;
+    const gamePlayed = {
+      clickInputs: finalResults.filter((result) => result.inputType === "click")
+        .length,
+      durationSeconds: reactionWindowMs / 1000,
+      falseStarts: falseStarts.length,
+      finishedAt: new Date(),
+      fastestReactionMs,
+      gameMode: "reaction" as const,
+      keyInputs: finalResults.filter((result) => result.inputType === "key")
+        .length,
+      maxClicks: 0,
+      noReactions: noReactions.length,
+      numberOfUsers: currentGame.listUsers.length,
+      reactionWindowMs,
+      ...(startedAt ? {startedAt} : {}),
+      tapInputs: finalResults.filter((result) => result.inputType === "tap")
+        .length,
+      timer: reactionWindowMs / 1000,
+      validReactions: validResults.length,
+      winnerMetric: "reactionMs" as const,
+      winnerScore: fastestReactionMs,
+      ...(winner?.username ? {winnerUsername: winner.username} : {})
+    };
+
+    roomStats?.current.gamesPlayed.push(gamePlayed);
+  }, [
+    currentGame.listUsers,
+    isHost,
+    reactionWindowMs,
+    roomStats,
+    session?.results,
+    signalAt,
+    telemetryTags,
+    winner
+  ]);
+
+  const logReactionInput = useCallback(
+    (result: ReactionResult) => {
+      logEvent(getAnalytics(), "reaction_input", {
+        gameMode: "reaction",
+        inputType: result.inputType,
+        reactionMs: result.reactionMs ?? null,
+        resultStatus: result.status
+      });
+      metricCounter("reaction_input", undefined, {
+        ...telemetryTags,
+        input_type: result.inputType ?? "unknown",
+        result_status: result.status
+      });
+    },
+    [telemetryTags]
+  );
+
   useEffect(() => {
     if (
       !signalAt ||
@@ -235,6 +375,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     }
 
     finalizedSignalAtRef.current = signalAt;
+    recordRoundFinished();
     update(ref(db, `games/${idGame}`), {
       status: "ended",
       "reactionSession/status": "ended",
@@ -247,6 +388,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     idGame,
     isHost,
     reactionWindowMs,
+    recordRoundFinished,
     session,
     signalAt,
     winner?.playerKey
@@ -268,6 +410,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
         }
 
         finalizedSignalAtRef.current = signalAt;
+        recordRoundFinished();
         update(ref(db, `games/${idGame}`), {
           status: "ended",
           "reactionSession/status": "ended",
@@ -287,6 +430,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     idGame,
     isHost,
     reactionWindowMs,
+    recordRoundFinished,
     serverTimeOffset,
     session,
     signalAt,
@@ -319,6 +463,16 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
     signalShownAtRef.current = null;
     signalShownAtPerformanceRef.current = null;
     setLocalSignalVisible(false);
+    recordedRoundStatsSignalAtRef.current = null;
+
+    logEvent(getAnalytics(), "start_game", {
+      action: "start_game",
+      date: new Date(),
+      gameMode: "reaction",
+      reactionWindowMs,
+      users: currentGame.listUsers.length
+    });
+    metricCounter("game_started", undefined, telemetryTags);
 
     await updateReactionSession(
       {
@@ -385,15 +539,18 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
       try {
         const clickedAt = Date.now();
         const clickedAtPerformance = performance.now();
+        let result: ReactionResult;
 
         if (!localSignalVisible) {
-          await persistResult({
+          result = {
             playerKey: localPlayerKey,
             username: gameUser.username,
             status: "false-start",
             clickedAt,
             inputType
-          });
+          };
+          await persistResult(result);
+          logReactionInput(result);
           resultPersisted = true;
           return;
         }
@@ -406,7 +563,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
           signalShownAtPerformanceRef.current = clickedAtPerformance;
         }
 
-        await persistResult({
+        result = {
           playerKey: localPlayerKey,
           username: gameUser.username,
           status: "valid",
@@ -419,7 +576,9 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
             )
           ),
           inputType
-        });
+        };
+        await persistResult(result);
+        logReactionInput(result);
         resultPersisted = true;
       } finally {
         if (!resultPersisted) {
@@ -433,6 +592,7 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
       localPlayerKey,
       localResult,
       localSignalVisible,
+      logReactionInput,
       persistResult
     ]
   );
@@ -865,6 +1025,26 @@ const ReactionBattle = ({idGame, localUser}: ReactionBattleProps) => {
                 )}
               </div>
             </div>
+
+            {showReactionAd && (
+              <Card className="reaction-battle-ad relative mx-auto mt-auto hidden w-[384px] max-w-full overflow-hidden border-primary-300/70 bg-primary-100 p-0 pt-5 lg:flex">
+                <span className="absolute left-2 top-1 text-[10px] font-bold uppercase leading-none text-primary-600">
+                  {AD_LABEL}
+                </span>
+                <GoogleAdUnit placement={reactionAdPlacement}>
+                  <ins
+                    className="adsbygoogle"
+                    style={{
+                      display: "inline-block",
+                      width: reactionAdPlacement.width,
+                      height: reactionAdPlacement.height
+                    }}
+                    data-ad-client={ADSENSE_PUBLISHER_ID}
+                    data-ad-slot={reactionAdPlacement.slot}
+                  ></ins>
+                </GoogleAdUnit>
+              </Card>
+            )}
           </div>
         </div>
 

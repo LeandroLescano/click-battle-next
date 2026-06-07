@@ -11,11 +11,12 @@ export const reportParseTime = (durationMs: number, roomId: string) => {
 export const reportHostMetrics = (
   usersCount: number,
   roomId: string,
-  isHost: boolean
+  isHost: boolean,
+  gameMode: string
 ) => {
   if (!isHost) return;
 
-  const roomTags = {room_id: roomId, is_host: "1"};
+  const roomTags = {room_id: roomId, game_mode: gameMode, is_host: "1"};
 
   metricGaugeOnce("snapshot_users_count", usersCount, roomTags, 0.1);
   metricGaugeOnce("room_users_count", usersCount, roomTags, 0.1);
@@ -24,9 +25,14 @@ export const reportHostMetrics = (
 export const reportApplyStateTime = (
   durationMs: number,
   roomId: string,
-  isHost: boolean
+  isHost: boolean,
+  gameMode: string
 ) => {
-  const roomTags = {room_id: roomId, is_host: isHost ? "1" : "0"};
+  const roomTags = {
+    room_id: roomId,
+    game_mode: gameMode,
+    is_host: isHost ? "1" : "0"
+  };
 
   metricTiming("local_state_apply_ms", durationMs, roomTags, 0.1);
 };

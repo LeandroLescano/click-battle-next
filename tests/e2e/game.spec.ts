@@ -61,6 +61,17 @@ test.describe("Game", () => {
     await expect(classicRoomCard.getByText("Classic Speed")).toBeVisible();
 
     await hostPage.page.goto("/");
+    const gameModeSelect = hostPage.page.getByRole("combobox", {
+      name: "Game mode"
+    });
+    const timerSelect = hostPage.page.getByRole("combobox", {name: "Timer"});
+
+    await expect(timerSelect).toBeVisible();
+    await gameModeSelect.selectOption("reaction");
+    await expect(timerSelect).toBeHidden();
+    await gameModeSelect.selectOption("classic-speed");
+    await expect(timerSelect).toBeVisible();
+
     await hostPage.createRoom({
       gameMode: "reaction",
       roomName: reactionRoomName

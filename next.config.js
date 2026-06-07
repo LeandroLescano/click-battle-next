@@ -25,6 +25,7 @@ const nextConfig = {
     CLIENT_EMAIL: process.env.CLIENT_EMAIL,
     NEXT_PUBLIC_ADSENSE_PUBLISHER_ID:
       process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID,
+    NEXT_PUBLIC_ADS_ENABLED: process.env.NEXT_PUBLIC_ADS_ENABLED,
     SENTRY_DSN: process.env.SENTRY_DSN
   },
   webpack(config) {

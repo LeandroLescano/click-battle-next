@@ -28,6 +28,7 @@ import {Game, Room} from "interfaces";
 import {
   DEFAULT_GAME_MODE,
   getGameModeLabelKey,
+  isReactionMode,
   SUPPORTED_WEB_GAME_MODES
 } from "lib/game/gameModes";
 import logoAnim from "lotties/logo-animated.json";
@@ -51,6 +52,8 @@ export const CreateSection = () => {
   const router = useRouter();
   const {t} = useTranslation();
   const {setGame} = useGame();
+  const selectedGameMode = room.gameMode || DEFAULT_GAME_MODE;
+  const showTimerField = !isReactionMode(selectedGameMode);
 
   const handleUpdateRoom = (data: Partial<Room>) => {
     setRoom((prev) => ({...prev, ...data}));
@@ -229,7 +232,7 @@ export const CreateSection = () => {
             className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
             containerClassName="flex-1"
             data-label="Game mode"
-            value={room?.gameMode}
+            value={selectedGameMode}
             onChange={(ref) =>
               handleUpdateRoom({gameMode: ref.target.value as GameMode})
             }
@@ -261,23 +264,25 @@ export const CreateSection = () => {
               </option>
             ))}
           </Select>
-          <Select
-            label={t("Timer")}
-            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
-            className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
-            containerClassName="flex-1"
-            data-label="Timer"
-            value={room?.timer}
-            onChange={(ref) =>
-              handleUpdateRoom({timer: Number(ref.target.value)})
-            }
-          >
-            {AVAILABLE_TIMES.map((val, i) => (
-              <option key={i} value={val}>
-                {val}
-              </option>
-            ))}
-          </Select>
+          {showTimerField && (
+            <Select
+              label={t("Timer")}
+              labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+              className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
+              containerClassName="flex-1"
+              data-label="Timer"
+              value={room?.timer}
+              onChange={(ref) =>
+                handleUpdateRoom({timer: Number(ref.target.value)})
+              }
+            >
+              {AVAILABLE_TIMES.map((val, i) => (
+                <option key={i} value={val}>
+                  {val}
+                </option>
+              ))}
+            </Select>
+          )}
         </div>
       </div>
       <div className="pl-1 md:pl-0 mt-2">

@@ -22,6 +22,7 @@ import {useIsMobileDevice, useNewPlayerAlert} from "hooks";
 import {Game} from "interfaces";
 import {UseRoomGameReturn} from "interfaces/RoomGame";
 import {RoomStats} from "interfaces/RoomStats";
+import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 import {breadcrumb, metricCounter, withSpan} from "observability/sentry";
 import {addRoomStats} from "services/rooms";
 import {handleInvite as handleInviteUtil} from "utils/invite";
@@ -247,7 +248,8 @@ export const useRoomGame = (): UseRoomGameReturn => {
             reportApplyStateTime(
               performance.now() - startApply,
               gameID,
-              parsedIsHost
+              parsedIsHost,
+              game.gameMode ?? DEFAULT_GAME_MODE
             );
           }
         });
@@ -318,11 +320,19 @@ export const useRoomGame = (): UseRoomGameReturn => {
       return;
     }
 
-    if (
+    const shouldSaveRoomStats =
+      localIsHost &&
       roomStats.current &&
-      Date.now() - roomStats.current.created.getTime() > 30 * 1000
-    ) {
-      addRoomStats({...roomStats.current, removed: new Date()});
+      (Date.now() - roomStats.current.created.getTime() > 30 * 1000 ||
+        roomStats.current.gamesPlayed.length > 0);
+
+    if (shouldSaveRoomStats) {
+      addRoomStats({
+        ...roomStats.current,
+        closedReason: "host-left",
+        id: gameKey,
+        removed: new Date()
+      });
     }
 
     const roomRef = ref(db, roomPath);

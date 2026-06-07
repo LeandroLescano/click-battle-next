@@ -3,35 +3,53 @@ import React from "react";
 
 import {Card} from "components-new/Card";
 import {useWindowSize} from "hooks";
+import {
+  AD_LABEL,
+  AD_PLACEMENTS,
+  ADS_ENABLED,
+  ADSENSE_PUBLISHER_ID
+} from "lib/ads/placements";
 
 import GoogleAdUnit from "./GoogleAdUnit";
 
 export const CardGameAd = () => {
   const {width} = useWindowSize();
   const adbDetector = new AdblockDetector();
+  const placement =
+    width > 768
+      ? AD_PLACEMENTS.homeRoomsDesktop
+      : AD_PLACEMENTS.homeRoomsMobile;
 
   const userHasAdblock = adbDetector.detect() ?? true;
 
-  if (userHasAdblock) return <></>;
+  if (!ADS_ENABLED || userHasAdblock) return <></>;
 
   return (
-    <Card className="w-full md:w-64 p-0">
-      <GoogleAdUnit>
-        {width > 768 ? (
+    <Card className="relative flex min-h-[96px] w-full items-center justify-center overflow-hidden border-primary-300/70 bg-primary-100 p-0 pt-4 md:min-h-[124px] md:w-64">
+      <span className="absolute left-2 top-1 text-[9px] font-bold uppercase leading-none text-primary-600 md:text-[10px]">
+        {AD_LABEL}
+      </span>
+      <GoogleAdUnit placement={placement}>
+        {placement.format === "fluid" ? (
           <ins
             className="adsbygoogle"
-            style={{display: "block", height: "120px"}}
+            style={{display: "block", width: "100%", height: placement.height}}
             data-ad-format="fluid"
-            data-ad-layout-key="-gv-9+1i-2s+2u"
-            data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
-            data-ad-slot="9606023479"
+            data-ad-layout-key={placement.layoutKey}
+            data-ad-client={ADSENSE_PUBLISHER_ID}
+            data-ad-slot={placement.slot}
           ></ins>
         ) : (
           <ins
             className="adsbygoogle"
-            data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}
-            style={{display: "inline-block", width: "149px", height: "63px"}}
-            data-ad-slot="4369393021"
+            data-ad-client={ADSENSE_PUBLISHER_ID}
+            style={{
+              display: "block",
+              width: placement.width,
+              height: placement.height,
+              margin: "0 auto"
+            }}
+            data-ad-slot={placement.slot}
           ></ins>
         )}
       </GoogleAdUnit>

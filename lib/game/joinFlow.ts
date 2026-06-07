@@ -1,6 +1,7 @@
 import {ParsedGameSnapshot} from "@leandrolescano/click-battle-core";
 
 import {JoinAction} from "interfaces/RoomGame";
+import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 import {breadcrumb, metricCounter} from "observability/sentry";
 
 export const determineJoinAction = (
@@ -12,7 +13,11 @@ export const determineJoinAction = (
 ): JoinAction => {
   const {game, listUsers, isHost, isRoomFull, requiresPassword} = parsed;
 
-  const roomTags = {room_id: gameID, is_host: isHost ? "1" : "0"};
+  const roomTags = {
+    room_id: gameID,
+    game_mode: game.gameMode ?? DEFAULT_GAME_MODE,
+    is_host: isHost ? "1" : "0"
+  };
 
   if (isHost) {
     return {redirect: null, showPasswordPrompt: false, addUser: false};

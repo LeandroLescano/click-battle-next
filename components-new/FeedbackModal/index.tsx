@@ -1,12 +1,12 @@
-import React, {useState} from "react";
-import Swal from "sweetalert2";
 import {Dialog, DialogBackdrop, DialogPanel} from "@headlessui/react";
+import React, {useState} from "react";
 import {Trans, useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
 
 import {Button} from "components-new/Button";
 import {RatingStars} from "components-new/RatingStars";
-import {updateUser} from "services/user";
 import {useAuth} from "contexts/AuthContext";
+import {updateUser} from "services/user";
 
 import {FeedbackModalProps} from "./types";
 
@@ -71,7 +71,10 @@ export const FeedbackModal = ({
               Feedback
             </h2>
             <h3 className="md:text-3xl text-center font-semibold text-primary-700 dark:text-primary-200">
-              {<Trans i18nKey="rateUs" components={{1: <br />}} />}
+              <Trans
+                i18nKey="rateUs"
+                components={{1: <br key="rate-us-break" />}}
+              />
             </h3>
             <RatingStars
               onSelect={setRating}

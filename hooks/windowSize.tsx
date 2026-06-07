@@ -6,19 +6,31 @@ type WindowSize = {
 };
 
 export const useWindowSize = (): WindowSize => {
+  const getWindowSize = (): WindowSize => {
+    if (typeof window === "undefined") {
+      return {
+        width: 0,
+        height: 0
+      };
+    }
+
+    return {
+      width: window.innerWidth,
+      height: window.innerHeight
+    };
+  };
+
   const [windowSize, setWindowSize] = useState<WindowSize>({
-    width: window.innerWidth,
-    height: window.innerHeight
+    width: getWindowSize().width,
+    height: getWindowSize().height
   });
 
   const handleResize = () => {
-    setWindowSize({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
+    setWindowSize(getWindowSize());
   };
 
   useEffect(() => {
+    handleResize();
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);

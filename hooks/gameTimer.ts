@@ -8,9 +8,22 @@ import {useEffect, useRef, useState} from "react";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {RoomStats} from "interfaces";
+import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
+import {metricCounter} from "observability/sentry";
 import {updateUser} from "services/user";
 
 const COUNTDOWN = 3;
+
+const toGameDate = (value: unknown) => {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value;
+  }
+
+  if (typeof value === "number" || typeof value === "string") {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? undefined : date;
+  }
+};
 
 const useGameTimer = ({
   disabled = false,
@@ -94,21 +107,41 @@ const useGameTimer = ({
           const finishKey = `${game.key}:${game.startTime ?? "no-start"}:owner`;
           if (handledFinishRef.current === finishKey) return;
           handledFinishRef.current = finishKey;
+          const gameMode = game.gameMode ?? DEFAULT_GAME_MODE;
 
           logEvent(getAnalytics(), "game_finish", {
             date: new Date(),
+            gameMode,
             users: game.listUsers,
             maxClicks: Math.max(
               ...game.listUsers.map((users) => users.clicks || 0)
             )
           });
+          metricCounter("game_finished", undefined, {
+            room_id: game.key ?? "",
+            game_mode: gameMode,
+            is_host: "1"
+          });
 
-          roomStats?.current.gamesPlayed.push({
-            maxClicks: Math.max(...game.listUsers.map((lu) => lu.clicks || 0)),
+          const winner = [...game.listUsers].sort(
+            (left, right) => (right.clicks || 0) - (left.clicks || 0)
+          )[0];
+          const maxClicks = winner?.clicks ?? 0;
+          const startedAt = toGameDate(game.startTime);
+          const gamePlayed = {
+            durationSeconds: game.settings.timer,
+            finishedAt: new Date(),
+            maxClicks,
             numberOfUsers: game.listUsers.length,
             timer: game.settings.timer,
-            gameMode: game.gameMode ?? "classic-speed"
-          });
+            gameMode,
+            ...(startedAt ? {startedAt} : {}),
+            winnerMetric: "clicks" as const,
+            winnerScore: maxClicks,
+            ...(winner?.username ? {winnerUsername: winner.username} : {})
+          };
+
+          roomStats?.current.gamesPlayed.push(gamePlayed);
 
           const refGame = ref(db, `games/${game.key}`);
           const endedGame: Partial<Game> = {status: "ended"};

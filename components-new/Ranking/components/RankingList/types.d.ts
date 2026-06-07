@@ -1,10 +1,6 @@
-import {GameUser} from "interfaces";
-
-type WithRequired<T, K extends keyof T> = T & {[P in K]-?: T[P]};
+import {RankingEntry, RankingMode} from "components-new/Ranking/types";
 
 export interface RankingListProps {
-  users: (WithRequired<GameUser, "maxScores"> & {
-    cps: number;
-    time: number;
-  })[];
+  mode: RankingMode;
+  users: RankingEntry[];
 }
