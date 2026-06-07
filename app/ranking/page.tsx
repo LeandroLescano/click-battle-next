@@ -111,7 +111,12 @@ const getRanking = unstable_cache(
 const RankingWrapper = async () => {
   const {lastUpdate, rankings} = await getRanking();
 
-  return <Ranking rankings={rankings} lastUpdate={lastUpdate} />;
+  return (
+    <Ranking
+      rankings={JSON.parse(JSON.stringify(rankings))}
+      lastUpdate={lastUpdate}
+    />
+  );
 };
 
 export default RankingWrapper;
