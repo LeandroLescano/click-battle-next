@@ -52,7 +52,10 @@ export default async function Layout({children}: Props) {
             />
           ) : null}
           <title>Click Battle</title>
-          <meta name="viewport" content="width=device-width, minimum-scale=1" />
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover"
+          />
           <meta
             name="description"
             content="Click Battle is an online multiplayer click battle game where you can challenge your friends to a 10 second click battle. The player with the most clicks at the end of the battle wins. Click Battle is a fun and addictive game that is perfect for a quick break or a long gaming session."
