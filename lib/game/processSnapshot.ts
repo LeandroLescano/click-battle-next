@@ -2,7 +2,6 @@ import {
   ParsedGameSnapshot,
   parseGameSnapshot
 } from "@leandrolescano/click-battle-core";
-import {DataSnapshot} from "firebase/database";
 
 import {breadcrumb, breadcrumbOnce, withSpanMin} from "observability/sentry";
 
@@ -14,7 +13,7 @@ interface ProcessSnapshotResult {
 }
 
 export const processSnapshot = (
-  raw: DataSnapshot,
+  raw: unknown,
   key: string | null,
   uid: string | undefined,
   gameID: string

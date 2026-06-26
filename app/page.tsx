@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
-import {getDatabase, onValue, ref, remove} from "@firebase/database";
+import {getDatabase, onValue, ref} from "@firebase/database";
 import {assessRoomJoin, GameUser} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import dynamic from "next/dynamic";
@@ -18,8 +18,15 @@ import {NotificationType} from "components-new/NotificationModal/types";
 import {WelcomeMessage} from "components-new/WelcomeMessage";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
-import {Game} from "interfaces";
-import {isHostDisconnectStale} from "lib/game/hostPresence";
+import {Game, HostDisconnectSignal} from "interfaces";
+import {
+  deleteRoomIfStillStale,
+  partitionRoomSnapshots
+} from "lib/game/roomCleanup";
+import {
+  estimateServerNow,
+  useServerTimeOffset
+} from "lib/game/serverTimeOffset";
 
 type ListedGameSnapshot = Partial<Game> & {
   hostDisconnectedAt?: number;
@@ -50,6 +57,7 @@ const Home = () => {
   const db = getDatabase();
   const {gameUser, user, loading} = useAuth();
   const {resetGame, setGame, setHasEnteredPassword} = useGame();
+  const serverTimeOffset = useServerTimeOffset();
   const {t} = useTranslation();
 
   useEffect(() => {
@@ -77,6 +85,12 @@ const Home = () => {
 
   useEffect(() => {
     let mounted = true;
+    let latestList: Record<string, ListedGameSnapshot> | null = null;
+    let latestSignals: Record<
+      string,
+      Record<string, HostDisconnectSignal>
+    > | null = null;
+    let evaluationTimeout: number | null = null;
 
     //Get rooms of games from DB
     if (gameUser?.username) {
@@ -84,8 +98,25 @@ const Home = () => {
     }
 
     const refGames = ref(db, `games`);
-    const unsubscribe = onValue(refGames, (snapshot) => {
-      const list: Record<string, ListedGameSnapshot> | null = snapshot.val();
+    const getServerNow = () => estimateServerNow(serverTimeOffset);
+
+    const clearEvaluationTimeout = () => {
+      if (evaluationTimeout !== null) {
+        window.clearTimeout(evaluationTimeout);
+        evaluationTimeout = null;
+      }
+    };
+
+    const evaluateList = (
+      list: Record<string, ListedGameSnapshot> | null,
+      disconnectSignals: Record<
+        string,
+        Record<string, HostDisconnectSignal>
+      > | null = latestSignals
+    ) => {
+      latestList = list;
+      latestSignals = disconnectSignals;
+      clearEvaluationTimeout();
 
       if (!list) {
         setListGames([]);
@@ -96,15 +127,11 @@ const Home = () => {
         return;
       }
 
-      const now = Date.now();
-      const staleRoomKeys: string[] = [];
-      const games = Object.entries(list)
+      const now = getServerNow();
+      const {nextEvaluationAt, staleRoomKeys, visibleEntries} =
+        partitionRoomSnapshots(list, disconnectSignals, now);
+      const games = visibleEntries
         .map(([key, rawGame]) => {
-          if (isHostDisconnectStale(rawGame.hostDisconnectedAt, now)) {
-            staleRoomKeys.push(key);
-            return null;
-          }
-
           if (!gameUser?.username) {
             return null;
           }
@@ -133,15 +160,52 @@ const Home = () => {
 
       setListGames(games);
       staleRoomKeys.forEach((key) => {
-        remove(ref(db, `games/${key}`)).catch(console.error);
+        const rawRoom = list[key];
+        const currentSessionId =
+          rawRoom?.hostLease &&
+          typeof rawRoom.hostLease === "object" &&
+          typeof rawRoom.hostLease.sessionId === "string"
+            ? rawRoom.hostLease.sessionId
+            : null;
+        const observedDisconnectedAt =
+          currentSessionId &&
+          disconnectSignals?.[key]?.[currentSessionId]?.disconnectedAt
+            ? disconnectSignals[key][currentSessionId].disconnectedAt
+            : null;
+
+        deleteRoomIfStillStale(db, key, getServerNow, {
+          expectedSessionId: currentSessionId,
+          observedDisconnectedAt
+        }).catch(console.error);
       });
+
+      if (nextEvaluationAt !== null) {
+        evaluationTimeout = window.setTimeout(
+          () => {
+            evaluateList(latestList, latestSignals);
+          },
+          Math.max(0, nextEvaluationAt - getServerNow())
+        );
+      }
+    };
+
+    const unsubscribeRooms = onValue(refGames, (snapshot) => {
+      evaluateList(snapshot.val(), latestSignals);
     });
+    const unsubscribeSignals = onValue(
+      ref(db, "roomHostDisconnects"),
+      (snapshot) => {
+        evaluateList(latestList, snapshot.val());
+      }
+    );
 
     return () => {
       mounted = false;
-      unsubscribe();
+      clearEvaluationTimeout();
+      unsubscribeRooms();
+      unsubscribeSignals();
     };
-  }, [gameUser?.username]);
+  }, [db, gameUser?.username, serverTimeOffset]);
 
   //Function for enter room
   const handleEnterGame = (game: Game) => {
