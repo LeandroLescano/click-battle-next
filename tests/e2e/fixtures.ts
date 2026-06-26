@@ -6,10 +6,23 @@ import {
   get,
   getDatabase,
   ref,
-  set
+  remove,
+  runTransaction,
+  set,
+  update
 } from "firebase/database";
+import {
+  getApps as getAdminApps,
+  initializeApp as initializeAdminApp
+} from "firebase-admin/app";
+import {getFirestore as getAdminFirestore} from "firebase-admin/firestore";
 
-import type {Game} from "interfaces";
+import type {
+  Game,
+  HostDisconnectSignal,
+  HostLease,
+  RoomLifecycleSnapshot
+} from "interfaces";
 import {firebaseConfig} from "resources/config";
 
 import {authenticate} from "./auth.utils";
@@ -18,11 +31,16 @@ const TEST_DATABASE_URL =
   process.env.databaseURL ||
   process.env.DATABASE_URL ||
   "https://click-battle-mp-default-rtdb.firebaseio.com";
+const TEST_PROJECT_ID = process.env.projectId || "click-battle-emulator";
 
 const getTestDatabase = () => {
   const app =
     getApps().length === 0
-      ? initializeApp({...firebaseConfig, databaseURL: TEST_DATABASE_URL})
+      ? initializeApp({
+          ...firebaseConfig,
+          databaseURL: TEST_DATABASE_URL,
+          projectId: firebaseConfig.projectId || TEST_PROJECT_ID
+        })
       : getApp();
   const db = getDatabase(app, TEST_DATABASE_URL);
 
@@ -33,6 +51,15 @@ const getTestDatabase = () => {
   }
 
   return db;
+};
+
+const getTestAdminFirestore = () => {
+  process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
+  const app =
+    getAdminApps().find(({name}) => name === "click-battle-e2e") ??
+    initializeAdminApp({projectId: TEST_PROJECT_ID}, "click-battle-e2e");
+
+  return getAdminFirestore(app);
 };
 
 class GenericPage {
@@ -104,6 +131,135 @@ class GenericPage {
 
     return snapshot.val() as Game | null;
   }
+
+  async setRawRoom(roomID: string, room: Partial<Game>) {
+    await set(ref(getTestDatabase(), `games/${roomID}`), room);
+  }
+
+  async patchRoomLifecycle(roomID: string, lifecycle: RoomLifecycleSnapshot) {
+    await update(ref(getTestDatabase(), `games/${roomID}`), lifecycle);
+  }
+
+  async getHostLease(roomID: string): Promise<HostLease | null> {
+    const snapshot = await get(
+      ref(getTestDatabase(), `games/${roomID}/hostLease`)
+    );
+
+    return snapshot.val() as HostLease | null;
+  }
+
+  async setHostLease(roomID: string, hostLease: HostLease | null) {
+    await set(ref(getTestDatabase(), `games/${roomID}/hostLease`), hostLease);
+  }
+
+  async expireHostLease(roomID: string, ageMs = 91_000) {
+    const hostLease = await this.getHostLease(roomID);
+
+    if (!hostLease) {
+      throw new Error(`Room ${roomID} does not have a host lease`);
+    }
+
+    await this.setHostLease(roomID, {
+      ...hostLease,
+      lastRenewedAt: Date.now() - ageMs
+    });
+  }
+
+  async renewHostLease(roomID: string, renewedAt = Date.now()) {
+    const hostLease = await this.getHostLease(roomID);
+
+    if (!hostLease) {
+      throw new Error(`Room ${roomID} does not have a host lease`);
+    }
+
+    await this.setHostLease(roomID, {
+      ...hostLease,
+      lastRenewedAt: renewedAt
+    });
+  }
+
+  async replaceHostLeaseSession(roomID: string, sessionID: string) {
+    const hostLease = await this.getHostLease(roomID);
+
+    if (!hostLease) {
+      throw new Error(`Room ${roomID} does not have a host lease`);
+    }
+
+    await this.setHostLease(roomID, {
+      ...hostLease,
+      sessionId: sessionID,
+      claimedAt: Date.now(),
+      lastRenewedAt: Date.now()
+    });
+  }
+
+  async attemptLeaseRenewal(
+    roomID: string,
+    ownerID: string,
+    sessionID: string
+  ): Promise<boolean> {
+    const result = await runTransaction(
+      ref(getTestDatabase(), `games/${roomID}/hostLease`),
+      (current: HostLease | null) => {
+        if (!current) {
+          return;
+        }
+
+        if (current.ownerId !== ownerID || current.sessionId !== sessionID) {
+          return;
+        }
+
+        return {
+          ...current,
+          lastRenewedAt: Date.now()
+        };
+      },
+      {applyLocally: false}
+    );
+
+    return result.committed;
+  }
+
+  async getDisconnectSignal(
+    roomID: string,
+    sessionID: string
+  ): Promise<HostDisconnectSignal | null> {
+    const snapshot = await get(
+      ref(getTestDatabase(), `roomHostDisconnects/${roomID}/${sessionID}`)
+    );
+
+    return snapshot.val() as HostDisconnectSignal | null;
+  }
+
+  async setDisconnectSignal(
+    roomID: string,
+    sessionID: string,
+    disconnectedAt: number
+  ) {
+    await set(
+      ref(getTestDatabase(), `roomHostDisconnects/${roomID}/${sessionID}`),
+      {
+        disconnectedAt
+      }
+    );
+  }
+
+  async removeDisconnectSignals(roomID: string) {
+    await remove(ref(getTestDatabase(), `roomHostDisconnects/${roomID}`));
+  }
+
+  async removeRoom(roomID: string) {
+    await remove(ref(getTestDatabase(), `games/${roomID}`));
+  }
+
+  async hasRoomHistory(roomID: string) {
+    const snapshot = await getTestAdminFirestore()
+      .collection("rooms")
+      .doc(roomID)
+      .get();
+
+    return snapshot.exists;
+  }
 }
 
 class HostPage extends GenericPage {}
@@ -118,18 +274,14 @@ type MyFixtures = {
 export * from "@playwright/test";
 export const test = base.extend<MyFixtures>({
   hostPage: async ({browser}, use) => {
-    const context = await browser.newContext({
-      storageState: "tests/.auth/host.json"
-    });
+    const context = await browser.newContext();
     const hostPage = new HostPage(await context.newPage());
     await authenticate(hostPage.page, "host");
     await use(hostPage);
     await context.close();
   },
   userPage: async ({browser}, use) => {
-    const context = await browser.newContext({
-      storageState: "tests/.auth/user.json"
-    });
+    const context = await browser.newContext();
     const userPage = new UserPage(await context.newPage());
     await authenticate(userPage.page, "user");
     await use(userPage);

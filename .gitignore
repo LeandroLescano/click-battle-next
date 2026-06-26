@@ -14,10 +14,17 @@
 
 # production
 /build
+dist/
 .env
+.env*
 
 # misc
 .DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
 *.pem
 
 # debug

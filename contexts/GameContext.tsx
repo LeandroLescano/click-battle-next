@@ -1,7 +1,14 @@
 "use client";
 
 import {GameUser} from "@leandrolescano/click-battle-core";
-import React, {useState, useContext, createContext, useEffect} from "react";
+import React, {
+  useState,
+  useContext,
+  createContext,
+  useEffect,
+  useCallback,
+  useMemo
+} from "react";
 import {useTranslation} from "react-i18next";
 
 import {FinalResults, Game} from "interfaces";
@@ -95,9 +102,9 @@ function useGameProvider(): GameContextState {
     sessionStorage.setItem("game", JSON.stringify(game));
   }, [game]);
 
-  const calculatePosition = () => {
+  const calculatePosition = useCallback(() => {
     const position =
-      game.listUsers
+      [...game.listUsers]
         .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
         .findIndex((user) => user.key === localUser.key) + 1;
 
@@ -106,35 +113,48 @@ function useGameProvider(): GameContextState {
       localPositionSuffix: getSuffixPosition(position, t),
       results: game.listUsers
     });
-  };
+  }, [game.listUsers, localUser.key, t]);
 
-  const setPartialGame = (partialGame: Partial<Game>) => {
+  const setPartialGame = useCallback((partialGame: Partial<Game>) => {
     setGame((prev) => ({...prev, ...partialGame}));
-  };
+  }, []);
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setGame(initialGame);
-  };
+  }, []);
 
-  const resetContext = () => {
+  const resetContext = useCallback(() => {
     setGame(initialGame);
     setFinalResults(undefined);
     setLocalUser({username: "", clicks: 0});
     setIsHost(false);
-  };
+  }, []);
 
-  return {
-    game,
-    localUser,
-    isHost,
-    hasEnteredPassword,
-    finalResults,
-    setHasEnteredPassword,
-    setGame: setPartialGame,
-    setLocalUser,
-    resetGame,
-    setIsHost,
-    calculatePosition,
-    resetContext
-  };
+  return useMemo(
+    () => ({
+      game,
+      localUser,
+      isHost,
+      hasEnteredPassword,
+      finalResults,
+      setHasEnteredPassword,
+      setGame: setPartialGame,
+      setLocalUser,
+      resetGame,
+      setIsHost,
+      calculatePosition,
+      resetContext
+    }),
+    [
+      game,
+      localUser,
+      isHost,
+      hasEnteredPassword,
+      finalResults,
+      setPartialGame,
+      resetGame,
+      calculatePosition,
+      resetContext
+    ]
+  );
 }

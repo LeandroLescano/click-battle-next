@@ -5,7 +5,6 @@ import {
 } from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {
-  child,
   get,
   getDatabase,
   push,
@@ -31,10 +30,14 @@ import {
   isReactionMode,
   SUPPORTED_WEB_GAME_MODES
 } from "lib/game/gameModes";
+import {buildInitialHostLease, createHostSessionId} from "lib/game/hostLease";
 import logoAnim from "lotties/logo-animated.json";
 import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
+
+const getStoredHostSessionKey = (roomId: string) =>
+  `host-room-session:${roomId}`;
 
 export const CreateSection = () => {
   const [creating, setCreating] = useState(false);
@@ -79,6 +82,8 @@ export const CreateSection = () => {
       if (gameUser && room) {
         setCreating(true);
         const newGameRef = ref(db, "games/");
+        const newRoomRef = push(newGameRef);
+        const roomId = newRoomRef.key;
 
         const userToPush: GameUser = {
           username: gameUser.username,
@@ -128,15 +133,20 @@ export const CreateSection = () => {
           reactionSession: null
         };
 
-        objRoom.key = push(newGameRef, objRoom).key;
-        const childNewGame = child(
-          newGameRef,
-          `${objRoom.key}/listUsers/${user?.uid}`
-        );
+        if (roomId && user?.uid) {
+          const sessionId = createHostSessionId(user.uid);
+          objRoom.key = roomId;
 
-        await set(childNewGame, userToPush);
+          await set(ref(db, `games/${roomId}`), {
+            ...objRoom,
+            listUsers: {
+              [user.uid]: userToPush
+            },
+            hostLease: buildInitialHostLease(user.uid, sessionId)
+          });
 
-        if (objRoom.key) {
+          sessionStorage.setItem(getStoredHostSessionKey(roomId), sessionId);
+
           logEvent(getAnalytics(), "create_room", {
             action: "create_room",
             withCustomName: !!room.name,
@@ -148,12 +158,12 @@ export const CreateSection = () => {
 
           setGame({
             ...objRoom,
-            key: objRoom.key
+            key: roomId
           });
 
           sessionStorage.setItem("gameUserKey", "0");
 
-          router.push("/game/" + objRoom.key);
+          router.push("/game/" + roomId);
         } else {
           Swal.fire({
             icon: "error",
