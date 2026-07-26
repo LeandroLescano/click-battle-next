@@ -18,7 +18,7 @@ test("Should go to 404 page on missing route and back to home", async ({
 
   await page.getByRole("button", {name: "Back to home"}).click();
 
-  await page.waitForURL("http://localhost:3000/");
+  await page.waitForURL((url) => url.pathname === "/");
 
-  expect(page.url()).toContain("http://localhost:3000/");
+  expect(new URL(page.url()).pathname).toBe("/");
 });

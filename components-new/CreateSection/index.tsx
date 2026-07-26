@@ -12,7 +12,6 @@ import {
   serverTimestamp,
   set
 } from "firebase/database";
-import lottie from "lottie-web";
 import {useRouter} from "next/navigation";
 import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -181,24 +180,45 @@ export const CreateSection = () => {
   };
 
   useEffect(() => {
+    let disposed = false;
+    let animation: {destroy: () => void} | undefined;
+
     if (gameUser?.username) {
       get(ref(db, "config")).then((snapshot) => {
         const defaultConfig = snapshot.val();
-        if (defaultConfig) {
+        if (defaultConfig && !disposed) {
           setConfig(defaultConfig);
           sessionStorage.setItem("config", JSON.stringify(defaultConfig));
         }
       });
-      if (logoContainer?.current?.innerHTML === "") {
-        lottie.loadAnimation({
-          container: logoContainer.current!,
+
+      void import("lottie-web").then(({default: lottie}) => {
+        if (
+          disposed ||
+          !logoContainer.current ||
+          logoContainer.current.innerHTML !== ""
+        ) {
+          return;
+        }
+
+        animation = lottie.loadAnimation({
+          container: logoContainer.current,
           animationData: logoAnim,
           renderer: "svg",
           loop: true,
           autoplay: true
         });
-      }
+
+        if (disposed) {
+          animation.destroy();
+        }
+      });
     }
+
+    return () => {
+      disposed = true;
+      animation?.destroy();
+    };
   }, [gameUser?.username]);
 
   return (

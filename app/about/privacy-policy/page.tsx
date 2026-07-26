@@ -1,6 +1,12 @@
+import type {Metadata} from "next";
 import React from "react";
 
 import "../styles.scss";
+import {createRouteMetadata} from "lib/seo/metadata";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return createRouteMetadata("privacyPolicy");
+}
 
 const PrivacyPolicy = () => {
   return (

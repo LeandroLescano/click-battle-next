@@ -1,4 +1,5 @@
 import {getApp, getApps, initializeApp} from "firebase/app";
+import type {Metadata} from "next";
 import localFont from "next/font/local";
 import React, {ReactNode, Suspense} from "react";
 
@@ -10,6 +11,7 @@ import {ThemeProvider} from "contexts/ThemeContext";
 import {I18nProvider} from "i18n/i18n-context";
 import {detectLanguage} from "i18n/server";
 import {ADS_ENABLED, ADSENSE_PUBLISHER_ID} from "lib/ads/placements";
+import {createRootMetadata} from "lib/seo/metadata";
 import {firebaseConfig} from "resources/config";
 
 import "./tailwind.scss";
@@ -17,12 +19,16 @@ import "./tailwind.scss";
 if (!getApps().length) {
   initializeApp(firebaseConfig);
 } else {
-  getApp(); // if already initialized, use that one
+  getApp();
 }
 
 type Props = {
   children: ReactNode;
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return createRootMetadata();
+}
 
 const tinyFont = localFont({
   src: "../public/fonts/Tiny5-Regular.ttf",
@@ -51,43 +57,10 @@ export default async function Layout({children}: Props) {
               crossOrigin="anonymous"
             />
           ) : null}
-          <title>Click Battle</title>
           <meta
             name="viewport"
             content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover"
           />
-          <meta
-            name="description"
-            content="Click Battle is an online multiplayer click battle game where you can challenge your friends to a 10 second click battle. The player with the most clicks at the end of the battle wins. Click Battle is a fun and addictive game that is perfect for a quick break or a long gaming session."
-          />
-          <meta
-            name="keywords"
-            content="click, clicks, battle, game, multiplayer, online, friends, competition, challenge, high score, leaderboard, social, fun, addictive, casual, free"
-          />
-          <meta property="og:type" content="article" />
-          <meta property="og:title" content="Click Battle" />
-          <meta
-            property="og:image"
-            content="https://www.click-battle.com.ar/logo/logo.svg"
-          />
-          <meta
-            property="og:description"
-            content="Online multiplayer click battle game"
-          />
-          <meta property="og:url" content="https://www.click-battle.com.ar/" />
-          <meta property="og:site_name" content="Click Battle" />
-          <meta name="twitter:title" content="Click Battle" />
-          <meta
-            name="twitter:description"
-            content="Online multiplayer click battle game"
-          />
-          <meta
-            name="twitter:image"
-            content="https://www.click-battle.com.ar/logo/logo.svg"
-          />
-          <meta name="twitter:creator" content="@LeanLescano_" />
-          <meta name="author" content="Lescano Leandro Nicolas" />
-          {/* Script to fix 'globalThis is not defined' errors */}
           <script
             dangerouslySetInnerHTML={{
               __html: `!function(t){function e(){var e=this||self;e.globalThis=e,delete t.prototype._T_}"object"!=typeof globalThis&&(this?e():(t.defineProperty(t.prototype,"_T_",{configurable:!0,get:e}),_T_))}(Object);`

@@ -49,7 +49,7 @@ export const CardGame = ({
               </span>
             </div>
 
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary-300/60 bg-primary-50/50 px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-500 md:gap-2 md:bg-transparent md:px-0 md:py-0 md:text-base">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary-300 bg-primary-50/50 px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-500 md:gap-2 md:bg-transparent md:text-base">
               <span className="md:hidden">
                 <User width={16} height={16} />
               </span>
@@ -61,7 +61,7 @@ export const CardGame = ({
           </div>
 
           <div className="min-w-0">
-            <span className="inline-flex max-w-full rounded-full border border-primary-300/80 bg-primary-50/35 px-2 py-0.5 text-[9px] font-bold uppercase leading-none tracking-[0.08em] text-primary-400 md:py-1 md:text-xs md:tracking-[0.12em]">
+            <span className="inline-flex max-w-full rounded-full border border-primary-300 bg-primary-50/35 px-2 py-0.5 text-[9px] font-bold uppercase leading-none tracking-[0.08em] text-primary-400 md:py-1 md:text-xs md:tracking-[0.12em]">
               <span className="truncate">
                 {getGameModeLabel(t, game.gameMode)}
               </span>
