@@ -341,30 +341,32 @@ const Home = () => {
             <CreateSection />
           </div>
           <div className="contents md:relative md:flex md:min-h-0 md:min-w-[560px] md:max-w-[73%] md:flex-col md:items-start md:justify-start md:pl-1 lg:w-2/3 order-md-0">
-            <div className="order-0">
+            <div className="order-0 md:mb-10">
               <WelcomeMessage />
             </div>
-            <h3 className="order-2 mt-2 pl-1 text-base font-bold text-primary-600 dark:text-primary-100 md:order-none md:mb-8 md:mt-0 md:pl-0 md:text-4xl">
-              {t("Available rooms")}
-            </h3>
-            <div className="games-container order-3 grid w-full grid-cols-[repeat(auto-fill,minmax(180px,180px))] justify-start gap-3 overflow-y-auto overflow-x-hidden p-1.5 md:order-none md:w-fit md:grid-cols-2 md:gap-6 md:p-2">
-              {listGames.length > 0
-                ? listGames.map((game, i) => (
-                    <Fragment key={i}>
-                      <CardGame
-                        game={game}
-                        roomNumber={i}
-                        handleEnterGame={() => handleEnterGame(game)}
-                      />
-                      {(listGames.length === 1 ||
-                        (i !== 0 &&
-                          (i % 4 === 0 || i === listGames.length - 1))) && (
-                        <CardGameAd />
-                      )}
-                    </Fragment>
-                  ))
-                : gameUser?.username && <CardGameAd />}
-            </div>
+            <section className="order-2 mt-3 flex min-h-0 w-full flex-col gap-2 md:order-none md:mt-0 md:gap-3">
+              <h2 className="pl-1 text-base font-bold text-primary-600 dark:text-primary-100 md:pl-0 md:text-4xl">
+                {t("Available rooms")}
+              </h2>
+              <div className="games-container grid w-full grid-cols-[repeat(auto-fill,minmax(180px,180px))] justify-start gap-3 overflow-y-auto overflow-x-hidden p-1.5 md:w-fit md:grid-cols-2 md:gap-6 md:p-2">
+                {listGames.length > 0
+                  ? listGames.map((game, i) => (
+                      <Fragment key={i}>
+                        <CardGame
+                          game={game}
+                          roomNumber={i}
+                          handleEnterGame={() => handleEnterGame(game)}
+                        />
+                        {(listGames.length === 1 ||
+                          (i !== 0 &&
+                            (i % 4 === 0 || i === listGames.length - 1))) && (
+                          <CardGameAd />
+                        )}
+                      </Fragment>
+                    ))
+                  : gameUser?.username && <CardGameAd />}
+              </div>
+            </section>
           </div>
         </div>
         <Footer />
