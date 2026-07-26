@@ -4,6 +4,7 @@ import {
   GameMode
 } from "@leandrolescano/click-battle-core";
 import {getFirestore} from "firebase-admin/firestore";
+import type {Metadata} from "next";
 import {unstable_cache} from "next/cache";
 import React from "react";
 
@@ -14,8 +15,13 @@ import {
   ReactionRankingEntry
 } from "components-new/Ranking/types";
 import {customInitApp} from "lib/firebase-admin-config";
+import {createRouteMetadata} from "lib/seo/metadata";
 
 customInitApp();
+
+export async function generateMetadata(): Promise<Metadata> {
+  return createRouteMetadata("ranking");
+}
 
 const isSupportedRankingMode = (
   value?: GameMode | null

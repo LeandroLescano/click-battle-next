@@ -517,10 +517,12 @@ test.describe("Game", () => {
     await hostPage.page.waitForTimeout(3000);
 
     const clickButton = userPage.getByRole("button", {name: "Click"});
-    for (let i = 0; i < 20; i++) {
-      clickButton.click().catch(() => {});
-      await userPage.waitForTimeout(5);
-    }
+    await expect(clickButton).toBeVisible();
+    await clickButton.evaluate((button) => {
+      for (let i = 0; i < 20; i++) {
+        (button as HTMLButtonElement).click();
+      }
+    });
 
     await userPage.waitForURL(
       (url) => url.searchParams.has("suspicionOfHack"),

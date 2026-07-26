@@ -1,0 +1,384 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+"use client";
+import {getDatabase, onValue, ref} from "@firebase/database";
+import {assessRoomJoin, GameUser} from "@leandrolescano/click-battle-core";
+import {getAnalytics, logEvent} from "firebase/analytics";
+import dynamic from "next/dynamic";
+import {useRouter, useSearchParams} from "next/navigation";
+import {Fragment, useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
+import Swal from "sweetalert2";
+
+import {requestPassword} from "components";
+import {Header, Footer, CardGame, CardGameAd, Loading} from "components-new";
+import {CreateSection} from "components-new/CreateSection";
+import {LoginModalProps} from "components-new/LoginModal/types";
+import {NotificationModal} from "components-new/NotificationModal";
+import {NotificationType} from "components-new/NotificationModal/types";
+import {WelcomeMessage} from "components-new/WelcomeMessage";
+import {useAuth} from "contexts/AuthContext";
+import {useGame} from "contexts/GameContext";
+import {Game, HostDisconnectSignal} from "interfaces";
+import {
+  deleteRoomIfStillStale,
+  partitionRoomSnapshots
+} from "lib/game/roomCleanup";
+import {
+  estimateServerNow,
+  useServerTimeOffset
+} from "lib/game/serverTimeOffset";
+
+type ListedGameSnapshot = Partial<Game> & {
+  hostDisconnectedAt?: number;
+};
+
+const LoginModal = dynamic<LoginModalProps>(
+  () =>
+    import("../components-new/LoginModal").then(
+      (component) => component.LoginModal
+    ),
+  {
+    ssr: false
+  }
+);
+
+const Home = () => {
+  const [listGames, setListGames] = useState<Game[]>([]);
+  const [notificationModal, setNotificationModal] = useState<{
+    show: boolean;
+    type: NotificationType;
+  }>({
+    show: false,
+    type: "fullRoom"
+  });
+
+  const router = useRouter();
+  const params = useSearchParams();
+  const db = getDatabase();
+  const {gameUser, user, loading} = useAuth();
+  const {resetGame, setGame, setHasEnteredPassword} = useGame();
+  const serverTimeOffset = useServerTimeOffset();
+  const {t} = useTranslation();
+
+  useEffect(() => {
+    //If exist userKey get user from DB
+    if (params.get("kickedOut") === "true") {
+      router.replace("/");
+      setNotificationModal({
+        show: true,
+        type: "kickedOut"
+      });
+    } else if (params.get("fullRoom") === "true") {
+      router.replace("/");
+      setNotificationModal({
+        show: true,
+        type: "fullRoom"
+      });
+    } else if (params.get("suspicionOfHack") === "true") {
+      router.replace("/");
+      setNotificationModal({
+        show: true,
+        type: "hacks"
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    let latestList: Record<string, ListedGameSnapshot> | null = null;
+    let latestSignals: Record<
+      string,
+      Record<string, HostDisconnectSignal>
+    > | null = null;
+    let evaluationTimeout: number | null = null;
+
+    //Get rooms of games from DB
+    if (gameUser?.username) {
+      resetGame();
+    }
+
+    const refGames = ref(db, `games`);
+    const getServerNow = () => estimateServerNow(serverTimeOffset);
+
+    const clearEvaluationTimeout = () => {
+      if (evaluationTimeout !== null) {
+        window.clearTimeout(evaluationTimeout);
+        evaluationTimeout = null;
+      }
+    };
+
+    const evaluateList = (
+      list: Record<string, ListedGameSnapshot> | null,
+      disconnectSignals: Record<
+        string,
+        Record<string, HostDisconnectSignal>
+      > | null = latestSignals
+    ) => {
+      latestList = list;
+      latestSignals = disconnectSignals;
+      clearEvaluationTimeout();
+
+      if (!list) {
+        setListGames([]);
+        return;
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      const now = getServerNow();
+      const {nextEvaluationAt, staleRoomKeys, visibleEntries} =
+        partitionRoomSnapshots(list, disconnectSignals, now);
+      const games = visibleEntries
+        .map(([key, rawGame]) => {
+          if (!gameUser?.username) {
+            return null;
+          }
+
+          const parsed = assessRoomJoin(
+            {
+              key,
+              ...rawGame
+            },
+            {
+              snapshotKey: key
+            }
+          );
+
+          if (!parsed) {
+            return null;
+          }
+
+          return {
+            ...parsed.game,
+            key,
+            listUsers: parsed.listUsers
+          } as Game;
+        })
+        .filter(Boolean) as Game[];
+
+      setListGames(games);
+      staleRoomKeys.forEach((key) => {
+        const rawRoom = list[key];
+        const currentSessionId =
+          rawRoom?.hostLease &&
+          typeof rawRoom.hostLease === "object" &&
+          typeof rawRoom.hostLease.sessionId === "string"
+            ? rawRoom.hostLease.sessionId
+            : null;
+        const observedDisconnectedAt =
+          currentSessionId &&
+          disconnectSignals?.[key]?.[currentSessionId]?.disconnectedAt
+            ? disconnectSignals[key][currentSessionId].disconnectedAt
+            : null;
+
+        deleteRoomIfStillStale(db, key, getServerNow, {
+          expectedSessionId: currentSessionId,
+          observedDisconnectedAt
+        }).catch(console.error);
+      });
+
+      if (nextEvaluationAt !== null) {
+        evaluationTimeout = window.setTimeout(
+          () => {
+            evaluateList(latestList, latestSignals);
+          },
+          Math.max(0, nextEvaluationAt - getServerNow())
+        );
+      }
+    };
+
+    const unsubscribeRooms = onValue(refGames, (snapshot) => {
+      evaluateList(snapshot.val(), latestSignals);
+    });
+    const unsubscribeSignals = onValue(
+      ref(db, "roomHostDisconnects"),
+      (snapshot) => {
+        evaluateList(latestList, snapshot.val());
+      }
+    );
+
+    return () => {
+      mounted = false;
+      clearEvaluationTimeout();
+      unsubscribeRooms();
+      unsubscribeSignals();
+    };
+  }, [db, gameUser?.username, serverTimeOffset]);
+
+  //Function for enter room
+  const handleEnterGame = (game: Game) => {
+    try {
+      const parsedGame = assessRoomJoin(game, {
+        snapshotKey: game.key,
+        localUID: user?.uid,
+        hasPasswordAccess: false
+      });
+
+      if (!parsedGame) {
+        throw new Error("Invalid room snapshot");
+      }
+
+      const appGame = {
+        ...parsedGame.game,
+        listUsers: parsedGame.listUsers
+      } as unknown as Game;
+
+      if (parsedGame.kickedOut) {
+        router.push("/?kickedOut=true");
+        return;
+      }
+
+      if (parsedGame.isRoomFull) {
+        Swal.fire({
+          icon: "warning",
+          title: t("Room is full"),
+          toast: true,
+          showConfirmButton: false,
+          position: "bottom-end",
+          timer: 3000
+        });
+        return;
+      }
+
+      if (parsedGame.requiresPassword && game.settings.password) {
+        requestPassword(game.settings.password, t).then((val) => {
+          if (!val.isConfirmed) {
+            return;
+          }
+
+          const unlockedGame = assessRoomJoin(game, {
+            snapshotKey: game.key,
+            localUID: user?.uid,
+            hasPasswordAccess: true
+          });
+
+          if (!unlockedGame) {
+            return;
+          }
+
+          if (unlockedGame.isRoomFull) {
+            router.push("/?fullRoom=true");
+            return;
+          }
+
+          setHasEnteredPassword(true);
+          configRoomToEnter({
+            ...unlockedGame.game,
+            listUsers: unlockedGame.listUsers
+          } as unknown as Game);
+        });
+        return;
+      }
+
+      configRoomToEnter(appGame);
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: "error",
+        title: t("Ups! We couldn't enter the room, please try again."),
+        timer: 3000,
+        timerProgressBar: true,
+        heightAuto: false
+      });
+    }
+  };
+
+  //Function for add actualGameID to sessionStorage and add new user to game in database
+  const configRoomToEnter = (game: Game) => {
+    if (
+      game.key &&
+      game.ownerUser &&
+      gameUser &&
+      game.ownerUser.username !== gameUser.username
+    ) {
+      setGame(game);
+      if (user?.uid) {
+        const userToPush: GameUser = {
+          username: gameUser.username,
+          clicks: 0,
+          rol: "visitor"
+        };
+        if (gameUser.maxScores) {
+          userToPush.maxScores = gameUser.maxScores;
+        }
+        logEvent(getAnalytics(), "enter_room", {
+          action: "enter_room",
+          gameMode: game.gameMode ?? "classic-speed",
+          withCustomName: !!game.roomName,
+          withPassword: !!game.settings.password,
+          maxUsers: game.settings.maxUsers,
+          isRegistered: !user.isAnonymous
+        });
+        router.push(`/game/${game.key}`);
+      } else {
+        console.error("Error loading user to game");
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Loading />
+        <div className="sr-only">
+          <h1>{t("Start a room in seconds")}</h1>
+          <p>
+            {t("Create a room, invite friends, and start a match in seconds.")}
+          </p>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <main>
+      <div className="text-primary-200 min-h-dvh flex flex-col gap-4 md:gap-0">
+        <Header />
+        <div className="flex flex-col md:flex-row-reverse w-full md:gap-4 lg:gap-0 flex-1 min-h-0 p-md-0 overflow-y-visible md:overflow-hidden">
+          <div className="order-1 flex flex-col md:order-none md:w1/2 md:max-h-[480px] lg:w-1/3 short:overflow-y-auto short:px-3">
+            <CreateSection />
+          </div>
+          <div className="contents md:relative md:flex md:min-h-0 md:min-w-[560px] md:max-w-[73%] md:flex-col md:items-start md:justify-start md:pl-1 lg:w-2/3 order-md-0">
+            <div className="order-0">
+              <WelcomeMessage />
+            </div>
+            <h3 className="order-2 mt-2 pl-1 text-base font-bold text-primary-600 dark:text-primary-100 md:order-none md:mb-8 md:mt-0 md:pl-0 md:text-4xl">
+              {t("Available rooms")}
+            </h3>
+            <div className="games-container order-3 grid w-full grid-cols-[repeat(auto-fill,minmax(180px,180px))] justify-start gap-3 overflow-y-auto overflow-x-hidden p-1.5 md:order-none md:w-fit md:grid-cols-2 md:gap-6 md:p-2">
+              {listGames.length > 0
+                ? listGames.map((game, i) => (
+                    <Fragment key={i}>
+                      <CardGame
+                        game={game}
+                        roomNumber={i}
+                        handleEnterGame={() => handleEnterGame(game)}
+                      />
+                      {(listGames.length === 1 ||
+                        (i !== 0 &&
+                          (i % 4 === 0 || i === listGames.length - 1))) && (
+                        <CardGameAd />
+                      )}
+                    </Fragment>
+                  ))
+                : gameUser?.username && <CardGameAd />}
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+      <LoginModal />
+      <NotificationModal
+        show={notificationModal.show}
+        onClose={() =>
+          setNotificationModal({...notificationModal, show: false})
+        }
+        type={notificationModal.type}
+      />
+    </main>
+  );
+};
+
+export default Home;
