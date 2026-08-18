@@ -14,7 +14,7 @@ import {useRoomGame} from "hooks/useRoomGame";
 import {Game} from "interfaces";
 import {RoomStats} from "interfaces/RoomStats";
 import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
-import {getReactionWinner} from "lib/game/reactionBattle";
+import {getReactionRound, getReactionWinner} from "lib/game/reactionBattle";
 
 const OpponentSection = dynamic(
   () => import("../../../components-new/OpponentSection")
@@ -76,13 +76,16 @@ const modeViews: Partial<Record<GameMode, ModeView>> = {
     usesClassicTimer: false,
     shouldShowRoomTitle: () => true,
     getShouldCelebrate: ({currentGame, localUser}) => {
+      const reactionRound = getReactionRound(
+        currentGame as unknown as Record<string, unknown>
+      );
       const reactionWinner = getReactionWinner(
         currentGame.listUsers,
-        currentGame.reactionSession?.results
+        reactionRound?.results
       );
 
       return (
-        currentGame.reactionSession?.status === "ended" &&
+        reactionRound?.status === "ended" &&
         Boolean(reactionWinner) &&
         (reactionWinner?.playerKey === localUser.key ||
           reactionWinner?.playerKey === localUser.username)

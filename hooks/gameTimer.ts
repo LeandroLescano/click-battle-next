@@ -1,6 +1,6 @@
 import {Game, MaxScore} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
-import {getDatabase, ref, update} from "firebase/database";
+import {getDatabase, ref, set, update} from "firebase/database";
 import {Timestamp} from "firebase/firestore";
 import moment from "moment";
 import {useEffect, useRef, useState} from "react";
@@ -53,11 +53,7 @@ const useGameTimer = ({
       return () => clearInterval(countdownInterval);
     } else if (game.status !== "ended") {
       if (localUser.rol === "owner") {
-        const refGame = ref(db, `games/${game.key}`);
-        const updatedGame: Partial<Game> = {
-          status: "playing"
-        };
-        update(refGame, updatedGame);
+        void set(ref(db, `games/${game.key}/status`), "playing");
       }
       setCountdown(COUNTDOWN);
     }
@@ -143,10 +139,7 @@ const useGameTimer = ({
 
           roomStats?.current.gamesPlayed.push(gamePlayed);
 
-          const refGame = ref(db, `games/${game.key}`);
-          const endedGame: Partial<Game> = {status: "ended"};
-
-          update(refGame, endedGame);
+          void set(ref(db, `games/${game.key}/status`), "ended");
           onFinish?.();
           calculatePosition();
           updateLocalMaxScore(userKey);

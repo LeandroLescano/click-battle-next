@@ -57,7 +57,7 @@ const Home = () => {
   const db = getDatabase();
   const {gameUser, user, loading} = useAuth();
   const {resetGame, setGame, setHasEnteredPassword} = useGame();
-  const serverTimeOffset = useServerTimeOffset();
+  const {offsetMs: serverTimeOffset} = useServerTimeOffset();
   const {t} = useTranslation();
 
   useEffect(() => {

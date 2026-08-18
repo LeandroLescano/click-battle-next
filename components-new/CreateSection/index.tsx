@@ -129,7 +129,8 @@ export const CreateSection = () => {
           settings: normalizedRoom.settings,
           gameMode: normalizedRoom.gameMode,
           modeSettings: normalizedRoom.modeSettings,
-          reactionSession: null
+          reactionCurrentRoundId: null,
+          reactionRounds: {}
         };
 
         if (roomId && user?.uid) {

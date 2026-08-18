@@ -4,13 +4,14 @@ import {
 } from "@leandrolescano/click-battle-core";
 import {Timestamp} from "firebase/firestore";
 
-import {ReactionSession} from "./ReactionBattle";
+import {ReactionRound} from "./ReactionBattle";
 
 export type Game = ExternalGame & {
   hostLease?: HostLease | null;
   hostConnectionId?: string;
   hostDisconnectedAt?: number | null;
-  reactionSession?: ReactionSession | null;
+  reactionCurrentRoundId?: string | null;
+  reactionRounds?: Record<string, ReactionRound>;
 };
 
 export type HostLease = {
