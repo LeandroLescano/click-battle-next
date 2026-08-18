@@ -100,12 +100,17 @@ export const useRoomGame = (): UseRoomGameReturn => {
 
   const {setNewUser} = useNewPlayerAlert(currentGame.listUsers, localUser);
   const isMobileDevice = useIsMobileDevice();
-  const serverTimeOffset = useServerTimeOffset();
+  const {offsetMs: serverTimeOffset, isReady: isServerTimeReady} =
+    useServerTimeOffset();
   const {t} = useTranslation();
 
   useEffect(() => {
-    serverTimeOffsetRef.current = serverTimeOffset;
-  }, [serverTimeOffset]);
+    // A numeric zero is a valid server offset, but it must not be used until
+    // the listener has delivered an actual offset snapshot.
+    if (isServerTimeReady) {
+      serverTimeOffsetRef.current = serverTimeOffset;
+    }
+  }, [isServerTimeReady, serverTimeOffset]);
 
   useEffect(() => {
     latestGameRef.current = currentGame;
@@ -381,7 +386,8 @@ export const useRoomGame = (): UseRoomGameReturn => {
           setGame({
             ...nextGame,
             listUsers,
-            reactionSession: nextGame.reactionSession ?? null
+            reactionCurrentRoundId: nextGame.reactionCurrentRoundId ?? null,
+            reactionRounds: nextGame.reactionRounds ?? {}
           });
           if (dbLocalUser) setLocalUser(dbLocalUser);
           setIsHost(parsedIsHost);
@@ -554,13 +560,13 @@ export const useRoomGame = (): UseRoomGameReturn => {
       (Date.now() - roomStats.current.created.getTime() > 30 * 1000 ||
         roomStats.current.gamesPlayed.length > 0);
 
-    if (shouldSaveRoomStats) {
-      addRoomStats({
+    if (shouldSaveRoomStats && currentGame.gameMode !== "reaction") {
+      void addRoomStats({
         ...roomStats.current,
         closedReason: "host-left",
         id: gameKey,
         removed: new Date()
-      });
+      }).catch(console.error);
     }
 
     const roomRef = ref(db, roomPath);

@@ -229,5 +229,11 @@
   "Internal Click Battle analytics dashboard.": "Painel interno de analises de Click Battle.",
   "Join a Click Battle room": "Entre em uma sala de Click Battle",
   "Join an active Click Battle room or return to the home lobby to create your own challenge.": "Entre em uma sala ativa de Click Battle ou volte ao lobby para criar seu proprio desafio.",
-  "wins": "vitorias"
+  "wins": "vitorias",
+  "Synchronizing game clock...": "Sincronizando o relogio do jogo...",
+  "Waiting for a secure clock connection before starting.": "Aguardando uma conexão segura com o relógio antes de iniciar.",
+  "Unable to update the round. Try again.": "Não foi possível atualizar a rodada. Tente novamente.",
+  "Unable to start the round. Try again.": "Não foi possível iniciar a rodada. Tente novamente.",
+  "Unable to return to the lobby. Try again.": "Não foi possível voltar ao lobby. Tente novamente.",
+  "Round finished, but statistics will retry.": "A rodada terminou, mas as estatísticas serão tentadas novamente."
 }

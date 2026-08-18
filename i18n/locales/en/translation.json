@@ -60,5 +60,11 @@
   "Internal Click Battle analytics dashboard.": "Internal Click Battle analytics dashboard.",
   "Join a Click Battle room": "Join a Click Battle room",
   "Join an active Click Battle room or return to the home lobby to create your own challenge.": "Join an active Click Battle room or return to the home lobby to create your own challenge.",
-  "wins": "wins"
+  "wins": "wins",
+  "Synchronizing game clock...": "Synchronizing game clock...",
+  "Waiting for a secure clock connection before starting.": "Waiting for a secure clock connection before starting.",
+  "Unable to update the round. Try again.": "Unable to update the round. Try again.",
+  "Unable to start the round. Try again.": "Unable to start the round. Try again.",
+  "Unable to return to the lobby. Try again.": "Unable to return to the lobby. Try again.",
+  "Round finished, but statistics will retry.": "Round finished, but statistics will retry."
 }

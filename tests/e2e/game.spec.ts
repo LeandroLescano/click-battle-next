@@ -3,6 +3,15 @@ import {expect, test, type Page} from "./fixtures";
 const uniqueRoomName = (prefix: string) =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
+const getCurrentReactionRound = (room: {
+  reactionCurrentRoundId?: string | null;
+  reactionRounds?: Record<string, unknown>;
+} | null) => {
+  const roundId = room?.reactionCurrentRoundId;
+
+  return roundId ? room?.reactionRounds?.[roundId] : undefined;
+};
+
 const getButtonBox = async (page: Page, name: string) => {
   const button = page.getByRole("button", {name});
   const box = await button.boundingBox();
@@ -275,7 +284,11 @@ test.describe("Game", () => {
       .poll(
         async () => {
           const room = await hostPage.getRoom(roomID);
-          const results = room?.reactionSession?.results ?? {};
+          const round = getCurrentReactionRound(room);
+          const results =
+            round && typeof round === "object" && "results" in round
+              ? (round.results as Record<string, {status?: string}>)
+              : {};
 
           return Object.values(results).filter(
             (result) => result.status === "valid"
@@ -289,7 +302,11 @@ test.describe("Game", () => {
       .poll(
         async () => {
           const room = await hostPage.getRoom(roomID);
-          const results = room?.reactionSession?.results ?? {};
+          const round = getCurrentReactionRound(room);
+          const results =
+            round && typeof round === "object" && "results" in round
+              ? (round.results as Record<string, {inputType?: string}>)
+              : {};
 
           return Object.values(results)
             .map((result) => result.inputType)
@@ -305,7 +322,11 @@ test.describe("Game", () => {
         async () => {
           const room = await hostPage.getRoom(roomID);
 
-          return room?.reactionSession?.status;
+          const round = getCurrentReactionRound(room);
+
+          return round && typeof round === "object" && "status" in round
+            ? round.status
+            : undefined;
         },
         {timeout: 7000}
       )
@@ -355,7 +376,15 @@ test.describe("Game", () => {
       .poll(
         async () => {
           const room = await hostPage.getRoom(roomID);
-          const results = Object.values(room?.reactionSession?.results ?? {});
+          const round = getCurrentReactionRound(room);
+          const results = Object.values(
+            round && typeof round === "object" && "results" in round
+              ? (round.results as Record<
+                  string,
+                  {username?: string; inputType?: string}
+                >)
+              : {}
+          );
 
           return results
             .map((result) => `${result.username}:${result.inputType}`)

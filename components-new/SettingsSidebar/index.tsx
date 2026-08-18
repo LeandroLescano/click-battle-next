@@ -1,4 +1,4 @@
-import {getDatabase, ref, update} from "@firebase/database";
+import {getDatabase, ref, set, update} from "@firebase/database";
 import {clsx} from "clsx";
 import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -86,17 +86,14 @@ export const SettingsSidebar = ({
         maxUsers: config.maxUsers
       });
 
-      const refGame = ref(db, `games/${idGame}`);
-
-      const updatedGame: Partial<Game> = {
-        roomName: localSettings.roomName,
-        settings: {
+      await Promise.all([
+        set(ref(db, `games/${idGame}/roomName`), localSettings.roomName),
+        update(ref(db, `games/${idGame}/settings`), {
           maxUsers: localSettings.maxUsers,
           timer: localSettings.timer,
           password: localSettings.password || null
-        }
-      };
-      await update(refGame, updatedGame);
+        })
+      ]);
 
       Toast.fire({
         title: t("Settings updated"),
