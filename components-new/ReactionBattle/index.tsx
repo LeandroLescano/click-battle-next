@@ -44,6 +44,7 @@ import {
   DEFAULT_REACTION_SYNC_BUFFER_MS,
   MAX_REACTION_DELAY_MS,
   MIN_REACTION_DELAY_MS,
+  MIN_PLAUSIBLE_REACTION_MS,
   buildReactionResultList,
   createReactionRound,
   getReactionWinner,
@@ -372,13 +373,10 @@ const ReactionBattle = ({
 
     promotedSignalAtRef.current = signalAt;
     void runTransaction(
-      ref(db, `games/${idGame}/reactionRounds/${activeRoundId}`),
+      ref(db, `games/${idGame}/reactionRounds/${activeRoundId}/status`),
       (current) => {
-        if (!current || typeof current !== "object") return;
-        const round = current as ReactionSession;
-        if (round.status === "signal") return round;
-        if (round.status !== "scheduled") return;
-        return {...round, status: "signal"};
+        if (current === "signal") return current;
+        return current === "scheduled" ? "signal" : undefined;
       }
     )
       .then(({committed}) => {
@@ -472,21 +470,12 @@ const ReactionBattle = ({
     setTransitionError(null);
     try {
       const {committed} = await runTransaction(
-        ref(db, `games/${idGame}/reactionRounds/${activeRoundId}`),
+        ref(db, `games/${idGame}/reactionRounds/${activeRoundId}/status`),
         (current) => {
-          if (!current || typeof current !== "object") return;
-          const round = current as ReactionSession;
-          if (round.status === "ended") return round;
-          if (round.status !== "scheduled" && round.status !== "signal") return;
-          const persistedWinner = getReactionWinner(
-            currentGame.listUsers,
-            round.results
-          );
-          return {
-            ...round,
-            status: "ended",
-            winnerKey: persistedWinner?.playerKey ?? null
-          };
+          if (current === "ended") return current;
+          return current === "scheduled" || current === "signal"
+            ? "ended"
+            : undefined;
         }
       );
       if (!committed) throw new Error("Reaction round could not be finalized");
@@ -667,7 +656,7 @@ const ReactionBattle = ({
           signalShownAt: signalShownAtRef.current,
           reactionMs: Math.round(
             Math.max(
-              0,
+              MIN_PLAUSIBLE_REACTION_MS,
               clickedAtPerformance - signalShownAtPerformanceRef.current
             )
           ),

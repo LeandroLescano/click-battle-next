@@ -20,6 +20,7 @@ export const ADSENSE_PUBLISHER_ID =
   process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID ?? "";
 
 export const ADS_ENABLED =
+  process.env.NODE_ENV === "production" &&
   process.env.NEXT_PUBLIC_ADS_ENABLED !== "false" &&
   ADSENSE_PUBLISHER_ID.length > 0;
 
