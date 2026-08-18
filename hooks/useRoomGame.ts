@@ -560,7 +560,7 @@ export const useRoomGame = (): UseRoomGameReturn => {
       (Date.now() - roomStats.current.created.getTime() > 30 * 1000 ||
         roomStats.current.gamesPlayed.length > 0);
 
-    if (shouldSaveRoomStats && currentGame.gameMode !== "reaction") {
+    if (shouldSaveRoomStats) {
       void addRoomStats({
         ...roomStats.current,
         closedReason: "host-left",

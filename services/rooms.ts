@@ -1,4 +1,3 @@
-import {getAuth} from "firebase/auth";
 import {
   addDoc,
   arrayUnion,
@@ -16,38 +15,6 @@ import {RoomStats} from "interfaces/RoomStats";
 import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 
 const PATH = "rooms";
-
-/** Requests server-derived reaction statistics; the browser never sends stats. */
-export const persistReactionRoundStatistics = async (
-  roomId: string,
-  roundId: string
-) => {
-  const user = getAuth().currentUser;
-
-  if (!user) {
-    throw new Error(
-      "Authentication is required to persist reaction statistics."
-    );
-  }
-
-  const response = await fetch(
-    `/api/rooms/${encodeURIComponent(roomId)}/reaction-statistics`,
-    {
-      body: JSON.stringify({roundId}),
-      headers: {
-        Authorization: `Bearer ${await user.getIdToken()}`,
-        "Content-Type": "application/json"
-      },
-      method: "POST"
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Unable to persist reaction statistics.");
-  }
-
-  return response.json() as Promise<{persisted: boolean; roundId: string}>;
-};
 
 const getStatsGameMode = (mode: unknown) =>
   mode === "reaction" || mode === "classic-speed" ? mode : DEFAULT_GAME_MODE;

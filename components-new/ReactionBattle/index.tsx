@@ -56,7 +56,6 @@ import {
   useServerTimeOffset
 } from "lib/game/serverTimeOffset";
 import {metricCounter} from "observability/sentry";
-import {persistReactionRoundStatistics} from "services/rooms";
 import {getSuffixPosition} from "utils/string";
 
 import "./styles.scss";
@@ -492,9 +491,6 @@ const ReactionBattle = ({
       );
       if (!committed) throw new Error("Reaction round could not be finalized");
       recordRoundFinished();
-      void persistReactionRoundStatistics(idGame, activeRoundId).catch(() => {
-        setTransitionError(t("Round finished, but statistics will retry."));
-      });
     } catch {
       finalizedSignalAtRef.current = null;
       setTransitionError(t("Unable to update the round. Try again."));
