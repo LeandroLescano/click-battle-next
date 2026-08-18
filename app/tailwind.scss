@@ -76,7 +76,12 @@ body {
 }
 
 main > div {
-  @apply px-5 py-6 xl:px-32 xl:py-14 short:py-1;
+  @apply px-5 pt-6 pb-6 xl:px-32 xl:py-14 short:py-1;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 html {

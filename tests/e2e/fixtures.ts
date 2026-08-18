@@ -15,6 +15,7 @@ import {
   getApps as getAdminApps,
   initializeApp as initializeAdminApp
 } from "firebase-admin/app";
+import {getDatabase as getAdminDatabase} from "firebase-admin/database";
 import {getFirestore as getAdminFirestore} from "firebase-admin/firestore";
 
 import type {
@@ -53,14 +54,27 @@ const getTestDatabase = () => {
   return db;
 };
 
-const getTestAdminFirestore = () => {
+const getTestAdminApp = () => {
   process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
-  const app =
+  process.env.FIREBASE_DATABASE_EMULATOR_HOST = "127.0.0.1:9000";
+
+  return (
     getAdminApps().find(({name}) => name === "click-battle-e2e") ??
-    initializeAdminApp({projectId: TEST_PROJECT_ID}, "click-battle-e2e");
+    initializeAdminApp(
+      {databaseURL: TEST_DATABASE_URL, projectId: TEST_PROJECT_ID},
+      "click-battle-e2e"
+    )
+  );
+};
+
+const getTestAdminFirestore = () => {
+  const app = getTestAdminApp();
 
   return getAdminFirestore(app);
 };
+
+const getTestAdminDatabase = () =>
+  getAdminDatabase(getTestAdminApp());
 
 class GenericPage {
   page: Page;
@@ -126,8 +140,9 @@ class GenericPage {
   }
 
   async getRoom(roomID: string): Promise<Game | null> {
-    const db = getTestDatabase();
-    const snapshot = await get(ref(db, `games/${roomID}`));
+    const snapshot = await getTestAdminDatabase()
+      .ref(`games/${roomID}`)
+      .once("value");
 
     return snapshot.val() as Game | null;
   }

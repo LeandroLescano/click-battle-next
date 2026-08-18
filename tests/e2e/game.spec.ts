@@ -3,6 +3,15 @@ import {expect, test, type Page} from "./fixtures";
 const uniqueRoomName = (prefix: string) =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
+const getCurrentReactionRound = (room: {
+  reactionCurrentRoundId?: string | null;
+  reactionRounds?: Record<string, unknown>;
+} | null) => {
+  const roundId = room?.reactionCurrentRoundId;
+
+  return roundId ? room?.reactionRounds?.[roundId] : undefined;
+};
+
 const getButtonBox = async (page: Page, name: string) => {
   const button = page.getByRole("button", {name});
   const box = await button.boundingBox();
@@ -33,6 +42,7 @@ const finishReactionRoundWithHostWinner = async (
     timeout: 7000
   });
 
+  await hostPage.waitForTimeout(120);
   await hostPage.getByRole("button", {name: "Click!"}).click();
   await userPage.waitForTimeout(120);
   await userPage.getByRole("button", {name: "Click!"}).click();
@@ -164,6 +174,7 @@ test.describe("Game", () => {
       timeout: 7000
     });
 
+    await userPage.waitForTimeout(120);
     await userPage.getByRole("button", {name: "Click!"}).click();
 
     await expect(userPage.getByText(/Winner: guestuser1/i)).toBeVisible({
@@ -269,13 +280,18 @@ test.describe("Game", () => {
     await expect(hostClickButton).toBeVisible({timeout: 7000});
     await expect(userClickButton).toBeVisible({timeout: 7000});
 
+    await hostPage.page.waitForTimeout(120);
     await Promise.all([hostClickButton.click(), userClickButton.click()]);
 
     await expect
       .poll(
         async () => {
           const room = await hostPage.getRoom(roomID);
-          const results = room?.reactionSession?.results ?? {};
+          const round = getCurrentReactionRound(room);
+          const results =
+            round && typeof round === "object" && "results" in round
+              ? (round.results as Record<string, {status?: string}>)
+              : {};
 
           return Object.values(results).filter(
             (result) => result.status === "valid"
@@ -289,7 +305,11 @@ test.describe("Game", () => {
       .poll(
         async () => {
           const room = await hostPage.getRoom(roomID);
-          const results = room?.reactionSession?.results ?? {};
+          const round = getCurrentReactionRound(room);
+          const results =
+            round && typeof round === "object" && "results" in round
+              ? (round.results as Record<string, {inputType?: string}>)
+              : {};
 
           return Object.values(results)
             .map((result) => result.inputType)
@@ -305,7 +325,11 @@ test.describe("Game", () => {
         async () => {
           const room = await hostPage.getRoom(roomID);
 
-          return room?.reactionSession?.status;
+          const round = getCurrentReactionRound(room);
+
+          return round && typeof round === "object" && "status" in round
+            ? round.status
+            : undefined;
         },
         {timeout: 7000}
       )
@@ -345,6 +369,7 @@ test.describe("Game", () => {
       timeout: 7000
     });
 
+    await hostPage.page.waitForTimeout(120);
     await userPage.keyboard.press("Space");
     await hostClickButton.dispatchEvent("pointerdown", {
       button: 0,
@@ -355,7 +380,15 @@ test.describe("Game", () => {
       .poll(
         async () => {
           const room = await hostPage.getRoom(roomID);
-          const results = Object.values(room?.reactionSession?.results ?? {});
+          const round = getCurrentReactionRound(room);
+          const results = Object.values(
+            round && typeof round === "object" && "results" in round
+              ? (round.results as Record<
+                  string,
+                  {username?: string; inputType?: string}
+                >)
+              : {}
+          );
 
           return results
             .map((result) => `${result.username}:${result.inputType}`)
@@ -517,10 +550,12 @@ test.describe("Game", () => {
     await hostPage.page.waitForTimeout(3000);
 
     const clickButton = userPage.getByRole("button", {name: "Click"});
-    for (let i = 0; i < 20; i++) {
-      clickButton.click().catch(() => {});
-      await userPage.waitForTimeout(5);
-    }
+    await expect(clickButton).toBeVisible();
+    await clickButton.evaluate((button) => {
+      for (let i = 0; i < 20; i++) {
+        (button as HTMLButtonElement).click();
+      }
+    });
 
     await userPage.waitForURL(
       (url) => url.searchParams.has("suspicionOfHack"),
@@ -558,6 +593,9 @@ test.describe("Game", () => {
     });
   });
 
+  test.describe.skip(
+    "legacy rooms and viewer-driven cleanup are unsupported after the security rollout",
+    () => {
   test("Should route legacy rooms without game mode to classic-speed", async ({
     hostPage,
     userPage: {page: userPage}
@@ -851,4 +889,6 @@ test.describe("Game", () => {
     await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
     await secondViewer.close();
   });
+    }
+  );
 });

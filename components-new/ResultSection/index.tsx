@@ -1,4 +1,4 @@
-import {get, getDatabase, ref, update} from "firebase/database";
+import {get, getDatabase, ref, set, update} from "firebase/database";
 import React from "react";
 import {useTranslation} from "react-i18next";
 
@@ -18,13 +18,10 @@ const ResultSection = () => {
 
   // function for reset all data
   const handleReset = () => {
-    const refGame = ref(db, `games/${game.key}`);
-    const resetGame: Partial<Game> = {
-      status: "lobby",
-      startTime: null
-    };
-
-    update(refGame, resetGame);
+    void Promise.all([
+      set(ref(db, `games/${game.key}/status`), "lobby"),
+      set(ref(db, `games/${game.key}/startTime`), null)
+    ]);
     const refGameUsers = ref(db, `games/${game.key}/listUsers`);
     get(refGameUsers).then((snapshot) => {
       snapshot.forEach((child) => {

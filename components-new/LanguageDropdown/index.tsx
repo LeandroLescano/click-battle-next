@@ -1,4 +1,3 @@
-import {changeLanguage} from "i18next";
 import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 
@@ -16,7 +15,7 @@ export const LanguageDropdown = () => {
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   const handleOnChange = (lang: string) => {
-    changeLanguage(lang);
+    void i18n.changeLanguage(lang);
     setIsOpen(false);
   };
 

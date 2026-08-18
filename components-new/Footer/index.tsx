@@ -36,7 +36,7 @@ export const Footer = memo(() => {
 
   return (
     <>
-      <footer className="mt-auto flex flex-row text-sm md:text-2xl font-semibold text-primary-700 dark:text-primary-100 justify-center md:justify-between w-full items-center md:pb-2">
+      <footer className="safe-area-bottom mt-auto flex flex-row text-sm md:text-2xl font-semibold text-primary-700 dark:text-primary-100 justify-center md:justify-between w-full items-center md:pb-2">
         <div className="mx-auto md:mx-0 md:pt-2 w-32 md:w-auto">
           <a
             href="https://cafecito.app/leanlescano"
@@ -63,10 +63,14 @@ export const Footer = memo(() => {
               {t("Contact")}
             </a>
             <span> | </span>
+            <Link href="/how-to-play">{t("How to play")}</Link>
+            <span> | </span>
             <Link href="/ranking">{t("Ranking")}</Link>
           </div>
         ) : (
           <div className="flex justify-end self-center gap-2 w-full pb-sm-2 pb-0 uppercase">
+            <Link href="/how-to-play">{t("How to play")}</Link>
+            <span> | </span>
             <Link href="/ranking">{t("Ranking")}</Link>
             <span> | </span>
             <span onClick={toggleModal} className="cursor-pointer">

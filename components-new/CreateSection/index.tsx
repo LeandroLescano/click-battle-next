@@ -12,7 +12,6 @@ import {
   serverTimestamp,
   set
 } from "firebase/database";
-import lottie from "lottie-web";
 import {useRouter} from "next/navigation";
 import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -130,7 +129,8 @@ export const CreateSection = () => {
           settings: normalizedRoom.settings,
           gameMode: normalizedRoom.gameMode,
           modeSettings: normalizedRoom.modeSettings,
-          reactionSession: null
+          reactionCurrentRoundId: null,
+          reactionRounds: {}
         };
 
         if (roomId && user?.uid) {
@@ -181,24 +181,45 @@ export const CreateSection = () => {
   };
 
   useEffect(() => {
+    let disposed = false;
+    let animation: {destroy: () => void} | undefined;
+
     if (gameUser?.username) {
       get(ref(db, "config")).then((snapshot) => {
         const defaultConfig = snapshot.val();
-        if (defaultConfig) {
+        if (defaultConfig && !disposed) {
           setConfig(defaultConfig);
           sessionStorage.setItem("config", JSON.stringify(defaultConfig));
         }
       });
-      if (logoContainer?.current?.innerHTML === "") {
-        lottie.loadAnimation({
-          container: logoContainer.current!,
+
+      void import("lottie-web").then(({default: lottie}) => {
+        if (
+          disposed ||
+          !logoContainer.current ||
+          logoContainer.current.innerHTML !== ""
+        ) {
+          return;
+        }
+
+        animation = lottie.loadAnimation({
+          container: logoContainer.current,
           animationData: logoAnim,
           renderer: "svg",
           loop: true,
           autoplay: true
         });
-      }
+
+        if (disposed) {
+          animation.destroy();
+        }
+      });
     }
+
+    return () => {
+      disposed = true;
+      animation?.destroy();
+    };
   }, [gameUser?.username]);
 
   return (
@@ -206,7 +227,7 @@ export const CreateSection = () => {
       <h2 className="text-xl md:text-5xl font-extrabold self-start text-primary-600 dark:text-primary-100">
         {t("Create your own room")}
       </h2>
-      <div className="flex-1 flex flex-col justify-end pr-1">
+      <div className="flex flex-col justify-start pr-1 md:flex-1 md:justify-end">
         <div className="flex justify-between items-end gap-x-9 w-full flex-1 flex-wrap">
           <Input
             label={t("Insert room name")}

@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {Page} from "@playwright/test";
 
-const URL_LOCAL = "http://localhost:3000";
-
 export const loginAsGuest = async (page: Page, name = "guestuser") => {
-  await page.goto(URL_LOCAL, {waitUntil: "domcontentloaded"});
+  await page.goto("/", {waitUntil: "domcontentloaded"});
 
   const usernameInput = page.locator('input[placeholder="Username"]').last();
   await usernameInput.waitFor({state: "visible", timeout: 5000});

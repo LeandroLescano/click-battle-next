@@ -1,5 +1,4 @@
 import {getAnalytics, logEvent} from "firebase/analytics";
-import {changeLanguage} from "i18next";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import React, {useEffect, useState} from "react";
@@ -247,7 +246,7 @@ export const Footer = () => {
                   as="button"
                   key={lang}
                   active={i18n.language === lang}
-                  onClick={() => changeLanguage(lang)}
+                  onClick={() => void i18n.changeLanguage(lang)}
                 >
                   <img src={`/flags/${lang}.svg`} alt={lang} />
                 </Dropdown.Item>

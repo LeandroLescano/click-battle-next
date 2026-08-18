@@ -3,7 +3,13 @@
 import {GameUser} from "@leandrolescano/click-battle-core";
 import {AdblockDetector} from "adblock-detector";
 import {getAnalytics, logEvent} from "firebase/analytics";
-import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  runTransaction,
+  serverTimestamp,
+  update
+} from "firebase/database";
 import {
   useCallback,
   useEffect,
@@ -38,9 +44,11 @@ import {
   DEFAULT_REACTION_SYNC_BUFFER_MS,
   MAX_REACTION_DELAY_MS,
   MIN_REACTION_DELAY_MS,
+  MIN_PLAUSIBLE_REACTION_MS,
   buildReactionResultList,
-  createReactionSession,
+  createReactionRound,
   getReactionWinner,
+  getReactionRound,
   getReactionWindowMs,
   haveAllPlayersReacted
 } from "lib/game/reactionBattle";
@@ -87,12 +95,15 @@ const ReactionBattle = ({
   roomStats
 }: ReactionBattleProps) => {
   const db = getDatabase();
-  const serverTimeOffset = useServerTimeOffset();
+  const {offsetMs: serverTimeOffset, isReady: isServerTimeReady} =
+    useServerTimeOffset();
   const {t} = useTranslation();
   const {user, gameUser} = useAuth();
   const {game: currentGame, isHost, setGame} = useGame();
   const {height, width} = useWindowSize();
-  const session = currentGame.reactionSession;
+  const session = getReactionRound(
+    currentGame as unknown as Record<string, unknown>
+  );
   const localPlayerKey = user?.uid || localUser?.key || "";
   const signalShownAtRef = useRef<number | null>(null);
   const signalShownAtPerformanceRef = useRef<number | null>(null);
@@ -102,11 +113,16 @@ const ReactionBattle = ({
   const submittingRef = useRef(false);
   const [localSignalVisible, setLocalSignalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingTransition, setPendingTransition] = useState<string | null>(
+    null
+  );
+  const [transitionError, setTransitionError] = useState<string | null>(null);
   const isRoundFinished = session?.status === "ended";
 
   const reactionWindowMs = getReactionWindowMs(currentGame.modeSettings);
   const estimatedNow = estimateServerNow(serverTimeOffset);
   const signalAt = session?.signalAt ?? null;
+  const activeRoundId = session?.roundId ?? null;
   const signalReached = Boolean(signalAt && estimatedNow >= signalAt);
   const isWaitingForOpponent = currentGame.listUsers.length < 2;
   const userHasAdblock = useMemo(() => {
@@ -356,10 +372,30 @@ const ReactionBattle = ({
     }
 
     promotedSignalAtRef.current = signalAt;
-    update(ref(db, `games/${idGame}`), {
-      "reactionSession/status": "signal"
-    });
-  }, [db, idGame, isHost, session?.status, signalAt, signalReached]);
+    void runTransaction(
+      ref(db, `games/${idGame}/reactionRounds/${activeRoundId}/status`),
+      (current) => {
+        if (current === "signal") return current;
+        return current === "scheduled" ? "signal" : undefined;
+      }
+    )
+      .then(({committed}) => {
+        if (!committed) promotedSignalAtRef.current = null;
+      })
+      .catch(() => {
+        promotedSignalAtRef.current = null;
+        setTransitionError(t("Unable to update the round. Try again."));
+      });
+  }, [
+    activeRoundId,
+    db,
+    idGame,
+    isHost,
+    session?.status,
+    signalAt,
+    signalReached,
+    t
+  ]);
 
   useEffect(() => {
     if (!isHost || !session || !signalAt || session.status === "ended") {
@@ -375,12 +411,7 @@ const ReactionBattle = ({
     }
 
     finalizedSignalAtRef.current = signalAt;
-    recordRoundFinished();
-    update(ref(db, `games/${idGame}`), {
-      status: "ended",
-      "reactionSession/status": "ended",
-      "reactionSession/winnerKey": winner?.playerKey ?? null
-    });
+    void finalizeRound();
   }, [
     currentGame.listUsers,
     db,
@@ -410,12 +441,7 @@ const ReactionBattle = ({
         }
 
         finalizedSignalAtRef.current = signalAt;
-        recordRoundFinished();
-        update(ref(db, `games/${idGame}`), {
-          status: "ended",
-          "reactionSession/status": "ended",
-          "reactionSession/winnerKey": winner?.playerKey ?? null
-        });
+        void finalizeRound();
       },
       Math.max(
         0,
@@ -437,17 +463,36 @@ const ReactionBattle = ({
     winner?.playerKey
   ]);
 
-  const updateReactionSession = async (
-    nextSession: ReactionSession,
-    nextStatus?: "lobby" | "countdown" | "playing" | "ended"
-  ) => {
-    await update(ref(db, `games/${idGame}`), {
-      reactionSession: nextSession,
-      ...(nextStatus ? {status: nextStatus} : {})
-    });
-  };
+  async function finalizeRound() {
+    if (!activeRoundId || !session || pendingTransition) return;
+
+    setPendingTransition("finalize");
+    setTransitionError(null);
+    try {
+      const {committed} = await runTransaction(
+        ref(db, `games/${idGame}/reactionRounds/${activeRoundId}/status`),
+        (current) => {
+          if (current === "ended") return current;
+          return current === "scheduled" || current === "signal"
+            ? "ended"
+            : undefined;
+        }
+      );
+      if (!committed) throw new Error("Reaction round could not be finalized");
+      recordRoundFinished();
+    } catch {
+      finalizedSignalAtRef.current = null;
+      setTransitionError(t("Unable to update the round. Try again."));
+    } finally {
+      setPendingTransition(null);
+    }
+  }
 
   const handleStartRound = async () => {
+    if (!isServerTimeReady || pendingTransition) {
+      return;
+    }
+
     const signalDelayMs =
       MIN_REACTION_DELAY_MS +
       Math.floor(
@@ -474,17 +519,40 @@ const ReactionBattle = ({
     });
     metricCounter("game_started", undefined, telemetryTags);
 
-    await updateReactionSession(
-      {
-        ...createReactionSession({
-          signalAt: signalAtMs,
-          signalDelayMs,
-          syncBufferMs: DEFAULT_REACTION_SYNC_BUFFER_MS
-        }),
-        createdAt: serverTimestamp()
-      },
-      "playing"
-    );
+    const roundId = `reaction-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 10)}`;
+    const nextRound = {
+      ...createReactionRound({
+        roundId,
+        signalAt: signalAtMs,
+        signalDelayMs,
+        syncBufferMs: DEFAULT_REACTION_SYNC_BUFFER_MS,
+        windowMs: reactionWindowMs
+      }),
+      createdAt: serverTimestamp()
+    };
+
+    setPendingTransition("start");
+    setTransitionError(null);
+    try {
+      await update(
+        ref(db, `games/${idGame}/reactionRounds/${roundId}`),
+        nextRound
+      );
+      const {committed} = await runTransaction(
+        ref(db, `games/${idGame}/reactionCurrentRoundId`),
+        (current) => {
+          if (!current || current === activeRoundId) return roundId;
+          return;
+        }
+      );
+      if (!committed) throw new Error("Reaction round already active");
+    } catch {
+      setTransitionError(t("Unable to start the round. Try again."));
+    } finally {
+      setPendingTransition(null);
+    }
   };
 
   const handleReturnToLobby = async () => {
@@ -494,14 +562,25 @@ const ReactionBattle = ({
     signalShownAtPerformanceRef.current = null;
     setLocalSignalVisible(false);
 
-    await update(ref(db, `games/${idGame}`), {
-      reactionSession: null,
-      status: "lobby"
-    });
-    setGame({
-      reactionSession: null,
-      status: "lobby"
-    });
+    if (pendingTransition) return;
+    setPendingTransition("lobby");
+    setTransitionError(null);
+    try {
+      const {committed} = await runTransaction(
+        ref(db, `games/${idGame}/reactionCurrentRoundId`),
+        (current) => (current === activeRoundId ? null : undefined)
+      );
+      if (!committed) throw new Error("Reaction round changed");
+      setGame({
+        reactionCurrentRoundId: null,
+        reactionRounds: {},
+        status: "lobby"
+      });
+    } catch {
+      setTransitionError(t("Unable to return to the lobby. Try again."));
+    } finally {
+      setPendingTransition(null);
+    }
   };
 
   const handleKickUser = async (playerKey: string) => {
@@ -514,11 +593,17 @@ const ReactionBattle = ({
     async (result: ReactionResult) => {
       if (!session || !localPlayerKey) return;
 
-      await update(ref(db, `games/${idGame}`), {
-        [`reactionSession/results/${localPlayerKey}`]: result
-      });
+      if (!activeRoundId) return;
+      const {committed} = await runTransaction(
+        ref(
+          db,
+          `games/${idGame}/reactionRounds/${activeRoundId}/results/${localPlayerKey}`
+        ),
+        (current) => (current === null ? result : undefined)
+      );
+      if (!committed) throw new Error("Reaction result already submitted");
     },
-    [db, idGame, localPlayerKey, session]
+    [activeRoundId, db, idGame, localPlayerKey, session]
   );
 
   const handleReactionInput = useCallback(
@@ -571,7 +656,7 @@ const ReactionBattle = ({
           signalShownAt: signalShownAtRef.current,
           reactionMs: Math.round(
             Math.max(
-              0,
+              MIN_PLAUSIBLE_REACTION_MS,
               clickedAtPerformance - signalShownAtPerformanceRef.current
             )
           ),
@@ -695,7 +780,11 @@ const ReactionBattle = ({
     return t("Fastest click after the signal wins");
   })();
 
-  const canStart = isHost && currentGame.listUsers.length >= 2;
+  const canStart =
+    isHost &&
+    isServerTimeReady &&
+    !pendingTransition &&
+    currentGame.listUsers.length >= 2;
   const primaryActionClasses =
     "h-full w-full px-6 py-5 text-2xl md:px-8 md:py-6 md:text-4xl";
   const signalActionTone =
@@ -733,7 +822,11 @@ const ReactionBattle = ({
       return {
         className: primaryActionClasses,
         disabled: !canStart,
-        label: isHost ? t("Start reaction round") : t("Waiting for host"),
+        label: isHost
+          ? isServerTimeReady
+            ? t("Start reaction round")
+            : t("Synchronizing game clock...")
+          : t("Waiting for host"),
         onClick: isHost && canStart ? handleStartRound : undefined
       };
     }
@@ -834,6 +927,9 @@ const ReactionBattle = ({
 
     if (!session) {
       if (isWaitingForOpponent) return t("Waiting for opponents...");
+      if (isHost && !isServerTimeReady) {
+        return t("Synchronizing game clock...");
+      }
       return isHost ? t("Reaction Battle ready") : t("Stay ready");
     }
 
@@ -856,6 +952,9 @@ const ReactionBattle = ({
 
     if (!session) {
       if (isWaitingForOpponent) return t("Fastest click after the signal wins");
+      if (isHost && !isServerTimeReady) {
+        return t("Waiting for a secure clock connection before starting.");
+      }
       return isHost
         ? t("Trigger the countdown when everyone is ready")
         : t("Host starts the round");
@@ -967,6 +1066,14 @@ const ReactionBattle = ({
                 <p className="text-sm md:text-base text-primary-400 dark:text-primary-200">
                   {arenaDetail}
                 </p>
+                {transitionError && (
+                  <p
+                    className="text-sm font-semibold text-rose-600 dark:text-rose-300"
+                    role="alert"
+                  >
+                    {transitionError}
+                  </p>
+                )}
                 {overlayTag && (
                   <p className="inline-flex w-fit rounded-full border border-primary-300 px-3 py-1 text-xs font-bold uppercase text-primary-500 dark:border-primary-200 dark:text-primary-100">
                     {overlayTag}

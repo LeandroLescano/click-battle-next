@@ -1,6 +1,6 @@
 import {AntiClickCheat, GameUser} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
-import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
+import {getDatabase, ref, serverTimestamp, set, update} from "firebase/database";
 import {useRouter} from "next/navigation";
 import {useMemo, useRef, useState} from "react";
 import {Trans, useTranslation} from "react-i18next";
@@ -52,7 +52,6 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
 
   // function for start game
   const handleStart = () => {
-    const refGame = ref(db, `games/${idGame}`);
     const gameMode = game.gameMode ?? DEFAULT_GAME_MODE;
     logEvent(getAnalytics(), "start_game", {
       action: "start_game",
@@ -65,11 +64,10 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
       game_mode: gameMode,
       is_host: isHost ? "1" : "0"
     });
-    const startedGame = {
-      status: "countdown",
-      startTime: serverTimestamp()
-    };
-    update(refGame, startedGame);
+    void Promise.all([
+      set(ref(db, `games/${idGame}/status`), "countdown"),
+      set(ref(db, `games/${idGame}/startTime`), serverTimestamp())
+    ]);
   };
 
   const handleClick = () => {

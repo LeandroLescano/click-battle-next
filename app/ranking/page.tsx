@@ -4,6 +4,7 @@ import {
   GameMode
 } from "@leandrolescano/click-battle-core";
 import {getFirestore} from "firebase-admin/firestore";
+import type {Metadata} from "next";
 import {unstable_cache} from "next/cache";
 import React from "react";
 
@@ -14,8 +15,13 @@ import {
   ReactionRankingEntry
 } from "components-new/Ranking/types";
 import {customInitApp} from "lib/firebase-admin-config";
+import {createRouteMetadata} from "lib/seo/metadata";
 
 customInitApp();
+
+export async function generateMetadata(): Promise<Metadata> {
+  return createRouteMetadata("ranking");
+}
 
 const isSupportedRankingMode = (
   value?: GameMode | null
@@ -43,6 +49,8 @@ const getRanking = unstable_cache(
       const room = doc.data() as {
         gamesPlayed?: Array<{
           gameMode?: GameMode;
+          eligible?: boolean;
+          reactionWindowMs?: number;
           winnerMetric?: "clicks" | "reactionMs";
           winnerScore?: number | null;
           winnerUsername?: string;
@@ -53,6 +61,7 @@ const getRanking = unstable_cache(
         if (
           !isSupportedRankingMode(game.gameMode) ||
           game.gameMode !== "reaction" ||
+          game.eligible !== true ||
           game.winnerMetric !== "reactionMs" ||
           typeof game.winnerScore !== "number" ||
           !game.winnerUsername
@@ -60,7 +69,16 @@ const getRanking = unstable_cache(
           return;
         }
 
-        const reactionMs = Math.max(0, Math.round(game.winnerScore));
+        const reactionMs = Math.round(game.winnerScore);
+        const reactionWindowMs = game.reactionWindowMs;
+
+        if (
+          reactionMs < 100 ||
+          (typeof reactionWindowMs === "number" &&
+            reactionMs > reactionWindowMs)
+        ) {
+          return;
+        }
         const entry = reactionMap.get(game.winnerUsername);
 
         if (!entry) {

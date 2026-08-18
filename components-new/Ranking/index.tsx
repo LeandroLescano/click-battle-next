@@ -58,6 +58,9 @@ export const Ranking = ({lastUpdate, rankings}: RankingProps) => {
             {t("Last update")}:{" "}
             {moment(lastUpdate).format("DD/MM/YYYY HH:mm:ss")}
           </p>
+          <p className="max-w-[42rem] text-sm font-semibold text-primary-600 dark:text-primary-100 md:text-xl">
+            {t("See who leads Classic Speed and Reaction Battle right now.")}
+          </p>
         </div>
 
         <div className="mx-auto flex w-full max-w-[58rem] justify-center">
