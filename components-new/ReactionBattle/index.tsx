@@ -377,7 +377,8 @@ const ReactionBattle = ({
       (current) => {
         if (current === "signal") return current;
         return current === "scheduled" ? "signal" : undefined;
-      }
+      },
+      {applyLocally: false}
     )
       .then(({committed}) => {
         if (!committed) promotedSignalAtRef.current = null;
@@ -624,9 +625,19 @@ const ReactionBattle = ({
       try {
         const clickedAt = Date.now();
         const clickedAtPerformance = performance.now();
-        let result: ReactionResult;
+      let result: ReactionResult;
 
-        if (!localSignalVisible) {
+        const canSubmitValidResult =
+          localSignalVisible && session?.status === "signal";
+
+        if (!canSubmitValidResult) {
+          // The local countdown can reach zero a few milliseconds before the
+          // host transition is confirmed in RTDB. Do not turn that narrow
+          // interval into an invalid "valid" result that rules reject.
+          if (localSignalVisible) {
+            return;
+          }
+
           result = {
             playerKey: localPlayerKey,
             username: gameUser.username,
@@ -678,7 +689,8 @@ const ReactionBattle = ({
       localResult,
       localSignalVisible,
       logReactionInput,
-      persistResult
+      persistResult,
+      session?.status
     ]
   );
 
@@ -793,6 +805,8 @@ const ReactionBattle = ({
     "!bg-primary-100 !border-primary-300 !text-primary-500 dark:!bg-primary-700 dark:!border-primary-300 dark:!text-primary-100";
   const falseStartActionTone =
     "!bg-primary-100 !border-rose-300 !text-rose-700 dark:!bg-primary-700 dark:!border-rose-400 dark:!text-rose-100";
+  const isSignalConfirmed =
+    localSignalVisible && session?.status === "signal";
   const actionState: ReactionActionState = (() => {
     if (isRoundFinished && isHost) {
       return {
@@ -849,15 +863,19 @@ const ReactionBattle = ({
 
     return {
       className: `${primaryActionClasses} ${
-        localSignalVisible ? signalActionTone : idleActionTone
+        isSignalConfirmed ? signalActionTone : idleActionTone
       } ${
-        localSignalVisible
+        isSignalConfirmed
           ? "reaction-battle-action--signal"
           : "reaction-battle-action--armed"
       }`,
       disabled:
-        submitting || !localPlayerKey || !session || session.status === "ended",
-      label: localSignalVisible ? t("Click!") : t("Stay ready..."),
+        submitting ||
+        !localPlayerKey ||
+        !session ||
+        session.status === "ended" ||
+        (localSignalVisible && !isSignalConfirmed),
+      label: isSignalConfirmed ? t("Click!") : t("Stay ready..."),
       loading: submitting,
       onPointerDown: handleReactionPointerDown
     };
