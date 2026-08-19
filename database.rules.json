@@ -27,7 +27,7 @@
         "reactionCurrentRoundId": { ".write": "auth != null && data.parent().child('ownerUser/key').val() === auth.uid && ((!newData.exists() && data.parent().child('reactionRounds').child(data.val()).child('status').val() === 'ended') || (newData.isString() && newData.val().length > 0 && newData.val().length <= 128 && data.parent().child('reactionRounds').child(newData.val()).exists()))" },
         "reactionRounds": {
           "$roundId": {
-            ".write": "auth != null && root.child('games').child($roomId).child('ownerUser/key').val() === auth.uid && !data.exists() && newData.child('roundId').val() === $roundId && newData.child('status').val() === 'scheduled'",
+            ".write": "auth != null && root.child('games').child($roomId).child('ownerUser/key').val() === auth.uid && ((!data.exists() && newData.child('roundId').val() === $roundId && newData.child('status').val() === 'scheduled') || (data.exists() && !newData.exists() && data.child('status').val() === 'scheduled' && root.child('games').child($roomId).child('reactionCurrentRoundId').val() != $roundId))",
             "roundId": { ".validate": "newData.val() === $roundId" },
             "status": {
               ".write": "auth != null && root.child('games').child($roomId).child('ownerUser/key').val() === auth.uid && ((data.val() === 'waiting' && newData.val() === 'scheduled') || (data.val() === 'scheduled' && (newData.val() === 'signal' || newData.val() === 'ended')) || (data.val() === 'signal' && newData.val() === 'ended'))",
@@ -38,7 +38,7 @@
             "winnerKey": { ".write": "auth != null && root.child('games').child($roomId).child('ownerUser/key').val() === auth.uid && newData.parent().child('status').val() === 'ended' && (newData.isString() || !newData.exists())" },
             "results": {
               "$uid": {
-                ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.exists() && root.child('games').child($roomId).child('listUsers').child($uid).exists() && root.child('games').child($roomId).child('reactionCurrentRoundId').val() === $roundId && ((root.child('games').child($roomId).child('reactionRounds').child($roundId).child('status').val() === 'signal' && newData.child('status').val() === 'valid') || (root.child('games').child($roomId).child('reactionRounds').child($roundId).child('status').val() === 'scheduled' && newData.child('status').val() === 'false-start'))",
+                ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.exists() && root.child('games').child($roomId).child('listUsers').child($uid).exists() && root.child('games').child($roomId).child('reactionCurrentRoundId').val() === $roundId && ((root.child('games').child($roomId).child('reactionRounds').child($roundId).child('status').val() === 'signal' && newData.child('status').val() === 'valid') || ((root.child('games').child($roomId).child('reactionRounds').child($roundId).child('status').val() === 'scheduled' || root.child('games').child($roomId).child('reactionRounds').child($roundId).child('status').val() === 'signal') && newData.child('status').val() === 'false-start'))",
                 ".validate": "newData.child('playerKey').val() === $uid && newData.child('username').val() === root.child('games').child($roomId).child('listUsers').child($uid).child('username').val() && ((newData.child('status').val() === 'valid' && newData.hasChildren(['playerKey', 'username', 'status', 'clickedAt', 'signalShownAt', 'reactionMs', 'inputType']) && newData.child('clickedAt').isNumber() && newData.child('signalShownAt').isNumber() && newData.child('reactionMs').isNumber() && newData.child('reactionMs').val() >= 100 && newData.child('reactionMs').val() <= root.child('games').child($roomId).child('reactionRounds').child($roundId).child('windowMs').val() && (newData.child('inputType').val() === 'click' || newData.child('inputType').val() === 'tap' || newData.child('inputType').val() === 'key')) || (newData.child('status').val() === 'false-start' && newData.hasChildren(['playerKey', 'username', 'status', 'clickedAt', 'inputType']) && newData.child('clickedAt').isNumber() && !newData.child('reactionMs').exists() && (newData.child('inputType').val() === 'click' || newData.child('inputType').val() === 'tap' || newData.child('inputType').val() === 'key')))"
               }
             }
@@ -56,7 +56,10 @@
       }
     },
     "gamesList": { ".read": "auth != null", ".write": false },
-    "users": { ".read": "auth != null", ".write": "auth != null" },
+    "users": {
+      ".read": "auth != null",
+      "$uid": { ".write": "auth != null && auth.uid === $uid" }
+    },
     "config": { ".read": "auth != null", ".write": false }
   }
 }

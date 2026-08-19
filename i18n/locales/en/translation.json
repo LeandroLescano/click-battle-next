@@ -64,6 +64,7 @@
   "Synchronizing game clock...": "Synchronizing game clock...",
   "Waiting for a secure clock connection before starting.": "Waiting for a secure clock connection before starting.",
   "Unable to update the round. Try again.": "Unable to update the round. Try again.",
+  "Unable to save your reaction. Try again.": "Unable to save your reaction. Try again.",
   "Unable to start the round. Try again.": "Unable to start the round. Try again.",
   "Unable to return to the lobby. Try again.": "Unable to return to the lobby. Try again.",
   "Round finished, but statistics will retry.": "Round finished, but statistics will retry."

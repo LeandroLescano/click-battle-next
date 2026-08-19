@@ -233,6 +233,7 @@
   "Synchronizing game clock...": "Sincronizando el reloj del juego...",
   "Waiting for a secure clock connection before starting.": "Esperando una conexión segura con el reloj antes de comenzar.",
   "Unable to update the round. Try again.": "No se pudo actualizar la ronda. Intentá de nuevo.",
+  "Unable to save your reaction. Try again.": "No se pudo guardar tu reacción. Intentá de nuevo.",
   "Unable to start the round. Try again.": "No se pudo iniciar la ronda. Intentá de nuevo.",
   "Unable to return to the lobby. Try again.": "No se pudo volver a la sala de espera. Intentá de nuevo.",
   "Round finished, but statistics will retry.": "La ronda terminó, pero las estadísticas se reintentarán."

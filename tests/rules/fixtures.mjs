@@ -20,7 +20,8 @@ export const createRulesEnvironment = async () => {
 
 export const cleanupRulesEnvironment = async () => env?.cleanup();
 export const rtdb = (uid) => env.authenticatedContext(uid).database();
-export const firestore = (uid) => env.authenticatedContext(uid).firestore();
+export const firestore = (uid, token = {}) =>
+  env.authenticatedContext(uid, token).firestore();
 export {doc, ref, remove, set, setDoc, update, updateDoc};
 
 export const room = ({mode = "reaction", roundStatus = "signal"} = {}) => ({
@@ -52,5 +53,13 @@ export const validResult = (uid = "guest", username = "Guest") => ({
   clickedAt: 1200,
   signalShownAt: 1000,
   reactionMs: 200,
+  inputType: "click"
+});
+
+export const falseStartResult = (uid = "guest", username = "Guest") => ({
+  playerKey: uid,
+  username,
+  status: "false-start",
+  clickedAt: 1200,
   inputType: "click"
 });

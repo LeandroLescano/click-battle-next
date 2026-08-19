@@ -18,3 +18,8 @@ test("only the owner renews the host lease and writes its disconnect signal", as
   await assertSucceeds(set(ref(rtdb("host"), "roomHostDisconnects/room-1/session-1"), {disconnectedAt: 3}));
   await assertFails(set(ref(rtdb("guest"), "roomHostDisconnects/room-1/session-1"), {disconnectedAt: 3}));
 });
+
+test("users may write only their own RTDB profile", async () => {
+  await assertSucceeds(set(ref(rtdb("guest"), "users/guest"), {nickname: "Guest"}));
+  await assertFails(set(ref(rtdb("guest"), "users/host"), {nickname: "Host"}));
+});

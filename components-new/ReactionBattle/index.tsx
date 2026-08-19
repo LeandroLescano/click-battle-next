@@ -5,6 +5,7 @@ import {AdblockDetector} from "adblock-detector";
 import {getAnalytics, logEvent} from "firebase/analytics";
 import {
   getDatabase,
+  remove,
   ref,
   runTransaction,
   serverTimestamp,
@@ -536,11 +537,13 @@ const ReactionBattle = ({
 
     setPendingTransition("start");
     setTransitionError(null);
+    let roundCreated = false;
     try {
       await update(
         ref(db, `games/${idGame}/reactionRounds/${roundId}`),
         nextRound
       );
+      roundCreated = true;
       const {committed} = await runTransaction(
         ref(db, `games/${idGame}/reactionCurrentRoundId`),
         (current) => {
@@ -550,6 +553,11 @@ const ReactionBattle = ({
       );
       if (!committed) throw new Error("Reaction round already active");
     } catch {
+      if (roundCreated) {
+        await remove(
+          ref(db, `games/${idGame}/reactionRounds/${roundId}`)
+        ).catch(() => undefined);
+      }
       setTransitionError(t("Unable to start the round. Try again."));
     } finally {
       setPendingTransition(null);
@@ -676,6 +684,8 @@ const ReactionBattle = ({
         await persistResult(result);
         logReactionInput(result);
         resultPersisted = true;
+      } catch {
+        setTransitionError(t("Unable to save your reaction. Try again."));
       } finally {
         if (!resultPersisted) {
           submittingRef.current = false;
