@@ -78,6 +78,7 @@ export const useRoomGame = (): UseRoomGameReturn => {
     setHasEnteredPassword,
     hasEnteredPassword
   } = useGame();
+  const joiningRoomRef = useRef<string | null>(null);
 
   const latestGameRef = useRef(currentGame);
   const roomStats = useRef<RoomStats>({
@@ -502,13 +503,28 @@ export const useRoomGame = (): UseRoomGameReturn => {
 
   const addNewUserToDB = (game: Game) => {
     if (gUser?.uid) {
+      if (game.listUsers.some((player) => player.key === gUser.uid)) {
+        joiningRoomRef.current = null;
+        return;
+      }
+
+      const joinKey = `${game.key}:${gUser.uid}`;
+      if (joiningRoomRef.current === joinKey) {
+        return;
+      }
+
+      joiningRoomRef.current = joinKey;
       const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
-      set(refUser, {
-        clicks: 0,
-        rol: "visitor",
-        username: gameUser?.username,
-        enterDate: Timestamp.now()
-      });
+      void set(refUser, {
+          clicks: 0,
+          rol: "visitor",
+          username: gameUser?.username,
+          enterDate: Timestamp.now()
+        })
+        .catch(console.error)
+        .finally(() => {
+          joiningRoomRef.current = null;
+        });
     } else if (query.get("invite")) {
       if (Date.now() > Number(query.get("invite"))) {
         router.push("/");
@@ -581,7 +597,6 @@ export const useRoomGame = (): UseRoomGameReturn => {
               }
 
               await remove(roomRef);
-              await remove(ref(db, `roomHostDisconnects/${gameKey}`));
             });
         })()
       : remove(roomRef);
