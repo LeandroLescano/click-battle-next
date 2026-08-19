@@ -90,8 +90,7 @@ export const clearHostDisconnectSignal = async (
   db: Database,
   roomId: string,
   sessionId: string
-) =>
-  remove(ref(db, getHostDisconnectSignalPath(roomId, sessionId)));
+) => remove(ref(db, getHostDisconnectSignalPath(roomId, sessionId)));
 
 export const bootstrapLegacyHostLease = async (
   db: Database,
