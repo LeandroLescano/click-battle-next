@@ -1,9 +1,9 @@
 import {
   Database,
+  remove,
   ref,
   runTransaction,
-  serverTimestamp,
-  update
+  serverTimestamp
 } from "firebase/database";
 
 import {HostLease, RawRoomLifecycleSnapshot} from "interfaces";
@@ -91,9 +91,7 @@ export const clearHostDisconnectSignal = async (
   roomId: string,
   sessionId: string
 ) =>
-  update(ref(db), {
-    [getHostDisconnectSignalPath(roomId, sessionId)]: null
-  });
+  remove(ref(db, getHostDisconnectSignalPath(roomId, sessionId)));
 
 export const bootstrapLegacyHostLease = async (
   db: Database,

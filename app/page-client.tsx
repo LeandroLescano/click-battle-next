@@ -19,10 +19,7 @@ import {WelcomeMessage} from "components-new/WelcomeMessage";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {Game, HostDisconnectSignal} from "interfaces";
-import {
-  deleteRoomIfStillStale,
-  partitionRoomSnapshots
-} from "lib/game/roomCleanup";
+import {partitionRoomSnapshots} from "lib/game/roomCleanup";
 import {
   estimateServerNow,
   useServerTimeOffset
@@ -128,8 +125,11 @@ const Home = () => {
       }
 
       const now = getServerNow();
-      const {nextEvaluationAt, staleRoomKeys, visibleEntries} =
-        partitionRoomSnapshots(list, disconnectSignals, now);
+      const {nextEvaluationAt, visibleEntries} = partitionRoomSnapshots(
+        list,
+        disconnectSignals,
+        now
+      );
       const games = visibleEntries
         .map(([key, rawGame]) => {
           if (!gameUser?.username) {
@@ -159,26 +159,6 @@ const Home = () => {
         .filter(Boolean) as Game[];
 
       setListGames(games);
-      staleRoomKeys.forEach((key) => {
-        const rawRoom = list[key];
-        const currentSessionId =
-          rawRoom?.hostLease &&
-          typeof rawRoom.hostLease === "object" &&
-          typeof rawRoom.hostLease.sessionId === "string"
-            ? rawRoom.hostLease.sessionId
-            : null;
-        const observedDisconnectedAt =
-          currentSessionId &&
-          disconnectSignals?.[key]?.[currentSessionId]?.disconnectedAt
-            ? disconnectSignals[key][currentSessionId].disconnectedAt
-            : null;
-
-        deleteRoomIfStillStale(db, key, getServerNow, {
-          expectedSessionId: currentSessionId,
-          observedDisconnectedAt
-        }).catch(console.error);
-      });
-
       if (nextEvaluationAt !== null) {
         evaluationTimeout = window.setTimeout(
           () => {

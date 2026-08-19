@@ -24,7 +24,6 @@ import {UseRoomGameReturn} from "interfaces/RoomGame";
 import {RoomStats} from "interfaces/RoomStats";
 import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 import {
-  bootstrapLegacyHostLease,
   clearHostDisconnectSignal,
   createHostSessionId,
   getHostDisconnectSignalPath,
@@ -33,7 +32,6 @@ import {
   renewHostLease
 } from "lib/game/hostLease";
 import {assessRoomLifecycle} from "lib/game/hostPresence";
-import {deleteRoomIfStillStale} from "lib/game/roomCleanup";
 import {
   estimateServerNow,
   useServerTimeOffset
@@ -245,9 +243,6 @@ export const useRoomGame = (): UseRoomGameReturn => {
           : null;
 
       if (!rawLease) {
-        await bootstrapLegacyHostLease(db, gameID, gUser.uid, sessionId).catch(
-          console.error
-        );
         stopHostHeartbeat();
         return;
       }
@@ -357,12 +352,8 @@ export const useRoomGame = (): UseRoomGameReturn => {
         scheduleLifecycleReevaluation(lifecycle.cleanupAt);
         syncHostLeaseOwnership(raw, parsedIsHost).catch(console.error);
 
-        if (!parsedIsHost && lifecycle.mayDelete) {
+          if (!parsedIsHost && lifecycle.mayDelete) {
           stopHostHeartbeat();
-          deleteRoomIfStillStale(db, gameID, getServerNow, {
-            expectedSessionId: lifecycle.expectedSessionId,
-            observedDisconnectedAt: lifecycle.observedDisconnectedAt
-          }).catch(console.error);
           router.replace("/");
           return;
         }
