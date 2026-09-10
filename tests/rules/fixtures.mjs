@@ -25,9 +25,16 @@ export const firestore = (uid, token = {}) =>
 export {doc, ref, remove, set, setDoc, update, updateDoc};
 
 export const room = ({mode = "reaction", roundStatus = "signal"} = {}) => ({
+  created: 1,
   ownerUser: {key: "host", username: "Host"},
-  hostLease: {ownerId: "host", sessionId: "session-1", claimedAt: 1, lastRenewedAt: 1},
+  hostLease: {
+    ownerId: "host",
+    sessionId: "session-1",
+    claimedAt: 1,
+    lastRenewedAt: 1
+  },
   gameMode: mode,
+  roomName: "Room",
   status: "lobby",
   settings: {maxUsers: 4, timer: 30},
   listUsers: {

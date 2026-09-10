@@ -32,7 +32,14 @@ const TEST_DATABASE_URL =
   process.env.databaseURL ||
   process.env.DATABASE_URL ||
   "https://click-battle-mp-default-rtdb.firebaseio.com";
-const TEST_PROJECT_ID = process.env.projectId || "click-battle-emulator";
+const databaseProjectId = new URL(TEST_DATABASE_URL).hostname
+  .split(".")[0]
+  .replace(/-default-rtdb$/, "");
+const TEST_PROJECT_ID =
+  process.env.projectId ||
+  firebaseConfig.projectId ||
+  databaseProjectId ||
+  "click-battle-emulator";
 
 const getTestDatabase = () => {
   const app =
@@ -73,8 +80,7 @@ const getTestAdminFirestore = () => {
   return getAdminFirestore(app);
 };
 
-const getTestAdminDatabase = () =>
-  getAdminDatabase(getTestAdminApp());
+const getTestAdminDatabase = () => getAdminDatabase(getTestAdminApp());
 
 class GenericPage {
   page: Page;
@@ -151,6 +157,10 @@ class GenericPage {
     await set(ref(getTestDatabase(), `games/${roomID}`), room);
   }
 
+  async setRawRoomAsAdmin(roomID: string, room: Record<string, unknown>) {
+    await getTestAdminDatabase().ref(`games/${roomID}`).set(room);
+  }
+
   async patchRoomLifecycle(roomID: string, lifecycle: RoomLifecycleSnapshot) {
     await update(ref(getTestDatabase(), `games/${roomID}`), lifecycle);
   }
@@ -168,15 +178,19 @@ class GenericPage {
   }
 
   async expireHostLease(roomID: string, ageMs = 91_000) {
-    const hostLease = await this.getHostLease(roomID);
+    const adminDatabase = getTestAdminDatabase();
+    const leaseRef = adminDatabase.ref(`games/${roomID}/hostLease`);
+    const hostLease = (await leaseRef.once("value")).val() as HostLease | null;
 
     if (!hostLease) {
       throw new Error(`Room ${roomID} does not have a host lease`);
     }
 
-    await this.setHostLease(roomID, {
-      ...hostLease,
-      lastRenewedAt: Date.now() - ageMs
+    const lastRenewedAt = Date.now() - ageMs;
+    await adminDatabase.ref().update({
+      [`games/${roomID}/created`]: lastRenewedAt - 1_000,
+      [`games/${roomID}/hostLease/claimedAt`]: lastRenewedAt - 1_000,
+      [`games/${roomID}/hostLease/lastRenewedAt`]: lastRenewedAt
     });
   }
 
@@ -274,6 +288,15 @@ class GenericPage {
       .get();
 
     return snapshot.exists;
+  }
+
+  async getRoomHistory(roomID: string) {
+    const snapshot = await getTestAdminFirestore()
+      .collection("rooms")
+      .doc(roomID)
+      .get();
+
+    return snapshot.exists ? snapshot.data() : null;
   }
 }
 

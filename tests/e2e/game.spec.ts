@@ -3,10 +3,12 @@ import {expect, test, type Page} from "./fixtures";
 const uniqueRoomName = (prefix: string) =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
-const getCurrentReactionRound = (room: {
-  reactionCurrentRoundId?: string | null;
-  reactionRounds?: Record<string, unknown>;
-} | null) => {
+const getCurrentReactionRound = (
+  room: {
+    reactionCurrentRoundId?: string | null;
+    reactionRounds?: Record<string, unknown>;
+  } | null
+) => {
   const roundId = room?.reactionCurrentRoundId;
 
   return roundId ? room?.reactionRounds?.[roundId] : undefined;
@@ -593,27 +595,7 @@ test.describe("Game", () => {
     });
   });
 
-  test.describe.skip(
-    "legacy rooms and viewer-driven cleanup are unsupported after the security rollout",
-    () => {
-  test("Should route legacy rooms without game mode to classic-speed", async ({
-    hostPage,
-    userPage: {page: userPage}
-  }) => {
-    const roomID = await hostPage.createRoom();
-    await hostPage.makeRoomLegacy(roomID);
-
-    await userPage.goto(`/game/${roomID}`);
-    await userPage.waitForURL(/\/game\//);
-
-    await expect(hostPage.page.getByText("Press start to play")).toBeVisible();
-    await hostPage.page.getByText("Start!").click();
-
-    await userPage.waitForTimeout(3000);
-    await expect(userPage.getByRole("button", {name: "Click"})).toBeVisible();
-  });
-
-  test("Should hide and delete a stale room from the modern room list", async ({
+  test("Should delete a stale room from the modern room list without history", async ({
     hostPage,
     userPage: {page: userPage}
   }) => {
@@ -627,268 +609,313 @@ test.describe("Game", () => {
     await expect(
       userPage.getByRole("button", {name: new RegExp(roomName, "i")})
     ).not.toBeVisible();
-    await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
-  });
-
-  test("Should reevaluate a disconnect grace deadline without another write", async ({
-    hostPage,
-    userPage: {page: userPage}
-  }) => {
-    const roomName = uniqueRoomName("disconnect-grace-room");
-    const roomID = await hostPage.createRoom({roomName});
-    const hostLease = await hostPage.getHostLease(roomID);
-
-    expect(hostLease).not.toBeNull();
-
-    await hostPage.page.close();
-    await hostPage.renewHostLease(roomID, Date.now() - 26_000);
-    await hostPage.setDisconnectSignal(
-      roomID,
-      hostLease!.sessionId,
-      Date.now() - 25_000
-    );
-    await userPage.goto("/");
-
-    const roomCard = userPage.getByRole("button", {
-      name: new RegExp(roomName, "i")
-    });
-    await expect(roomCard).toBeVisible();
-    await expect(roomCard).not.toBeVisible({timeout: 10_000});
-    await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
-  });
-
-  test("Should reject a stale room direct link before joining", async ({
-    hostPage,
-    userPage: {page: userPage}
-  }) => {
-    const roomName = uniqueRoomName("stale-room-direct");
-    const roomID = await hostPage.createRoom({roomName});
-    const hostLease = await hostPage.getHostLease(roomID);
-
-    expect(hostLease).not.toBeNull();
-
-    await hostPage.page.close();
-    await hostPage.renewHostLease(roomID, Date.now() - 32_000);
-    await hostPage.setDisconnectSignal(
-      roomID,
-      hostLease!.sessionId,
-      Date.now() - 31_000
-    );
-    await userPage.goto(`/game/${roomID}`);
-
-    await userPage.waitForURL("/");
-    await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
-  });
-
-  test("Should preserve a room when the host recovers before grace expires", async ({
-    hostPage,
-    userPage: {page: userPage}
-  }) => {
-    const roomName = uniqueRoomName("disconnect-grace-recovery");
-    const roomID = await hostPage.createRoom({roomName});
-    const hostLease = await hostPage.getHostLease(roomID);
-
-    expect(hostLease).not.toBeNull();
-
-    await hostPage.page.close();
-    await hostPage.renewHostLease(roomID, Date.now() - 26_000);
-    await hostPage.setDisconnectSignal(
-      roomID,
-      hostLease!.sessionId,
-      Date.now() - 25_000
-    );
-    await userPage.goto("/");
-
-    const roomCard = userPage.getByRole("button", {
-      name: new RegExp(roomName, "i")
-    });
-    await expect(roomCard).toBeVisible();
-
-    await hostPage.renewHostLease(roomID);
-    await hostPage.removeDisconnectSignals(roomID);
-    await userPage.waitForTimeout(6000);
-
-    await expect(roomCard).toBeVisible();
     await expect
-      .poll(() => hostPage.getDisconnectSignal(roomID, hostLease!.sessionId))
+      .poll(() => hostPage.getRoom(roomID), {timeout: 15_000})
       .toBeNull();
-    await hostPage.removeRoom(roomID);
+
+    expect(await hostPage.getRoomHistory(roomID)).toBeNull();
   });
 
-  test("Should replace the host session and ignore obsolete renewals and signals", async ({
+  test("Should resume an interrupted stale room cleanup", async ({
     hostPage,
     userPage: {page: userPage}
   }) => {
-    const roomName = uniqueRoomName("replacement-session-room");
-    const roomID = await hostPage.createRoom({roomName});
-    const initialLease = await hostPage.getHostLease(roomID);
-    const room = await hostPage.getRoom(roomID);
+    const roomID = `cleanup-recovery-${Date.now()}`;
+    const removed = Date.now() - 90_000;
 
-    expect(initialLease).not.toBeNull();
-    expect(room?.ownerUser?.key).toBeTruthy();
+    await hostPage.setRawRoomAsAdmin(roomID, {
+      cleanupTombstone: {
+        closedAt: removed,
+        version: 1
+      }
+    });
 
-    await hostPage.replaceHostLeaseSession(roomID, "obsolete-session");
+    await userPage.goto("/");
+
     await expect
-      .poll(async () => (await hostPage.getHostLease(roomID))?.sessionId)
-      .toBe(initialLease!.sessionId);
+      .poll(() => hostPage.getRoom(roomID), {timeout: 15_000})
+      .toBeNull();
+    expect(await hostPage.getRoomHistory(roomID)).toBeNull();
+  });
 
-    await hostPage.setDisconnectSignal(
-      roomID,
-      "obsolete-session",
-      Date.now() - 31_000
-    );
-    await userPage.goto("/");
-    await expect(
-      userPage.getByRole("button", {name: new RegExp(roomName, "i")})
-    ).toBeVisible();
+  test.describe("legacy room compatibility and lifecycle cleanup", () => {
+    test("Should route legacy rooms without game mode to classic-speed", async ({
+      hostPage,
+      userPage: {page: userPage}
+    }) => {
+      const roomID = await hostPage.createRoom();
+      await hostPage.makeRoomLegacy(roomID);
 
-    await expect(
-      hostPage.attemptLeaseRenewal(
+      await userPage.goto(`/game/${roomID}`);
+      await userPage.waitForURL(/\/game\//);
+
+      await expect(
+        hostPage.page.getByText("Press start to play")
+      ).toBeVisible();
+      await hostPage.page.getByText("Start!").click();
+
+      await userPage.waitForTimeout(3000);
+      await expect(userPage.getByRole("button", {name: "Click"})).toBeVisible();
+    });
+
+    test("Should reevaluate a disconnect grace deadline without another write", async ({
+      hostPage,
+      userPage: {page: userPage}
+    }) => {
+      const roomName = uniqueRoomName("disconnect-grace-room");
+      const roomID = await hostPage.createRoom({roomName});
+      const hostLease = await hostPage.getHostLease(roomID);
+
+      expect(hostLease).not.toBeNull();
+
+      await hostPage.page.close();
+      await hostPage.renewHostLease(roomID, Date.now() - 26_000);
+      await hostPage.setDisconnectSignal(
         roomID,
-        room!.ownerUser.key!,
-        "obsolete-session"
-      )
-    ).resolves.toBe(false);
-    await expect.poll(() => hostPage.getRoom(roomID)).not.toBeNull();
+        hostLease!.sessionId,
+        Date.now() - 25_000
+      );
+      await userPage.goto("/");
 
-    await hostPage.removeRoom(roomID);
-  });
+      const roomCard = userPage.getByRole("button", {
+        name: new RegExp(roomName, "i")
+      });
+      await expect(roomCard).toBeVisible();
+      await expect(roomCard).not.toBeVisible({timeout: 10_000});
+      await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
+    });
 
-  test("Should not recreate a room after deletion when an obsolete heartbeat arrives", async ({
-    hostPage,
-    userPage: {page: userPage}
-  }) => {
-    const roomName = uniqueRoomName("deleted-room-no-recreate");
-    const roomID = await hostPage.createRoom({roomName});
-    const initialLease = await hostPage.getHostLease(roomID);
-    const room = await hostPage.getRoom(roomID);
+    test("Should reject a stale room direct link before joining", async ({
+      hostPage,
+      userPage: {page: userPage}
+    }) => {
+      const roomName = uniqueRoomName("stale-room-direct");
+      const roomID = await hostPage.createRoom({roomName});
+      const hostLease = await hostPage.getHostLease(roomID);
 
-    expect(initialLease).not.toBeNull();
-    expect(room?.ownerUser?.key).toBeTruthy();
+      expect(hostLease).not.toBeNull();
 
-    await hostPage.page.close();
-    await hostPage.expireHostLease(roomID);
-    await userPage.goto("/");
-    await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
-
-    await expect(
-      hostPage.attemptLeaseRenewal(
+      await hostPage.page.close();
+      await hostPage.renewHostLease(roomID, Date.now() - 32_000);
+      await hostPage.setDisconnectSignal(
         roomID,
-        room!.ownerUser.key!,
-        initialLease!.sessionId
-      )
-    ).resolves.toBe(false);
-    await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
-  });
+        hostLease!.sessionId,
+        Date.now() - 31_000
+      );
+      await userPage.goto(`/game/${roomID}`);
 
-  test("Should preserve a young pre-lease room with only legacy host evidence", async ({
-    hostPage,
-    userPage: {page: userPage}
-  }) => {
-    const roomName = uniqueRoomName("young-legacy-presence");
-    const roomID = await hostPage.createRoom({roomName});
-
-    await hostPage.page.close();
-    await hostPage.patchRoomLifecycle(roomID, {
-      created: Date.now() - 60 * 60 * 1000,
-      hostLease: null,
-      hostConnectionId: "legacy-host-only",
-      hostDisconnectedAt: null
+      await userPage.waitForURL("/");
+      await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
     });
-    await userPage.goto("/");
 
-    await expect(
-      userPage.getByRole("button", {name: new RegExp(roomName, "i")})
-    ).toBeVisible();
-    await expect
-      .poll(async () => (await hostPage.getRoom(roomID))?.hostConnectionId)
-      .toBe("legacy-host-only");
-    await hostPage.removeRoom(roomID);
-  });
+    test("Should preserve a room when the host recovers before grace expires", async ({
+      hostPage,
+      userPage: {page: userPage}
+    }) => {
+      const roomName = uniqueRoomName("disconnect-grace-recovery");
+      const roomID = await hostPage.createRoom({roomName});
+      const hostLease = await hostPage.getHostLease(roomID);
 
-  test("Should bootstrap a lease when the authenticated owner opens a legacy room", async ({
-    hostPage
-  }) => {
-    const roomName = uniqueRoomName("legacy-bootstrap-room");
-    const roomID = await hostPage.createRoom({roomName});
+      expect(hostLease).not.toBeNull();
 
-    await hostPage.patchRoomLifecycle(roomID, {
-      hostLease: null,
-      hostConnectionId: "legacy-host-only",
-      hostDisconnectedAt: null
+      await hostPage.page.close();
+      await hostPage.renewHostLease(roomID, Date.now() - 26_000);
+      await hostPage.setDisconnectSignal(
+        roomID,
+        hostLease!.sessionId,
+        Date.now() - 25_000
+      );
+      await userPage.goto("/");
+
+      const roomCard = userPage.getByRole("button", {
+        name: new RegExp(roomName, "i")
+      });
+      await expect(roomCard).toBeVisible();
+
+      await hostPage.renewHostLease(roomID);
+      await hostPage.removeDisconnectSignals(roomID);
+      await userPage.waitForTimeout(6000);
+
+      await expect(roomCard).toBeVisible();
+      await expect
+        .poll(() => hostPage.getDisconnectSignal(roomID, hostLease!.sessionId))
+        .toBeNull();
+      await hostPage.removeRoom(roomID);
     });
-    await hostPage.page.goto(`/game/${roomID}`);
-    await hostPage.page.waitForURL(/\/game\//);
 
-    await expect.poll(() => hostPage.getHostLease(roomID)).not.toBeNull();
-    await hostPage.removeRoom(roomID);
-  });
+    test("Should replace the host session and ignore obsolete renewals and signals", async ({
+      hostPage,
+      userPage: {page: userPage}
+    }) => {
+      const roomName = uniqueRoomName("replacement-session-room");
+      const roomID = await hostPage.createRoom({roomName});
+      const initialLease = await hostPage.getHostLease(roomID);
+      const room = await hostPage.getRoom(roomID);
 
-  test("Should clean an old pre-lease room even when a stale hostConnectionId remains", async ({
-    hostPage,
-    userPage: {page: userPage}
-  }) => {
-    const roomName = uniqueRoomName("legacy-connection-ghost");
-    const roomID = await hostPage.createRoom({roomName});
+      expect(initialLease).not.toBeNull();
+      expect(room?.ownerUser?.key).toBeTruthy();
 
-    await hostPage.page.close();
-    await hostPage.patchRoomLifecycle(roomID, {
-      created: Date.now() - 25 * 60 * 60 * 1000,
-      hostLease: null,
-      hostConnectionId: "stale-legacy-connection",
-      hostDisconnectedAt: null
+      await hostPage.replaceHostLeaseSession(roomID, "obsolete-session");
+      await expect
+        .poll(async () => (await hostPage.getHostLease(roomID))?.sessionId)
+        .toBe(initialLease!.sessionId);
+
+      await hostPage.setDisconnectSignal(
+        roomID,
+        "obsolete-session",
+        Date.now() - 31_000
+      );
+      await userPage.goto("/");
+      await expect(
+        userPage.getByRole("button", {name: new RegExp(roomName, "i")})
+      ).toBeVisible();
+
+      await expect(
+        hostPage.attemptLeaseRenewal(
+          roomID,
+          room!.ownerUser.key!,
+          "obsolete-session"
+        )
+      ).resolves.toBe(false);
+      await expect.poll(() => hostPage.getRoom(roomID)).not.toBeNull();
+
+      await hostPage.removeRoom(roomID);
     });
-    await userPage.goto("/");
 
-    await expect(
-      userPage.getByRole("button", {name: new RegExp(roomName, "i")})
-    ).not.toBeVisible();
-    await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
-  });
+    test("Should not recreate a room after deletion when an obsolete heartbeat arrives", async ({
+      hostPage,
+      userPage: {page: userPage}
+    }) => {
+      const roomName = uniqueRoomName("deleted-room-no-recreate");
+      const roomID = await hostPage.createRoom({roomName});
+      const initialLease = await hostPage.getHostLease(roomID);
+      const room = await hostPage.getRoom(roomID);
 
-  test("Should clean a legacy ghost room from the modern list without history", async ({
-    hostPage,
-    userPage: {page: userPage}
-  }) => {
-    const roomName = uniqueRoomName("legacy-ghost-modern");
-    const roomID = await hostPage.createRoom({roomName});
+      expect(initialLease).not.toBeNull();
+      expect(room?.ownerUser?.key).toBeTruthy();
 
-    await hostPage.page.close();
-    await hostPage.patchRoomLifecycle(roomID, {
-      created: Date.now() - 25 * 60 * 60 * 1000,
-      hostLease: null,
-      hostConnectionId: null,
-      hostDisconnectedAt: null
+      await hostPage.page.close();
+      await hostPage.expireHostLease(roomID);
+      await userPage.goto("/");
+      await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
+
+      await expect(
+        hostPage.attemptLeaseRenewal(
+          roomID,
+          room!.ownerUser.key!,
+          initialLease!.sessionId
+        )
+      ).resolves.toBe(false);
+      await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
     });
-    await userPage.goto("/");
 
-    await expect(
-      userPage.getByRole("button", {name: new RegExp(roomName, "i")})
-    ).not.toBeVisible();
-    await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
-    expect(await hostPage.hasRoomHistory(roomID)).toBe(false);
-  });
+    test("Should preserve a young pre-lease room with only legacy host evidence", async ({
+      hostPage,
+      userPage: {page: userPage}
+    }) => {
+      const roomName = uniqueRoomName("young-legacy-presence");
+      const roomID = await hostPage.createRoom({roomName});
 
-  test("Should clean a concurrent legacy ghost room idempotently", async ({
-    hostPage,
-    userPage: {page: userPage}
-  }) => {
-    const roomName = uniqueRoomName("legacy-ghost-concurrent");
-    const roomID = await hostPage.createRoom({roomName});
+      await hostPage.page.close();
+      await hostPage.patchRoomLifecycle(roomID, {
+        created: Date.now() - 60 * 60 * 1000,
+        hostLease: null,
+        hostConnectionId: "legacy-host-only",
+        hostDisconnectedAt: null
+      });
+      await userPage.goto("/");
 
-    await hostPage.page.close();
-    await hostPage.patchRoomLifecycle(roomID, {
-      created: Date.now() - 25 * 60 * 60 * 1000,
-      hostLease: null,
-      hostConnectionId: null,
-      hostDisconnectedAt: null
+      await expect(
+        userPage.getByRole("button", {name: new RegExp(roomName, "i")})
+      ).toBeVisible();
+      await expect
+        .poll(async () => (await hostPage.getRoom(roomID))?.hostConnectionId)
+        .toBe("legacy-host-only");
+      await hostPage.removeRoom(roomID);
     });
-    const secondViewer = await userPage.context().newPage();
 
-    await Promise.all([userPage.goto("/"), secondViewer.goto("/")]);
-    await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
-    await secondViewer.close();
+    test("Should bootstrap a lease when the authenticated owner opens a legacy room", async ({
+      hostPage
+    }) => {
+      const roomName = uniqueRoomName("legacy-bootstrap-room");
+      const roomID = await hostPage.createRoom({roomName});
+
+      await hostPage.patchRoomLifecycle(roomID, {
+        hostLease: null,
+        hostConnectionId: "legacy-host-only",
+        hostDisconnectedAt: null
+      });
+      await hostPage.page.goto(`/game/${roomID}`);
+      await hostPage.page.waitForURL(/\/game\//);
+
+      await expect.poll(() => hostPage.getHostLease(roomID)).not.toBeNull();
+      await hostPage.removeRoom(roomID);
+    });
+
+    test("Should clean an old pre-lease room even when a stale hostConnectionId remains", async ({
+      hostPage,
+      userPage: {page: userPage}
+    }) => {
+      const roomName = uniqueRoomName("legacy-connection-ghost");
+      const roomID = await hostPage.createRoom({roomName});
+
+      await hostPage.page.close();
+      await hostPage.patchRoomLifecycle(roomID, {
+        created: Date.now() - 25 * 60 * 60 * 1000,
+        hostLease: null,
+        hostConnectionId: "stale-legacy-connection",
+        hostDisconnectedAt: null
+      });
+      await userPage.goto("/");
+
+      await expect(
+        userPage.getByRole("button", {name: new RegExp(roomName, "i")})
+      ).not.toBeVisible();
+      await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
+    });
+
+    test("Should clean a legacy ghost room from the modern list without history", async ({
+      hostPage,
+      userPage: {page: userPage}
+    }) => {
+      const roomName = uniqueRoomName("legacy-ghost-modern");
+      const roomID = await hostPage.createRoom({roomName});
+
+      await hostPage.page.close();
+      await hostPage.patchRoomLifecycle(roomID, {
+        created: Date.now() - 25 * 60 * 60 * 1000,
+        hostLease: null,
+        hostConnectionId: null,
+        hostDisconnectedAt: null
+      });
+      await userPage.goto("/");
+
+      await expect(
+        userPage.getByRole("button", {name: new RegExp(roomName, "i")})
+      ).not.toBeVisible();
+      await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
+      expect(await hostPage.hasRoomHistory(roomID)).toBe(false);
+    });
+
+    test("Should clean a concurrent legacy ghost room idempotently", async ({
+      hostPage,
+      userPage: {page: userPage}
+    }) => {
+      const roomName = uniqueRoomName("legacy-ghost-concurrent");
+      const roomID = await hostPage.createRoom({roomName});
+
+      await hostPage.page.close();
+      await hostPage.patchRoomLifecycle(roomID, {
+        created: Date.now() - 25 * 60 * 60 * 1000,
+        hostLease: null,
+        hostConnectionId: null,
+        hostDisconnectedAt: null
+      });
+      const secondViewer = await userPage.context().newPage();
+
+      await Promise.all([userPage.goto("/"), secondViewer.goto("/")]);
+      await expect.poll(() => hostPage.getRoom(roomID)).toBeNull();
+      await secondViewer.close();
+    });
   });
-    }
-  );
 });
