@@ -1,6 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires, no-undef
 const {withSentryConfig} = require("@sentry/nextjs");
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
+const {getRobotsHeadersForVercelEnv} = require("./lib/seo/noindexHeaders.cjs");
+
 /* eslint-disable no-undef */
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -27,6 +30,9 @@ const nextConfig = {
       process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID,
     NEXT_PUBLIC_ADS_ENABLED: process.env.NEXT_PUBLIC_ADS_ENABLED,
     SENTRY_DSN: process.env.SENTRY_DSN
+  },
+  async headers() {
+    return getRobotsHeadersForVercelEnv(process.env.VERCEL_ENV);
   },
   webpack(config) {
     config.ignoreWarnings = [
