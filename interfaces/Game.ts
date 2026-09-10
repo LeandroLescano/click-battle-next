@@ -7,6 +7,7 @@ import {Timestamp} from "firebase/firestore";
 import {ReactionRound} from "./ReactionBattle";
 
 export type Game = ExternalGame & {
+  cleanupTombstone?: RoomCleanupTombstone;
   hostLease?: HostLease | null;
   hostConnectionId?: string;
   hostDisconnectedAt?: number | null;
@@ -25,7 +26,13 @@ export type HostDisconnectSignal = {
   disconnectedAt: number;
 };
 
+export type RoomCleanupTombstone = {
+  closedAt: number;
+  version: 1;
+};
+
 export type RoomLifecycleSnapshot = {
+  cleanupTombstone?: unknown;
   created?: unknown;
   hostLease?: unknown;
   hostDisconnectSignal?: unknown;
@@ -37,6 +44,7 @@ export type RoomLifecycleSnapshot = {
 };
 
 export type RawRoomLifecycleSnapshot = {
+  cleanupTombstone?: unknown;
   created?: unknown;
   hostLease?: unknown;
   hostConnectionId?: unknown;

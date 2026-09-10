@@ -1,8 +1,85 @@
 import {Database, ref, remove, runTransaction} from "firebase/database";
 
-import {HostDisconnectSignal, RoomLifecycleSnapshot} from "interfaces";
+import {
+  HostDisconnectSignal,
+  RoomCleanupTombstone,
+  RoomLifecycleSnapshot
+} from "interfaces";
 
-import {assessRoomLifecycle} from "./hostPresence";
+import {HOST_LEASE_EXPIRY_MS} from "./hostLease";
+import {
+  HOST_DISCONNECT_GRACE_MS,
+  LEGACY_ROOM_MAX_AGE_MS,
+  assessRoomLifecycle
+} from "./hostPresence";
+
+type RawRoomSnapshot = RoomLifecycleSnapshot & Record<string, unknown>;
+
+const finiteNumber = (value: unknown): number | null =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? value
+    : null;
+
+const parseCleanupTombstone = (room: unknown): RoomCleanupTombstone | null => {
+  if (!room || typeof room !== "object") {
+    return null;
+  }
+
+  const tombstone = (room as {cleanupTombstone?: unknown}).cleanupTombstone;
+
+  if (!tombstone || typeof tombstone !== "object") {
+    return null;
+  }
+
+  const candidate = tombstone as Partial<RoomCleanupTombstone>;
+  const closedAt = finiteNumber(candidate.closedAt);
+
+  return candidate.version === 1 && closedAt !== null
+    ? {closedAt, version: 1}
+    : null;
+};
+
+const getCleanupTimestamp = (
+  room: RawRoomSnapshot,
+  assessment: ReturnType<typeof assessRoomLifecycle>,
+  now: number
+) => {
+  if (
+    assessment.reason === "host-disconnected" &&
+    assessment.observedDisconnectedAt !== null
+  ) {
+    return assessment.observedDisconnectedAt + HOST_DISCONNECT_GRACE_MS;
+  }
+
+  const lease =
+    room.hostLease && typeof room.hostLease === "object"
+      ? (room.hostLease as Record<string, unknown>)
+      : null;
+  const lastRenewedAt = finiteNumber(lease?.lastRenewedAt);
+
+  if (assessment.reason === "lease-expired" && lastRenewedAt !== null) {
+    return lastRenewedAt + HOST_LEASE_EXPIRY_MS;
+  }
+
+  const created = finiteNumber(room.created);
+
+  if (assessment.reason === "legacy-age" && created !== null) {
+    return created + LEGACY_ROOM_MAX_AGE_MS;
+  }
+
+  return now;
+};
+
+const buildCleanupTombstone = (
+  room: RawRoomSnapshot,
+  assessment: ReturnType<typeof assessRoomLifecycle>,
+  now: number
+): RoomCleanupTombstone => {
+  return {
+    closedAt: getCleanupTimestamp(room, assessment, now),
+    version: 1
+  };
+};
 
 export type RoomSnapshotEntry<T extends RoomLifecycleSnapshot> = [string, T];
 
@@ -75,13 +152,24 @@ export const deleteRoomIfStillStale = async (
     observedDisconnectedAt?: number | null;
   }
 ) => {
+  let acceptedTombstone: RoomCleanupTombstone | null = null;
   const result = await runTransaction(
     ref(db, `games/${roomKey}`),
-    (currentRoom: RoomLifecycleSnapshot | null) => {
+    (currentRoom: RawRoomSnapshot | null) => {
+      acceptedTombstone = null;
+
       if (!currentRoom) {
         return;
       }
 
+      const existingTombstone = parseCleanupTombstone(currentRoom);
+
+      if (existingTombstone) {
+        acceptedTombstone = existingTombstone;
+        return;
+      }
+
+      const now = getServerNow();
       const assessment = assessRoomLifecycle(
         {
           ...currentRoom,
@@ -93,7 +181,7 @@ export const deleteRoomIfStillStale = async (
                 }
               : null
         },
-        getServerNow()
+        now
       );
 
       if (!assessment.mayDelete) {
@@ -115,14 +203,22 @@ export const deleteRoomIfStillStale = async (
         return;
       }
 
-      return null;
+      acceptedTombstone = buildCleanupTombstone(currentRoom, assessment, now);
+
+      return {cleanupTombstone: acceptedTombstone};
     },
     {applyLocally: false}
   );
 
-  if (result.committed) {
-    remove(ref(db, `roomHostDisconnects/${roomKey}`)).catch(console.error);
+  const tombstone =
+    parseCleanupTombstone(result.snapshot.val()) ?? acceptedTombstone;
+
+  if (!tombstone) {
+    return false;
   }
 
-  return result.committed;
+  await remove(ref(db, `games/${roomKey}`));
+  await remove(ref(db, `roomHostDisconnects/${roomKey}`)).catch(console.error);
+
+  return true;
 };

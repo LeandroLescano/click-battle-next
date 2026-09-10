@@ -24,6 +24,7 @@ import {UseRoomGameReturn} from "interfaces/RoomGame";
 import {RoomStats} from "interfaces/RoomStats";
 import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 import {
+  bootstrapLegacyHostLease,
   clearHostDisconnectSignal,
   createHostSessionId,
   getHostDisconnectSignalPath,
@@ -244,6 +245,9 @@ export const useRoomGame = (): UseRoomGameReturn => {
           : null;
 
       if (!rawLease) {
+        bootstrapLegacyHostLease(db, gameID, gUser.uid, sessionId).catch(
+          console.error
+        );
         stopHostHeartbeat();
         return;
       }
@@ -353,7 +357,7 @@ export const useRoomGame = (): UseRoomGameReturn => {
         scheduleLifecycleReevaluation(lifecycle.cleanupAt);
         syncHostLeaseOwnership(raw, parsedIsHost).catch(console.error);
 
-          if (!parsedIsHost && lifecycle.mayDelete) {
+        if (!parsedIsHost && lifecycle.mayDelete) {
           stopHostHeartbeat();
           router.replace("/");
           return;
@@ -516,11 +520,11 @@ export const useRoomGame = (): UseRoomGameReturn => {
       joiningRoomRef.current = joinKey;
       const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
       void set(refUser, {
-          clicks: 0,
-          rol: "visitor",
-          username: gameUser?.username,
-          enterDate: Timestamp.now()
-        })
+        clicks: 0,
+        rol: "visitor",
+        username: gameUser?.username,
+        enterDate: Timestamp.now()
+      })
         .catch(console.error)
         .finally(() => {
           joiningRoomRef.current = null;
