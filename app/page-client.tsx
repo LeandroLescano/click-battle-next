@@ -84,6 +84,14 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    if (params.get("entry_point") !== "click_speed_test") return;
+
+    logEvent(getAnalytics(), "click_speed_test_lobby_view", {
+      entry_point: "click_speed_test"
+    });
+  }, [params]);
+
+  useEffect(() => {
     let mounted = true;
     let latestList: Record<string, ListedGameSnapshot> | null = null;
     let latestSignals: Record<
