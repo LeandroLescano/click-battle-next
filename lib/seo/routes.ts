@@ -3,6 +3,7 @@ import type {MetadataRoute} from "next";
 export type SeoRouteKey =
   | "home"
   | "playOnline"
+  | "clickSpeedTest"
   | "ranking"
   | "privacyPolicy"
   | "termsOfService"
@@ -45,6 +46,17 @@ export const SEO_ROUTES: Record<SeoRouteKey, SeoRouteDefinition> = {
       "Learn how Click Battle rooms, game modes, and rankings work before jumping into a match with friends.",
     index: true,
     priority: 0.7,
+    changeFrequency: "weekly"
+  },
+  clickSpeedTest: {
+    path: "/click-speed-test",
+    canonicalPath: "/click-speed-test",
+    title: "Click Speed Test",
+    fullTitle: "Click Speed Test | Click Battle",
+    description:
+      "Test how fast you can click in 5 seconds, compare your score, and challenge a friend to an online Click Battle.",
+    index: true,
+    priority: 0.8,
     changeFrequency: "weekly"
   },
   ranking: {
@@ -99,6 +111,7 @@ export const SEO_ROUTES: Record<SeoRouteKey, SeoRouteDefinition> = {
 export const INDEXABLE_ROUTE_KEYS: SeoRouteKey[] = [
   "home",
   "playOnline",
+  "clickSpeedTest",
   "ranking",
   "privacyPolicy",
   "termsOfService"

@@ -6,6 +6,7 @@ export const LEGACY_ROOM_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 export type RoomLifecycleState = "active" | "pending" | "stale" | "unknown";
 
 export type RoomLifecycleReason =
+  | "cleanup-pending"
   | "lease-active"
   | "disconnect-grace"
   | "host-disconnected"
@@ -23,6 +24,7 @@ export type RoomLifecycleAssessment = {
 };
 
 type RoomPresenceSnapshot = {
+  cleanupTombstone?: unknown;
   created?: unknown;
   hostConnectionId?: unknown;
   hostDisconnectedAt?: unknown;
@@ -76,10 +78,31 @@ const isHostDisconnectSignal = (
   return isFiniteTimestamp(candidate.disconnectedAt);
 };
 
+const isCleanupTombstone = (value: unknown) => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as {closedAt?: unknown; version?: unknown};
+
+  return candidate.version === 1 && isFiniteTimestamp(candidate.closedAt);
+};
+
 export const assessRoomLifecycle = (
   room: RoomPresenceSnapshot,
   now = Date.now()
 ): RoomLifecycleAssessment => {
+  if (isCleanupTombstone(room.cleanupTombstone)) {
+    return {
+      cleanupAt: null,
+      expectedSessionId: null,
+      mayDelete: true,
+      observedDisconnectedAt: null,
+      reason: "cleanup-pending",
+      state: "stale"
+    };
+  }
+
   const lease = isHostLease(room.hostLease) ? room.hostLease : null;
   const matchingDisconnectSignal = isHostDisconnectSignal(
     room.hostDisconnectSignal

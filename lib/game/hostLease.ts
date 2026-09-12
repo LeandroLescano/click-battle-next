@@ -1,12 +1,12 @@
 import {
   Database,
+  remove,
   ref,
   runTransaction,
-  serverTimestamp,
-  update
+  serverTimestamp
 } from "firebase/database";
 
-import {HostLease, RawRoomLifecycleSnapshot} from "interfaces";
+import {HostLease} from "interfaces";
 
 export const HOST_LEASE_HEARTBEAT_MS = 20 * 1000;
 export const HOST_LEASE_EXPIRY_MS = 90 * 1000;
@@ -90,10 +90,7 @@ export const clearHostDisconnectSignal = async (
   db: Database,
   roomId: string,
   sessionId: string
-) =>
-  update(ref(db), {
-    [getHostDisconnectSignalPath(roomId, sessionId)]: null
-  });
+) => remove(ref(db, getHostDisconnectSignalPath(roomId, sessionId)));
 
 export const bootstrapLegacyHostLease = async (
   db: Database,
@@ -102,20 +99,13 @@ export const bootstrapLegacyHostLease = async (
   sessionId: string
 ) =>
   runTransaction(
-    ref(db, `games/${roomId}`),
-    (currentRoom: RawRoomLifecycleSnapshot | null) => {
-      if (!currentRoom || currentRoom.hostLease) {
+    ref(db, getHostLeasePath(roomId)),
+    (currentLease: HostLease | null) => {
+      if (currentLease) {
         return;
       }
 
-      if (currentRoom.ownerUser?.key !== ownerId) {
-        return;
-      }
-
-      return {
-        ...currentRoom,
-        hostLease: buildInitialHostLease(ownerId, sessionId)
-      };
+      return buildInitialHostLease(ownerId, sessionId);
     },
     {applyLocally: false}
   );

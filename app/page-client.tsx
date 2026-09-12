@@ -84,6 +84,14 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    if (params.get("entry_point") !== "click_speed_test") return;
+
+    logEvent(getAnalytics(), "click_speed_test_lobby_view", {
+      entry_point: "click_speed_test"
+    });
+  }, [params]);
+
+  useEffect(() => {
     let mounted = true;
     let latestList: Record<string, ListedGameSnapshot> | null = null;
     let latestSignals: Record<
@@ -91,6 +99,9 @@ const Home = () => {
       Record<string, HostDisconnectSignal>
     > | null = null;
     let evaluationTimeout: number | null = null;
+    let cleanupRetryTimeout: number | null = null;
+    let cleanupInFlight = false;
+    const pendingCleanupRoomKeys = new Set<string>();
 
     //Get rooms of games from DB
     if (gameUser?.username) {
@@ -104,6 +115,88 @@ const Home = () => {
       if (evaluationTimeout !== null) {
         window.clearTimeout(evaluationTimeout);
         evaluationTimeout = null;
+      }
+    };
+
+    const clearCleanupRetryTimeout = () => {
+      if (cleanupRetryTimeout !== null) {
+        window.clearTimeout(cleanupRetryTimeout);
+        cleanupRetryTimeout = null;
+      }
+    };
+
+    const flushStaleRoomCleanup = async () => {
+      if (
+        !mounted ||
+        cleanupInFlight ||
+        pendingCleanupRoomKeys.size === 0 ||
+        !user
+      ) {
+        return;
+      }
+
+      cleanupInFlight = true;
+      clearCleanupRetryTimeout();
+      const roomIds = Array.from(pendingCleanupRoomKeys).slice(0, 50);
+      roomIds.forEach((roomId) => pendingCleanupRoomKeys.delete(roomId));
+
+      try {
+        let nextRoomIndex = 0;
+        const failedRoomIds: string[] = [];
+        const cleanupWorker = async () => {
+          while (nextRoomIndex < roomIds.length) {
+            const roomId = roomIds[nextRoomIndex++];
+            const rawRoom = latestList?.[roomId];
+            const lease =
+              rawRoom?.hostLease && typeof rawRoom.hostLease === "object"
+                ? (rawRoom.hostLease as {sessionId?: unknown})
+                : null;
+            const sessionId =
+              typeof lease?.sessionId === "string" ? lease.sessionId : null;
+            const disconnectedAt = sessionId
+              ? latestSignals?.[roomId]?.[sessionId]?.disconnectedAt ?? null
+              : null;
+
+            try {
+              await deleteRoomIfStillStale(db, roomId, getServerNow, {
+                expectedSessionId: sessionId,
+                observedDisconnectedAt: disconnectedAt
+              });
+            } catch (cleanupError) {
+              console.error(cleanupError);
+              failedRoomIds.push(roomId);
+            }
+          }
+        };
+
+        await Promise.all(
+          Array.from({length: Math.min(6, roomIds.length)}, () =>
+            cleanupWorker()
+          )
+        );
+
+        if (failedRoomIds.length > 0) {
+          failedRoomIds.forEach((roomId) => pendingCleanupRoomKeys.add(roomId));
+          throw new Error("One or more stale rooms could not be cleaned");
+        }
+      } catch (cleanupError) {
+        console.error(cleanupError);
+        if (mounted) {
+          cleanupRetryTimeout = window.setTimeout(() => {
+            cleanupRetryTimeout = null;
+            void flushStaleRoomCleanup();
+          }, 30_000);
+        }
+      } finally {
+        cleanupInFlight = false;
+
+        if (
+          mounted &&
+          cleanupRetryTimeout === null &&
+          pendingCleanupRoomKeys.size > 0
+        ) {
+          void flushStaleRoomCleanup();
+        }
       }
     };
 
@@ -159,25 +252,8 @@ const Home = () => {
         .filter(Boolean) as Game[];
 
       setListGames(games);
-      staleRoomKeys.forEach((key) => {
-        const rawRoom = list[key];
-        const currentSessionId =
-          rawRoom?.hostLease &&
-          typeof rawRoom.hostLease === "object" &&
-          typeof rawRoom.hostLease.sessionId === "string"
-            ? rawRoom.hostLease.sessionId
-            : null;
-        const observedDisconnectedAt =
-          currentSessionId &&
-          disconnectSignals?.[key]?.[currentSessionId]?.disconnectedAt
-            ? disconnectSignals[key][currentSessionId].disconnectedAt
-            : null;
-
-        deleteRoomIfStillStale(db, key, getServerNow, {
-          expectedSessionId: currentSessionId,
-          observedDisconnectedAt
-        }).catch(console.error);
-      });
+      staleRoomKeys.forEach((roomKey) => pendingCleanupRoomKeys.add(roomKey));
+      void flushStaleRoomCleanup();
 
       if (nextEvaluationAt !== null) {
         evaluationTimeout = window.setTimeout(
@@ -202,10 +278,11 @@ const Home = () => {
     return () => {
       mounted = false;
       clearEvaluationTimeout();
+      clearCleanupRetryTimeout();
       unsubscribeRooms();
       unsubscribeSignals();
     };
-  }, [db, gameUser?.username, serverTimeOffset]);
+  }, [db, gameUser?.username, serverTimeOffset, user]);
 
   //Function for enter room
   const handleEnterGame = (game: Game) => {

@@ -33,7 +33,6 @@ import {
   renewHostLease
 } from "lib/game/hostLease";
 import {assessRoomLifecycle} from "lib/game/hostPresence";
-import {deleteRoomIfStillStale} from "lib/game/roomCleanup";
 import {
   estimateServerNow,
   useServerTimeOffset
@@ -80,6 +79,7 @@ export const useRoomGame = (): UseRoomGameReturn => {
     setHasEnteredPassword,
     hasEnteredPassword
   } = useGame();
+  const joiningRoomRef = useRef<string | null>(null);
 
   const latestGameRef = useRef(currentGame);
   const roomStats = useRef<RoomStats>({
@@ -245,7 +245,7 @@ export const useRoomGame = (): UseRoomGameReturn => {
           : null;
 
       if (!rawLease) {
-        await bootstrapLegacyHostLease(db, gameID, gUser.uid, sessionId).catch(
+        bootstrapLegacyHostLease(db, gameID, gUser.uid, sessionId).catch(
           console.error
         );
         stopHostHeartbeat();
@@ -359,10 +359,6 @@ export const useRoomGame = (): UseRoomGameReturn => {
 
         if (!parsedIsHost && lifecycle.mayDelete) {
           stopHostHeartbeat();
-          deleteRoomIfStillStale(db, gameID, getServerNow, {
-            expectedSessionId: lifecycle.expectedSessionId,
-            observedDisconnectedAt: lifecycle.observedDisconnectedAt
-          }).catch(console.error);
           router.replace("/");
           return;
         }
@@ -511,13 +507,28 @@ export const useRoomGame = (): UseRoomGameReturn => {
 
   const addNewUserToDB = (game: Game) => {
     if (gUser?.uid) {
+      if (game.listUsers.some((player) => player.key === gUser.uid)) {
+        joiningRoomRef.current = null;
+        return;
+      }
+
+      const joinKey = `${game.key}:${gUser.uid}`;
+      if (joiningRoomRef.current === joinKey) {
+        return;
+      }
+
+      joiningRoomRef.current = joinKey;
       const refUser = ref(db, `games/${game.key}/listUsers/${gUser.uid}`);
-      set(refUser, {
+      void set(refUser, {
         clicks: 0,
         rol: "visitor",
         username: gameUser?.username,
         enterDate: Timestamp.now()
-      });
+      })
+        .catch(console.error)
+        .finally(() => {
+          joiningRoomRef.current = null;
+        });
     } else if (query.get("invite")) {
       if (Date.now() > Number(query.get("invite"))) {
         router.push("/");
@@ -590,7 +601,6 @@ export const useRoomGame = (): UseRoomGameReturn => {
               }
 
               await remove(roomRef);
-              await remove(ref(db, `roomHostDisconnects/${gameKey}`));
             });
         })()
       : remove(roomRef);
