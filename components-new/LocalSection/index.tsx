@@ -1,6 +1,12 @@
 import {AntiClickCheat, GameUser} from "@leandrolescano/click-battle-core";
 import {getAnalytics, logEvent} from "firebase/analytics";
-import {getDatabase, ref, serverTimestamp, set, update} from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  serverTimestamp,
+  set,
+  update
+} from "firebase/database";
 import {useRouter} from "next/navigation";
 import {useMemo, useRef, useState} from "react";
 import {Trans, useTranslation} from "react-i18next";
@@ -166,54 +172,56 @@ function LocalSection({idGame, localUser}: LocalSectionProps) {
   }, [start, showCountdown, isHost, localUser.clicks, i18n.language]);
 
   return (
-    <div className="w-full md:w-1/2 flex flex-col px-4 md:px-0">
-      <h4 className="text-2xl md:text-5xl text-center md:text-start font-extrabold tracking-wide mb-4 md:mb-12 text-primary-600 dark:text-primary-200">
-        {importantInfo}
-      </h4>
-      <AdditionalInfo />
-      <div>
-        {(!isHost || start || showCountdown) && (
-          <Button
-            className="text-xl md:text-4xl w-full md:w-9/12 px-3.5 md:px-5 py-3 md:py-4"
-            disabled={!start || disableUI}
-            onClick={handleClick}
-          >
-            Click
-          </Button>
+    <>
+      <div className="w-full md:w-1/2 flex flex-col px-4 md:px-0">
+        <h4 className="text-2xl md:text-5xl text-center md:text-start font-extrabold tracking-wide mb-4 md:mb-12 text-primary-600 dark:text-primary-200">
+          {importantInfo}
+        </h4>
+        <AdditionalInfo />
+        <div>
+          {(!isHost || start || showCountdown) && (
+            <Button
+              className="text-xl md:text-4xl w-full md:w-9/12 px-3.5 md:px-5 py-3 md:py-4"
+              disabled={!start || disableUI}
+              onClick={handleClick}
+            >
+              Click
+            </Button>
+          )}
+          {isHost && !start && !showCountdown && (
+            <Button
+              className="text-xl md:text-4xl w-full md:w-9/12 px-3.5 md:px-5 py-3 md:py-4"
+              disabled={cantStart}
+              onClick={handleStart}
+            >
+              {t("Start!")}
+            </Button>
+          )}
+          <h2 className="flex items-center gap-3 md:gap-6 font-semibold text-3xl md:text-6xl mt-5 md:mt-10 justify-center md:justify-start">
+            <Watch /> 00:{String(remainingTime).padStart(2, "0")}
+          </h2>
+        </div>
+        {showGameplayAd && (
+          <Card className="relative mt-auto mr-auto overflow-hidden p-0 pt-5">
+            <span className="absolute left-2 top-1 text-[10px] font-bold uppercase leading-none text-primary-600">
+              {AD_LABEL}
+            </span>
+            <GoogleAdUnit placement={classicAdPlacement}>
+              <ins
+                className="adsbygoogle"
+                style={{
+                  display: "inline-block",
+                  width: classicAdPlacement.width,
+                  height: classicAdPlacement.height
+                }}
+                data-ad-client={ADSENSE_PUBLISHER_ID}
+                data-ad-slot={classicAdPlacement.slot}
+              ></ins>
+            </GoogleAdUnit>
+          </Card>
         )}
-        {isHost && !start && !showCountdown && (
-          <Button
-            className="text-xl md:text-4xl w-full md:w-9/12 px-3.5 md:px-5 py-3 md:py-4"
-            disabled={cantStart}
-            onClick={handleStart}
-          >
-            {t("Start!")}
-          </Button>
-        )}
-        <h2 className="flex items-center gap-3 md:gap-6 font-semibold text-3xl md:text-6xl mt-5 md:mt-10 justify-center md:justify-start">
-          <Watch /> 00:{String(remainingTime).padStart(2, "0")}
-        </h2>
       </div>
-      {showGameplayAd && (
-        <Card className="relative mt-auto mr-auto overflow-hidden p-0 pt-5">
-          <span className="absolute left-2 top-1 text-[10px] font-bold uppercase leading-none text-primary-600">
-            {AD_LABEL}
-          </span>
-          <GoogleAdUnit placement={classicAdPlacement}>
-            <ins
-              className="adsbygoogle"
-              style={{
-                display: "inline-block",
-                width: classicAdPlacement.width,
-                height: classicAdPlacement.height
-              }}
-              data-ad-client={ADSENSE_PUBLISHER_ID}
-              data-ad-slot={classicAdPlacement.slot}
-            ></ins>
-          </GoogleAdUnit>
-        </Card>
-      )}
-    </div>
+    </>
   );
 }
 

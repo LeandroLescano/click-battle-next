@@ -93,7 +93,15 @@ class GenericPage {
     password?: string;
     gameMode?: "classic-speed" | "reaction";
     roomName?: string;
+    keepInvitePrompt?: boolean;
   }): Promise<string> {
+    const invitePrompt = this.page.getByTestId("room-invite-prompt");
+    if (await invitePrompt.isVisible()) {
+      await invitePrompt
+        .getByRole("button", {name: "Continue waiting"})
+        .click();
+    }
+
     if (options?.roomName) {
       await this.page
         .getByRole("textbox", {name: "Room name"})
@@ -107,9 +115,9 @@ class GenericPage {
     }
 
     if (options?.gameMode) {
-      await this.page
-        .getByRole("combobox", {name: "Game mode"})
-        .selectOption(options.gameMode);
+      const modeName =
+        options.gameMode === "reaction" ? "Reaction Battle" : "Speed Battle";
+      await this.page.getByRole("radio", {name: modeName}).click({force: true});
     }
 
     const createButton = this.page.getByRole("button", {name: "Create game"});
@@ -117,6 +125,14 @@ class GenericPage {
     await Promise.all([this.page.waitForURL(/\/game\//), createButton.click()]);
 
     const roomID = this.page.url().split("/").pop();
+
+    if (!options?.keepInvitePrompt) {
+      const continueWaiting = this.page.getByRole("button", {
+        name: "Continue waiting"
+      });
+      await expect(continueWaiting).toBeVisible();
+      await continueWaiting.click();
+    }
 
     return roomID || "";
   }

@@ -823,7 +823,7 @@ const ReactionBattle = ({
         className:
           "h-full w-full px-4 py-3 text-xl md:px-6 md:py-4 md:text-3xl",
         disabled: false,
-        label: t("Start next round"),
+        label: t("Rematch"),
         onClick: handleStartRound,
         secondaryAction: {
           className:

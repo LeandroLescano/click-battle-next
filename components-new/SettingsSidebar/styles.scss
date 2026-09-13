@@ -5,20 +5,32 @@
   top: 0;
   right: 0;
   height: 100%;
-  min-width: 0;
-  transition: 0.6s all cubic-bezier(0.51, 0.22, 0.55, 0.32);
-  width: 0;
+  width: 100vw;
   overflow: hidden;
+  pointer-events: none;
+  transform: translate3d(100%, 0, 0);
+  transition:
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 360ms;
+  visibility: hidden;
+  will-change: transform;
 
   &.active {
-    width: 100vw;
+    pointer-events: auto;
+    transform: translate3d(0, 0, 0);
+    transition-delay: 0s;
+    visibility: visible;
   }
 }
 
 @media screen and (min-width: 640px) {
   .sidebar {
-    &.active {
-      width: 470px;
-    }
+    width: 470px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
   }
 }
