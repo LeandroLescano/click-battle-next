@@ -40,7 +40,7 @@
         },
         "listUsers": {
           "$uid": {
-            ".write": "(auth != null && auth.uid === $uid && !data.exists() && newData.exists()) || (auth != null && auth.uid === $uid && data.exists() && !newData.exists())",
+            ".write": "auth != null && auth.uid === $uid && ((!data.exists() && newData.exists()) || !newData.exists())",
             ".validate": "!newData.exists() || (newData.child('username').isString() && newData.child('rol').isString() && newData.child('clicks').isNumber())",
             "clicks": {
               ".write": "auth != null && (auth.uid === $uid || root.child('games').child($roomId).child('ownerUser/key').val() === auth.uid) && root.child('games').child($roomId).child('gameMode').val() === 'classic-speed' && newData.isNumber()"

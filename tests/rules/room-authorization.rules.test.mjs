@@ -77,6 +77,12 @@ test("existing rooms cannot be replaced and owner identity is immutable", async 
   );
 });
 
+test("a player may remove an absent membership for disconnect cleanup", async () => {
+  await assertSucceeds(
+    remove(ref(rtdb("new-guest"), "games/room-1/listUsers/new-guest"))
+  );
+});
+
 test("only the owner renews the host lease and writes its disconnect signal", async () => {
   await assertSucceeds(
     update(ref(rtdb("host"), "games/room-1/hostLease"), {
