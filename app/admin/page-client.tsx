@@ -40,6 +40,7 @@ import {useAuth} from "contexts/AuthContext";
 import {DesignPreference} from "interfaces/DesignPreferences";
 import {RoomStats} from "interfaces/RoomStats";
 import {DEFAULT_GAME_MODE, getGameModeLabelKey} from "lib/game/gameModes";
+import {getRoomGameModeBreakdown} from "lib/game/roomGameModes";
 import {getDesignPreferences} from "services/experience";
 import {getRoomStats} from "services/rooms";
 import {minutesBetween} from "utils/date";
@@ -285,6 +286,7 @@ const hasChartValues = (data: {datasets: {data: unknown[]}[]}) =>
 
 const AdminClientPage = () => {
   const [rooms, setRooms] = useState<RoomStats[]>([]);
+  const [roomsError, setRoomsError] = useState<string | null>(null);
   const [currentRooms, setCurrentRooms] = useState(0);
   const [designPreferences, setDesignPreferences] = useState<
     DesignPreference[]
@@ -316,9 +318,16 @@ const AdminClientPage = () => {
       return;
     }
 
-    getRoomStats(effectiveStartDate, effectiveEndDate).then((rooms) =>
-      setRooms(rooms)
-    );
+    setRooms([]);
+    setRoomsError(null);
+    getRoomStats(effectiveStartDate, effectiveEndDate)
+      .then((rooms) => setRooms(rooms))
+      .catch((error) => {
+        console.error(error);
+        setRoomsError(
+          "Could not load room history. Check the browser console."
+        );
+      });
     const refGames = ref(getDatabase(), `games`);
     const unsubscribe = onValue(refGames, (snapshot) => {
       setCurrentRooms(snapshot.size);
@@ -756,6 +765,15 @@ const AdminClientPage = () => {
           </div>
         </section>
 
+        {roomsError && (
+          <p
+            className="rounded-md border border-red-500/50 bg-red-100 px-4 py-3 text-sm font-semibold text-red-900 dark:bg-red-950/70 dark:text-red-100"
+            role="alert"
+          >
+            {roomsError}
+          </p>
+        )}
+
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           <StatCard
             helper="Realtime database"
@@ -941,7 +959,7 @@ const AdminClientPage = () => {
                     Name
                   </th>
                   <th className="w-[13%] px-4 py-3" scope="col">
-                    Mode
+                    Played modes
                   </th>
                   <th className="w-[7%] px-3 py-3 text-right" scope="col">
                     Peak
@@ -991,7 +1009,18 @@ const AdminClientPage = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <ModePill mode={getModeLabel(room.gameMode)} />
+                        <div className="flex flex-wrap gap-1.5">
+                          {getRoomGameModeBreakdown(room).map(
+                            ({gameMode, gamesPlayed}) => (
+                              <ModePill
+                                key={gameMode}
+                                mode={`${getModeLabel(gameMode)}${
+                                  gamesPlayed > 0 ? ` · ${gamesPlayed}` : ""
+                                }`}
+                              />
+                            )
+                          )}
+                        </div>
                       </td>
                       <td className="px-3 py-3 text-right tabular-nums">
                         {room.maxUsersConnected}

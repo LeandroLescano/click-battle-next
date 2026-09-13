@@ -96,8 +96,8 @@
       }
     },
     "roomHostDisconnects": {
+      ".read": "auth != null",
       "$roomId": {
-        ".read": "auth != null",
         ".write": "auth != null && !newData.exists() && !root.child('games').child($roomId).exists()",
         "$sessionId": {
           ".write": "auth != null && root.child('games').child($roomId).child('ownerUser/key').val() === auth.uid && root.child('games').child($roomId).child('hostLease/sessionId').val() === $sessionId",

@@ -10,7 +10,7 @@ import {Input} from "components-new/Input";
 import {Select} from "components-new/Select";
 import {Cross} from "icons/Cross";
 import {Game} from "interfaces";
-import {getWebModeSettings} from "lib/game/gameModes";
+import {getWebModeSettings, isReactionMode} from "lib/game/gameModes";
 import {AVAILABLE_TIMES} from "resources/constants";
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
@@ -43,6 +43,7 @@ export const SettingsSidebar = ({
   const inputPassword = useRef<HTMLInputElement>(null);
   const db = getDatabase();
   const {t} = useTranslation();
+  const showTimerField = !isReactionMode(settings.gameMode);
 
   useEffect(() => {
     setSettings({
@@ -187,23 +188,25 @@ export const SettingsSidebar = ({
               </option>
             ))}
           </Select>
-          <Select
-            label={t("Timer")}
-            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
-            className="mb-2 h-9 md:h-12 text-xs md:text-lg"
-            containerClassName="flex-1"
-            data-label="Timer"
-            value={settings.timer}
-            onChange={(ref) =>
-              setSettings({...settings, timer: Number(ref.target.value)})
-            }
-          >
-            {AVAILABLE_TIMES.map((val, i) => (
-              <option key={i} value={val}>
-                {val}
-              </option>
-            ))}
-          </Select>
+          {showTimerField && (
+            <Select
+              label={t("Timer")}
+              labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
+              className="mb-2 h-9 md:h-12 text-xs md:text-lg"
+              containerClassName="flex-1"
+              data-label="Timer"
+              value={settings.timer}
+              onChange={(ref) =>
+                setSettings({...settings, timer: Number(ref.target.value)})
+              }
+            >
+              {AVAILABLE_TIMES.map((val, i) => (
+                <option key={i} value={val}>
+                  {val}
+                </option>
+              ))}
+            </Select>
+          )}
           <Button
             className="w-full py-2 px-3 md:py-4 md:px-5 text-base md:text-3xl mt-4"
             onClick={handleUpdateSettings}

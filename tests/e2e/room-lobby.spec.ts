@@ -74,11 +74,14 @@ test.describe("Room lobby", () => {
     await prompt.getByRole("button", {name: "Room settings"}).click();
 
     const sidebar = hostPage.page.locator("aside.sidebar");
+    const timer = sidebar.getByRole("combobox", {name: "Timer"});
     const reactionMode = sidebar.getByRole("radio", {
       name: "Reaction Battle"
     });
+    await expect(timer).toBeVisible();
     await expect(reactionMode).toHaveAttribute("aria-checked", "false");
     await reactionMode.click();
+    await expect(timer).toBeHidden();
     await hostPage.page.getByRole("button", {name: "Save settings"}).click();
 
     await expect

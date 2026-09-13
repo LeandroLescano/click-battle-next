@@ -155,6 +155,7 @@
   "Stay ready...": "Fique atento...",
   "DQ": "DQ",
   "Waiting for host": "Aguardando o anfitriao iniciar",
+  "Host": "Anfitrião",
   "Players": "Jogadores",
   "Room lobby": "Lobby da sala",
   "Players connected": "{{count}} / {{max}} jogadores conectados",

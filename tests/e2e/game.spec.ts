@@ -253,7 +253,9 @@ test.describe("Game", () => {
     const roomName = uniqueRoomName("reaction-false-start");
     const roomID = await hostPage.createRoom({gameMode: "reaction", roomName});
 
-    await expect(hostPage.page.getByText("Reaction Battle")).toBeVisible();
+    await expect(
+      hostPage.page.getByRole("button", {name: "Start reaction round"})
+    ).toBeVisible();
 
     await userPage
       .getByRole("button", {name: new RegExp(roomName, "i")})
@@ -342,7 +344,8 @@ test.describe("Game", () => {
     await expect(
       hostPage.page.getByRole("button", {name: "Start reaction round"})
     ).toBeVisible();
-    await expect(hostPage.page.getByText("Opponents (1/1)")).toBeVisible();
+    await expect(hostPage.page.getByText("Players (2/2)")).toBeVisible();
+    await expect(hostPage.page.getByText("Host", {exact: true})).toBeVisible();
     await expect(
       hostPage.page.getByRole("button", {name: "Back to lobby"})
     ).not.toBeVisible();
@@ -352,7 +355,8 @@ test.describe("Game", () => {
     await expect(
       userPage.getByRole("button", {name: "Waiting for host"})
     ).toBeVisible();
-    await expect(userPage.getByText("Opponents (1/1)")).toBeVisible();
+    await expect(userPage.getByText("Players (2/2)")).toBeVisible();
+    await expect(userPage.getByText("Host", {exact: true})).toBeVisible();
     await expect(userPage.getByText("Reaction results (2)")).not.toBeVisible();
     await expect(userPage.getByText(/Winner:/i)).not.toBeVisible();
   });
@@ -582,7 +586,7 @@ test.describe("Game", () => {
     await expect(
       hostPage.page.getByRole("button", {name: "Stay ready..."})
     ).toBeVisible();
-    await expect(hostPage.page.getByText("Opponents (1/1)")).toBeVisible();
+    await expect(hostPage.page.getByText("Players (2/2)")).toBeVisible();
     await expect(
       hostPage.page.getByRole("button", {name: "Back to lobby"})
     ).not.toBeVisible();
@@ -629,9 +633,7 @@ test.describe("Game", () => {
 
     await hostPage.page.getByRole("button", {name: "Kick"}).click();
 
-    await expect(
-      hostPage.page.getByText("Waiting for opponents...")
-    ).toBeVisible();
+    await expect(hostPage.page.getByText("Players (1/2)")).toBeVisible();
     await expect(
       userPage.getByText("You have been removed by the host")
     ).toBeVisible();

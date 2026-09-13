@@ -101,6 +101,7 @@
   "Back to lobby": "Back to lobby",
   "No timer": "No timer",
   "Room lobby": "Room lobby",
+  "Host": "Host",
   "Players": "Players",
   "Players connected": "{{count}} / {{max}} players connected",
   "Invite a friend to start": "Invite a friend to start",
