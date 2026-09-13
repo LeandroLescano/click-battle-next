@@ -633,7 +633,7 @@ const ReactionBattle = ({
       try {
         const clickedAt = Date.now();
         const clickedAtPerformance = performance.now();
-      let result: ReactionResult;
+        let result: ReactionResult;
 
         const canSubmitValidResult =
           localSignalVisible && session?.status === "signal";
@@ -815,15 +815,14 @@ const ReactionBattle = ({
     "!bg-primary-100 !border-primary-300 !text-primary-500 dark:!bg-primary-700 dark:!border-primary-300 dark:!text-primary-100";
   const falseStartActionTone =
     "!bg-primary-100 !border-rose-300 !text-rose-700 dark:!bg-primary-700 dark:!border-rose-400 dark:!text-rose-100";
-  const isSignalConfirmed =
-    localSignalVisible && session?.status === "signal";
+  const isSignalConfirmed = localSignalVisible && session?.status === "signal";
   const actionState: ReactionActionState = (() => {
     if (isRoundFinished && isHost) {
       return {
         className:
           "h-full w-full px-4 py-3 text-xl md:px-6 md:py-4 md:text-3xl",
         disabled: false,
-        label: t("Start next round"),
+        label: t("Rematch"),
         onClick: handleStartRound,
         secondaryAction: {
           className:
@@ -1023,11 +1022,15 @@ const ReactionBattle = ({
 
   const leaderboardRows = participantResults.map((player, index) => {
     const isLocal = player.playerKey === localPlayerKey;
+    const isRoomHost = currentGame.ownerUser?.key === player.playerKey;
+    const status = getResultStatus(player, t, isRoundFinished);
 
     return {
       key: player.playerKey,
       primary: `${index + 1}. ${player.username}`,
-      secondary: getResultStatus(player, t, isRoundFinished),
+      secondary: [isRoomHost ? t("Host") : null, status]
+        .filter(Boolean)
+        .join(" · "),
       value: getResultMsLabel(player, t),
       highlighted: isLocal,
       muted: player.status === "waiting",
@@ -1042,11 +1045,11 @@ const ReactionBattle = ({
           : undefined
     };
   });
-  const opponentCount = Math.max(0, currentGame.listUsers.length - 1);
-  const opponentCapacity = Math.max(0, currentGame.settings.maxUsers - 1);
   const leaderboardTitle = isRoundFinished
     ? t("Reaction results count", {count: currentGame.listUsers.length})
-    : `${t("Opponents")} (${opponentCount}/${opponentCapacity})`;
+    : `${t("Players")} (${currentGame.listUsers.length}/${
+        currentGame.settings.maxUsers
+      })`;
 
   return (
     <div className="reaction-battle-root flex min-w-0 flex-1 flex-col gap-4 h-full min-h-0 px-4 md:px-0">

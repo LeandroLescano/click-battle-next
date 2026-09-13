@@ -91,5 +91,21 @@
   "Challenge a friend": "Challenge a friend",
   "What is a click speed test?": "What is a click speed test?",
   "A click speed test measures how many times you can click in a short time. Use this 10-second challenge to warm up, compare scores, and then take the competition into a 1v1 Click Battle room.": "A click speed test measures how many times you can click in a short time. Use this 10-second challenge to warm up, compare scores, and then take the competition into a 1v1 Click Battle room.",
-  "A click speed test measures how many times you can click in a short time. Use this 5-second challenge to warm up, compare scores, and then take the competition into a 1v1 Click Battle room.": "A click speed test measures how many times you can click in a short time. Use this 5-second challenge to warm up, compare scores, and then take the competition into a 1v1 Click Battle room."
+  "A click speed test measures how many times you can click in a short time. Use this 5-second challenge to warm up, compare scores, and then take the competition into a 1v1 Click Battle room.": "A click speed test measures how many times you can click in a short time. Use this 5-second challenge to warm up, compare scores, and then take the competition into a 1v1 Click Battle room.",
+  "Choose your battle": "Choose your battle",
+  "Pick a mode, then set up your room.": "Pick a mode, then set up your room.",
+  "Make more clicks than your opponents before time runs out.": "Make more clicks than your opponents before time runs out.",
+  "Wait for the signal, then react faster than your opponents.": "Wait for the signal, then react faster than your opponents.",
+  "Reaction Battle has no timer": "Reaction Battle has no timer",
+  "Rematch": "Rematch",
+  "Back to lobby": "Back to lobby",
+  "No timer": "No timer",
+  "Room lobby": "Room lobby",
+  "Host": "Host",
+  "Players": "Players",
+  "Players connected": "{{count}} / {{max}} players connected",
+  "Invite a friend to start": "Invite a friend to start",
+  "You need one more player to start.": "You need one more player to start.",
+  "Room settings": "Room settings",
+  "Continue waiting": "Continue waiting"
 }

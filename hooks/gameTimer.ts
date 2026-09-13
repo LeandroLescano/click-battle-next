@@ -8,6 +8,7 @@ import {useEffect, useRef, useState} from "react";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {RoomStats} from "interfaces";
+import {getClassicRemainingTime} from "lib/game/classicTimer";
 import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 import {metricCounter} from "observability/sentry";
 import {updateUser} from "services/user";
@@ -40,6 +41,18 @@ const useGameTimer = ({
   const [countdown, setCountdown] = useState(COUNTDOWN);
   const handledFinishRef = useRef<string | null>(null);
   const db = getDatabase();
+
+  useEffect(() => {
+    if (disabled || !game) return;
+
+    setRemainingTime((previousRemainingTime) =>
+      getClassicRemainingTime({
+        previousRemainingTime,
+        status: game.status,
+        timerSeconds: game.settings.timer
+      })
+    );
+  }, [disabled, game, game?.startTime, game?.status]);
 
   useEffect(() => {
     if (disabled) return;

@@ -17,10 +17,69 @@ test.before(async () => createRulesEnvironment());
 test.after(async () => cleanupRulesEnvironment());
 test.beforeEach(async () => seedRoom(room()));
 
+test("only the host can switch between supported modes in an idle lobby", async () => {
+  const switchableRoom = room({mode: "classic-speed"});
+  delete switchableRoom.reactionCurrentRoundId;
+  delete switchableRoom.reactionRounds;
+  switchableRoom.modeSettings = {gameMode: "classic-speed", config: {}};
+  await seedRoom(switchableRoom);
+
+  const reactionSettings = {gameMode: "reaction", config: {windowMs: 1500}};
+  await assertFails(
+    update(ref(rtdb("guest"), "games/room-1"), {
+      gameMode: "reaction",
+      modeSettings: reactionSettings
+    })
+  );
+  await assertSucceeds(
+    update(ref(rtdb("host"), "games/room-1"), {
+      gameMode: "reaction",
+      modeSettings: reactionSettings
+    })
+  );
+  await assertFails(
+    update(ref(rtdb("host"), "games/room-1"), {
+      gameMode: "precision",
+      modeSettings: {gameMode: "precision", config: {targetCount: 10}}
+    })
+  );
+  await assertFails(
+    set(ref(rtdb("host"), "games/room-1/gameMode"), "classic-speed")
+  );
+  await assertFails(
+    set(ref(rtdb("host"), "games/room-1/modeSettings"), {
+      gameMode: "classic-speed",
+      config: {}
+    })
+  );
+  await assertFails(
+    update(ref(rtdb("host"), "games/room-1"), {
+      gameMode: "classic-speed",
+      modeSettings: {gameMode: "classic-speed", config: {}},
+      status: "playing"
+    })
+  );
+});
+
+test("mode switches are blocked once a reaction round is active", async () => {
+  await assertFails(
+    update(ref(rtdb("host"), "games/room-1"), {
+      gameMode: "classic-speed",
+      modeSettings: {gameMode: "classic-speed", config: {}}
+    })
+  );
+});
+
 test("existing rooms cannot be replaced and owner identity is immutable", async () => {
   await assertFails(set(ref(rtdb("guest"), "games/room-1"), room()));
   await assertFails(
     update(ref(rtdb("host"), "games/room-1/ownerUser"), {key: "guest"})
+  );
+});
+
+test("a player may remove an absent membership for disconnect cleanup", async () => {
+  await assertSucceeds(
+    remove(ref(rtdb("new-guest"), "games/room-1/listUsers/new-guest"))
   );
 });
 
