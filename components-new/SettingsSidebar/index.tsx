@@ -5,10 +5,12 @@ import {useTranslation} from "react-i18next";
 import Swal from "sweetalert2";
 
 import {Button} from "components-new/Button";
+import {GameModeSelection} from "components-new/GameModeSelection";
 import {Input} from "components-new/Input";
 import {Select} from "components-new/Select";
 import {Cross} from "icons/Cross";
 import {Game} from "interfaces";
+import {getWebModeSettings} from "lib/game/gameModes";
 import {AVAILABLE_TIMES} from "resources/constants";
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
@@ -27,6 +29,7 @@ const Toast = Swal.mixin({
 });
 
 export const SettingsSidebar = ({
+  canChangeGameMode,
   options,
   idGame,
   showSideBar,
@@ -44,6 +47,7 @@ export const SettingsSidebar = ({
   useEffect(() => {
     setSettings({
       maxUsers: options.maxUsers,
+      gameMode: options.gameMode,
       roomName: options.roomName,
       timer: options.timer
     });
@@ -81,19 +85,24 @@ export const SettingsSidebar = ({
 
   const updateDatabase = async (localSettings: Settings) => {
     try {
-      localSettings = adjustRoomSettings({
+      const adjustedSettings = adjustRoomSettings({
         settings: localSettings,
         maxUsers: config.maxUsers
       });
+      localSettings = {...localSettings, ...adjustedSettings};
 
-      await Promise.all([
-        set(ref(db, `games/${idGame}/roomName`), localSettings.roomName),
-        update(ref(db, `games/${idGame}/settings`), {
-          maxUsers: localSettings.maxUsers,
-          timer: localSettings.timer,
-          password: localSettings.password || null
-        })
-      ]);
+      await update(ref(db, `games/${idGame}`), {
+        roomName: localSettings.roomName,
+        "settings/maxUsers": localSettings.maxUsers,
+        "settings/password": localSettings.password || null,
+        "settings/timer": localSettings.timer,
+        ...(canChangeGameMode
+          ? {
+              gameMode: localSettings.gameMode,
+              modeSettings: getWebModeSettings(localSettings.gameMode)
+            }
+          : {})
+      });
 
       Toast.fire({
         title: t("Settings updated"),
@@ -154,6 +163,13 @@ export const SettingsSidebar = ({
               </label>
             )}
           </div>
+          {canChangeGameMode && (
+            <GameModeSelection
+              compact
+              onSelect={(gameMode) => setSettings({...settings, gameMode})}
+              selectedGameMode={settings.gameMode}
+            />
+          )}
           <Select
             label={t("Max number of users")}
             labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"

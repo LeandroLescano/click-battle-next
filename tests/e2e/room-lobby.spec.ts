@@ -62,6 +62,45 @@ test.describe("Room lobby", () => {
     await expect(prompt).toBeHidden();
   });
 
+  test("lets the host switch the mode from the lobby before a match starts", async ({
+    hostPage
+  }) => {
+    const roomID = await hostPage.createRoom({
+      roomName: uniqueRoomName("lobby-mode-switch"),
+      keepInvitePrompt: true
+    });
+
+    const prompt = hostPage.page.getByTestId("room-invite-prompt");
+    await prompt.getByRole("button", {name: "Room settings"}).click();
+
+    const sidebar = hostPage.page.locator("aside.sidebar");
+    const reactionMode = sidebar.getByRole("radio", {
+      name: "Reaction Battle"
+    });
+    await expect(reactionMode).toHaveAttribute("aria-checked", "false");
+    await reactionMode.click();
+    await hostPage.page.getByRole("button", {name: "Save settings"}).click();
+
+    await expect
+      .poll(
+        async () => {
+          const room = await hostPage.getRoom(roomID);
+          return {
+            gameMode: room?.gameMode,
+            modeSettings: room?.modeSettings
+          };
+        },
+        {timeout: 7000}
+      )
+      .toEqual({
+        gameMode: "reaction",
+        modeSettings: {
+          config: {windowMs: 1500},
+          gameMode: "reaction"
+        }
+      });
+  });
+
   test("opens room settings without leaving the invite prompt over the controls", async ({
     hostPage
   }) => {

@@ -152,11 +152,19 @@ const RoomGameClientPage = () => {
             <CelebrationResult shouldCelebrate={shouldCelebrate} />
             {isHost && (
               <SettingsSidebar
+                canChangeGameMode={
+                  currentGame.status === "lobby" &&
+                  !currentGame.reactionCurrentRoundId
+                }
                 showSideBar={showSideBar}
                 handleSideBar={(val: boolean) => setShowSideBar(val)}
                 idGame={currentGame.key || ""}
                 options={{
                   maxUsers: currentGame?.settings.maxUsers || 2,
+                  gameMode:
+                    currentGame.gameMode === "reaction"
+                      ? "reaction"
+                      : "classic-speed",
                   roomName: currentGame?.roomName,
                   password: currentGame?.settings.password,
                   timer: currentGame?.settings.timer || 10

@@ -1,4 +1,4 @@
-import {GameMode} from "@leandrolescano/click-battle-core";
+import {GameMode, GameModeSettings} from "@leandrolescano/click-battle-core";
 import {TFunction} from "i18next";
 
 export type HomeModeSelection = {
@@ -29,6 +29,13 @@ export const HOME_MODE_SELECTION: readonly HomeModeSelection[] = [
 
 export const getHomeModeSelection = (mode: GameMode) =>
   HOME_MODE_SELECTION.find((selection) => selection.gameMode === mode);
+
+export const getWebModeSettings = (
+  gameMode: Extract<GameMode, "classic-speed" | "reaction">
+): GameModeSettings =>
+  gameMode === "reaction"
+    ? {gameMode, config: {windowMs: 1500}}
+    : {gameMode, config: {}};
 
 export const getGameModeLabelKey = (mode?: GameMode | null) => {
   switch (mode) {

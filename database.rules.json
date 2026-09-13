@@ -30,6 +30,14 @@
           ".write": "auth != null && data.parent().child('ownerUser/key').val() === auth.uid",
           ".validate": "!newData.exists() || !newData.parent().child('cleanupTombstone').exists()"
         },
+        "gameMode": {
+          ".write": "auth != null && data.parent().child('ownerUser/key').val() === auth.uid && data.parent().child('status').val() === 'lobby' && !data.parent().child('reactionCurrentRoundId').exists() && (newData.val() === 'classic-speed' || newData.val() === 'reaction')",
+          ".validate": "!newData.exists() || !newData.parent().child('cleanupTombstone').exists()"
+        },
+        "modeSettings": {
+          ".write": "auth != null && data.parent().child('ownerUser/key').val() === auth.uid && data.parent().child('status').val() === 'lobby' && !data.parent().child('reactionCurrentRoundId').exists() && newData.child('gameMode').val() === newData.parent().child('gameMode').val()",
+          ".validate": "!newData.exists() || (!newData.parent().child('cleanupTombstone').exists() && newData.child('gameMode').val() === newData.parent().child('gameMode').val() && ((newData.child('gameMode').val() === 'classic-speed' && newData.child('config').hasChildren() === false) || (newData.child('gameMode').val() === 'reaction' && newData.child('config').child('windowMs').isNumber() && newData.child('config').child('windowMs').val() >= 100 && newData.child('config').child('windowMs').val() <= 30000)))"
+        },
         "listUsers": {
           "$uid": {
             ".write": "(auth != null && auth.uid === $uid && !data.exists() && newData.exists()) || (auth != null && auth.uid === $uid && data.exists() && !newData.exists())",
