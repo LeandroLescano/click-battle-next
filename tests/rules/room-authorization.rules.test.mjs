@@ -43,6 +43,22 @@ test("only the host can switch between supported modes in an idle lobby", async 
       modeSettings: {gameMode: "precision", config: {targetCount: 10}}
     })
   );
+  await assertFails(
+    set(ref(rtdb("host"), "games/room-1/gameMode"), "classic-speed")
+  );
+  await assertFails(
+    set(ref(rtdb("host"), "games/room-1/modeSettings"), {
+      gameMode: "classic-speed",
+      config: {}
+    })
+  );
+  await assertFails(
+    update(ref(rtdb("host"), "games/room-1"), {
+      gameMode: "classic-speed",
+      modeSettings: {gameMode: "classic-speed", config: {}},
+      status: "playing"
+    })
+  );
 });
 
 test("mode switches are blocked once a reaction round is active", async () => {
