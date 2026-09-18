@@ -6,15 +6,13 @@ import React, {useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {Button} from "components-new/Button";
+import {GameModeSelection} from "components-new/GameModeSelection";
 import {LanguageDropdown} from "components-new/LanguageDropdown";
 import {LeftArrow} from "icons/LeftArrow";
-import {getGameModeLabel} from "lib/game/gameModes";
 
 import {RankingAd} from "./components/RankingAd";
 import {RankingList} from "./components/RankingList";
 import {RankingMode, RankingProps} from "./types";
-
-const RANKING_MODE_ORDER: RankingMode[] = ["classic-speed", "reaction"];
 
 export const Ranking = ({lastUpdate, rankings}: RankingProps) => {
   const {t} = useTranslation();
@@ -63,28 +61,12 @@ export const Ranking = ({lastUpdate, rankings}: RankingProps) => {
           </p>
         </div>
 
-        <div className="mx-auto flex w-full max-w-[58rem] justify-center">
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 bg-transparent p-1.5">
-            {RANKING_MODE_ORDER.map((mode) => {
-              const isActive = mode === selectedMode;
-
-              return (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setSelectedMode(mode)}
-                  className={[
-                    "min-w-[9rem] rounded-md border-2 px-4 py-2 text-sm font-bold uppercase transition md:min-w-[12rem] md:px-5 md:py-3 md:text-xl",
-                    isActive
-                      ? "border-primary-300 bg-primary-200 text-primary-700 shadow-[3px_4px_0_var(--color-primary-250)]"
-                      : "border-transparent bg-transparent text-primary-600 hover:border-primary-300/60 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-100"
-                  ].join(" ")}
-                >
-                  {getGameModeLabel(t, mode)}
-                </button>
-              );
-            })}
-          </div>
+        <div className="mx-auto w-full max-w-[58rem]">
+          <GameModeSelection
+            onSelect={setSelectedMode}
+            selectedGameMode={selectedMode}
+            showHeader={false}
+          />
         </div>
 
         <section className="relative flex min-h-0 flex-1 items-stretch justify-center overflow-hidden">
