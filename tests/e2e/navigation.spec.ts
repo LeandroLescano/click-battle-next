@@ -7,7 +7,7 @@ test("Should navigate to ranking page", async ({userPage: {page}}) => {
   await expect(page.getByRole("heading", {name: "Click masters"})).toBeVisible({
     timeout: 15000
   });
-  await page.getByRole("radio", {name: /Reaction Battle/i}).click();
+  await page.getByRole("tab", {name: /Reaction Battle/i}).click();
   await expect(
     page.getByRole("heading", {name: "Fastest reactions"})
   ).toBeVisible();

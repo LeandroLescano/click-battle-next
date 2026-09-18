@@ -8,37 +8,30 @@ type GameModeSelectionProps = {
   compact?: boolean;
   onSelect: (gameMode: Extract<GameMode, "classic-speed" | "reaction">) => void;
   selectedGameMode: GameMode;
-  showHeader?: boolean;
 };
 
 export const GameModeSelection = ({
   compact = false,
   onSelect,
-  selectedGameMode,
-  showHeader = true
+  selectedGameMode
 }: GameModeSelectionProps) => {
   const {t} = useTranslation();
 
   return (
-    <section
-      aria-labelledby={showHeader ? "mode-selection-heading" : undefined}
-      className="w-full"
-    >
-      {showHeader && (
-        <div className="mb-2 flex flex-col gap-0.5 md:mb-3">
-          <h3
-            id="mode-selection-heading"
-            className="text-sm font-bold uppercase tracking-[0.1em] text-primary-500 dark:text-primary-200 md:text-base"
-          >
-            {t(compact ? "Game mode" : "Choose your battle")}
-          </h3>
-          {!compact && (
-            <span className="text-xs font-semibold text-primary-500 dark:text-primary-300 md:text-sm">
-              {t("Pick a mode, then set up your room.")}
-            </span>
-          )}
-        </div>
-      )}
+    <section aria-labelledby="mode-selection-heading" className="w-full">
+      <div className="mb-2 flex flex-col gap-0.5 md:mb-3">
+        <h3
+          id="mode-selection-heading"
+          className="text-sm font-bold uppercase tracking-[0.1em] text-primary-500 dark:text-primary-200 md:text-base"
+        >
+          {t(compact ? "Game mode" : "Choose your battle")}
+        </h3>
+        {!compact && (
+          <span className="text-xs font-semibold text-primary-500 dark:text-primary-300 md:text-sm">
+            {t("Pick a mode, then set up your room.")}
+          </span>
+        )}
+      </div>
       <div
         aria-label={t("Game mode")}
         className="grid grid-cols-2 gap-2 md:gap-3"
