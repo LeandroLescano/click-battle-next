@@ -18,7 +18,7 @@ export const GameModeTabs = ({
   return (
     <div
       aria-label={t("Game mode")}
-      className="flex gap-1 overflow-x-auto border-b-2 border-primary-300 px-1 [scrollbar-width:thin] dark:border-primary-300 md:gap-2 md:px-2"
+      className="flex gap-1 overflow-x-auto overflow-y-hidden border-b-2 border-primary-300 px-1 [scrollbar-width:thin] dark:border-primary-300 md:gap-2 md:px-2"
       role="tablist"
     >
       {HOME_MODE_SELECTION.map((mode) => {
@@ -27,7 +27,7 @@ export const GameModeTabs = ({
         return (
           <button
             aria-selected={selected}
-            className={`-mb-[2px] min-w-max flex-1 rounded-t-xl border border-b-0 px-4 py-2.5 text-sm font-extrabold uppercase transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 md:px-6 md:py-3 md:text-lg ${
+            className={`-mb-[2px] min-w-max flex-1 rounded-t-xl border border-b-0 px-4 py-2.5 text-sm font-extrabold uppercase transition-[background-color,border-color,color,box-shadow] duration-150 ease-out motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 md:px-6 md:py-3 md:text-lg ${
               selected
                 ? "border-primary-600 border-b-primary-100 bg-primary-100 text-primary-700 shadow-[3px_0_0_var(--color-primary-250)] dark:border-primary-100 dark:border-b-primary-500 dark:bg-primary-500 dark:text-primary-50"
                 : "border-transparent bg-transparent text-primary-600 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 dark:text-primary-300 dark:hover:border-primary-300 dark:hover:bg-primary-600 dark:hover:text-primary-100"
