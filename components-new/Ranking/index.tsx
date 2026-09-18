@@ -6,7 +6,7 @@ import React, {useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {Button} from "components-new/Button";
-import {GameModeSelection} from "components-new/GameModeSelection";
+import {GameModeTabs} from "components-new/GameModeTabs";
 import {LanguageDropdown} from "components-new/LanguageDropdown";
 import {LeftArrow} from "icons/LeftArrow";
 
@@ -62,10 +62,9 @@ export const Ranking = ({lastUpdate, rankings}: RankingProps) => {
         </div>
 
         <div className="mx-auto w-full max-w-[58rem]">
-          <GameModeSelection
+          <GameModeTabs
             onSelect={setSelectedMode}
             selectedGameMode={selectedMode}
-            showHeader={false}
           />
         </div>
 
