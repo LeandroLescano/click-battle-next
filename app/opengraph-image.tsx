@@ -28,10 +28,13 @@ export default function OpenGraphImage() {
       >
         <div
           style={{
+            bottom: 0,
             display: "flex",
-            inset: 0,
+            left: 0,
             opacity: 0.2,
-            position: "absolute"
+            position: "absolute",
+            right: 0,
+            top: 0
           }}
         >
           {GRID_COLUMNS.map((column) => (
@@ -66,12 +69,11 @@ export default function OpenGraphImage() {
 
         <div
           style={{
-            background: "#5463e6",
+            background: "radial-gradient(circle, #5463e6 0%, transparent 68%)",
             borderRadius: 999,
             display: "flex",
-            filter: "blur(90px)",
             height: 380,
-            opacity: 0.28,
+            opacity: 0.38,
             position: "absolute",
             right: -100,
             top: -140,
