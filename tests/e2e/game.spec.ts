@@ -73,18 +73,16 @@ test.describe("Game", () => {
     await expect(classicRoomCard.getByText("Classic Speed")).toBeVisible();
 
     await hostPage.page.goto("/");
-    const speedBattle = hostPage.page.getByRole("radio", {
-      name: "Speed Battle"
+    const gameModeSelect = hostPage.page.getByRole("combobox", {
+      name: "Game mode"
     });
-    const reactionBattle = hostPage.page.getByRole("radio", {
-      name: "Reaction Battle"
-    });
+    const timerSelect = hostPage.page.getByRole("combobox", {name: "Timer"});
 
-    await expect(speedBattle).toBeChecked();
-    await reactionBattle.check();
-    await expect(reactionBattle).toBeChecked();
-    await speedBattle.check();
-    await expect(speedBattle).toBeChecked();
+    await expect(timerSelect).toBeVisible();
+    await gameModeSelect.selectOption("reaction");
+    await expect(timerSelect).toBeHidden();
+    await gameModeSelect.selectOption("classic-speed");
+    await expect(timerSelect).toBeVisible();
 
     await hostPage.createRoom({
       gameMode: "reaction",
@@ -137,7 +135,7 @@ test.describe("Game", () => {
         .click({clickCount: 10, delay: 200})
     ]);
 
-    await expect(hostPage.page.locator("#result")).toBeVisible({
+    await expect(hostPage.page.getByText("1st place")).toBeVisible({
       timeout: 10000
     });
     await expect(
@@ -146,104 +144,9 @@ test.describe("Game", () => {
       timeout: 10000
     });
     await expect(hostPage.page.getByText(/remaining/i)).not.toBeVisible();
-    const roomBeforeRematch = await hostPage.getRoom(roomID);
-    expect(roomBeforeRematch).not.toBeNull();
-    const preservedRoomState = {
-      gameMode: roomBeforeRematch?.gameMode,
-      players: Object.keys(roomBeforeRematch?.listUsers ?? {}).sort(),
-      roomName: roomBeforeRematch?.roomName,
-      settings: roomBeforeRematch?.settings
-    };
-    const backToLobbyButton = hostPage.page.getByRole("button", {
-      name: "Back to lobby"
-    });
-    await expect(backToLobbyButton).toBeVisible();
-    const rematchButton = hostPage.page.getByRole("button", {
-      name: "Rematch"
-    });
-    await expect(rematchButton).toBeVisible();
     await expect(
-      userPage.getByRole("button", {name: "Rematch"})
-    ).not.toBeVisible();
-    await rematchButton.click();
-
-    await expect(
-      hostPage.page.getByRole("button", {name: "Click"})
-    ).toBeDisabled();
-    await expect
-      .poll(
-        async () => {
-          const room = await hostPage.getRoom(roomID);
-          return {
-            ...preservedRoomState,
-            clicks: Object.values(room?.listUsers ?? {}).map(
-              ({clicks}) => clicks
-            ),
-            gameMode: room?.gameMode,
-            hasStartTime: typeof room?.startTime === "number",
-            players: Object.keys(room?.listUsers ?? {}).sort(),
-            roomName: room?.roomName,
-            settings: room?.settings,
-            status: room?.status
-          };
-        },
-        {timeout: 7000}
-      )
-      .toEqual({
-        ...preservedRoomState,
-        clicks: [0, 0],
-        hasStartTime: true,
-        status: "countdown"
-      });
-  });
-
-  test("Should return a Classic Speed result to the lobby without starting", async ({
-    hostPage,
-    userPage: {page: userPage}
-  }) => {
-    const roomName = uniqueRoomName("classic-back-to-lobby");
-    const roomID = await hostPage.createRoom({roomName});
-
-    await userPage
-      .getByRole("button", {name: new RegExp(roomName, "i")})
-      .click();
-    await userPage.waitForURL(/\/game\//);
-    await hostPage.page.getByRole("button", {name: "Start!"}).click();
-
-    await userPage.waitForTimeout(3000);
-    await hostPage.page.waitForTimeout(3000);
-    await Promise.all([
-      hostPage.page
-        .getByRole("button", {name: "Click"})
-        .click({clickCount: 20, delay: 100}),
-      userPage
-        .getByRole("button", {name: "Click"})
-        .click({clickCount: 10, delay: 200})
-    ]);
-
-    await expect(hostPage.page.locator("#result")).toBeVisible({
-      timeout: 10000
-    });
-    await hostPage.page.getByRole("button", {name: "Back to lobby"}).click();
-
-    await expect(
-      hostPage.page.getByRole("button", {name: "Start!"})
-    ).toBeEnabled();
-    await expect
-      .poll(
-        async () => {
-          const room = await hostPage.getRoom(roomID);
-          return {
-            clicks: Object.values(room?.listUsers ?? {}).map(
-              ({clicks}) => clicks
-            ),
-            hasStartTime: typeof room?.startTime === "number",
-            status: room?.status
-          };
-        },
-        {timeout: 7000}
-      )
-      .toEqual({clicks: [0, 0], hasStartTime: false, status: "lobby"});
+      hostPage.page.getByRole("button", {name: "Reset"})
+    ).toBeVisible();
   });
 
   test("Should play a reaction round with false start and valid winner", async ({
@@ -253,9 +156,7 @@ test.describe("Game", () => {
     const roomName = uniqueRoomName("reaction-false-start");
     const roomID = await hostPage.createRoom({gameMode: "reaction", roomName});
 
-    await expect(
-      hostPage.page.getByRole("button", {name: "Start reaction round"})
-    ).toBeVisible();
+    await expect(hostPage.page.getByText("Reaction Battle")).toBeVisible();
 
     await userPage
       .getByRole("button", {name: new RegExp(roomName, "i")})
@@ -307,12 +208,6 @@ test.describe("Game", () => {
       userPage.getByRole("button", {name: "Stay ready..."})
     ).toBeVisible();
     const armedBox = await getButtonBox(userPage, "Stay ready...");
-    const armedFrameAnimation = await userPage
-      .getByRole("button", {name: "Stay ready..."})
-      .evaluate(
-        (button) => window.getComputedStyle(button, "::before").animationName
-      );
-    expect(armedFrameAnimation).toBe("none");
 
     await expect(userPage.getByRole("button", {name: "Click!"})).toBeVisible({
       timeout: 7000
@@ -323,7 +218,7 @@ test.describe("Game", () => {
     await finishReactionRoundWithHostWinner(hostPage.page, userPage);
 
     await expect(
-      hostPage.page.getByRole("button", {name: "Rematch"})
+      hostPage.page.getByRole("button", {name: "Start next round"})
     ).toBeVisible();
     await expect(
       hostPage.page.getByRole("button", {name: "Back to lobby"})
@@ -344,8 +239,7 @@ test.describe("Game", () => {
     await expect(
       hostPage.page.getByRole("button", {name: "Start reaction round"})
     ).toBeVisible();
-    await expect(hostPage.page.getByText("Players (2/2)")).toBeVisible();
-    await expect(hostPage.page.getByText("Host", {exact: true})).toBeVisible();
+    await expect(hostPage.page.getByText("Opponents (1/1)")).toBeVisible();
     await expect(
       hostPage.page.getByRole("button", {name: "Back to lobby"})
     ).not.toBeVisible();
@@ -355,8 +249,7 @@ test.describe("Game", () => {
     await expect(
       userPage.getByRole("button", {name: "Waiting for host"})
     ).toBeVisible();
-    await expect(userPage.getByText("Players (2/2)")).toBeVisible();
-    await expect(userPage.getByText("Host", {exact: true})).toBeVisible();
+    await expect(userPage.getByText("Opponents (1/1)")).toBeVisible();
     await expect(userPage.getByText("Reaction results (2)")).not.toBeVisible();
     await expect(userPage.getByText(/Winner:/i)).not.toBeVisible();
   });
@@ -537,56 +430,12 @@ test.describe("Game", () => {
       .click();
     await finishReactionRoundWithHostWinner(hostPage.page, userPage);
 
-    const roomBeforeRematch = await hostPage.getRoom(roomID);
-    const completedRoundId = roomBeforeRematch?.reactionCurrentRoundId;
-    expect(completedRoundId).toBeTruthy();
-    const completedRound =
-      roomBeforeRematch?.reactionRounds?.[completedRoundId!];
-    expect(completedRound?.status).toBe("ended");
-    const preservedRoomState = {
-      gameMode: roomBeforeRematch?.gameMode,
-      players: Object.keys(roomBeforeRematch?.listUsers ?? {}).sort(),
-      roomName: roomBeforeRematch?.roomName,
-      settings: roomBeforeRematch?.settings
-    };
-
-    await hostPage.page.getByRole("button", {name: "Rematch"}).click();
-
-    await expect
-      .poll(
-        async () => {
-          const room = await hostPage.getRoom(roomID);
-          const nextRoundId = room?.reactionCurrentRoundId;
-
-          return {
-            ...preservedRoomState,
-            completedRoundStatus:
-              room?.reactionRounds?.[completedRoundId!]?.status,
-            gameMode: room?.gameMode,
-            hasFreshRound: Boolean(
-              nextRoundId && nextRoundId !== completedRoundId
-            ),
-            nextRoundStatus: nextRoundId
-              ? room?.reactionRounds?.[nextRoundId]?.status
-              : null,
-            players: Object.keys(room?.listUsers ?? {}).sort(),
-            roomName: room?.roomName,
-            settings: room?.settings
-          };
-        },
-        {timeout: 7000}
-      )
-      .toEqual({
-        ...preservedRoomState,
-        completedRoundStatus: "ended",
-        hasFreshRound: true,
-        nextRoundStatus: "scheduled"
-      });
+    await hostPage.page.getByRole("button", {name: "Start next round"}).click();
 
     await expect(
       hostPage.page.getByRole("button", {name: "Stay ready..."})
     ).toBeVisible();
-    await expect(hostPage.page.getByText("Players (2/2)")).toBeVisible();
+    await expect(hostPage.page.getByText("Opponents (1/1)")).toBeVisible();
     await expect(
       hostPage.page.getByRole("button", {name: "Back to lobby"})
     ).not.toBeVisible();
@@ -633,7 +482,9 @@ test.describe("Game", () => {
 
     await hostPage.page.getByRole("button", {name: "Kick"}).click();
 
-    await expect(hostPage.page.getByText("Players (1/2)")).toBeVisible();
+    await expect(
+      hostPage.page.getByText("Waiting for opponents...")
+    ).toBeVisible();
     await expect(
       userPage.getByText("You have been removed by the host")
     ).toBeVisible();
@@ -647,11 +498,8 @@ test.describe("Game", () => {
       .context()
       .grantPermissions(["clipboard-read", "clipboard-write"]);
 
-    await hostPage.createRoom({password: "123", keepInvitePrompt: true});
-    await hostPage.page
-      .getByTestId("room-invite-prompt")
-      .getByRole("button", {name: "Invite friends"})
-      .click();
+    await hostPage.createRoom({password: "123"});
+    await hostPage.page.getByText("Invite friends").click();
 
     const inviteLink = await (
       await hostPage.page.evaluateHandle(() => navigator.clipboard.readText())

@@ -3,9 +3,13 @@ import {expect, test as base, type Page} from "@playwright/test";
 import {getApp, getApps, initializeApp} from "firebase/app";
 import {
   connectDatabaseEmulator,
+  get,
   getDatabase,
   ref,
-  runTransaction
+  remove,
+  runTransaction,
+  set,
+  update
 } from "firebase/database";
 import {
   getApps as getAdminApps,
@@ -89,15 +93,7 @@ class GenericPage {
     password?: string;
     gameMode?: "classic-speed" | "reaction";
     roomName?: string;
-    keepInvitePrompt?: boolean;
   }): Promise<string> {
-    const invitePrompt = this.page.getByTestId("room-invite-prompt");
-    if (await invitePrompt.isVisible()) {
-      await invitePrompt
-        .getByRole("button", {name: "Continue waiting"})
-        .click();
-    }
-
     if (options?.roomName) {
       await this.page
         .getByRole("textbox", {name: "Room name"})
@@ -111,9 +107,9 @@ class GenericPage {
     }
 
     if (options?.gameMode) {
-      const modeName =
-        options.gameMode === "reaction" ? "Reaction Battle" : "Speed Battle";
-      await this.page.getByRole("radio", {name: modeName}).click({force: true});
+      await this.page
+        .getByRole("combobox", {name: "Game mode"})
+        .selectOption(options.gameMode);
     }
 
     const createButton = this.page.getByRole("button", {name: "Create game"});
@@ -121,14 +117,6 @@ class GenericPage {
     await Promise.all([this.page.waitForURL(/\/game\//), createButton.click()]);
 
     const roomID = this.page.url().split("/").pop();
-
-    if (!options?.keepInvitePrompt) {
-      const continueWaiting = this.page.getByRole("button", {
-        name: "Continue waiting"
-      });
-      await expect(continueWaiting).toBeVisible();
-      await continueWaiting.click();
-    }
 
     return roomID || "";
   }
@@ -140,8 +128,9 @@ class GenericPage {
   }
 
   async makeRoomLegacy(roomID: string) {
-    const roomRef = getTestAdminDatabase().ref(`games/${roomID}`);
-    const snapshot = await roomRef.once("value");
+    const db = getTestDatabase();
+    const roomRef = ref(db, `games/${roomID}`);
+    const snapshot = await get(roomRef);
     const room = snapshot.val();
 
     if (!room) {
@@ -153,7 +142,7 @@ class GenericPage {
       modeSettings: _modeSettings,
       ...legacyRoom
     } = room;
-    await roomRef.set(legacyRoom);
+    await set(roomRef, legacyRoom);
   }
 
   async getRoom(roomID: string): Promise<Game | null> {
@@ -165,7 +154,7 @@ class GenericPage {
   }
 
   async setRawRoom(roomID: string, room: Partial<Game>) {
-    await getTestAdminDatabase().ref(`games/${roomID}`).set(room);
+    await set(ref(getTestDatabase(), `games/${roomID}`), room);
   }
 
   async setRawRoomAsAdmin(roomID: string, room: Record<string, unknown>) {
@@ -173,21 +162,19 @@ class GenericPage {
   }
 
   async patchRoomLifecycle(roomID: string, lifecycle: RoomLifecycleSnapshot) {
-    await getTestAdminDatabase().ref(`games/${roomID}`).update(lifecycle);
+    await update(ref(getTestDatabase(), `games/${roomID}`), lifecycle);
   }
 
   async getHostLease(roomID: string): Promise<HostLease | null> {
-    const snapshot = await getTestAdminDatabase()
-      .ref(`games/${roomID}/hostLease`)
-      .once("value");
+    const snapshot = await get(
+      ref(getTestDatabase(), `games/${roomID}/hostLease`)
+    );
 
     return snapshot.val() as HostLease | null;
   }
 
   async setHostLease(roomID: string, hostLease: HostLease | null) {
-    await getTestAdminDatabase()
-      .ref(`games/${roomID}/hostLease`)
-      .set(hostLease);
+    await set(ref(getTestDatabase(), `games/${roomID}/hostLease`), hostLease);
   }
 
   async expireHostLease(roomID: string, ageMs = 91_000) {
@@ -266,9 +253,9 @@ class GenericPage {
     roomID: string,
     sessionID: string
   ): Promise<HostDisconnectSignal | null> {
-    const snapshot = await getTestAdminDatabase()
-      .ref(`roomHostDisconnects/${roomID}/${sessionID}`)
-      .once("value");
+    const snapshot = await get(
+      ref(getTestDatabase(), `roomHostDisconnects/${roomID}/${sessionID}`)
+    );
 
     return snapshot.val() as HostDisconnectSignal | null;
   }
@@ -278,17 +265,20 @@ class GenericPage {
     sessionID: string,
     disconnectedAt: number
   ) {
-    await getTestAdminDatabase()
-      .ref(`roomHostDisconnects/${roomID}/${sessionID}`)
-      .set({disconnectedAt});
+    await set(
+      ref(getTestDatabase(), `roomHostDisconnects/${roomID}/${sessionID}`),
+      {
+        disconnectedAt
+      }
+    );
   }
 
   async removeDisconnectSignals(roomID: string) {
-    await getTestAdminDatabase().ref(`roomHostDisconnects/${roomID}`).remove();
+    await remove(ref(getTestDatabase(), `roomHostDisconnects/${roomID}`));
   }
 
   async removeRoom(roomID: string) {
-    await getTestAdminDatabase().ref(`games/${roomID}`).remove();
+    await remove(ref(getTestDatabase(), `games/${roomID}`));
   }
 
   async hasRoomHistory(roomID: string) {

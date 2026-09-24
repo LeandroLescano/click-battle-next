@@ -12,7 +12,6 @@ import {
 } from "firebase/firestore";
 
 import {RoomStats} from "interfaces/RoomStats";
-import {getRoomStatsDateRange} from "lib/game/adminDateRange";
 import {DEFAULT_GAME_MODE} from "lib/game/gameModes";
 
 const PATH = "rooms";
@@ -129,13 +128,13 @@ export const getRoomStats = async (
   let q = query(roomsCollection, orderBy("created", "desc"));
   const rooms: RoomStats[] = [];
 
-  const {end, start} = getRoomStatsDateRange(startDate, endDate);
-
-  if (start) {
-    q = query(q, where("created", ">=", start));
+  if (startDate) {
+    q = query(q, where("created", ">=", new Date(startDate)));
   }
-  if (end) {
-    q = query(q, where("created", "<=", end));
+  if (endDate) {
+    const endOfDay = new Date(endDate);
+    endOfDay.setHours(23, 59, 59, 999);
+    q = query(q, where("created", "<=", endOfDay));
   }
 
   await getDocs(q).then((snapshot) => {
