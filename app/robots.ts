@@ -16,7 +16,11 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     return {
       rules: {
         userAgent: "*",
-        disallow: "/"
+        // Preview deployments carry X-Robots-Tag: noindex on every response.
+        // Crawlers must be allowed to fetch those responses to see it.
+        ...(process.env.VERCEL_ENV === "preview"
+          ? {allow: "/"}
+          : {disallow: "/"})
       }
     };
   }
