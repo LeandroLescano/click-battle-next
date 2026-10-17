@@ -76,6 +76,7 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
     return {
       key: rowKey,
       primary: user.username,
+      secondary: game.ownerUser?.key === user.key ? t("Host") : undefined,
       value: String(user.clicks || 0),
       highlighted: localUsername === user.username,
       action:
@@ -93,11 +94,7 @@ function OpponentSection({localUsername, maxUsers}: OpponentSectionProps) {
   return (
     <div className="w-full md:w-1/2 max-h-full text-sm md:text-3xl px-4 md:px-0 font-medium h-full flex flex-col min-h-0">
       <RoomLeaderboard
-        title={
-          game.listUsers.length === 1 && isHost
-            ? t("Waiting for opponents...")
-            : t("Opponents") + ` (${game.listUsers.length - 1}/${maxUsers - 1})`
-        }
+        title={`${t("Players")} (${game.listUsers.length}/${maxUsers})`}
         leftLabel={t("Name")}
         rightLabel={t("Clicks")}
         rows={leaderboardRows}

@@ -18,17 +18,13 @@ import {useTranslation} from "react-i18next";
 import Swal from "sweetalert2";
 
 import {Button} from "components-new/Button";
+import {GameModeSelection} from "components-new/GameModeSelection";
 import {Input} from "components-new/Input";
 import {Select} from "components-new/Select";
 import {useAuth} from "contexts/AuthContext";
 import {useGame} from "contexts/GameContext";
 import {Game, Room} from "interfaces";
-import {
-  DEFAULT_GAME_MODE,
-  getGameModeLabelKey,
-  isReactionMode,
-  SUPPORTED_WEB_GAME_MODES
-} from "lib/game/gameModes";
+import {DEFAULT_GAME_MODE, isReactionMode} from "lib/game/gameModes";
 import {buildInitialHostLease, createHostSessionId} from "lib/game/hostLease";
 import logoAnim from "lotties/logo-animated.json";
 import {AVAILABLE_TIMES, DEFAULT_VALUES} from "resources/constants";
@@ -224,108 +220,112 @@ export const CreateSection = () => {
 
   return (
     <>
-      <h2 className="text-xl md:text-5xl font-extrabold self-start text-primary-600 dark:text-primary-100">
+      <h2 className="text-2xl md:text-5xl font-extrabold self-start text-primary-600 dark:text-primary-100">
         {t("Create your own room")}
       </h2>
-      <div className="flex flex-col justify-start pr-1 md:flex-1 md:justify-end">
-        <div className="flex justify-between items-end gap-x-9 w-full flex-1 flex-wrap">
-          <Input
-            label={t("Insert room name")}
-            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
-            type="text"
-            className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
-            containerClassName="flex-1"
-            data-label="Room name"
-            value={room?.name}
-            onChange={(ref) => handleUpdateRoom({name: ref.target.value})}
-            placeholder={
-              gameUser?.username
-                ? t("Name's room", {name: gameUser.username})
-                : t("Room name")
-            }
-          />
-          <Input
-            label={t("Insert room password (op)")}
-            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
-            type="password"
-            className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
-            containerClassName="flex-1"
-            data-label="Password"
-            value={room?.password || ""}
-            onChange={(ref) => handleUpdateRoom({password: ref.target.value})}
-            placeholder={t("Password")}
-          />
-        </div>
-        <div className="flex justify-between items-center gap-x-9 w-full flex-1 flex-wrap">
-          <Select
-            label={t("Game mode")}
-            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
-            className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
-            containerClassName="flex-1"
-            data-label="Game mode"
-            value={selectedGameMode}
-            onChange={(ref) =>
-              handleUpdateRoom({gameMode: ref.target.value as GameMode})
-            }
-          >
-            {SUPPORTED_WEB_GAME_MODES.map((mode) => (
-              <option key={mode} value={mode}>
-                {t(getGameModeLabelKey(mode))}
-              </option>
-            ))}
-          </Select>
-          <Select
-            label={t("Max number of users")}
-            labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
-            className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
-            containerClassName="flex-1"
-            data-label="Max number of users"
-            value={room?.maxUsers}
-            onChange={(ref) =>
-              handleUpdateRoom({maxUsers: Number(ref.target.value)})
-            }
-          >
-            {[
-              ...Array.from(
-                range(DEFAULT_VALUES.MIN_USERS, config.maxUsers + 1)
-              )
-            ].map((val, i) => (
-              <option key={i} value={val}>
-                {val}
-              </option>
-            ))}
-          </Select>
-          {showTimerField && (
-            <Select
-              label={t("Timer")}
-              labelClassName="text-primary-500 dark:text-primary-200 text-xs md:text-lg"
-              className="mb-2 h-9 md:h-12 text-xs md:text-lg min-w-48"
+      <div className="flex w-full flex-col gap-4 md:gap-5">
+        <GameModeSelection
+          onSelect={(gameMode) => handleUpdateRoom({gameMode})}
+          selectedGameMode={selectedGameMode}
+        />
+        <div className="flex flex-col justify-start pr-1 md:flex-1 md:justify-end">
+          <div className="flex justify-between items-end gap-x-9 w-full flex-1 flex-wrap">
+            <Input
+              label={t("Insert room name")}
+              labelClassName="text-primary-500 dark:text-primary-200 text-sm md:text-lg"
+              type="text"
+              className="mb-2 h-11 md:h-12 text-sm md:text-lg min-w-48"
               containerClassName="flex-1"
-              data-label="Timer"
-              value={room?.timer}
+              data-label="Room name"
+              value={room?.name}
+              onChange={(ref) => handleUpdateRoom({name: ref.target.value})}
+              placeholder={
+                gameUser?.username
+                  ? t("Name's room", {name: gameUser.username})
+                  : t("Room name")
+              }
+            />
+            <Input
+              label={t("Insert room password (op)")}
+              labelClassName="text-primary-500 dark:text-primary-200 text-sm md:text-lg"
+              type="password"
+              className="mb-2 h-11 md:h-12 text-sm md:text-lg min-w-48"
+              containerClassName="flex-1"
+              data-label="Password"
+              value={room?.password || ""}
+              onChange={(ref) => handleUpdateRoom({password: ref.target.value})}
+              placeholder={t("Password")}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3 w-full">
+            <Select
+              label={t("Max number of users")}
+              labelClassName="text-primary-500 dark:text-primary-200 text-sm md:text-lg"
+              className="mb-2 h-11 md:h-12 text-sm md:text-lg min-w-0"
+              containerClassName="min-w-0"
+              data-label="Max number of users"
+              value={room?.maxUsers}
               onChange={(ref) =>
-                handleUpdateRoom({timer: Number(ref.target.value)})
+                handleUpdateRoom({maxUsers: Number(ref.target.value)})
               }
             >
-              {AVAILABLE_TIMES.map((val, i) => (
+              {[
+                ...Array.from(
+                  range(DEFAULT_VALUES.MIN_USERS, config.maxUsers + 1)
+                )
+              ].map((val, i) => (
                 <option key={i} value={val}>
                   {val}
                 </option>
               ))}
             </Select>
-          )}
+            {showTimerField ? (
+              <Select
+                label={t("Timer")}
+                labelClassName="text-primary-500 dark:text-primary-200 text-sm md:text-lg"
+                className="mb-2 h-11 md:h-12 text-sm md:text-lg min-w-0"
+                containerClassName="min-w-0"
+                data-label="Timer"
+                value={room?.timer}
+                onChange={(ref) =>
+                  handleUpdateRoom({timer: Number(ref.target.value)})
+                }
+              >
+                {AVAILABLE_TIMES.map((val, i) => (
+                  <option key={i} value={val}>
+                    {val}
+                  </option>
+                ))}
+              </Select>
+            ) : (
+              <div className="min-w-0">
+                <p className="text-sm font-medium leading-6 text-primary-500 dark:text-primary-200 md:text-lg">
+                  {t("Timer")}
+                </p>
+                <div
+                  className="mt-1.5 flex h-11 items-center rounded-lg border border-primary-300 bg-primary-100 px-3 text-sm font-semibold text-primary-500 dark:border-white/60 dark:bg-primary-700 dark:text-primary-200 md:mt-3 md:h-12 md:px-6 md:text-lg"
+                  data-testid="reaction-no-timer"
+                >
+                  <span className="md:hidden">{t("No timer")}</span>
+                  <span className="hidden md:inline">
+                    {t("Reaction Battle has no timer")}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="pl-1 md:pl-0 mt-2">
-        <Button
-          className="self-start w-full lg:w-9/12 text-lg md:text-3xl p-2 lg:p-6 leading-none overflow-visible"
-          disabled={!gameUser?.username || creating}
-          onClick={handleCreate}
-          loading={creating}
-          loadingText="Creating..."
-        >
-          {t("Create game")}
-        </Button>
+        <div className="pl-1 md:pl-0 mt-2">
+          <Button
+            className="self-start w-full lg:w-9/12 text-lg md:text-3xl p-2 lg:p-6 leading-none overflow-visible"
+            disabled={!gameUser?.username || creating}
+            onClick={handleCreate}
+            loading={creating}
+            loadingText="Creating..."
+          >
+            {t("Create game")}
+          </Button>
+        </div>
       </div>
     </>
   );

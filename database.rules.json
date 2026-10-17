@@ -30,9 +30,17 @@
           ".write": "auth != null && data.parent().child('ownerUser/key').val() === auth.uid",
           ".validate": "!newData.exists() || !newData.parent().child('cleanupTombstone').exists()"
         },
+        "gameMode": {
+          ".write": "auth != null && data.parent().child('ownerUser/key').val() === auth.uid && data.parent().child('status').val() === 'lobby' && newData.parent().child('status').val() === 'lobby' && !data.parent().child('reactionCurrentRoundId').exists() && (newData.val() === 'classic-speed' || newData.val() === 'reaction')",
+          ".validate": "!newData.exists() || (!newData.parent().child('cleanupTombstone').exists() && ((newData.val() === 'classic-speed' && newData.parent().child('modeSettings/gameMode').val() === 'classic-speed' && newData.parent().child('modeSettings/config').hasChildren() === false) || (newData.val() === 'reaction' && newData.parent().child('modeSettings/gameMode').val() === 'reaction' && newData.parent().child('modeSettings/config/windowMs').isNumber() && newData.parent().child('modeSettings/config/windowMs').val() >= 100 && newData.parent().child('modeSettings/config/windowMs').val() <= 30000)))"
+        },
+        "modeSettings": {
+          ".write": "auth != null && data.parent().child('ownerUser/key').val() === auth.uid && data.parent().child('status').val() === 'lobby' && newData.parent().child('status').val() === 'lobby' && !data.parent().child('reactionCurrentRoundId').exists() && newData.child('gameMode').val() === newData.parent().child('gameMode').val()",
+          ".validate": "!newData.exists() || (!newData.parent().child('cleanupTombstone').exists() && newData.child('gameMode').val() === newData.parent().child('gameMode').val() && ((newData.child('gameMode').val() === 'classic-speed' && newData.child('config').hasChildren() === false) || (newData.child('gameMode').val() === 'reaction' && newData.child('config').child('windowMs').isNumber() && newData.child('config').child('windowMs').val() >= 100 && newData.child('config').child('windowMs').val() <= 30000)))"
+        },
         "listUsers": {
           "$uid": {
-            ".write": "(auth != null && auth.uid === $uid && !data.exists() && newData.exists()) || (auth != null && auth.uid === $uid && data.exists() && !newData.exists())",
+            ".write": "auth != null && auth.uid === $uid && ((!data.exists() && newData.exists()) || !newData.exists())",
             ".validate": "!newData.exists() || (newData.child('username').isString() && newData.child('rol').isString() && newData.child('clicks').isNumber())",
             "clicks": {
               ".write": "auth != null && (auth.uid === $uid || root.child('games').child($roomId).child('ownerUser/key').val() === auth.uid) && root.child('games').child($roomId).child('gameMode').val() === 'classic-speed' && newData.isNumber()"
@@ -53,7 +61,7 @@
         },
         "reactionRounds": {
           "$roundId": {
-            ".write": "auth != null && root.child('games').child($roomId).child('ownerUser/key').val() === auth.uid && ((!data.exists() && newData.child('roundId').val() === $roundId && newData.child('status').val() === 'scheduled') || (data.exists() && !newData.exists() && data.child('status').val() === 'scheduled' && root.child('games').child($roomId).child('reactionCurrentRoundId').val() != $roundId))",
+            ".write": "auth != null && root.child('games').child($roomId).child('ownerUser/key').val() === auth.uid && root.child('games').child($roomId).child('gameMode').val() === 'reaction' && ((!data.exists() && newData.child('roundId').val() === $roundId && newData.child('status').val() === 'scheduled') || (data.exists() && !newData.exists() && data.child('status').val() === 'scheduled' && root.child('games').child($roomId).child('reactionCurrentRoundId').val() != $roundId))",
             "roundId": {
               ".validate": "newData.val() === $roundId"
             },
@@ -88,8 +96,8 @@
       }
     },
     "roomHostDisconnects": {
+      ".read": "auth != null",
       "$roomId": {
-        ".read": "auth != null",
         ".write": "auth != null && !newData.exists() && !root.child('games').child($roomId).exists()",
         "$sessionId": {
           ".write": "auth != null && root.child('games').child($roomId).child('ownerUser/key').val() === auth.uid && root.child('games').child($roomId).child('hostLease/sessionId').val() === $sessionId",

@@ -76,6 +76,14 @@ export const PlayOnlineGuide = () => {
                   {t("View ranking")}
                 </Button>
               </Link>
+              <Link href="/click-speed-test" passHref>
+                <Button
+                  variant="outlined"
+                  className="px-4 py-2 text-sm uppercase md:px-6 md:text-xl"
+                >
+                  {t("Try the Click Speed Test")}
+                </Button>
+              </Link>
             </div>
           </div>
 

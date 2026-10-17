@@ -1,4 +1,4 @@
-import {get, getDatabase, ref, set, update} from "firebase/database";
+import {getDatabase, ref, serverTimestamp, update} from "firebase/database";
 import React from "react";
 import {useTranslation} from "react-i18next";
 
@@ -16,17 +16,24 @@ const ResultSection = () => {
   const {t} = useTranslation();
   const {game, isHost, finalResults} = useGame();
 
-  // function for reset all data
-  const handleReset = () => {
-    void Promise.all([
-      set(ref(db, `games/${game.key}/status`), "lobby"),
-      set(ref(db, `games/${game.key}/startTime`), null)
-    ]);
-    const refGameUsers = ref(db, `games/${game.key}/listUsers`);
-    get(refGameUsers).then((snapshot) => {
-      snapshot.forEach((child) => {
-        update(child.ref, {clicks: 0});
-      });
+  const getResetClicks = () =>
+    Object.fromEntries(
+      game.listUsers.map(({key}) => [`listUsers/${key}/clicks`, 0])
+    );
+
+  const handleBackToLobby = () => {
+    void update(ref(db, `games/${game.key}`), {
+      ...getResetClicks(),
+      startTime: null,
+      status: "lobby"
+    });
+  };
+
+  const handleRematch = () => {
+    void update(ref(db, `games/${game.key}`), {
+      ...getResetClicks(),
+      startTime: serverTimestamp(),
+      status: "countdown"
     });
   };
 
@@ -81,12 +88,21 @@ const ResultSection = () => {
           </div>
         </div>
         {isHost && (
-          <Button
-            className="mt-5 w-full md:w-80 px-3.5 py-2.5 md:p-5 text-2xl md:text-3xl self-center z-50"
-            onClick={handleReset}
-          >
-            {t("Reset")}
-          </Button>
+          <div className="mt-5 flex w-full flex-col gap-3 self-center md:w-80">
+            <Button
+              className="w-full px-3.5 py-2.5 text-2xl md:p-5 md:text-3xl"
+              onClick={handleRematch}
+            >
+              {t("Rematch")}
+            </Button>
+            <Button
+              className="w-full px-3.5 py-2.5 text-lg md:p-4 md:text-2xl"
+              variant="outlined"
+              onClick={handleBackToLobby}
+            >
+              {t("Back to lobby")}
+            </Button>
+          </div>
         )}
       </div>
     </>

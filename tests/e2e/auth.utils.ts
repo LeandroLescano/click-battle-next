@@ -4,6 +4,14 @@ import {Page} from "@playwright/test";
 export const loginAsGuest = async (page: Page, name = "guestuser") => {
   await page.goto("/", {waitUntil: "domcontentloaded"});
 
+  const guestLogin = page.getByRole("button", {
+    name: /Login as guest|Ingresar como invitado/i
+  });
+
+  if (await guestLogin.isVisible()) {
+    await guestLogin.click();
+  }
+
   const usernameInput = page.locator('input[placeholder="Username"]').last();
   await usernameInput.waitFor({state: "visible", timeout: 5000});
   await usernameInput.fill(name);

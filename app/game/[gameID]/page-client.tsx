@@ -8,6 +8,7 @@ import {useTranslation} from "react-i18next";
 import {Button, Loading, SettingsSidebar} from "components-new";
 import {GameHeader} from "components-new/GameHeader";
 import {LoginModalProps} from "components-new/LoginModal/types";
+import {RoomInvitePrompt} from "components-new/RoomInvitePrompt";
 import {useAuth} from "contexts/AuthContext";
 import useGameTimer from "hooks/gameTimer";
 import {useRoomGame} from "hooks/useRoomGame";
@@ -106,6 +107,7 @@ const getModeView = (mode?: GameMode | null) =>
 
 const RoomGameClientPage = () => {
   const [showSideBar, setShowSideBar] = useState(false);
+  const [showInvitePrompt, setShowInvitePrompt] = useState(true);
   const {t} = useTranslation();
   const {isAuthenticated, loading: authLoading} = useAuth();
 
@@ -150,17 +152,40 @@ const RoomGameClientPage = () => {
             <CelebrationResult shouldCelebrate={shouldCelebrate} />
             {isHost && (
               <SettingsSidebar
+                canChangeGameMode={
+                  currentGame.status === "lobby" &&
+                  !currentGame.reactionCurrentRoundId
+                }
                 showSideBar={showSideBar}
                 handleSideBar={(val: boolean) => setShowSideBar(val)}
                 idGame={currentGame.key || ""}
                 options={{
                   maxUsers: currentGame?.settings.maxUsers || 2,
+                  gameMode:
+                    currentGame.gameMode === "reaction"
+                      ? "reaction"
+                      : "classic-speed",
                   roomName: currentGame?.roomName,
                   password: currentGame?.settings.password,
                   timer: currentGame?.settings.timer || 10
                 }}
               />
             )}
+            <RoomInvitePrompt
+              game={currentGame}
+              onDismiss={() => setShowInvitePrompt(false)}
+              onInvite={handleInvite}
+              onOpenSettings={() => {
+                setShowInvitePrompt(false);
+                setShowSideBar(true);
+              }}
+              show={
+                showInvitePrompt &&
+                isHost &&
+                currentGame.status === "lobby" &&
+                currentGame.listUsers.length < 2
+              }
+            />
             <div onClick={closeSideBar} className="flex flex-col gap-4 h-full">
               <GameHeader
                 onOpenSettings={() => setShowSideBar(true)}
@@ -171,7 +196,11 @@ const RoomGameClientPage = () => {
                   {currentGame?.roomName || ""}
                 </h1>
               ) : null}
-              {modeView.renderContent({currentGame, localUser, roomStats})}
+              {modeView.renderContent({
+                currentGame,
+                localUser,
+                roomStats
+              })}
               <Button
                 variant="outlined"
                 className="text-xl md:text-2xl py-0.5 px-3 md:py-1 md:px-6 self-center md:self-end z-10"
