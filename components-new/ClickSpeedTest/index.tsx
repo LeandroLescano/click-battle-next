@@ -101,8 +101,8 @@ export const ClickSpeedTest = () => {
   const isComplete = phase === "complete";
 
   return (
-    <main className="min-h-dvh px-5 py-5 text-primary-700 md:h-dvh md:overflow-hidden md:px-10 md:py-8">
-      <div className="relative mx-auto flex h-full w-full max-w-[90rem] flex-col gap-4 !px-0 !py-0 md:gap-6">
+    <main className="min-h-dvh px-5 py-5 text-primary-700 md:px-10 md:py-8">
+      <div className="relative mx-auto flex min-h-[calc(100dvh-2.5rem)] w-full max-w-[90rem] flex-col gap-4 !px-0 !py-0 md:min-h-[calc(100dvh-4rem)] md:gap-6">
         <header className="flex h-8 items-center justify-between">
           <Link
             href="/"
@@ -119,7 +119,7 @@ export const ClickSpeedTest = () => {
               {t("Click speed test")}
             </p>
             <h1 className="mt-3 max-w-[34rem] text-5xl font-bold leading-[0.88] text-primary-600 dark:text-primary-100 md:text-7xl">
-              {t("How many clicks can you make in 5 seconds?")}
+              {t("5-Second Click Speed Test")}
             </h1>
             <p className="mt-5 max-w-[31rem] text-base font-semibold leading-snug text-primary-600 dark:text-primary-100 md:text-xl">
               {t(

@@ -1,4 +1,5 @@
 import type {Metadata} from "next";
+import Link from "next/link";
 import {Suspense} from "react";
 
 import {Loading} from "components-new/Loading";
@@ -15,22 +16,38 @@ export default async function Home() {
   const {t} = await getServerTranslations("translation");
 
   return (
-    <Suspense
-      fallback={
-        <>
-          <Loading />
-          <div className="sr-only">
-            <h1>{t("Start a room in seconds")}</h1>
-            <p>
-              {t(
-                "Create a room, invite friends, and start a match in seconds."
-              )}
-            </p>
-          </div>
-        </>
-      }
-    >
-      <HomeClientPage />
-    </Suspense>
+    <>
+      <Suspense
+        fallback={
+          <>
+            <Loading />
+            <div className="sr-only">
+              <h1>{t("Start a room in seconds")}</h1>
+              <p>
+                {t(
+                  "Create a room, invite friends, and start a match in seconds."
+                )}
+              </p>
+            </div>
+          </>
+        }
+      >
+        <HomeClientPage />
+      </Suspense>
+      <nav
+        aria-label={t("Explore Click Battle")}
+        className="flex flex-wrap justify-center gap-x-6 gap-y-3 border-t border-primary-300 px-5 py-5 font-sans text-sm font-semibold text-primary-600 dark:text-primary-100"
+      >
+        <Link href="/click-speed-test" className="underline underline-offset-4">
+          {t("Try the Click Speed Test")}
+        </Link>
+        <Link href="/how-to-play" className="underline underline-offset-4">
+          {t("How to play")}
+        </Link>
+        <Link href="/ranking" className="underline underline-offset-4">
+          {t("Ranking")}
+        </Link>
+      </nav>
+    </>
   );
 }

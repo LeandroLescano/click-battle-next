@@ -1,6 +1,7 @@
 import type {Metadata} from "next";
 
 import {ClickSpeedTest} from "components-new/ClickSpeedTest";
+import {ClickSpeedTestGuide} from "components-new/ClickSpeedTest/Guide";
 import {createRouteMetadata} from "lib/seo/metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -8,5 +9,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function ClickSpeedTestPage() {
-  return <ClickSpeedTest />;
+  return (
+    <>
+      <ClickSpeedTest />
+      <ClickSpeedTestGuide />
+    </>
+  );
 }
