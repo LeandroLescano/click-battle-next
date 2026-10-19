@@ -1,5 +1,5 @@
 .cst-page {
-  --cst-page: var(--color-primary-50);
+  --cst-page: transparent;
   --cst-surface: #fff;
   --cst-ink: var(--color-primary-600);
   --cst-muted: var(--color-primary-500);
@@ -32,7 +32,8 @@
   align-items: center;
   gap: 10px;
   font-family: var(--font-tiny5), monospace;
-  font-size: 24px;
+  font-size: 30px;
+  text-shadow: 2px 0 0 var(--color-primary-400);
   color: var(--cst-ink);
   text-decoration: none;
 }
@@ -57,13 +58,13 @@
 .cst-pad > span,
 .cst-result-summary,
 .cst-actions {
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: inherit;
 }
 
 .cst-eyebrow {
   display: flex;
   gap: 12px;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -77,30 +78,30 @@
 .cst-intro h1 {
   max-width: 550px;
   margin: 10px 0 12px;
-  font-family: var(--font-tiny5), monospace;
+  font-family: inherit;
   font-size: clamp(2rem, 8.5vw, 3rem);
   line-height: 1.04;
-  font-weight: 400;
+  font-weight: 700;
   text-wrap: balance;
 }
 
 .cst-description {
   max-width: 430px;
-  font-size: 14px;
+  font-size: 20px;
   line-height: 1.6;
   color: var(--cst-muted);
 }
 
 .cst-caption {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 18px;
   color: var(--cst-muted);
 }
 
 .cst-guide-link {
   display: inline-block;
   margin-top: 14px;
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -110,9 +111,9 @@
   min-width: 0;
   padding: 18px;
   border: 1px solid var(--cst-line);
-  border-radius: 24px;
+  border-radius: 12px;
   background: var(--cst-surface);
-  box-shadow: 0 20px 65px rgb(32 38 96 / 9%);
+  box-shadow: 3px 3px 0 var(--color-primary-300);
 }
 
 .cst-arena-heading {
@@ -121,7 +122,7 @@
   align-items: center;
   gap: 8px;
   min-height: 20px;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--cst-muted);
 }
@@ -134,7 +135,7 @@
 .cst-state-dot {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--color-primary-300);
 }
 .cst-round-label {
@@ -150,7 +151,7 @@
 
 .cst-label {
   display: block;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -159,7 +160,7 @@
 
 .cst-metrics strong {
   display: block;
-  font-family: var(--font-tiny5), monospace;
+  font-family: inherit;
   font-size: 56px;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
@@ -179,7 +180,7 @@
   height: 6px;
   margin-top: 10px;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: 2px;
   background: var(--cst-soft);
 }
 
@@ -203,7 +204,7 @@
 }
 
 .cst-stage {
-  min-height: 214px;
+  min-height: 248px;
   margin-top: 20px;
 }
 
@@ -214,10 +215,10 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  min-height: 214px;
+  min-height: 248px;
   padding: 20px 12px;
   border: 1px solid var(--color-primary-400);
-  border-radius: 14px;
+  border-radius: 6px;
   background: var(--color-primary-600);
   box-shadow: 0 5px 0 var(--color-primary-500);
   color: var(--color-primary-50);
@@ -230,13 +231,13 @@
 }
 
 .cst-pad > strong {
-  font-family: var(--font-tiny5), monospace;
+  font-family: inherit;
   font-size: 40px;
   font-weight: 400;
   line-height: 1.05;
 }
 .cst-pad > span {
-  font-size: 11px;
+  font-size: 16px;
   line-height: 1.5;
 }
 .cst-pointer {
@@ -256,16 +257,16 @@
 }
 
 .cst-hint {
-  min-height: 32px;
+  min-height: 48px;
   margin: 16px 0 0;
   text-align: center;
-  font-size: 11px;
+  font-size: 16px;
   line-height: 1.5;
   color: var(--cst-muted);
 }
 
 .cst-result {
-  min-height: 214px;
+  min-height: 248px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -281,19 +282,19 @@
   font-variant-numeric: tabular-nums;
 }
 .cst-result-score > strong {
-  font-family: var(--font-tiny5), monospace;
+  font-family: inherit;
   font-size: 80px;
   line-height: 1;
   font-weight: 400;
 }
 .cst-result-score > span {
-  font-family: var(--font-tiny5), monospace;
+  font-family: inherit;
   font-size: 25px;
   color: var(--cst-muted);
 }
 .cst-result-summary {
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 18px;
   color: var(--cst-muted);
 }
 .cst-actions {
@@ -312,9 +313,9 @@
   gap: 6px;
   min-height: 48px;
   padding: 9px;
-  border-radius: 9px;
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1.35;
   text-align: center;
@@ -374,9 +375,13 @@
     gap: 64px;
     padding: 40px 0;
   }
+  .cst-brand {
+    font-size: 56px;
+    text-shadow: 4px 0 0 var(--color-primary-400);
+  }
   .cst-intro h1 {
-    font-size: clamp(64px, 6vw, 88px);
-    line-height: 0.98;
+    font-size: clamp(48px, 5vw, 64px);
+    line-height: 1.05;
     margin: 18px 0 22px;
   }
   .cst-description {
@@ -384,11 +389,11 @@
   }
   .cst-caption {
     margin-top: 14px;
-    font-size: 13px;
+    font-size: 18px;
   }
   .cst-guide-link {
     margin-top: 28px;
-    font-size: 13px;
+    font-size: 18px;
   }
   .cst-arena {
     padding: 28px;
@@ -408,7 +413,7 @@
     font-size: 52px;
   }
   .cst-pad > span {
-    font-size: 13px;
+    font-size: 18px;
   }
   .cst-result-score > strong {
     font-size: 100px;
@@ -418,14 +423,14 @@
   }
   .cst-challenge,
   .cst-retry.button {
-    font-size: 14px;
+    font-size: 20px;
     min-height: 50px;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   .cst-page {
-    --cst-page: color-mix(in srgb, var(--color-primary-600) 18%, #101116);
+    --cst-page: transparent;
     --cst-surface: color-mix(in srgb, var(--color-primary-600) 35%, #151620);
     --cst-ink: var(--color-primary-50);
     --cst-muted: var(--color-primary-100);

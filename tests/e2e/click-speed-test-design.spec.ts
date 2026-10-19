@@ -154,3 +154,33 @@ test("reduced motion removes decorative transitions without changing the timer",
   ).toBe("none");
   await expect(page.getByTestId("click-speed-test-timer")).toHaveText("0.0s");
 });
+
+test("keeps Tiny5 for the brand and inherits the site's text font elsewhere", async ({
+  page
+}) => {
+  await page.goto("/click-speed-test");
+  const siteFont = await page
+    .locator("body")
+    .evaluate((node) => getComputedStyle(node).fontFamily);
+  for (const selector of [
+    ".cst-intro h1",
+    ".cst-metrics strong",
+    ".cst-pad > strong"
+  ]) {
+    expect(
+      await page
+        .locator(selector)
+        .first()
+        .evaluate((node) => getComputedStyle(node).fontFamily)
+    ).toBe(siteFont);
+  }
+  expect(
+    await page
+      .locator(".cst-brand")
+      .evaluate((node) => getComputedStyle(node).fontFamily)
+  ).not.toBe(siteFont);
+  const icon = page.locator(".cst-pointer");
+  await expect(icon).toHaveAttribute("shape-rendering", "crispEdges");
+  await expect(icon).toHaveAttribute("fill", "currentColor");
+  await expect(icon).not.toHaveAttribute("stroke", "currentColor");
+});

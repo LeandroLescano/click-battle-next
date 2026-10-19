@@ -240,16 +240,15 @@ export const ClickSpeedTest = () => {
                 >
                   <svg
                     className="cst-pointer"
-                    width="34"
-                    height="34"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    shapeRendering="crispEdges"
                     aria-hidden="true"
+                    focusable="false"
                   >
-                    <path d="m5 3 14 9-7 1-3 7-4-17Z" />
-                    <path d="m13 14 4 6" />
+                    <path d="M3 1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1H7v2H5v3H3V1Z M7 10h2v2h1v2H8v-2H7Z" />
                   </svg>
                   <strong>{isRunning ? t("Click!") : t("Start test")}</strong>
                   <span>
