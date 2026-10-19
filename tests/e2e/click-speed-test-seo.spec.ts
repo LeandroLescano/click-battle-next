@@ -39,9 +39,9 @@ test("finishes a five-second test, preserves its score and can retry", async ({
     timeout: 9000
   });
   await expect(page.getByText("3 clicks", {exact: true})).toBeVisible();
-  await expect(
-    page.getByText("0.6 clicks per second", {exact: true})
-  ).toBeVisible();
+  await expect(page.getByTestId("click-speed-test-score-cps")).toHaveText(
+    "0.6"
+  );
   await expect(page.getByTestId("click-speed-test-challenge")).toHaveAttribute(
     "href",
     "/?entry_point=click_speed_test"

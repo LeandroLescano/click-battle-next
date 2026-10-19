@@ -10,9 +10,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function ClickSpeedTestPage() {
   return (
-    <>
+    <div className="cst-page">
       <ClickSpeedTest />
       <ClickSpeedTestGuide />
-    </>
+    </div>
   );
 }
