@@ -6,6 +6,8 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {Button} from "components-new/Button";
+import {ButtonLink} from "components-new/Button/ButtonLink";
+import {BrandTitle} from "components-new/Header/BrandTitle";
 import {LanguageDropdown} from "components-new/LanguageDropdown";
 import {
   buildClickSpeedTestResult,
@@ -98,8 +100,11 @@ export const ClickSpeedTest = () => {
     <main className="cst">
       <div className="cst-shell">
         <header className="cst-header">
-          <Link href="/" className="cst-brand">
-            Click Battle<span aria-hidden="true">↗</span>
+          <Link
+            href="/"
+            className="cst-brand text-primary-600 dark:text-primary-100"
+          >
+            <BrandTitle />
           </Link>
           <LanguageDropdown />
         </header>
@@ -189,15 +194,14 @@ export const ClickSpeedTest = () => {
                   </p>
                   <div className="cst-actions">
                     {isLocked ? (
-                      <span
+                      <Button
                         className="cst-challenge cst-action-disabled"
-                        aria-disabled="true"
+                        disabled
                       >
-                        {t("Challenge a friend")}{" "}
-                        <span aria-hidden="true">↗</span>
-                      </span>
+                        {t("Challenge a friend")}
+                      </Button>
                     ) : (
-                      <Link
+                      <ButtonLink
                         data-testid="click-speed-test-challenge"
                         href="/?entry_point=click_speed_test"
                         className="cst-challenge"
@@ -212,9 +216,8 @@ export const ClickSpeedTest = () => {
                           )
                         }
                       >
-                        {t("Challenge a friend")}{" "}
-                        <span aria-hidden="true">↗</span>
-                      </Link>
+                        {t("Challenge a friend")}
+                      </ButtonLink>
                     )}
                     <Button
                       data-testid="click-speed-test-retry"
@@ -228,7 +231,7 @@ export const ClickSpeedTest = () => {
                   </div>
                 </div>
               ) : (
-                <button
+                <Button
                   type="button"
                   data-testid={
                     isRunning
@@ -256,7 +259,7 @@ export const ClickSpeedTest = () => {
                       ? t("Click or tap anywhere here")
                       : t("The timer starts immediately")}
                   </span>
-                </button>
+                </Button>
               )}
             </div>
             <p className="cst-hint" role="status">

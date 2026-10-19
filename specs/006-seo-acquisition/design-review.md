@@ -21,10 +21,18 @@ Requested review feedback: the existing timer was not prominent, the 600 ms safe
 - The cursor SVG uses a 16×16 integer grid, filled staircase edges and `crispEdges`, without diagonal strokes or rounded joins.
 - Larger localized labels retain stable arena geometry at 320px as well as 375px.
 
+## Narrow annotated corrections
+
+1. Extract the existing home title markup/classes unchanged into `Header/BrandTitle.tsx`, used by both the home Header and the test. Remove the decorative brand arrow; do not invent a replacement logo.
+2. Result retry uses the existing outlined Button without palette overrides. Challenge uses a native-link adapter around the same shared button styles; locked challenge is a genuinely disabled Button. Keep the URL, Analytics handler and 600 ms safety window.
+3. Ready/running targets render the same primary Button used in LocalSection. Remove the test-specific press animation and background/shadow overrides. Preserve only page geometry and the existing scoped reduced-motion override.
+
+Regression checks compare rendered control colors, border, radius, shadow and transform against an unmodified shared Button reference; they also exercise the original pressed transform. The geometry test clock is explicitly paused so screenshot latency cannot consume the safety-lock window.
+
 ## Animation and performance choices
 
 - Progress fill uses a transform and the existing 100 ms countdown tick.
-- Press feedback is a 100 ms transform; result entrance uses transform/opacity for 240 ms.
+- Press feedback now uses the original shared gameplay Button (150 ms transform/box-shadow); result entrance uses transform/opacity for 240 ms.
 - No confetti dependency, sound, page-load animation, per-click particle creation or extra animation loop.
 - The lock remains 600 ms. It is a click-safety window, not score-processing latency.
 - No measured Core Web Vitals improvement is claimed.
@@ -46,7 +54,7 @@ The redesign in this revision is an experience/interaction improvement. Animatio
 Before implementation, three targeted tests failed for the missing progress/tenths, missing nonblank locked result, and mobile play target below the first viewport.
 
 After implementation:
-- 54 targeted Playwright tests passed locally, including a typography/pixel-SVG regression.
+- 55 targeted Playwright tests passed locally, including typography/pixel-SVG and shared branding/button-palette regressions.
 - Includes ready/running/locked/complete states at 320, 375, 768, 1440px, three locales, light/dark, stable arena geometry, action hit areas, reduced motion, exact 3-click score, retry and Analytics event sequence.
 - Screenshot inspection covered mobile result/full page and desktop running panel.
 - TypeScript, targeted ESLint and translation coverage passed.

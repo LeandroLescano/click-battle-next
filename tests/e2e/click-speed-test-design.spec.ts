@@ -23,6 +23,8 @@ test("shows a filled result during the safety lock, then enables both actions", 
 }) => {
   await page.goto("/click-speed-test");
   await page.clock.install();
+  // Freeze wall time too: screenshot capture must not consume the 600ms lock.
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.getByTestId("click-speed-test-start").click();
   await page.getByTestId("click-speed-test-button").click({clickCount: 3});
   await page.clock.runFor(5001);
@@ -75,6 +77,8 @@ for (const locale of ["en", "es", "pr"]) {
           );
           await page.goto(`${origin}/click-speed-test`);
           await page.clock.install();
+          // Freeze wall time too: screenshot capture must not consume the 600ms lock.
+          await page.clock.pauseAt(new Date(Date.now() + 1000));
           const arena = page.locator(".cst-arena");
           const dimensions = await arena.boundingBox();
           await page.getByTestId("click-speed-test-start").click();
@@ -142,6 +146,8 @@ test("reduced motion removes decorative transitions without changing the timer",
   await page.emulateMedia({reducedMotion: "reduce"});
   await page.goto("/click-speed-test");
   await page.clock.install();
+  // Freeze wall time too: screenshot capture must not consume the 600ms lock.
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.getByTestId("click-speed-test-start").click();
   const pad = page.getByTestId("click-speed-test-button");
   expect(
@@ -176,11 +182,80 @@ test("keeps Tiny5 for the brand and inherits the site's text font elsewhere", as
   }
   expect(
     await page
-      .locator(".cst-brand")
+      .locator(".cst-brand .font-tiny5")
       .evaluate((node) => getComputedStyle(node).fontFamily)
   ).not.toBe(siteFont);
   const icon = page.locator(".cst-pointer");
   await expect(icon).toHaveAttribute("shape-rendering", "crispEdges");
   await expect(icon).toHaveAttribute("fill", "currentColor");
   await expect(icon).not.toHaveAttribute("stroke", "currentColor");
+});
+
+test("review: uses the home brand and shared gameplay/result button palette", async ({
+  page
+}) => {
+  await page.goto("/click-speed-test");
+  const brand = page.locator(".cst-brand");
+  await expect(brand).toHaveText("Click Battle!");
+  await expect(brand.locator(".font-tiny5")).toBeVisible();
+  await expect(brand).not.toContainText("↗");
+  const start = page.getByTestId("click-speed-test-start");
+  await expect(start).toHaveClass(/button-primary/);
+  const comparePalette = async (selector: string, variant: string) => {
+    await page.mouse.move(0, 0);
+    await expect
+      .poll(() =>
+        page.locator(selector).evaluate((node, variant) => {
+          const reference = document.createElement("button");
+          reference.className = `button button-${variant}`;
+          node.parentElement!.append(reference);
+          const actual = getComputedStyle(node);
+          const expected = getComputedStyle(reference);
+          const matches = [
+            "backgroundColor",
+            "color",
+            "borderTopColor",
+            "borderRadius",
+            "transform",
+            "boxShadow"
+          ].every(
+            (key) =>
+              actual[key as keyof CSSStyleDeclaration] ===
+              expected[key as keyof CSSStyleDeclaration]
+          );
+          reference.remove();
+          return matches;
+        }, variant)
+      )
+      .toBe(true);
+  };
+  await comparePalette('[data-testid="click-speed-test-start"]', "primary");
+  await page.clock.install();
+  // Freeze wall time too: screenshot capture must not consume the 600ms lock.
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
+  await start.click();
+  await expect(page.getByTestId("click-speed-test-button")).toHaveClass(
+    /button-primary/
+  );
+  await comparePalette('[data-testid="click-speed-test-button"]', "primary");
+  const pad = page.getByTestId("click-speed-test-button");
+  await pad.hover();
+  await page.mouse.down();
+  try {
+    await expect
+      .poll(() => pad.evaluate((node) => getComputedStyle(node).transform))
+      .toBe("matrix(1, 0, 0, 1, 0, 0)");
+  } finally {
+    await page.mouse.up();
+  }
+  await page.clock.runFor(5650);
+  await expect(page.getByTestId("click-speed-test-challenge")).toHaveClass(
+    /button-primary/
+  );
+  await expect(page.getByTestId("click-speed-test-challenge")).toHaveAttribute(
+    "href",
+    "/?entry_point=click_speed_test"
+  );
+  await comparePalette('[data-testid="click-speed-test-challenge"]', "primary");
+  await comparePalette('[data-testid="click-speed-test-retry"]', "outlined");
 });
