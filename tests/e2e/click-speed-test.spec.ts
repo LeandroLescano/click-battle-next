@@ -5,11 +5,13 @@ test("runs a click speed test and records clicks", async ({page}) => {
 
   await expect(
     page.getByRole("heading", {
-      name: "How many clicks can you make in 5 seconds?"
+      name: "5-Second Click Speed Test"
     })
   ).toBeVisible();
 
-  await expect(page.getByRole("link", {name: "Click Battle"})).toBeVisible();
+  await expect(
+    page.getByRole("link", {name: "Click Battle!", exact: true})
+  ).toBeVisible();
   await expect(page.getByRole("button", {name: "Go Back!"})).toHaveCount(0);
 
   await page.getByTestId("click-speed-test-start").click();

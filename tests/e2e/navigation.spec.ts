@@ -1,7 +1,10 @@
 import {test, expect} from "./fixtures";
 
 test("Should navigate to ranking page", async ({userPage: {page}}) => {
-  await page.getByRole("link", {name: "Ranking"}).click();
+  await page
+    .getByRole("main")
+    .getByRole("link", {name: "Ranking", exact: true})
+    .click();
   await page.waitForURL(/\/ranking/);
 
   await expect(page.getByRole("heading", {name: "Click masters"})).toBeVisible({
