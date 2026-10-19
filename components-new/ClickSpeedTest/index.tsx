@@ -149,18 +149,14 @@ export const ClickSpeedTest = () => {
 
         <div className="cst-layout">
           <section className="cst-intro">
-            <p className="cst-eyebrow">
-              {t("Click speed test")} <span aria-hidden="true">/ 05</span>
-            </p>
+            <p className="cst-eyebrow">{t("Click speed test")}</p>
             <h1>{t("5-Second Click Speed Test")}</h1>
             <p className="cst-description">
               {t(
-                "Measure your clicks per second in one quick, five-second round."
+                "Click for 5 seconds to measure your clicks per second (CPS)."
               )}
             </p>
-            <p className="cst-caption">
-              {t("Free to play. No account needed.")}
-            </p>
+            <p className="cst-caption">{t("No account required.")}</p>
             <a className="cst-guide-link" href="#click-speed-test-guide">
               {t("How your CPS is calculated")}{" "}
               <span aria-hidden="true">↓</span>
@@ -177,7 +173,7 @@ export const ClickSpeedTest = () => {
               <span className="cst-state">
                 <span className="cst-state-dot" aria-hidden="true" />
                 {showResult
-                  ? t("Sprint complete")
+                  ? t("Test complete")
                   : isCountingDown
                   ? t("Get ready")
                   : isRunning
@@ -320,15 +316,6 @@ export const ClickSpeedTest = () => {
                 </Button>
               )}
             </div>
-            <p className="cst-hint" role="status">
-              {showResult
-                ? t("Same device. Same test. Beat your score.")
-                : isCountingDown
-                ? t("Get ready — clicks count after the countdown.")
-                : isRunning
-                ? t("Keep going — every click counts.")
-                : t("Press Start, get ready, then click or tap.")}
-            </p>
           </section>
         </div>
       </div>

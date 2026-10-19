@@ -39,6 +39,15 @@ Regression checks compare rendered control colors, border, radius, shadow and tr
 - Countdown digits use the existing brief result entrance animation and disable decorative motion under reduced-motion preferences.
 - Deterministic tests cover exact 3/2/1 boundaries, ignored preparation clicks, a full five-second round, retry preparation, score reset, and Analytics start timing. The responsive/theme/locale matrix now also checks preparation geometry.
 
+## Copy review
+
+- Remove the arena footer instead of replacing its motivational slogans with different slogans. State labels, countdown, scores and actions remain.
+- Remove the decorative `/ 05` text. Replace the introductory pitch with the literal five-second test and CPS outcome; keep the no-account information.
+- Shorten the instructions to starting, waiting for 3–2–1, clicking and reading the result. Preserve the CPS formula and worked example.
+- Replace the score-to-live-challenge pitch with a plain Play with friends heading and the actual create-room/share-link flow. It does not imply that the test score is shared.
+- Keep the practical advice to compare attempts with the same input method; remove the unsolicited world-record disclaimer.
+- Apply the copy edits only to this page and its guide in English, Spanish and Portuguese. Timer, scoring, Analytics, shared buttons, title metadata and navigation targets are unchanged.
+
 ## Animation and performance choices
 
 - Progress fill uses a transform and the existing 100 ms countdown tick.
@@ -64,7 +73,7 @@ The redesign in this revision is an experience/interaction improvement. Animatio
 Before implementation, three targeted tests failed for the missing progress/tenths, missing nonblank locked result, and mobile play target below the first viewport.
 
 After implementation:
-- 57 targeted Playwright tests passed locally, including preparation/retry timing, typography/pixel-SVG and shared branding/button-palette regressions.
+- 60 targeted Playwright tests passed locally, including copy checks in all three locales, preparation/retry timing, typography/pixel-SVG and shared branding/button-palette regressions.
 - Includes ready/running/locked/complete states at 320, 375, 768, 1440px, three locales, light/dark, stable arena geometry, action hit areas, reduced motion, exact 3-click score, retry and Analytics event sequence.
 - Screenshot inspection covered mobile result/full page and desktop running panel.
 - TypeScript, targeted ESLint and translation coverage passed.

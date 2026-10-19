@@ -20,17 +20,15 @@ export function ClickSpeedTestGuide() {
             {t("How to take the click speed test")}
           </h2>
           <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-6 md:text-base">
+            <li>{t("Press Start test and wait for 3–2–1.")}</li>
             <li>
               {t(
-                "Press Start test. Get ready for 3–2–1, then click for five seconds."
+                "When Click! appears, click or tap the button until time runs out."
               )}
             </li>
             <li>
-              {t("Click or tap the large button until the timer reaches zero.")}
-            </li>
-            <li>
               {t(
-                "Read your total clicks and CPS, then try again to compare your attempts."
+                "Your result shows your total clicks and clicks per second (CPS)."
               )}
             </li>
           </ol>
@@ -63,18 +61,16 @@ export function ClickSpeedTestGuide() {
             )}
           </p>
           <p className="mt-3 text-sm leading-6 md:text-base">
-            {t(
-              "For a fair comparison, use the same device and input method across attempts. This is a practice score, not a verified world record."
-            )}
+            {t("Use the same device and input method when comparing attempts.")}
           </p>
         </div>
         <div>
           <h2 className="text-xl font-bold md:text-2xl">
-            {t("Turn your score into a live challenge")}
+            {t("Play with friends")}
           </h2>
           <p className="mt-5 text-sm leading-6 md:text-base">
             {t(
-              "The solo test is a warm-up. In Click Battle, create a multiplayer room, invite a friend and compete in Speed Battle or Reaction Battle."
+              "Create a room, share its link and play Speed Battle or Reaction Battle with friends."
             )}
           </p>
           <nav

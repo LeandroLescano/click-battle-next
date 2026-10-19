@@ -44,7 +44,6 @@
 .cst-guide-link,
 .cst-arena-heading,
 .cst-label,
-.cst-hint,
 .cst-pad > span,
 .cst-result-summary,
 .cst-actions {
@@ -59,10 +58,6 @@
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--cst-muted);
-}
-
-.cst-eyebrow > span {
-  color: var(--color-primary-300);
 }
 
 .cst-intro h1 {
@@ -231,15 +226,6 @@
 }
 .cst-arena[data-phase="running"] .cst-state-dot {
   animation: cst-status-pulse 1.2s ease-in-out infinite;
-}
-
-.cst-hint {
-  min-height: 48px;
-  margin: 16px 0 0;
-  text-align: center;
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--cst-muted);
 }
 
 .cst-result {
