@@ -29,6 +29,16 @@ Requested review feedback: the existing timer was not prominent, the 600 ms safe
 
 Regression checks compare rendered control colors, border, radius, shadow and transform against an unmodified shared Button reference; they also exercise the original pressed transform. The geometry test clock is explicitly paused so screenshot latency cannot consume the safety-lock window.
 
+## Preparation countdown
+
+- Starting and retrying now show 3–2–1 inside the same shared gameplay Button. Preparation is disabled and ignores clicks; its main timer remains at 5.0 seconds.
+- Only after preparation finishes is a fresh five-second deadline created. Preparation cannot consume the playable time.
+- The original 600 ms result safety lock and CPS calculation remain unchanged.
+- The start Analytics event now fires when the playable round actually begins, not when preparation is requested. There are no new event names.
+- Update visible instructions in English, Spanish and Portuguese; the guide no longer claims an immediate start.
+- Countdown digits use the existing brief result entrance animation and disable decorative motion under reduced-motion preferences.
+- Deterministic tests cover exact 3/2/1 boundaries, ignored preparation clicks, a full five-second round, retry preparation, score reset, and Analytics start timing. The responsive/theme/locale matrix now also checks preparation geometry.
+
 ## Animation and performance choices
 
 - Progress fill uses a transform and the existing 100 ms countdown tick.
@@ -54,7 +64,7 @@ The redesign in this revision is an experience/interaction improvement. Animatio
 Before implementation, three targeted tests failed for the missing progress/tenths, missing nonblank locked result, and mobile play target below the first viewport.
 
 After implementation:
-- 55 targeted Playwright tests passed locally, including typography/pixel-SVG and shared branding/button-palette regressions.
+- 57 targeted Playwright tests passed locally, including preparation/retry timing, typography/pixel-SVG and shared branding/button-palette regressions.
 - Includes ready/running/locked/complete states at 320, 375, 768, 1440px, three locales, light/dark, stable arena geometry, action hit areas, reduced motion, exact 3-click score, retry and Analytics event sequence.
 - Screenshot inspection covered mobile result/full page and desktop running panel.
 - TypeScript, targeted ESLint and translation coverage passed.

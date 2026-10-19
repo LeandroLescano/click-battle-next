@@ -21,7 +21,9 @@ export function ClickSpeedTestGuide() {
           </h2>
           <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-6 md:text-base">
             <li>
-              {t("Press Start test. The five-second timer begins immediately.")}
+              {t(
+                "Press Start test. Get ready for 3–2–1, then click for five seconds."
+              )}
             </li>
             <li>
               {t("Click or tap the large button until the timer reaches zero.")}

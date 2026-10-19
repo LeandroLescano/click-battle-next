@@ -26,6 +26,7 @@ test("shows a filled result during the safety lock, then enables both actions", 
   // Freeze wall time too: screenshot capture must not consume the 600ms lock.
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.getByTestId("click-speed-test-start").click();
+  await page.clock.runFor(3000);
   await page.getByTestId("click-speed-test-button").click({clickCount: 3});
   await page.clock.runFor(5001);
   const result = page.getByTestId("click-speed-test-result");
@@ -82,6 +83,21 @@ for (const locale of ["en", "es", "pr"]) {
           const arena = page.locator(".cst-arena");
           const dimensions = await arena.boundingBox();
           await page.getByTestId("click-speed-test-start").click();
+          const preparation = page.getByTestId("click-speed-test-countdown");
+          await expect(preparation).toBeDisabled();
+          await expect(preparation.locator("strong")).toHaveText("3");
+          const preparing = await arena.boundingBox();
+          expect(Math.abs(preparing!.height - dimensions!.height)).toBeLessThan(
+            2
+          );
+          await page.clock.runFor(1000);
+          await expect(preparation.locator("strong")).toHaveText("2");
+          if (locale === "en" && (width === 375 || width === 1440)) {
+            await arena.screenshot({
+              path: `test-results/cst-countdown-${width}-${colorScheme}.png`
+            });
+          }
+          await page.clock.runFor(2000);
           await page
             .getByTestId("click-speed-test-button")
             .click({clickCount: 3});
@@ -149,6 +165,12 @@ test("reduced motion removes decorative transitions without changing the timer",
   // Freeze wall time too: screenshot capture must not consume the 600ms lock.
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.getByTestId("click-speed-test-start").click();
+  expect(
+    await page
+      .locator(".cst-countdown-number")
+      .evaluate((node) => getComputedStyle(node).animationName)
+  ).toBe("none");
+  await page.clock.runFor(3000);
   const pad = page.getByTestId("click-speed-test-button");
   expect(
     await pad.evaluate((node) => getComputedStyle(node).transitionDuration)
@@ -234,6 +256,7 @@ test("review: uses the home brand and shared gameplay/result button palette", as
   // Freeze wall time too: screenshot capture must not consume the 600ms lock.
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await start.click();
+  await page.clock.runFor(3000);
   await expect(page.getByTestId("click-speed-test-button")).toHaveClass(
     /button-primary/
   );

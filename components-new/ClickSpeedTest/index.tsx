@@ -16,14 +16,18 @@ import {
 
 import "./styles.scss";
 
+const COUNTDOWN_SECONDS = 3;
+
 const DURATION_MS = CLICK_SPEED_TEST_DURATION_SECONDS * 1000;
 
 export const ClickSpeedTest = () => {
   const {t} = useTranslation();
   const [clicks, setClicks] = useState(0);
   const [remainingMs, setRemainingMs] = useState(DURATION_MS);
+  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
+  const preparationDeadlineRef = useRef<number | null>(null);
   const [phase, setPhase] = useState<
-    "ready" | "running" | "locked" | "complete"
+    "ready" | "countdown" | "running" | "locked" | "complete"
   >("ready");
   const clicksRef = useRef(0);
   const deadlineRef = useRef<number | null>(null);
@@ -68,16 +72,49 @@ export const ClickSpeedTest = () => {
     return () => window.clearTimeout(resultTimer);
   }, [phase]);
 
+  useEffect(() => {
+    if (phase !== "countdown" || preparationDeadlineRef.current === null)
+      return;
+    const preparationDeadline = preparationDeadlineRef.current;
+    const beginRound = () => {
+      if (preparationDeadlineRef.current === null) return;
+      preparationDeadlineRef.current = null;
+      // Start a fresh deadline here: preparation never consumes playing time.
+      deadlineRef.current = Date.now() + DURATION_MS;
+      setCountdown(0);
+      setPhase("running");
+      logEvent(getAnalytics(), "click_speed_test_start", {
+        duration_seconds: CLICK_SPEED_TEST_DURATION_SECONDS
+      });
+    };
+    const timer = window.setInterval(() => {
+      const seconds = Math.max(
+        Math.ceil((preparationDeadline - Date.now()) / 1000),
+        0
+      );
+      setCountdown(seconds);
+      if (seconds === 0) beginRound();
+    }, 100);
+    const timeout = window.setTimeout(
+      beginRound,
+      Math.max(preparationDeadline - Date.now(), 0)
+    );
+    return () => {
+      window.clearInterval(timer);
+      window.clearTimeout(timeout);
+    };
+  }, [phase]);
+
   const startTest = () => {
+    if (preparationDeadlineRef.current !== null || deadlineRef.current !== null)
+      return;
     clicksRef.current = 0;
-    deadlineRef.current = Date.now() + DURATION_MS;
+    preparationDeadlineRef.current = Date.now() + COUNTDOWN_SECONDS * 1000;
     finishedRef.current = false;
     setClicks(0);
     setRemainingMs(DURATION_MS);
-    setPhase("running");
-    logEvent(getAnalytics(), "click_speed_test_start", {
-      duration_seconds: CLICK_SPEED_TEST_DURATION_SECONDS
-    });
+    setCountdown(COUNTDOWN_SECONDS);
+    setPhase("countdown");
   };
 
   const registerClick = () => {
@@ -91,6 +128,7 @@ export const ClickSpeedTest = () => {
   };
 
   const result = buildClickSpeedTestResult(clicks);
+  const isCountingDown = phase === "countdown";
   const isRunning = phase === "running";
   const isLocked = phase === "locked";
   const showResult = isLocked || phase === "complete";
@@ -140,6 +178,8 @@ export const ClickSpeedTest = () => {
                 <span className="cst-state-dot" aria-hidden="true" />
                 {showResult
                   ? t("Sprint complete")
+                  : isCountingDown
+                  ? t("Get ready")
                   : isRunning
                   ? t("In progress")
                   : t("Ready to play")}
@@ -234,11 +274,14 @@ export const ClickSpeedTest = () => {
                 <Button
                   type="button"
                   data-testid={
-                    isRunning
+                    isCountingDown
+                      ? "click-speed-test-countdown"
+                      : isRunning
                       ? "click-speed-test-button"
                       : "click-speed-test-start"
                   }
                   className="cst-pad"
+                  disabled={isCountingDown}
                   onClick={isRunning ? registerClick : startTest}
                 >
                   <svg
@@ -253,11 +296,26 @@ export const ClickSpeedTest = () => {
                   >
                     <path d="M3 1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1H7v2H5v3H3V1Z M7 10h2v2h1v2H8v-2H7Z" />
                   </svg>
-                  <strong>{isRunning ? t("Click!") : t("Start test")}</strong>
+                  <strong
+                    key={isCountingDown ? countdown : "label"}
+                    className={
+                      isCountingDown ? "cst-countdown-number" : undefined
+                    }
+                    aria-live={isCountingDown ? "polite" : "off"}
+                    aria-atomic="true"
+                  >
+                    {isCountingDown
+                      ? countdown
+                      : isRunning
+                      ? t("Click!")
+                      : t("Start test")}
+                  </strong>
                   <span>
-                    {isRunning
+                    {isCountingDown
+                      ? t("Get ready")
+                      : isRunning
                       ? t("Click or tap anywhere here")
-                      : t("The timer starts immediately")}
+                      : t("The timer starts after 3–2–1")}
                   </span>
                 </Button>
               )}
@@ -265,9 +323,11 @@ export const ClickSpeedTest = () => {
             <p className="cst-hint" role="status">
               {showResult
                 ? t("Same device. Same test. Beat your score.")
+                : isCountingDown
+                ? t("Get ready — clicks count after the countdown.")
                 : isRunning
                 ? t("Keep going — every click counts.")
-                : t("Start the timer, then click or tap.")}
+                : t("Press Start, get ready, then click or tap.")}
             </p>
           </section>
         </div>

@@ -221,6 +221,11 @@
   font-size: 16px;
   line-height: 1.5;
 }
+.cst-pad > strong.cst-countdown-number {
+  font-size: 80px;
+  animation: cst-result-in 200ms ease-out both;
+}
+
 .cst-pointer {
   opacity: 0.8;
 }
@@ -410,6 +415,7 @@
     transform: none;
   }
   .cst-result,
+  .cst-countdown-number,
   .cst-state-dot {
     animation: none !important;
   }
