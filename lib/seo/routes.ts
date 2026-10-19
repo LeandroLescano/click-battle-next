@@ -51,10 +51,10 @@ export const SEO_ROUTES: Record<SeoRouteKey, SeoRouteDefinition> = {
   clickSpeedTest: {
     path: "/click-speed-test",
     canonicalPath: "/click-speed-test",
-    title: "Click Speed Test",
-    fullTitle: "Click Speed Test | Click Battle",
+    title: "5-Second Click Speed Test",
+    fullTitle: "5-Second Click Speed Test (CPS) | Click Battle",
     description:
-      "Test how fast you can click in 5 seconds, compare your score, and challenge a friend to an online Click Battle.",
+      "Take a free 5-second CPS test. See your total clicks and clicks per second, try again, or challenge a friend in Click Battle. No sign-up needed for the test.",
     index: true,
     priority: 0.8,
     changeFrequency: "weekly"

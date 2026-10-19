@@ -4,6 +4,8 @@ import {useTranslation} from "react-i18next";
 import {Button, ProfileModal} from "components-new";
 import {useAuth} from "contexts/AuthContext";
 
+import {BrandTitle} from "./BrandTitle";
+
 export const Header = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -12,9 +14,7 @@ export const Header = () => {
 
   return (
     <header className="flex justify-between items-center">
-      <div className="text-3xl md:text-7xl drop-shadow-sm font-tiny5 [text-shadow:2px_0px_0px_var(--color-primary-400)] md:[text-shadow:5px_0px_0px_var(--color-primary-400)]">
-        Click Battle!
-      </div>
+      <BrandTitle />
       <div className="flex items-center gap-1 md:gap-9 flex-col-reverse md:flex-row">
         <Button
           onClick={signOut}
