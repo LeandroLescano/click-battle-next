@@ -1,5 +1,5 @@
-import React from "react";
 import {Transition} from "@headlessui/react";
+import React from "react";
 import {useTranslation} from "react-i18next";
 
 export const WelcomeMessage = () => {
@@ -10,12 +10,12 @@ export const WelcomeMessage = () => {
       <section className="space-y-3">
         <div className="flex items-start gap-2">
           <h1 className="text-3xl md:text-5xl font-bold text-primary-600 dark:text-primary-100">
-            {t("Start a room in seconds")}
+            {t("Create a room and play click or reaction battles with friends")}
           </h1>
         </div>
         <p className="mt-2 max-w-[34rem] text-sm md:text-3xl">
           {t(
-            "Create a room, invite friends, and start a match in seconds."
+            "Share the room link to invite friends to Speed Battle or Reaction Battle."
           )}
         </p>
       </section>

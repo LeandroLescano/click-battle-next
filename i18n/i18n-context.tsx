@@ -5,10 +5,10 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import React, {useEffect, useState} from "react";
 import {I18nextProvider as Provider, initReactI18next} from "react-i18next";
 
-import {getOptions} from "./settings";
 import enTranslation from "./locales/en/translation.json";
 import esTranslation from "./locales/es/translation.json";
 import prTranslation from "./locales/pr/translation.json";
+import {getOptions} from "./settings";
 
 const resources = {
   en: {translation: enTranslation},
@@ -30,6 +30,8 @@ const createI18nInstance = (language: string) => {
         escapeValue: false
       },
       detection: {
+        order: ["cookie"],
+        lookupCookie: "i18next",
         caches: ["cookie"]
       }
     });

@@ -30,10 +30,10 @@ export const SEO_ROUTES: Record<SeoRouteKey, SeoRouteDefinition> = {
   home: {
     path: "/",
     canonicalPath: "/",
-    title: "Play online",
-    fullTitle: "Click Battle | Play online",
+    title: "Click battles and reaction games with friends",
+    fullTitle: "Click battles and reaction games with friends | Click Battle",
     description:
-      "Create a room, invite friends, and play real-time click battles or reaction rounds in your browser.",
+      "Create a room, share its link, and play Speed Battle or Reaction Battle with friends.",
     index: true,
     priority: 1,
     changeFrequency: "daily"
@@ -41,9 +41,9 @@ export const SEO_ROUTES: Record<SeoRouteKey, SeoRouteDefinition> = {
   playOnline: {
     path: "/how-to-play",
     canonicalPath: "/how-to-play",
-    title: "How to play",
+    title: "How to play Speed Battle and Reaction Battle",
     description:
-      "Learn how Click Battle rooms, game modes, and rankings work before jumping into a match with friends.",
+      "Create or join a room, share its link, and learn how Speed Battle and Reaction Battle work before playing with friends.",
     index: true,
     priority: 0.7,
     changeFrequency: "weekly"
