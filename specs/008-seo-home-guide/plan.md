@@ -4,7 +4,7 @@
 
 ## Summary
 
-Ajustar metadata/copy de home y `/how-to-play`, hacer que español sea el fallback de la URL `.com.ar` respetando la cookie explícita `i18next`, y retirar el viewport manual duplicado mediante la API de Next.js. No tocar gameplay, Firebase, Analytics, rutas de idioma, CPS ni ranking.
+Ajustar metadata/copy de home y `/how-to-play` con Click Battle como identidad principal y los modos existentes como reglas específicas de la guía; hacer que español sea el fallback de la URL `.com.ar` respetando la cookie explícita `i18next`, y retirar el viewport manual duplicado mediante la API de Next.js. No tocar gameplay, Firebase, Analytics, rutas de idioma, CPS ni ranking.
 
 ## Technical Context
 
@@ -25,8 +25,8 @@ Ajustar metadata/copy de home y `/how-to-play`, hacer que español sea el fallba
 ## Diseño y decisiones
 
 1. El idioma inicial depende únicamente de una cookie `i18next` válida (`en`, `es`, `pr`); si falta o no es válida, usar `defaultLng=es`. No depender de `Accept-Language` ni de `navigator.language` para que el HTML de `/` sea estable. Mantener `fallbackLng=en` para no cambiar la conducta de traducciones faltantes en los locales explícitos; conservar la lista/selector y caché por cookie.
-2. Traducir claves nuevas para los tres locales. Título, descripción, H1 y explicación mencionan salas compartibles y modos reales, sin promesas sobre registro o precio.
-3. La guía sigue con el componente existente y sus CTA actuales. Sus pasos distinguen Speed Battle (más clicks antes del fin del temporizador) de Reaction Battle (esperar la señal y reaccionar; anticiparse pierde la ronda).
+2. Traducir claves nuevas para los tres locales. Title/H1 de home y guía priorizan Click Battle; la descripción de home explica batallas online y el flujo real de crear/compartir una sala, sin promesas sobre registro o precio.
+3. La guía sigue con el componente existente y sus CTA actuales. Solo los pasos de reglas nombran Speed Battle (más clicks antes del fin del temporizador) y Reaction Battle (esperar la señal y reaccionar; anticiparse pierde la ronda); no se presentan como la definición exhaustiva del producto.
 4. La auditoría técnica confirmó dos `meta viewport` y el layout actual agrega uno manualmente, mientras Next.js también tiene viewport predeterminado. Cambiar a `export const viewport: Viewport` y conservar `width=device-width`, `initial-scale=1`, `minimum-scale=1` y `viewport-fit=cover`.
 5. No rehacer ni duplicar el trabajo de PR #76 (CPS) ni PR #78 (privacidad del ranking); la rama de trabajo se actualiza sobre el `develop` que ya contiene #78.
 

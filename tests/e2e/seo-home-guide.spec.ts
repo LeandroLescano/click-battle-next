@@ -3,49 +3,63 @@ import {expect, test} from "@playwright/test";
 const localized = [
   {
     locale: "en",
-    title: "Click battles and reaction games with friends | Click Battle",
+    title: "Click Battle: Online Click Battles with Friends",
     homeDescription:
-      "Create a room, share its link, and play Speed Battle or Reaction Battle with friends.",
-    h1: "Create a room and play click or reaction battles with friends",
-    homeIntro:
-      "Share the room link to invite friends to Speed Battle or Reaction Battle.",
-    guideTitle: "How to play Speed Battle and Reaction Battle",
+      "Create a room, share its link, and play quick online click battles with friends in your browser.",
+    h1: "Create a room and play Click Battle with friends",
+    homeIntro: "Share the room link to invite friends to your match.",
+    guideTitle: "How to play Click Battle",
+    guidePageTitle: "Click Battle: How to play",
     guideDescription:
-      "Create or join a room, share its link, and learn how Speed Battle and Reaction Battle work before playing with friends.",
+      "Create or join a room, invite friends with its link, and learn how the available modes work.",
     speedHeading: "Speed Battle: click before the timer ends",
+    speedDescription:
+      "Click or tap as many times as you can before the timer expires. The player with more clicks wins.",
     reactionHeading: "Reaction Battle: wait for the signal",
+    reactionDescription:
+      "After the signal appears, click, tap, or press Space. The fastest valid reaction wins; clicking early loses the round.",
     openLobby: "Open lobby",
     cps: "Try the Click Speed Test"
   },
   {
     locale: "es",
-    title: "Batallas de clicks y reacción con amigos | Click Battle",
+    title: "Click Battle: batallas de clicks online con amigos",
     homeDescription:
-      "Creá una sala, compartí el link y jugá Speed Battle o Batalla de Reacción con amigos.",
-    h1: "Creá una sala y jugá batallas de clicks o reacción con amigos",
+      "Creá una sala, compartí el enlace y jugá batallas de clicks online con amigos desde el navegador.",
+    h1: "Creá una sala y jugá Click Battle con tus amigos",
     homeIntro:
-      "Compartí el link de la sala para invitar amigos a Speed Battle o Batalla de Reacción.",
-    guideTitle: "Cómo jugar Speed Battle y Batalla de Reacción",
+      "Compartí el enlace de la sala para invitar a tus amigos a jugar.",
+    guideTitle: "Cómo jugar Click Battle",
+    guidePageTitle: "Click Battle: cómo jugar",
     guideDescription:
-      "Creá o unite a una sala, compartí el link y aprendé cómo funcionan Speed Battle y Batalla de Reacción antes de jugar con amigos.",
+      "Creá o unite a una sala, invitá a tus amigos con el link y aprendé cómo funcionan los modos disponibles.",
     speedHeading: "Speed Battle: hacé clicks antes de que termine el tiempo",
+    speedDescription:
+      "Hacé clicks o tocá la pantalla tantas veces como puedas antes de que termine el temporizador. Gana quien suma más clicks.",
     reactionHeading: "Batalla de Reacción: esperá la señal",
+    reactionDescription:
+      "Cuando aparezca la señal, hacé click, tocá la pantalla o presioná Espacio. Gana la reacción válida más rápida; si te adelantás, perdés la ronda.",
     openLobby: "Abrir lobby",
     cps: "Probar el test de velocidad de clicks"
   },
   {
     locale: "pr",
-    title: "Batalhas de cliques e reação com amigos | Click Battle",
+    title: "Click Battle: batalhas de cliques online com amigos",
     homeDescription:
-      "Crie uma sala, compartilhe o link e jogue Speed Battle ou Batalha de Reação com amigos.",
-    h1: "Crie uma sala e jogue batalhas de cliques ou reação com amigos",
+      "Crie uma sala, compartilhe o link e jogue batalhas de cliques online com amigos pelo navegador.",
+    h1: "Crie uma sala e jogue Click Battle com seus amigos",
     homeIntro:
-      "Compartilhe o link da sala para convidar amigos para Speed Battle ou Batalha de Reação.",
-    guideTitle: "Como jogar Speed Battle e Batalha de Reação",
+      "Compartilhe o link da sala para convidar seus amigos para jogar.",
+    guideTitle: "Como jogar Click Battle",
+    guidePageTitle: "Click Battle: como jogar",
     guideDescription:
-      "Crie ou entre em uma sala, compartilhe o link e veja como funcionam Speed Battle e Batalha de Reação antes de jogar com amigos.",
+      "Crie ou entre em uma sala, convide seus amigos pelo link e veja como funcionam os modos disponíveis.",
     speedHeading: "Speed Battle: clique antes do tempo acabar",
+    speedDescription:
+      "Clique ou toque na tela o máximo de vezes possível antes do cronômetro acabar. Vence quem fizer mais cliques.",
     reactionHeading: "Batalha de Reação: espere o sinal",
+    reactionDescription:
+      "Quando o sinal aparecer, clique, toque na tela ou pressione Espaço. A reação válida mais rápida vence; clicar antes faz você perder a rodada.",
     openLobby: "Abrir lobby",
     cps: "Testar o teste de velocidade de cliques"
   }
@@ -61,9 +75,7 @@ test("home defaults to Spanish in server HTML without a saved preference", async
   const html = await response.text();
 
   expect(html).toContain('<html lang="es"');
-  expect(html).toContain(
-    "<title>Batallas de clicks y reacción con amigos | Click Battle</title>"
-  );
+  expect(html).toContain(`<title>${localized[1].title}</title>`);
   expect(html).toContain(
     `name="description" content="${localized[1].homeDescription}"`
   );
@@ -185,9 +197,7 @@ for (const preference of localized) {
         await expect(
           page.getByRole("heading", {level: 1, name: preference.guideTitle})
         ).toBeVisible();
-        await expect(page).toHaveTitle(
-          `${preference.guideTitle} | Click Battle`
-        );
+        await expect(page).toHaveTitle(preference.guidePageTitle);
         await expect(page.locator('meta[name="description"]')).toHaveAttribute(
           "content",
           preference.guideDescription
@@ -196,10 +206,16 @@ for (const preference of localized) {
           page.getByRole("heading", {level: 2, name: preference.speedHeading})
         ).toBeVisible();
         await expect(
+          page.getByText(preference.speedDescription, {exact: true})
+        ).toBeVisible();
+        await expect(
           page.getByRole("heading", {
             level: 2,
             name: preference.reactionHeading
           })
+        ).toBeVisible();
+        await expect(
+          page.getByText(preference.reactionDescription, {exact: true})
         ).toBeVisible();
         await expect(
           page.getByRole("link", {name: preference.openLobby})

@@ -53,11 +53,11 @@ export const PlayOnlineGuide = () => {
               {t("How to play")}
             </p>
             <h1 className="max-w-[56rem] text-4xl font-bold leading-[0.95] text-primary-600 dark:text-primary-100 md:text-6xl">
-              {t("How to play Speed Battle and Reaction Battle")}
+              {t("How to play Click Battle")}
             </h1>
             <p className="max-w-[52rem] text-base font-semibold text-primary-600 dark:text-primary-100 md:text-2xl">
               {t(
-                "Create or join a room, share its link, and learn how Speed Battle and Reaction Battle work before playing with friends."
+                "Create or join a room, invite friends with its link, and learn how the available modes work."
               )}
             </p>
             <div className="flex flex-wrap gap-3 pt-2">

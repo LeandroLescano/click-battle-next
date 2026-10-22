@@ -400,14 +400,8 @@ const Home = () => {
       <>
         <Loading />
         <div className="sr-only">
-          <h1>
-            {t("Create a room and play click or reaction battles with friends")}
-          </h1>
-          <p>
-            {t(
-              "Share the room link to invite friends to Speed Battle or Reaction Battle."
-            )}
-          </p>
+          <h1>{t("Create a room and play Click Battle with friends")}</h1>
+          <p>{t("Share the room link to invite friends to your match.")}</p>
         </div>
       </>
     );

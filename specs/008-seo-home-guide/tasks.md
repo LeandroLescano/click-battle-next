@@ -24,3 +24,7 @@
 - [x] T011 Ejecutar `npm run check:i18n`, `npm run check:tsc`, lint focalizado y `git diff --check`; corregir regresiones.
 - [x] T012 Inspeccionar diff completo y estado Git, commit solo archivos del alcance, push de `codex/seo-social-discovery` y abrir PR a `develop`.
 - [x] T013 Leer PR/checks/preview remoto y entregar URL, resumen, checks y limitaciones por Kanban Review. No mergear ni desplegar manualmente.
+
+## Editorial revision requested for PR #80
+
+- [x] T014 Reorientar metadata/H1/copy general de home y metadata/H1 de la guía hacia Click Battle; conservar las reglas concretas de los modos actuales, traducir los cambios en `en`, `es` y `pr`, actualizar las regresiones y validar el mismo PR #80 sin merge ni deploy manual.
