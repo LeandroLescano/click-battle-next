@@ -5,7 +5,7 @@ test("home exposes the click speed test in HTML before authentication or JavaScr
   request
 }) => {
   const response = await request.get("/", {
-    headers: {"Accept-Language": "en"}
+    headers: {"Accept-Language": "en", Cookie: "i18next=en"}
   });
   expect(response.status()).toBe(200);
   const html = await response.text();
@@ -61,6 +61,9 @@ for (const scenario of [
       const page = await context.newPage();
       try {
         const origin = new URL(baseURL!).origin;
+        await context.addCookies([
+          {name: "i18next", value: scenario.locale, url: origin}
+        ]);
         await page.route("**/*", (route) =>
           new URL(route.request().url()).origin === origin
             ? route.continue()

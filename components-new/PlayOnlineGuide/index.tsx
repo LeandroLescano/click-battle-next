@@ -1,32 +1,31 @@
 "use client";
 
-import Link from "next/link";
 import {useTranslation} from "react-i18next";
 
-import {Button} from "components-new/Button";
+import {ButtonLink} from "components-new/Button/ButtonLink";
 import {LanguageDropdown} from "components-new/LanguageDropdown";
 import {LeftArrow} from "icons/LeftArrow";
 
 const GUIDE_SECTIONS = [
   {
     number: "01",
-    title: "Create a room or join one",
-    body: "Use the lobby to open your own match or jump into an available room with a shared link."
+    title: "Create or join a room",
+    body: "Use the lobby to create a room and choose a mode, or join an available room."
   },
   {
     number: "02",
-    title: "Invite your players",
-    body: "Share the room link, wait for everyone to appear, and use a password only when you want a private match."
+    title: "Share the room link",
+    body: "Invite friends with the room link. When everyone has joined, the host starts the match."
   },
   {
     number: "03",
-    title: "Start fast, play fast",
-    body: "Click Battle is built for quick rounds, instant rematches, and simple controls on desktop or phone."
+    title: "Speed Battle: click before the timer ends",
+    body: "Click or tap as many times as you can before the timer expires. The player with more clicks wins."
   },
   {
     number: "04",
-    title: "Come back for rematches",
-    body: "Replay with the same group, switch rooms, or check the ranking when someone wants proof."
+    title: "Reaction Battle: wait for the signal",
+    body: "After the signal appears, click, tap, or press Space. The fastest valid reaction wins; clicking early loses the round."
   }
 ] as const;
 
@@ -37,15 +36,14 @@ export const PlayOnlineGuide = () => {
     <main className="min-h-dvh px-5 py-6 text-primary-700 md:px-8 md:py-8">
       <div className="relative mx-auto flex w-full max-w-[96rem] flex-col gap-6">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/" passHref>
-            <Button
-              variant="outlined"
-              className="flex items-center gap-1 px-2.5 py-0.5 text-sm md:gap-2 md:px-5 md:py-1 md:text-2xl"
-            >
-              <LeftArrow />
-              {t("Go Back!")}
-            </Button>
-          </Link>
+          <ButtonLink
+            href="/"
+            variant="outlined"
+            className="flex items-center gap-1 px-2.5 py-0.5 text-sm md:gap-2 md:px-5 md:py-1 md:text-2xl"
+          >
+            <LeftArrow />
+            {t("Go Back!")}
+          </ButtonLink>
           <LanguageDropdown />
         </div>
 
@@ -55,35 +53,34 @@ export const PlayOnlineGuide = () => {
               {t("How to play")}
             </p>
             <h1 className="max-w-[56rem] text-4xl font-bold leading-[0.95] text-primary-600 dark:text-primary-100 md:text-6xl">
-              {t("How to start a Click Battle")}
+              {t("How to play Click Battle")}
             </h1>
             <p className="max-w-[52rem] text-base font-semibold text-primary-600 dark:text-primary-100 md:text-2xl">
               {t(
-                "Open the lobby, create a room or join one, invite your players, and start as soon as everyone is ready."
+                "Create or join a room, invite friends with its link, and learn how the available modes work."
               )}
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
-              <Link href="/" passHref>
-                <Button className="px-4 py-2 text-sm uppercase md:px-6 md:text-xl">
-                  {t("Open lobby")}
-                </Button>
-              </Link>
-              <Link href="/ranking" passHref>
-                <Button
-                  variant="outlined"
-                  className="px-4 py-2 text-sm uppercase md:px-6 md:text-xl"
-                >
-                  {t("View ranking")}
-                </Button>
-              </Link>
-              <Link href="/click-speed-test" passHref>
-                <Button
-                  variant="outlined"
-                  className="px-4 py-2 text-sm uppercase md:px-6 md:text-xl"
-                >
-                  {t("Try the Click Speed Test")}
-                </Button>
-              </Link>
+              <ButtonLink
+                href="/"
+                className="px-4 py-2 text-sm uppercase md:px-6 md:text-xl"
+              >
+                {t("Open lobby")}
+              </ButtonLink>
+              <ButtonLink
+                href="/ranking"
+                variant="outlined"
+                className="px-4 py-2 text-sm uppercase md:px-6 md:text-xl"
+              >
+                {t("View ranking")}
+              </ButtonLink>
+              <ButtonLink
+                href="/click-speed-test"
+                variant="outlined"
+                className="px-4 py-2 text-sm uppercase md:px-6 md:text-xl"
+              >
+                {t("Try the Click Speed Test")}
+              </ButtonLink>
             </div>
           </div>
 

@@ -1,5 +1,5 @@
 import {getApp, getApps, initializeApp} from "firebase/app";
-import type {Metadata} from "next";
+import type {Metadata, Viewport} from "next";
 import localFont from "next/font/local";
 import React, {ReactNode, Suspense} from "react";
 
@@ -30,6 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return createRootMetadata();
 }
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  minimumScale: 1,
+  viewportFit: "cover"
+};
+
 const tinyFont = localFont({
   src: "../public/fonts/Tiny5-Regular.ttf",
   variable: "--font-tiny5"
@@ -57,10 +64,6 @@ export default async function Layout({children}: Props) {
               crossOrigin="anonymous"
             />
           ) : null}
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover"
-          />
           <script
             dangerouslySetInnerHTML={{
               __html: `!function(t){function e(){var e=this||self;e.globalThis=e,delete t.prototype._T_}"object"!=typeof globalThis&&(this?e():(t.defineProperty(t.prototype,"_T_",{configurable:!0,get:e}),_T_))}(Object);`
