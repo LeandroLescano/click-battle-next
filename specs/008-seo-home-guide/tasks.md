@@ -22,5 +22,5 @@
 
 - [x] T010 Ejecutar E2E focalizado en Chromium para los casos de SEO/idioma y revisar móvil (375px) y escritorio (1440px), con requests externos bloqueados.
 - [x] T011 Ejecutar `npm run check:i18n`, `npm run check:tsc`, lint focalizado y `git diff --check`; corregir regresiones.
-- [ ] T012 Inspeccionar diff completo y estado Git, commit solo archivos del alcance, push de `codex/seo-social-discovery` y abrir PR a `develop`.
-- [ ] T013 Leer PR/checks/preview remoto y entregar URL, resumen, checks y limitaciones por Kanban Review. No mergear ni desplegar manualmente.
+- [x] T012 Inspeccionar diff completo y estado Git, commit solo archivos del alcance, push de `codex/seo-social-discovery` y abrir PR a `develop`.
+- [x] T013 Leer PR/checks/preview remoto y entregar URL, resumen, checks y limitaciones por Kanban Review. No mergear ni desplegar manualmente.
