@@ -7,39 +7,40 @@ import {useTranslation} from "react-i18next";
 
 import {LoginModal} from "components-new";
 import {Card} from "components-new/Card";
-import {
-  RankingEntry,
-  ReactionRankingEntry,
-  RankingMode
-} from "components-new/Ranking/types";
+import type {RankingMode} from "components-new/Ranking/types";
 import {useAuth} from "contexts/AuthContext";
+import {
+  toPublicClassicRankingEntry,
+  type PublicRankingEntry,
+  type PublicReactionRankingEntry
+} from "lib/ranking/publicRanking";
 
 import {RankingListProps} from "./types";
 import "./styles.scss";
 
-const sortEntries = (entries: RankingEntry[], mode: RankingMode) => {
+const sortEntries = (entries: PublicRankingEntry[], mode: RankingMode) => {
   const items = [...entries];
 
   if (mode === "reaction") {
     return items.sort((left, right) => {
-      const leftReaction = (left as ReactionRankingEntry).reactionMs;
-      const rightReaction = (right as ReactionRankingEntry).reactionMs;
+      const leftReaction = (left as PublicReactionRankingEntry).reactionMs;
+      const rightReaction = (right as PublicReactionRankingEntry).reactionMs;
 
       if (leftReaction !== rightReaction) {
         return leftReaction - rightReaction;
       }
 
       return (
-        (right as ReactionRankingEntry).roundsWon -
-        (left as ReactionRankingEntry).roundsWon
+        (right as PublicReactionRankingEntry).roundsWon -
+        (left as PublicReactionRankingEntry).roundsWon
       );
     });
   }
 
   return items.sort(
     (left, right) =>
-      (right as Extract<RankingEntry, {mode: "classic-speed"}>).cps -
-      (left as Extract<RankingEntry, {mode: "classic-speed"}>).cps
+      (right as Extract<PublicRankingEntry, {mode: "classic-speed"}>).cps -
+      (left as Extract<PublicRankingEntry, {mode: "classic-speed"}>).cps
   );
 };
 
@@ -75,14 +76,12 @@ export const RankingList = ({mode, users}: RankingListProps) => {
 
       setUsersList((prev) => [
         ...prev,
-        {
-          ...gameUser,
-          maxScores: gameUser.maxScores!,
+        toPublicClassicRankingEntry({
+          key: user.uid,
+          username: gameUser.username,
           cps,
-          mode: "classic-speed",
-          time,
-          key: user.uid
-        }
+          time
+        })
       ]);
     }
 
