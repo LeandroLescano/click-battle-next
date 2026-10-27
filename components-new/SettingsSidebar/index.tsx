@@ -1,4 +1,4 @@
-import {getDatabase, ref, set, update} from "@firebase/database";
+import {getDatabase, ref, update} from "@firebase/database";
 import {clsx} from "clsx";
 import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -9,13 +9,13 @@ import {GameModeSelection} from "components-new/GameModeSelection";
 import {Input} from "components-new/Input";
 import {Select} from "components-new/Select";
 import {Cross} from "icons/Cross";
-import {Game} from "interfaces";
 import {getWebModeSettings, isReactionMode} from "lib/game/gameModes";
 import {AVAILABLE_TIMES} from "resources/constants";
 import {sha256} from "services/encode";
 import {range} from "utils/numbers";
 import {adjustRoomSettings} from "utils/room";
 
+import {buildSettingsUpdatePayload} from "./settingsPayload";
 import {Settings, SettingsSidebarProps} from "./types";
 import "./styles.scss";
 
@@ -92,18 +92,15 @@ export const SettingsSidebar = ({
       });
       localSettings = {...localSettings, ...adjustedSettings};
 
-      await update(ref(db, `games/${idGame}`), {
-        roomName: localSettings.roomName,
-        "settings/maxUsers": localSettings.maxUsers,
-        "settings/password": localSettings.password || null,
-        "settings/timer": localSettings.timer,
-        ...(canChangeGameMode
-          ? {
-              gameMode: localSettings.gameMode,
-              modeSettings: getWebModeSettings(localSettings.gameMode)
-            }
-          : {})
-      });
+      await update(
+        ref(db, `games/${idGame}`),
+        buildSettingsUpdatePayload({
+          settings: localSettings,
+          currentGameMode: options.gameMode,
+          canChangeGameMode,
+          getModeSettings: getWebModeSettings
+        })
+      );
 
       Toast.fire({
         title: t("Settings updated"),
