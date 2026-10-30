@@ -1,4 +1,4 @@
-import {getDatabase, ref, set, update} from "@firebase/database";
+import {getDatabase, ref, update} from "@firebase/database";
 import {clsx} from "clsx";
 import React, {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -9,7 +9,6 @@ import {GameModeSelection} from "components-new/GameModeSelection";
 import {Input} from "components-new/Input";
 import {Select} from "components-new/Select";
 import {Cross} from "icons/Cross";
-import {Game} from "interfaces";
 import {getWebModeSettings, isReactionMode} from "lib/game/gameModes";
 import {AVAILABLE_TIMES} from "resources/constants";
 import {sha256} from "services/encode";
@@ -97,7 +96,7 @@ export const SettingsSidebar = ({
         "settings/maxUsers": localSettings.maxUsers,
         "settings/password": localSettings.password || null,
         "settings/timer": localSettings.timer,
-        ...(canChangeGameMode
+        ...(canChangeGameMode && localSettings.gameMode !== options.gameMode
           ? {
               gameMode: localSettings.gameMode,
               modeSettings: getWebModeSettings(localSettings.gameMode)
