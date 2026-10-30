@@ -15,7 +15,6 @@ import {sha256} from "services/encode";
 import {range} from "utils/numbers";
 import {adjustRoomSettings} from "utils/room";
 
-import {buildSettingsUpdatePayload} from "./settingsPayload";
 import {Settings, SettingsSidebarProps} from "./types";
 import "./styles.scss";
 
@@ -92,15 +91,18 @@ export const SettingsSidebar = ({
       });
       localSettings = {...localSettings, ...adjustedSettings};
 
-      await update(
-        ref(db, `games/${idGame}`),
-        buildSettingsUpdatePayload({
-          settings: localSettings,
-          currentGameMode: options.gameMode,
-          canChangeGameMode,
-          getModeSettings: getWebModeSettings
-        })
-      );
+      await update(ref(db, `games/${idGame}`), {
+        roomName: localSettings.roomName,
+        "settings/maxUsers": localSettings.maxUsers,
+        "settings/password": localSettings.password || null,
+        "settings/timer": localSettings.timer,
+        ...(canChangeGameMode && localSettings.gameMode !== options.gameMode
+          ? {
+              gameMode: localSettings.gameMode,
+              modeSettings: getWebModeSettings(localSettings.gameMode)
+            }
+          : {})
+      });
 
       Toast.fire({
         title: t("Settings updated"),
